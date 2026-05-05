@@ -20,12 +20,43 @@ from typing import Dict, List, Optional, Any
 import asyncpg
 from pydantic import BaseModel
 
+# Optional integration with the local-first kirobi_core package. We
+# import lazily so the supervisor still runs on environments where the
+# package is not installed (e.g. the original container build context).
+try:  # pragma: no cover - exercised in integration runs
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from kirobi_core.backlog import generate_backlog, prioritize  # type: ignore
+    from kirobi_core.bridge import backlog_for_supervisor  # type: ignore
+    from kirobi_core.scanner import scan_repository  # type: ignore
+    KIROBI_CORE_AVAILABLE = True
+except Exception:  # noqa: BLE001 - any failure means feature off
+    KIROBI_CORE_AVAILABLE = False
+
+
+def _resolve_log_path() -> str:
+    """Return a writable path for the supervisor log file.
+
+    In the container the path is ``/data/supervisor.log`` (mounted
+    volume); outside the container we fall back to a writable location
+    inside the repository so the supervisor stays importable for
+    tooling and tests.
+    """
+    container_path = Path("/data")
+    if container_path.is_dir() and os.access(container_path, os.W_OK):
+        return str(container_path / "supervisor.log")
+    fallback = Path(os.getenv("KIROBI_DATA_DIR", "")) if os.getenv("KIROBI_DATA_DIR") else None
+    if fallback is None:
+        fallback = Path(__file__).resolve().parents[2] / ".kirobi" / "supervisor"
+    fallback.mkdir(parents=True, exist_ok=True)
+    return str(fallback / "supervisor.log")
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/data/supervisor.log'),
+        logging.FileHandler(_resolve_log_path()),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -432,6 +463,46 @@ class KirobiSupervisor:
             f"Family interview started for {participant}"
         )
 
+    async def seed_from_kirobi_core(self, repo_root: Optional[str] = None,
+                                     limit: int = 10) -> int:
+        """Seed the task queue from the local kirobi_core backlog.
+
+        Returns the number of tasks created. Silently returns 0 when
+        the optional ``kirobi_core`` package is not importable, which
+        keeps the supervisor backwards compatible with the original
+        container build.
+        """
+        if not KIROBI_CORE_AVAILABLE:
+            logger.info("kirobi_core not available; skipping backlog seed")
+            return 0
+        try:
+            root = repo_root or os.getenv(
+                "KIROBI_REPO_ROOT",
+                str(Path(__file__).resolve().parents[2]),
+            )
+            scan = scan_repository(root)
+            tasks = prioritize(generate_backlog(scan), limit=limit)
+            created = 0
+            for payload in backlog_for_supervisor(tasks):
+                # Map string priority back to TaskPriority enum.
+                try:
+                    prio = TaskPriority(payload["priority"])
+                except ValueError:
+                    prio = TaskPriority.MEDIUM
+                await self.create_task(
+                    name=payload["name"],
+                    description=payload["description"],
+                    priority=prio,
+                    agent=payload.get("agent"),
+                    metadata=payload.get("metadata") or {},
+                )
+                created += 1
+            logger.info(f"Seeded {created} task(s) from kirobi_core backlog")
+            return created
+        except Exception as exc:  # noqa: BLE001 - feature must not break the loop
+            logger.warning(f"kirobi_core backlog seed failed: {exc}")
+            return 0
+
     async def welcome_greeting(self):
         """Initial welcome greeting after system start"""
         greeting = """
@@ -474,6 +545,14 @@ class KirobiSupervisor:
             agent="family-interviewer",
             metadata={'phase': 'onboarding'}
         )
+
+        # Optionally seed additional repository-housekeeping tasks from
+        # the local kirobi_core backlog. This is gated by an env var so
+        # operators can opt-in once they trust the workflow.
+        if os.getenv("KIROBI_SEED_BACKLOG", "").lower() in ("1", "true", "yes"):
+            await self.seed_from_kirobi_core(
+                limit=int(os.getenv("KIROBI_SEED_LIMIT", "5"))
+            )
 
         loop_count = 0
 

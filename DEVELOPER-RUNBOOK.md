@@ -21,6 +21,9 @@ and the "tonight clone & run" path.
 ```bash
 python -m kirobi_core version           # version string
 python -m kirobi_core doctor            # environment health check
+python -m kirobi_core doctor --live     # also probe the running stack
+python -m kirobi_core status            # one-shot stack status table
+python -m kirobi_core status --json     # machine-readable status
 python -m kirobi_core scan              # JSON repo summary
 python -m kirobi_core backlog --limit 5 # priorised tasks as JSON
 python -m kirobi_core registry          # parsed AGENTREGISTRY.md
@@ -41,7 +44,28 @@ The same commands are exposed via `make`:
 | `make interview`         | Guided onboarding interview (`PROFILE=name`)                 |
 | `make autonomous-once`   | One safe iteration; report under `.kirobi/reports/`          |
 | `make autonomous-loop`   | Loop with `INTERVAL=`, `ITERATIONS=`, `QUIET_HOURS=`         |
-| `make test`              | Run `pytest tests/unit`                                      |
+| `make status`            | Live stack probes (Ollama / Qdrant / Postgres / API …)       |
+| `make integration-test`  | End-to-end check (tests + compose validate + scripts)        |
+| `make test`              | Run `pytest tests/unit` (58 tests, stdlib only)              |
+
+### Stack integration
+
+* `kirobi_core.services` speaks directly to the running services with
+  stdlib `urllib` only — no `httpx`, no `requests`. Ollama and Qdrant
+  also expose model and collection metadata through the probes.
+* `kirobi_core.bridge` converts `kirobi_core.backlog.Task` objects into
+  the pydantic `Task` shape that `services/orchestrator/supervisor.py`
+  expects.
+* `services/orchestrator/supervisor.py` automatically detects
+  `kirobi_core` on `PYTHONPATH`. When `KIROBI_SEED_BACKLOG=true` is set
+  the supervisor seeds its task queue from the local backlog on
+  startup (limited by `KIROBI_SEED_LIMIT`, default `5`).
+* `docker-compose.yml` binds every service port to
+  `KIROBI_BIND_HOST` (default `127.0.0.1`). Set it to `0.0.0.0` only
+  when LAN access is intentional.
+* `infra/scripts/bootstrap.sh backup` honours `BACKUP_TARGET_DIR` and
+  `BACKUP_RETENTION_DAYS` from `.env` and snapshots `canon/`,
+  `experiences/` and `kirobi-core/` together.
 
 ### Safety model
 

@@ -62,12 +62,31 @@ Für eine reine Python-Variante (ideal auf einem frischen Pop!_OS-Rechner
 oder in CI) gibt es das Modul `kirobi_core/`:
 
 ```bash
-make bootstrap        # .env anlegen + Doctor + Repo-Scan
-make interview        # geführtes Onboarding (CLI, lokal)
-make autonomous-once  # eine sichere Dry-Run-Iteration des Autonomy-Loops
-make backlog LIMIT=5  # priorisierten Backlog ansehen
-make test             # 45+ Unit-Tests (stdlib only)
+make bootstrap         # .env anlegen + Doctor + Repo-Scan
+make interview         # geführtes Onboarding (CLI, lokal)
+make autonomous-once   # eine sichere Dry-Run-Iteration des Autonomy-Loops
+make backlog LIMIT=5   # priorisierten Backlog ansehen
+make test              # 58 Unit-Tests (stdlib only)
 ```
+
+### Stack-Integration (Docker + kirobi_core)
+
+Sobald die Docker-Services laufen (`docker compose up -d`), bindet
+sich der lokale Core automatisch an sie an:
+
+```bash
+make status            # Live-Probes für Ollama / Qdrant / Postgres / API / …
+make integration-test  # End-to-end Check (Tests + compose validate + Skripte)
+python -m kirobi_core doctor --live   # Doctor inkl. Service-Probes
+```
+
+Der Supervisor (`services/orchestrator/supervisor.py`) erkennt
+`kirobi_core` automatisch und kann seine Task-Queue aus dem Backlog
+seeden — aktivieren mit `KIROBI_SEED_BACKLOG=true` in `.env`.
+
+> **Sicherheits-Default:** alle Service-Ports sind via
+> `KIROBI_BIND_HOST=127.0.0.1` nur auf localhost erreichbar. Setze
+> bewusst auf `0.0.0.0`, wenn das System im LAN sichtbar sein soll.
 
 Details: siehe `DEVELOPER-RUNBOOK.md` → *Local Python Core (`kirobi_core`)*.
 
