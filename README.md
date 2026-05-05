@@ -84,11 +84,35 @@ Der Supervisor (`services/orchestrator/supervisor.py`) erkennt
 `kirobi_core` automatisch und kann seine Task-Queue aus dem Backlog
 seeden — aktivieren mit `KIROBI_SEED_BACKLOG=true` in `.env`.
 
-> **Sicherheits-Default:** alle Service-Ports sind via
-> `KIROBI_BIND_HOST=127.0.0.1` nur auf localhost erreichbar. Setze
-> bewusst auf `0.0.0.0`, wenn das System im LAN sichtbar sein soll.
+> **Sicherheits-Default:** alle internen Service-Ports sind via
+> `KIROBI_BIND_HOST=127.0.0.1` nur auf localhost erreichbar. Der
+> Reverse-Proxy unten ist die einzige Komponente, die im LAN sichtbar
+> ist (Standard: `KIROBI_PROXY_BIND_HOST=0.0.0.0` auf Port 80/443).
 
-Details: siehe `DEVELOPER-RUNBOOK.md` → *Local Python Core (`kirobi_core`)*.
+### Family-PWA unter `kirobi.local` und im LAN
+
+Damit Familie und Geräte sofort loslegen können, läuft Kirobi als
+installierbare PWA hinter einem lokalen Caddy-Reverse-Proxy:
+
+```bash
+make pwa-icons         # PWA-Icons generieren (einmalig)
+make pwa-up            # caddy + web + auth + api + postgres starten
+sudo make pwa-mdns     # kirobi.local via Avahi/mDNS publizieren (einmalig)
+```
+
+Danach erreichbar unter:
+
+| URL | Zweck |
+|---|---|
+| `http://kirobi.local/` | PWA aus dem Heimnetz |
+| `https://kirobi.local/` | gleiche PWA mit TLS (Caddy `tls internal`) |
+| `http://<LAN-IP>/` | Fallback, falls mDNS nicht verfügbar (z. B. Windows) |
+
+Erste Anmeldung: das Auth-Service legt beim ersten Start automatisch
+einen Admin-User an (Standard `sven` / Passwort aus
+`KIROBI_DEFAULT_PASSWORD`). Danach sofort über die PWA ändern.
+
+Details: siehe `DEVELOPER-RUNBOOK.md` und `infra/caddy/README.md`.
 
 ---
 

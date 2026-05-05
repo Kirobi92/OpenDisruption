@@ -233,6 +233,24 @@ test:
 status:
 	@$(KIROBI) status
 
+## PWA-Icons (apps/web/public/) aus dem SVG-Master neu generieren
+pwa-icons:
+	@$(PY) infra/scripts/build-pwa-icons.py --out apps/web/public
+
+## Family-PWA samt Reverse-Proxy hochfahren (kirobi.local + LAN-IP)
+pwa-up:
+	@docker compose up -d caddy web auth api postgres
+	@echo ""
+	@echo "→ PWA erreichbar unter:"
+	@echo "    http://$${KIROBI_HOSTNAME:-kirobi.local}/"
+	@echo "    https://$${KIROBI_HOSTNAME:-kirobi.local}/   (TLS via Caddy internal CA)"
+	@LAN_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}'); \
+		[ -n "$$LAN_IP" ] && echo "    http://$$LAN_IP/                     (LAN-IP)"
+
+## mDNS / Avahi für kirobi.local einrichten (benötigt sudo)
+pwa-mdns:
+	@bash infra/scripts/setup-mdns.sh
+
 ## End-to-end Integration Check (statisch, ohne laufende Services)
 integration-test:
 	@echo "→ kirobi_core unit tests"
@@ -247,5 +265,18 @@ integration-test:
 	@bash -n infra/scripts/bootstrap.sh && echo "  ✓ bootstrap.sh OK"
 	@echo "→ healthcheck.sh syntax"
 	@bash -n infra/scripts/healthcheck.sh && echo "  ✓ healthcheck.sh OK"
+	@echo "→ setup-mdns.sh syntax"
+	@bash -n infra/scripts/setup-mdns.sh && echo "  ✓ setup-mdns.sh OK"
+	@echo "→ Caddyfile vorhanden"
+	@test -f infra/caddy/Caddyfile && echo "  ✓ Caddyfile present"
+	@echo "→ services/auth/main.py + services/api/main.py kompilieren"
+	@$(PY) -m py_compile services/auth/main.py services/api/main.py && echo "  ✓ FastAPI services compile"
+	@echo "→ PWA-Manifest valide"
+	@$(PY) -c "import json; json.load(open('apps/web/public/manifest.json')); print('  ✓ manifest.json valid')"
+	@echo "→ PWA-Icons vorhanden"
+	@for f in icon.svg icon-192.png icon-512.png apple-touch-icon.png favicon.ico; do \
+		test -f "apps/web/public/$$f" || { echo "  ✗ apps/web/public/$$f fehlt"; exit 1; }; \
+	done
+	@echo "  ✓ alle PWA-Icons vorhanden"
 	@echo ""
 	@echo "Integration-Check abgeschlossen."

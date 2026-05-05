@@ -96,9 +96,117 @@ async def lifespan(app: FastAPI):
     # Startup
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
+    await _ensure_schema()
+    await _ensure_default_user()
     yield
     # Shutdown
     await db_pool.close()
+
+
+# Schema + first-run bootstrap ------------------------------------------------
+USERS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS users (
+    id              TEXT PRIMARY KEY,
+    username        TEXT UNIQUE NOT NULL,
+    display_name    TEXT NOT NULL,
+    email           TEXT,
+    password_hash   TEXT NOT NULL,
+    role            TEXT NOT NULL DEFAULT 'family',
+    avatar_url      TEXT,
+    bio             TEXT,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login      TIMESTAMPTZ
+);
+CREATE TABLE IF NOT EXISTS zone_permissions (
+    user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    zone        TEXT NOT NULL,
+    can_read    BOOLEAN NOT NULL DEFAULT FALSE,
+    can_write   BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (user_id, zone)
+);
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id              TEXT PRIMARY KEY,
+    user_id         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    session_token   TEXT UNIQUE NOT NULL,
+    device_info     TEXT,
+    ip_address      TEXT,
+    user_agent      TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at      TIMESTAMPTZ NOT NULL
+);
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id     TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    settings    JSONB NOT NULL DEFAULT '{}'::JSONB,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS audit_log (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         TEXT,
+    action          TEXT NOT NULL,
+    resource_type   TEXT,
+    details         JSONB,
+    ip_address      TEXT,
+    user_agent      TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS audit_log_user_idx     ON audit_log(user_id);
+CREATE INDEX IF NOT EXISTS user_sessions_user_idx ON user_sessions(user_id);
+"""
+
+
+async def _ensure_schema() -> None:
+    """Create the auth tables if they don't exist yet (idempotent)."""
+    async with db_pool.acquire() as conn:
+        await conn.execute(USERS_SCHEMA)
+
+
+async def _ensure_default_user() -> None:
+    """Seed a default admin so the PWA's login screen works on first boot.
+
+    Controlled by the env vars ``KIROBI_DEFAULT_USER`` and
+    ``KIROBI_DEFAULT_PASSWORD``. Setting either to an empty string disables
+    the bootstrap. Existing users are never modified.
+    """
+    username = os.getenv("KIROBI_DEFAULT_USER", "sven").strip()
+    password = os.getenv("KIROBI_DEFAULT_PASSWORD", "").strip()
+    if not username or not password:
+        return
+    display = os.getenv("KIROBI_DEFAULT_DISPLAY_NAME", username.title())
+    role = os.getenv("KIROBI_DEFAULT_ROLE", "admin")
+    async with db_pool.acquire() as conn:
+        existing = await conn.fetchval("SELECT 1 FROM users WHERE username = $1", username)
+        if existing:
+            return
+        user_id = str(uuid.uuid4())
+        await conn.execute(
+            """
+            INSERT INTO users (id, username, display_name, password_hash, role)
+            VALUES ($1, $2, $3, $4, $5)
+            """,
+            user_id,
+            username,
+            display,
+            pwd_context.hash(password),
+            role,
+        )
+        zones = [
+            ("PUBLIC", True, True),
+            ("WORKSPACE", True, True),
+            ("FAMILY_PRIVATE", True, True),
+            ("QUARANTINE", True, True),
+            ("SACRED", True, True),
+        ]
+        for zone, r, w in zones:
+            await conn.execute(
+                "INSERT INTO zone_permissions (user_id, zone, can_read, can_write) "
+                "VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING",
+                user_id, zone, r, w,
+            )
+        await conn.execute(
+            "INSERT INTO user_preferences (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
+            user_id,
+        )
 
 
 # FastAPI app
@@ -110,12 +218,38 @@ app = FastAPI(
 )
 
 # CORS middleware
+# `allow_origins=["*"]` together with `allow_credentials=True` is invalid per
+# the CORS spec — browsers reject the preflight. The PWA needs cookies/JWT
+# headers so we resolve a concrete origin list from KIROBI_PUBLIC_ORIGINS
+# (comma-separated). When the variable is empty we fall back to a regex that
+# matches localhost, the *.local mDNS hostname and any RFC1918 LAN address —
+# enough for the family setup but never the literal "*".
+def _cors_kwargs() -> dict:
+    raw = os.getenv("KIROBI_PUBLIC_ORIGINS", "").strip()
+    if raw:
+        origins = [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+        return {"allow_origins": origins}
+    # Fallback regex: localhost(:port), kirobi.local + any *.local + RFC1918.
+    pattern = (
+        r"^https?://("
+        r"localhost(:\d+)?|127\.0\.0\.1(:\d+)?|"
+        r"[a-zA-Z0-9-]+\.local(:\d+)?|"
+        r"10\.\d+\.\d+\.\d+(:\d+)?|"
+        r"192\.168\.\d+\.\d+(:\d+)?|"
+        r"172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?"
+        r")$"
+    )
+    return {"allow_origin_regex": pattern}
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately in production
+    **_cors_kwargs(),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+    expose_headers=["X-Request-Id"],
+    max_age=3600,
 )
 
 
