@@ -180,3 +180,11 @@ sources/models-3d/*.obj
 *.zip
 *.7z
 archive/snapshots/*.tar.gz
+
+# -----------------------------------------------------------------------------
+# KIROBI LOCAL PYTHON CORE
+# -----------------------------------------------------------------------------
+.kirobi/
+.pytest_cache/
+extracts/family-private/profiles/*.sensitive.json
+sacred/profiles/*.sensitive.json

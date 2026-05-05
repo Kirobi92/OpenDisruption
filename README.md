@@ -56,6 +56,21 @@ make status
 3. **Qdrant Dashboard** unter `http://localhost:6333/dashboard`
 4. System-Gesundheit prüfen: `make status`
 
+### Local-First Kickstart (kein Docker nötig)
+
+Für eine reine Python-Variante (ideal auf einem frischen Pop!_OS-Rechner
+oder in CI) gibt es das Modul `kirobi_core/`:
+
+```bash
+make bootstrap        # .env anlegen + Doctor + Repo-Scan
+make interview        # geführtes Onboarding (CLI, lokal)
+make autonomous-once  # eine sichere Dry-Run-Iteration des Autonomy-Loops
+make backlog LIMIT=5  # priorisierten Backlog ansehen
+make test             # 45+ Unit-Tests (stdlib only)
+```
+
+Details: siehe `DEVELOPER-RUNBOOK.md` → *Local Python Core (`kirobi_core`)*.
+
 ---
 
 ## Architektur-Übersicht
