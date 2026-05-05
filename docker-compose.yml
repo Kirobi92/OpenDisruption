@@ -1,0 +1,98 @@
+version: '3.8'
+
+networks:
+  kirobi-net:
+    driver: bridge
+
+volumes:
+  ollama_data:
+  openwebui_data:
+  qdrant_data:
+  postgres_data:
+  flowise_data:
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kirobi-ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - kirobi-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: kirobi-open-webui
+    restart: unless-stopped
+    ports:
+      - "${OPENWEBUI_PORT:-3000}:8080"
+    volumes:
+      - openwebui_data:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=${OPENWEBUI_SECRET_KEY:-changeme-in-production}
+    depends_on:
+      - ollama
+    networks:
+      - kirobi-net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: kirobi-qdrant
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - kirobi-net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: kirobi-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kirobi}
+      POSTGRES_USER: ${POSTGRES_USER:-kirobi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kirobi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kirobi-net
+
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: kirobi-flowise
+    restart: unless-stopped
+    ports:
+      - "${FLOWISE_PORT:-3001}:3000"
+    volumes:
+      - flowise_data:/root/.flowise
+    environment:
+      - FLOWISE_USERNAME=${FLOWISE_USERNAME:-admin}
+      - FLOWISE_PASSWORD=${FLOWISE_PASSWORD:-changeme}
+      - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRET_KEY:-changeme-in-production}
+      - LOG_LEVEL=${FLOWISE_LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kirobi-net
