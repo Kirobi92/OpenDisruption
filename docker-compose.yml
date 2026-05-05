@@ -10,6 +10,7 @@ volumes:
   qdrant_data:
   postgres_data:
   flowise_data:
+  uploads_data:
 
 services:
   ollama:
@@ -154,5 +155,75 @@ services:
         condition: service_started
       voice-processing:
         condition: service_started
+    networks:
+      - kirobi-net
+
+  auth:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: kirobi-auth
+    restart: unless-stopped
+    ports:
+      - "${AUTH_PORT:-8002}:8000"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-CHANGEME-in-production-use-strong-secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kirobi-net
+
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    container_name: kirobi-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8003}:8000"
+    volumes:
+      - uploads_data:/data/uploads
+      - ./canon:/canon:ro
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - AUTH_SERVICE_URL=http://auth:8000
+      - OLLAMA_HOST=http://ollama:11434
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+      ollama:
+        condition: service_started
+    networks:
+      - kirobi-net
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: kirobi-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3002}:3000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth:8000
+      - API_SERVICE_URL=http://api:8000
+      - NEXT_PUBLIC_APP_NAME=Kirobi
+    depends_on:
+      - auth
+      - api
     networks:
       - kirobi-net

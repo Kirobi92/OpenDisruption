@@ -683,7 +683,7 @@ Layer 1: Host Security
 **Version:** 1.0
 **Created:** 2026-05-05
 **Authors:** Claude Opus 4.7 (Principal Systems Architect)
-**Approved By:** Sven Kirchner (pending)
+**Approved By:** Sven Darusi (pending)
 **Next Review:** 2026-08-05 (quarterly)
 
 **Change Log:**

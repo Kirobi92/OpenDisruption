@@ -4,7 +4,7 @@ type: manometer
 version: 1.0
 ---
 
-# Emotionales Manometer – Familie Kirchner
+# Emotionales Manometer – Familie Darusi
 
 *Das Manometer ist ein Werkzeug um familiäre Stimmungen bewusst zu erfassen und Muster zu erkennen.*
 

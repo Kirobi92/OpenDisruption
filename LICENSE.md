@@ -2,8 +2,8 @@
 
 ## MIT License
 
-**Kirobi / Disruptive OS**  
-Copyright (c) 2024 Sven Kirchner (Kirobi92)
+**Kirobi / Disruptive OS**
+Copyright (c) 2024 Sven Darusi (Kirobi92)
 
 ---
 
@@ -30,7 +30,7 @@ SOFTWARE.
 ## Hinweise zur Marke und Inhalten
 
 ### Kirobi / Disruptive OS Branding
-Der Name **"Kirobi"** und das Konzept des **"Disruptive OS"** sind kreative Werke von Sven Kirchner. Die Verwendung dieser Bezeichnungen für eigene kommerzielle Produkte ohne Genehmigung ist nicht gestattet.
+Der Name **"Kirobi"** und das Konzept des **"Disruptive OS"** sind kreative Werke von Sven Darusi. Die Verwendung dieser Bezeichnungen für eigene kommerzielle Produkte ohne Genehmigung ist nicht gestattet.
 
 ### Persönliche und familiäre Inhalte
 Inhalte in den Verzeichnissen `sacred/`, `experiences/family/` und ähnlichen FAMILY_PRIVATE-Zonen sind **NICHT** unter dieser MIT-Lizenz veröffentlicht. Diese Inhalte sind privat und nicht für die Weitergabe bestimmt. Sie erscheinen möglicherweise in diesem Repository als strukturelle Beispiele, enthalten aber keine echten persönlichen Daten.
