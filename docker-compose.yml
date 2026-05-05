@@ -96,3 +96,63 @@ services:
         condition: service_healthy
     networks:
       - kirobi-net
+
+  voice-processing:
+    build:
+      context: ./services/voice-processing
+      dockerfile: Dockerfile
+    container_name: kirobi-voice-processing
+    restart: unless-stopped
+    ports:
+      - "${VOICE_PORT:-8001}:8001"
+    volumes:
+      - ./data/conversations:/data/conversations
+      - ./data/recordings:/data/recordings
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL:-large-v3}
+      - WHISPER_DEVICE=${WHISPER_DEVICE:-cuda}
+      - WHISPER_COMPUTE_TYPE=${WHISPER_COMPUTE_TYPE:-float16}
+      - VOICE_LANGUAGE=${VOICE_LANGUAGE:-de}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    depends_on:
+      - ollama
+    networks:
+      - kirobi-net
+
+  supervisor:
+    build:
+      context: ./services/orchestrator
+      dockerfile: Dockerfile
+    container_name: kirobi-supervisor
+    restart: unless-stopped
+    volumes:
+      - ./kirobi-core:/kirobi-core
+      - ./experiences:/experiences
+      - ./canon:/canon
+      - ./data/supervisor:/data
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - OLLAMA_HOST=http://ollama:11434
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - VOICE_SERVICE_URL=http://voice-processing:8001
+      - SUPERVISOR_MODEL=${SUPERVISOR_MODEL:-llama3.1:70b}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+      voice-processing:
+        condition: service_started
+    networks:
+      - kirobi-net
