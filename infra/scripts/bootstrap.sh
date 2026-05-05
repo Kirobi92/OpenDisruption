@@ -82,25 +82,42 @@ setup_env() {
 run_backup() {
   echo ""
   echo "→ Erstelle Backup..."
-  
-  local backup_dir="${KIROBI_BACKUP_PATH:-$REPO_ROOT/archive/snapshots}"
-  local timestamp=$(date +%Y%m%d_%H%M%S)
+
+  # Honour env vars from .env (BACKUP_TARGET_DIR / BACKUP_RETENTION_DAYS) and
+  # fall back to KIROBI_BACKUP_PATH for backwards compatibility.
+  local backup_dir="${BACKUP_TARGET_DIR:-${KIROBI_BACKUP_PATH:-$REPO_ROOT/archive/snapshots}}"
+  local retention_days="${BACKUP_RETENTION_DAYS:-30}"
+  local timestamp
+  timestamp=$(date +%Y%m%d_%H%M%S)
   local backup_name="kirobi_backup_$timestamp"
-  
+
   mkdir -p "$backup_dir/$backup_name"
-  
+
   # Canon und Experiences sichern
   if [ -d "$REPO_ROOT/canon" ]; then
     cp -r "$REPO_ROOT/canon" "$backup_dir/$backup_name/"
     echo "  ✅ canon/ gesichert"
   fi
-  
+
   if [ -d "$REPO_ROOT/experiences" ]; then
     cp -r "$REPO_ROOT/experiences" "$backup_dir/$backup_name/"
     echo "  ✅ experiences/ gesichert"
   fi
-  
+
+  # Optional: kirobi-core (audit log + state) und metadata
+  if [ -d "$REPO_ROOT/kirobi-core" ]; then
+    cp -r "$REPO_ROOT/kirobi-core" "$backup_dir/$backup_name/"
+    echo "  ✅ kirobi-core/ gesichert"
+  fi
+
   echo "  ✅ Backup erstellt in: $backup_dir/$backup_name"
+
+  # Retention: ältere Backups löschen, wenn BACKUP_RETENTION_DAYS gesetzt.
+  if [ "$retention_days" -gt 0 ] 2>/dev/null; then
+    echo "  → Bereinige Backups älter als ${retention_days} Tage in $backup_dir"
+    find "$backup_dir" -maxdepth 1 -type d -name "kirobi_backup_*" \
+      -mtime "+${retention_days}" -print -exec rm -rf {} + 2>/dev/null || true
+  fi
 }
 
 if [ "$MODE" = "backup" ]; then

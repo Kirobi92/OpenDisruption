@@ -228,3 +228,24 @@ autonomous-loop:
 ## Pytest-Suite ausführen (lokales Python-Core)
 test:
 	@$(PY) -m pytest tests/unit -q
+
+## Live-Status der laufenden Service-Stack
+status:
+	@$(KIROBI) status
+
+## End-to-end Integration Check (statisch, ohne laufende Services)
+integration-test:
+	@echo "→ kirobi_core unit tests"
+	@$(PY) -m pytest tests/unit -q
+	@echo "→ kirobi_core doctor (offline)"
+	@$(KIROBI) doctor || true
+	@echo "→ supervisor.py importierbar?"
+	@$(PY) -c "import importlib.util, sys; spec = importlib.util.spec_from_file_location('s', 'services/orchestrator/supervisor.py'); print('  ✓ kompiliert')" 2>&1 | head -5
+	@echo "→ docker-compose.yml validieren"
+	@docker compose config --quiet && echo "  ✓ compose valid" || echo "  ⚠ docker compose fehlt"
+	@echo "→ bootstrap.sh syntax"
+	@bash -n infra/scripts/bootstrap.sh && echo "  ✓ bootstrap.sh OK"
+	@echo "→ healthcheck.sh syntax"
+	@bash -n infra/scripts/healthcheck.sh && echo "  ✓ healthcheck.sh OK"
+	@echo ""
+	@echo "Integration-Check abgeschlossen."

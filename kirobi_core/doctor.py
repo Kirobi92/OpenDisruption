@@ -149,6 +149,24 @@ def run_doctor(root: Path | str = ".", checks: tuple[Check, ...] = DEFAULT_CHECK
     return results
 
 
+def run_live_probes(root: Path | str = ".") -> list[CheckResult]:
+    """Probe the running stack and return the results as CheckResults.
+
+    Used by ``kirobi_core doctor --live`` and ``kirobi_core status``.
+    Importing :mod:`kirobi_core.services` is lazy so the doctor stays
+    cheap when only the offline checks are requested.
+    """
+    from . import services as svc  # local import to keep doctor light
+
+    results: list[CheckResult] = []
+    cfg = svc.StackConfig.from_env()
+    for status in svc.probe_all(cfg):
+        bucket = PASS if status.ok else WARN  # offline services are not a hard fail
+        detail = f"{status.url} — {status.detail} ({status.latency_ms}ms)"
+        results.append(CheckResult(name=f"live:{status.name}", status=bucket, detail=detail))
+    return results
+
+
 def summarize(results: list[CheckResult]) -> tuple[int, int, int]:
     """Return ``(passes, warnings, failures)``."""
     p = sum(1 for r in results if r.status == PASS)

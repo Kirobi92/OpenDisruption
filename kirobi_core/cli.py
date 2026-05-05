@@ -50,9 +50,26 @@ def _cmd_version(_args: argparse.Namespace) -> int:
 
 def _cmd_doctor(args: argparse.Namespace) -> int:
     results = run_doctor(args.repo_root)
+    if getattr(args, "live", False):
+        from .doctor import run_live_probes
+
+        results = results + run_live_probes(args.repo_root)
     print(render(results))
     _, _, failures = summarize(results)
     return 0 if failures == 0 else 2
+
+
+def _cmd_status(args: argparse.Namespace) -> int:
+    from .services import StackConfig, probe_all, render_table
+
+    cfg = StackConfig.from_env()
+    statuses = probe_all(cfg, timeout=args.timeout)
+    if args.json:
+        print(json.dumps([s.to_dict() for s in statuses], indent=2, ensure_ascii=False))
+    else:
+        print(render_table(statuses))
+    # Exit 0 when at least one service is reachable, otherwise 2.
+    return 0 if any(s.ok for s in statuses) else 2
 
 
 def _cmd_scan(args: argparse.Namespace) -> int:
@@ -137,7 +154,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("doctor", help="Run environment health checks.")
     _add_common(p)
+    p.add_argument(
+        "--live",
+        action="store_true",
+        help="Also probe the running service stack (Ollama/Qdrant/etc.).",
+    )
     p.set_defaults(func=_cmd_doctor)
+
+    p = sub.add_parser("status", help="Probe the running service stack.")
+    _add_common(p)
+    p.add_argument("--timeout", type=float, default=2.0)
+    p.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    p.set_defaults(func=_cmd_status)
 
     p = sub.add_parser("scan", help="Scan the repository.")
     _add_common(p)
