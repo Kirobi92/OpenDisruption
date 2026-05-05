@@ -1,13 +1,15 @@
 # canon/business – BUSINESS Canon
 
-**Zone:** WORKSPACE | **Verantwortlich:** enterprise-agent
-kirobi-architect
+**Zone:** WORKSPACE | **Verantwortlich:** enterprise-agent, kirobi-architect
 
 ## Zweck
 Kanonische Dokumente für den Bereich **business**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Business-Modell\n- Kundenprofile\n- Prozesse und Workflows\n- Strategie
+- Business-Modell
+- Kundenprofile
+- Prozesse und Workflows
+- Strategie
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/business/ sammeln

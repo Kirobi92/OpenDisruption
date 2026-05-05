@@ -6,7 +6,9 @@
 Kanonische Dokumente für den Bereich **clients**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Kunden-Profiles\n- Projekt-Dokumentation\n- Kommunikations-Historien
+- Kunden-Profiles
+- Projekt-Dokumentation
+- Kommunikations-Historien
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/clients/ sammeln

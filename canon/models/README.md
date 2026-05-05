@@ -6,7 +6,9 @@
 Kanonische Dokumente für den Bereich **models**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Modell-Evaluierungen und -Benchmarks\n- Modell-Strategie\n- Fine-Tuning-Planung
+- Modell-Evaluierungen und -Benchmarks
+- Modell-Strategie
+- Fine-Tuning-Planung
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/models/ sammeln

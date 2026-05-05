@@ -6,7 +6,9 @@
 Kanonische Dokumente für den Bereich **identity**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Kirobi Kernidentität und Persönlichkeit\n- Werte und Prinzipien\n- Kommunikations-Standards
+- Kirobi Kernidentität und Persönlichkeit
+- Werte und Prinzipien
+- Kommunikations-Standards
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/identity/ sammeln

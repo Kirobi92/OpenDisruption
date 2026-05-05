@@ -1,14 +1,15 @@
 # canon/family – FAMILY Canon
 
-**Zone:** FAMILY_PRIVATE | **Verantwortlich:** samira-heart-agent
-enterprise-agent
-kirobi-architect
+**Zone:** FAMILY_PRIVATE | **Verantwortlich:** samira-heart-agent, enterprise-agent, kirobi-architect
 
 ## Zweck
 Kanonische Dokumente für den Bereich **family**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Familien-Agreements\n- Kommunikations-Regeln\n- Gemeinsame Werte\n- Grenzen und Vereinbarungen
+- Familien-Agreements
+- Kommunikations-Regeln
+- Gemeinsame Werte
+- Grenzen und Vereinbarungen
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/family/ sammeln
