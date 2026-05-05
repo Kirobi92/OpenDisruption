@@ -1,28 +1,41 @@
 {
-  "short_name": "Kirobi",
+  "id": "/?source=pwa",
   "name": "Kirobi Family Assistant",
-  "description": "Persönlicher KI-Assistent für die Familie Darusi",
+  "short_name": "Kirobi",
+  "description": "Persönlicher KI-Assistent für die Familie Darusi — lokal, privat, offline-fähig.",
   "icons": [
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/icon.svg",                 "sizes": "any",     "type": "image/svg+xml" },
+    { "src": "/icon-192.png",             "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png",             "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192-maskable.png",    "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512-maskable.png",    "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
-  "theme_color": "#1f2937",
-  "background_color": "#111827",
-  "orientation": "portrait-primary",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "orientation": "any",
   "scope": "/",
   "lang": "de",
-  "categories": ["productivity", "lifestyle"],
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "personalization"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Neuer Chat",
+      "short_name": "Chat",
+      "description": "Sofort einen neuen Chat starten",
+      "url": "/chat?new=1",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Status",
+      "short_name": "Status",
+      "description": "Stack-Status anzeigen",
+      "url": "/status",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "screenshots": []
 }

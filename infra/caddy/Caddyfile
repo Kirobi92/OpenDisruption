@@ -1,0 +1,107 @@
+# =============================================================================
+# Kirobi Reverse Proxy — Caddy
+# =============================================================================
+# Goals:
+#   * Make the family PWA reachable at http(s)://kirobi.local AND at the
+#     host's LAN IP from any device on the same network.
+#   * Terminate TLS locally with `tls internal` (Caddy's self-signed CA)
+#     so service workers / "Install app" prompts work.
+#   * Provide a stable /api/* surface for the PWA (no env-driven rewrites
+#     in Next.js — Caddy is the single source of truth for routing).
+#   * Keep all backends private (Docker network-only).
+#
+# The site addresses are templated from environment variables so the same
+# Caddyfile works locally (`kirobi.local`), on a fixed LAN IP, or both at
+# the same time. The defaults match the .env.example.
+# =============================================================================
+
+{
+	# Global options — Caddy 2.x.
+	admin off
+	auto_https disable_redirects
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+# --- HTTP (port 80) ----------------------------------------------------------
+# We keep HTTP enabled so PWAs can be tried out without trusting a self-signed
+# cert. Service workers ARE allowed on private RFC1918 IPs and on `*.local`.
+:80 {
+	encode zstd gzip
+	@health path /healthz
+	respond @health "ok" 200
+
+	# Auth service: /api/auth/* -> http://auth:8000/*
+	handle_path /api/auth/* {
+		reverse_proxy auth:8000 {
+			header_up X-Forwarded-Prefix /api/auth
+			header_up Host {host}
+		}
+	}
+
+	# Voice service: /voice/* -> http://voice-processing:8001/*
+	handle_path /voice/* {
+		reverse_proxy voice-processing:8001 {
+			header_up Host {host}
+		}
+	}
+
+	# Generic API: /api/* -> http://api:8000/*
+	handle_path /api/* {
+		reverse_proxy api:8000 {
+			header_up X-Forwarded-Prefix /api
+			header_up Host {host}
+		}
+	}
+
+	# Everything else -> Next.js PWA on port 3000.
+	handle {
+		reverse_proxy web:3000 {
+			header_up Host {host}
+		}
+	}
+
+	log {
+		output stdout
+		format console
+		level INFO
+	}
+}
+
+# --- HTTPS (port 443) with internal CA --------------------------------------
+# Active only when KIROBI_HOSTNAME is set (e.g. kirobi.local). The matching
+# certificate is signed by Caddy's internal root and lives in the caddy_data
+# volume; trust it once on each device for the install prompt.
+{$KIROBI_HOSTNAME:kirobi.local} {
+	tls internal
+
+	encode zstd gzip
+	@health path /healthz
+	respond @health "ok" 200
+
+	handle_path /api/auth/* {
+		reverse_proxy auth:8000
+	}
+	handle_path /voice/* {
+		reverse_proxy voice-processing:8001
+	}
+	handle_path /api/* {
+		reverse_proxy api:8000
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	log {
+		output stdout
+		format console
+		level INFO
+	}
+}
