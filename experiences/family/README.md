@@ -3,7 +3,7 @@
 **Zone:** FAMILY_PRIVATE | **Verantwortlich:** samira-heart-agent, kirobi-core (mit Logging)
 
 ## Zweck
-Dokumentation familiärer Erfahrungen, Rituale, Entwicklungen und Erkenntnisse für die Familie Kirchner.
+Dokumentation familiärer Erfahrungen, Rituale, Entwicklungen und Erkenntnisse für die Familie Darusi.
 
 ## Inhalt
 

@@ -338,7 +338,7 @@ While this is a personal system, we follow GDPR principles:
 
 ## Security Contacts
 
-**System Owner:** Sven Kirchner
+**System Owner:** Sven Darusi
 **Primary Contact:** [To be configured]
 **GitHub Security:** Use repository security tab
 

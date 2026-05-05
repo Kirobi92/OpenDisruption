@@ -1,6 +1,6 @@
 # Roadmap: Kirobi / Disruptive OS
 
-**Stand:** 2024 | **Eigentümer:** Sven Kirchner
+**Stand:** 2024 | **Eigentümer:** Sven Darusi
 
 ---
 

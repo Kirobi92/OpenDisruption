@@ -4,7 +4,7 @@ type: grenzen
 version: 1.0
 ---
 
-# Grenzen und Agreements – Familie Kirchner
+# Grenzen und Agreements – Familie Darusi
 
 *Grenzen schützen Beziehungen. Dieses Dokument hält gemeinsam vereinbarte Grenzen fest.*
 

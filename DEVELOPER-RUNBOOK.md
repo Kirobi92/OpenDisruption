@@ -920,7 +920,7 @@ make qdrant-collections  # List Qdrant collections
 
 ## Emergency Contacts
 
-**System Owner:** Sven Kirchner
+**System Owner:** Sven Darusi
 
 **For Critical Issues:**
 1. Stop services: `make down`

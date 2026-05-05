@@ -376,7 +376,7 @@ Built with:
 - **Qdrant** for vector search
 
 Designed for:
-- **Sven Kirchner** and family
+- **Sven Darusi** and family
 - **Privacy-first** AI interaction
 - **Local-first** processing
 - **Family-centered** support

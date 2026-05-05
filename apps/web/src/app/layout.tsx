@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Kirobi - Family Assistant',
-  description: 'Persönlicher KI-Assistent für die Familie Kirchner',
+  description: 'Persönlicher KI-Assistent für die Familie Darusi',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
