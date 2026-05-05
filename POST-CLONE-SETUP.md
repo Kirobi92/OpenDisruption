@@ -1,8 +1,44 @@
 # 🎉 Post-Clone Setup Guide – Heute Abend Ready!
 
-**Version:** 1.0
+**Version:** 1.1
 **Ziel:** Von Clone bis zum ersten natürlichen Family-Gespräch in unter 30 Minuten
 **Datum:** 2026-05-05
+
+---
+
+## ⚡ Tonight Clone & Run – Local-First Kickstart (kein Docker nötig)
+
+Wenn du zuerst nur sehen willst, dass das Repo *jetzt* auf einem frischen
+Linux-Rechner läuft – ohne Ollama, ohne GPU, ohne Compose-Stack – nutze den
+neuen Python-Core (`kirobi_core`). Er nutzt ausschließlich die Python-
+Standardbibliothek und braucht weder `pip install` noch Internet.
+
+```bash
+git clone https://github.com/Kirobi92/OpenDisruption.git
+cd OpenDisruption
+
+# 1. Health-Check, .env anlegen, Repo scannen
+make bootstrap
+
+# 2. Geführtes Onboarding-Interview (CLI, Antworten landen in .kirobi/)
+make interview
+
+# 3. Eine autonome Iteration im Dry-Run (Report nach .kirobi/reports/)
+make autonomous-once
+
+# 4. Backlog ansehen (priorisierte Tasks als JSON)
+make backlog LIMIT=5
+
+# 5. Tests ausführen
+make test
+```
+
+Alle obigen Befehle sind **dry-run-by-default**, schreiben keine sensiblen
+Daten in die Cloud und respektieren die fünf Sicherheitszonen aus
+`CLAUDE.md`. Die Audit-Spur landet in `kirobi-core/core-events.log`.
+
+Die volle Container-Variante mit Ollama, Qdrant, Open WebUI und Voice
+findest du weiter unten unter „Schnellstart (TL;DR)".
 
 ---
 

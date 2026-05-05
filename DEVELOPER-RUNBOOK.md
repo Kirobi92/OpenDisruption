@@ -1,9 +1,100 @@
 # Developer Runbook: Kirobi / Disruptive OS
 
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2026-05-05
 **Classification:** WORKSPACE
 **Audience:** Developers, operators, contributors
+
+---
+
+## Local Python Core (`kirobi_core`)
+
+The repository ships a **pure-stdlib Python package** at `kirobi_core/`
+that implements the local-first orchestrator, interview engine,
+backlog generator, doctor health-check and a **safe autonomous loop**
+(dry-run by default). It runs on any Python 3.10+ without `pip
+install` and without the Docker stack — useful for CI, dev laptops
+and the "tonight clone & run" path.
+
+### Entry points
+
+```bash
+python -m kirobi_core version           # version string
+python -m kirobi_core doctor            # environment health check
+python -m kirobi_core doctor --live     # also probe the running stack
+python -m kirobi_core status            # one-shot stack status table
+python -m kirobi_core status --json     # machine-readable status
+python -m kirobi_core scan              # JSON repo summary
+python -m kirobi_core backlog --limit 5 # priorised tasks as JSON
+python -m kirobi_core registry          # parsed AGENTREGISTRY.md
+python -m kirobi_core interview         # guided onboarding (CLI)
+python -m kirobi_core autonomous-once   # one dry-run iteration
+python -m kirobi_core autonomous-loop --interval 900 \
+        --quiet-hours "22:00-07:00"     # supervised loop
+```
+
+The same commands are exposed via `make`:
+
+| Make target              | Description                                                  |
+|--------------------------|--------------------------------------------------------------|
+| `make bootstrap`         | `.env` + `doctor` + `scan` (no Docker required)              |
+| `make doctor`            | Environment health checks                                    |
+| `make scan`              | Repository scan summary                                      |
+| `make backlog`           | Generate the prioritised backlog (`LIMIT=N`)                 |
+| `make interview`         | Guided onboarding interview (`PROFILE=name`)                 |
+| `make autonomous-once`   | One safe iteration; report under `.kirobi/reports/`          |
+| `make autonomous-loop`   | Loop with `INTERVAL=`, `ITERATIONS=`, `QUIET_HOURS=`         |
+| `make status`            | Live stack probes (Ollama / Qdrant / Postgres / API …)       |
+| `make integration-test`  | End-to-end check (tests + compose validate + scripts)        |
+| `make test`              | Run `pytest tests/unit` (58 tests, stdlib only)              |
+
+### Stack integration
+
+* `kirobi_core.services` speaks directly to the running services with
+  stdlib `urllib` only — no `httpx`, no `requests`. Ollama and Qdrant
+  also expose model and collection metadata through the probes.
+* `kirobi_core.bridge` converts `kirobi_core.backlog.Task` objects into
+  the pydantic `Task` shape that `services/orchestrator/supervisor.py`
+  expects.
+* `services/orchestrator/supervisor.py` automatically detects
+  `kirobi_core` on `PYTHONPATH`. When `KIROBI_SEED_BACKLOG=true` is set
+  the supervisor seeds its task queue from the local backlog on
+  startup (limited by `KIROBI_SEED_LIMIT`, default `5`).
+* `docker-compose.yml` binds every service port to
+  `KIROBI_BIND_HOST` (default `127.0.0.1`). Set it to `0.0.0.0` only
+  when LAN access is intentional.
+* `infra/scripts/bootstrap.sh backup` honours `BACKUP_TARGET_DIR` and
+  `BACKUP_RETENTION_DAYS` from `.env` and snapshots `canon/`,
+  `experiences/` and `kirobi-core/` together.
+
+### Safety model
+
+* **Dry-run by default**: `autonomous-once` / `autonomous-loop` never
+  modify repository files. They produce a JSON report with the planned
+  routing decisions per task.
+* **Zone-gated writes**: every proposed action goes through
+  `kirobi_core.zones.can_write`, which only allows `PUBLIC` and
+  `WORKSPACE` paths. `FAMILY_PRIVATE`, `QUARANTINE` and `SACRED`
+  always require explicit human approval.
+* **Sandboxed**: `kirobi_core.zones.is_inside_repo` makes sure no
+  autonomous file operation can escape the repository root.
+* **Audit log**: every routing decision and loop iteration is appended
+  as JSON-Lines to `kirobi-core/core-events.log` (the only log file
+  preserved by `.gitignore`). Secrets are redacted automatically.
+* **Quiet hours**: `--quiet-hours "22:00-07:00"` skips iterations
+  inside the configured window, including midnight wrap-around.
+* **Sensitive interview answers** are written to a separate file
+  under `extracts/family-private/profiles/` (or another zone you
+  pick); the main profile only stores a pointer.
+
+### Tests
+
+```bash
+make test         # 45+ unit tests, all stdlib
+```
+
+Tests live under `tests/unit/` and rely only on `pytest`. Add
+`pytest -k <name>` for focused runs.
 
 ---
 

@@ -109,12 +109,35 @@ app = FastAPI(
 )
 
 # CORS middleware
+# `allow_origins=["*"]` together with `allow_credentials=True` is invalid per
+# the CORS spec — browsers reject the preflight. We mirror the auth service
+# logic and resolve a concrete origin list from KIROBI_PUBLIC_ORIGINS, falling
+# back to a regex that covers localhost, *.local and RFC1918 LAN addresses.
+def _cors_kwargs() -> dict:
+    raw = os.getenv("KIROBI_PUBLIC_ORIGINS", "").strip()
+    if raw:
+        origins = [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+        return {"allow_origins": origins}
+    pattern = (
+        r"^https?://("
+        r"localhost(:\d+)?|127\.0\.0\.1(:\d+)?|"
+        r"[a-zA-Z0-9-]+\.local(:\d+)?|"
+        r"10\.\d+\.\d+\.\d+(:\d+)?|"
+        r"192\.168\.\d+\.\d+(:\d+)?|"
+        r"172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?"
+        r")$"
+    )
+    return {"allow_origin_regex": pattern}
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately in production
+    **_cors_kwargs(),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+    expose_headers=["X-Request-Id"],
+    max_age=3600,
 )
 
 
