@@ -6,7 +6,7 @@
 
 ## Was ist Kirobi / Disruptive OS?
 
-Kirobi ist ein persönliches, lokal betriebenes KI-Ökosystem, das als Supervisor-Agent fungiert und alle Bereiche des Lebens von Sven Kirchner koordiniert: Familie, Projekte, Business, Kreativität und Selbstentfaltung. Das System läuft vollständig on-premise auf leistungsstarker Hardware und verbindet lokale LLMs mit einem strukturierten Wissensgraphen, Workflow-Automatisierung und multimodalen Interfaces.
+Kirobi ist ein persönliches, lokal betriebenes KI-Ökosystem, das als Supervisor-Agent fungiert und alle Bereiche des Lebens von Sven Darusi koordiniert: Familie, Projekte, Business, Kreativität und Selbstentfaltung. Das System läuft vollständig on-premise auf leistungsstarker Hardware und verbindet lokale LLMs mit einem strukturierten Wissensgraphen, Workflow-Automatisierung und multimodalen Interfaces.
 
 **Kernprinzipien:**
 - 🏠 **Local-First**: Alle sensiblen Daten bleiben auf eigener Hardware
@@ -164,7 +164,7 @@ Mehr Details: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Lizenz
 
-MIT License – Kirobi / Disruptive OS  
-© 2024 Sven Kirchner (Kirobi92)
+MIT License – Kirobi / Disruptive OS
+© 2024 Sven Darusi (Kirobi92)
 
 Details: [LICENSE.md](LICENSE.md)

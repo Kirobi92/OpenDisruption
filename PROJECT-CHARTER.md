@@ -1,8 +1,8 @@
 # Projekt-Charta: Kirobi / Disruptive OS
 
-**Version:** 1.0  
-**Datum:** 2024  
-**Eigentümer:** Sven Kirchner (Kirobi92)  
+**Version:** 1.0
+**Datum:** 2024
+**Eigentümer:** Sven Darusi (Kirobi92)
 **Status:** Aktiv
 
 ---
@@ -66,9 +66,9 @@ Das System verbessert sich durch jede Interaktion. Lernpunkte werden in `experie
 
 | Rolle | Person | Beschreibung |
 |-------|--------|-------------|
-| **Eigentümer & Primärnutzer** | Sven Kirchner | Visionsträger, Hauptnutzer, Admin |
-| **Familie** | Samira Kirchner | Familienkontext, Mediation, Kreativität |
-| **Familie** | Sineo Kirchner | Creator-Content, Jugendprojekte |
+| **Eigentümer & Primärnutzer** | Sven Darusi | Visionsträger, Hauptnutzer, Admin |
+| **Familie** | Samira | Familienkontext, Mediation, Kreativität |
+| **Familie** | Sineo | Creator-Content, Jugendprojekte |
 | **Technische Mitarbeiter** | Kirobi-Agenten | KI-Agenten als "digitale Mitarbeiter" |
 | **Community** | Open-Source-Beitragende | Externen Beiträge zu Nicht-SACRED-Bereichen |
 

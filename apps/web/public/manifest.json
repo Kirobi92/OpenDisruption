@@ -1,0 +1,28 @@
+{
+  "short_name": "Kirobi",
+  "name": "Kirobi Family Assistant",
+  "description": "Persönlicher KI-Assistent für die Familie Darusi",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1f2937",
+  "background_color": "#111827",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "de",
+  "categories": ["productivity", "lifestyle"],
+  "screenshots": []
+}

@@ -23,7 +23,7 @@ This file contains **mandatory operating constraints** for all AI agents (Claude
 
 ## 1. REPOSITORY IDENTITY
 
-This is **NOT** a normal software repository. It is a **personal AI operating system** for Sven Kirchner and family, containing:
+This is **NOT** a normal software repository. It is a **personal AI operating system** for Sven Darusi and family, containing:
 
 - 🏠 **Family data** (private, sensitive, personal)
 - 🧠 **Knowledge management** (structured wisdom, learnings, experiences)

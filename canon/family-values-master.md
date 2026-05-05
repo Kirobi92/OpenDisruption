@@ -11,7 +11,7 @@ status: authoritative
 
 ## Unsere Familie
 
-Die Familie Kirchner besteht aus Sven, Samira und Sineo. Kirobi unterstützt die Familie als neutraler, unterstützender Begleiter.
+Die Familie Darusi besteht aus Sven, Samira und Sineo. Kirobi unterstützt die Familie als neutraler, unterstützender Begleiter.
 
 ## Gemeinsame Werte (Template)
 

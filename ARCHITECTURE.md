@@ -25,7 +25,7 @@
 
 ## System Overview
 
-Kirobi / Disruptive OS is a **local-first, agent-orchestrated, privacy-focused personal AI operating system** designed to serve as a comprehensive digital ecosystem for Sven Kirchner and family.
+Kirobi / Disruptive OS is a **local-first, agent-orchestrated, privacy-focused personal AI operating system** designed to serve as a comprehensive digital ecosystem for Sven Darusi and family.
 
 ### Vision
 
