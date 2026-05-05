@@ -1,0 +1,10 @@
+# Kirobi Core Events Log
+# Format: [TIMESTAMP] [LEVEL] [EVENT_CODE] [AGENT] [MESSAGE]
+# Levels: INFO, WARNING, ERROR, CRITICAL
+
+[2024-01-01T00:00:00Z] INFO SYS.BOOT kirobi-core System initialisiert. Version 0.1.0
+[2024-01-01T00:00:01Z] INFO SYS.SVC_UP kirobi-ops PostgreSQL verfügbar auf Port 5432
+[2024-01-01T00:00:02Z] INFO SYS.SVC_UP kirobi-ops Qdrant verfügbar auf Port 6333
+[2024-01-01T00:00:03Z] INFO SYS.SVC_UP kirobi-ops Ollama verfügbar auf Port 11434
+[2024-01-01T00:00:04Z] INFO AGT.ROUTING kirobi-core Routing-Matrix geladen: 14 Agenten registriert
+[2024-01-01T00:00:05Z] INFO ING.FILE_DETECTED hermes-extractor Inbox-Check: 0 neue Dateien
