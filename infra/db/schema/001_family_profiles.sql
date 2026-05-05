@@ -150,9 +150,9 @@ CREATE TRIGGER update_conversations_updated_at BEFORE UPDATE ON conversations
 -- Insert default family members
 -- Note: Passwords should be changed immediately after first login
 INSERT INTO users (username, display_name, email, role) VALUES
-    ('sven', 'Sven Kirchner', 'sven@kirobi.local', 'admin'),
-    ('samira', 'Samira Kirchner', 'samira@kirobi.local', 'family_member'),
-    ('sineo', 'Sineo Kirchner', 'sineo@kirobi.local', 'family_member')
+    ('sven', 'Sven Darusi', 'sven@kirobi.local', 'admin'),
+    ('samira', 'Samira', 'samira@kirobi.local', 'family_member'),
+    ('sineo', 'Sineo', 'sineo@kirobi.local', 'family_member')
 ON CONFLICT (username) DO NOTHING;
 
 -- Set up zone permissions for Sven (admin - full access)

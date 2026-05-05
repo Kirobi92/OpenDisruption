@@ -114,9 +114,9 @@
 ✅ **Verzeichnis:** `canon/family/`
 
 **Profile:**
-- `sven-profile.md` - Sven Kirchner (Admin, Visionär)
-- `samira-profile.md` - Samira Kirchner (Co-Creator, Herz der Familie)
-- `sineo-profile.md` - Sineo Kirchner (Content Creator, Jugendlicher)
+- `sven-profile.md` - Sven Darusi (Admin, Visionär)
+- `samira-profile.md` - Samira (Co-Creator, Herz der Familie)
+- `sineo-profile.md` - Sineo (Content Creator, Jugendlicher)
 
 **Jedes Profil enthält:**
 - Persönlichkeit & Werte

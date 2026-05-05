@@ -3,12 +3,12 @@ zone: FAMILY_PRIVATE
 created: 2026-05-05
 author: kirobi-core
 type: family_profile
-subject: Sineo Kirchner
+subject: Sineo
 tags: [family, profile, family_member, son, creator]
 version: 1.0
 ---
 
-# Profil: Sineo Kirchner
+# Profil: Sineo
 
 **Rolle im System:** Familienmitglied, Creator
 **Rolle in der Familie:** Sohn, Creator, Jugendlicher

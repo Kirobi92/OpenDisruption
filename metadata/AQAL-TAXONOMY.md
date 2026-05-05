@@ -35,7 +35,7 @@ Kirobi nutzt diesen Rahmen um sicherzustellen, dass alle Lebensbereiche berücks
 **Verwandte Verzeichnisse:** `sacred/`, `experiences/family/`, `experiences/learnings/`
 
 ### Quadrant 2: WIR (Beziehungen)
-- Familie Kirchner (Sven, Samira, Sineo)
+- Familie Darusi (Sven, Samira, Sineo)
 - Familiendynamiken und Mediation
 - Gemeinschaft und soziale Verbindungen
 - Familienwerte und Kultur

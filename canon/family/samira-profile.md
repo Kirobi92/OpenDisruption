@@ -3,12 +3,12 @@ zone: FAMILY_PRIVATE
 created: 2026-05-05
 author: kirobi-core
 type: family_profile
-subject: Samira Kirchner
+subject: Samira
 tags: [family, profile, family_member, mother, wife]
 version: 1.0
 ---
 
-# Profil: Samira Kirchner
+# Profil: Samira
 
 **Rolle im System:** Familienmitglied, Co-Creator
 **Rolle in der Familie:** Mutter, Ehefrau, Herz der Familie

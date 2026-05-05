@@ -4,7 +4,7 @@ type: rituale
 version: 1.0
 ---
 
-# Familien-Rituale – Kirchner
+# Familien-Rituale – Darusi
 
 ## Was sind Familien-Rituale?
 

@@ -324,7 +324,7 @@ async def create_message(
 
     # Load user profile for personalized response
     profile_path = f"/canon/family/{current_user.username}-profile.md"
-    system_prompt = f"""Du bist Kirobi, ein persönlicher KI-Assistent für die Familie Kirchner.
+    system_prompt = f"""Du bist Kirobi, ein persönlicher KI-Assistent für die Familie Darusi.
 
 Du sprichst mit: {current_user.display_name} ({current_user.username})
 Zone: {conversation.zone}

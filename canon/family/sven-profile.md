@@ -3,12 +3,12 @@ zone: FAMILY_PRIVATE
 created: 2026-05-05
 author: kirobi-core
 type: family_profile
-subject: Sven Kirchner
+subject: Sven Darusi
 tags: [family, profile, admin, father, husband]
 version: 1.0
 ---
 
-# Profil: Sven Kirchner
+# Profil: Sven Darusi
 
 **Rolle im System:** Administrator, Visionär, Hauptnutzer
 **Rolle in der Familie:** Vater, Ehemann
