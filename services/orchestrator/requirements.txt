@@ -1,0 +1,28 @@
+# Kirobi Supervisor Service - Python Dependencies
+
+# Core
+python>=3.10
+
+# Async & Event Loop
+asyncio>=3.4.3
+aiohttp>=3.9.0
+aiofiles>=23.0.0
+
+# Database
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.0
+
+# Data models
+pydantic>=2.0.0
+
+# LLM Integration
+requests>=2.31.0
+
+# Utilities
+python-dotenv>=1.0.0
+loguru>=0.7.0
+
+# Optional: LangGraph for advanced orchestration
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-community>=0.0.20
