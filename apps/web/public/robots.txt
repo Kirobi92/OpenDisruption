@@ -1,0 +1,3 @@
+# Kirobi PWA — local-first, no public crawling.
+User-agent: *
+Disallow: /

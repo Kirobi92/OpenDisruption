@@ -11,6 +11,8 @@ volumes:
   postgres_data:
   flowise_data:
   uploads_data:
+  caddy_data:
+  caddy_config:
 
 services:
   ollama:
@@ -173,6 +175,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-kirobi}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-CHANGEME-in-production-use-strong-secret}
+      - KIROBI_PUBLIC_ORIGINS=${KIROBI_PUBLIC_ORIGINS:-}
+      - KIROBI_DEFAULT_USER=${KIROBI_DEFAULT_USER:-sven}
+      - KIROBI_DEFAULT_PASSWORD=${KIROBI_DEFAULT_PASSWORD:-}
+      - KIROBI_DEFAULT_DISPLAY_NAME=${KIROBI_DEFAULT_DISPLAY_NAME:-Sven}
+      - KIROBI_DEFAULT_ROLE=${KIROBI_DEFAULT_ROLE:-admin}
     depends_on:
       postgres:
         condition: service_healthy
@@ -200,6 +207,7 @@ services:
       - OLLAMA_HOST=http://ollama:11434
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
+      - KIROBI_PUBLIC_ORIGINS=${KIROBI_PUBLIC_ORIGINS:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -216,13 +224,43 @@ services:
       dockerfile: Dockerfile
     container_name: kirobi-web
     restart: unless-stopped
+    # Direct exposure on KIROBI_WEB_PORT is kept for local dev / debugging,
+    # but the canonical entry point for the family is the Caddy reverse
+    # proxy below (port 80/443).
     ports:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:${WEB_PORT:-3002}:3000"
     environment:
-      - AUTH_SERVICE_URL=http://auth:8000
-      - API_SERVICE_URL=http://api:8000
+      # Empty AUTH_/API_SERVICE_URL means Next.js does NOT inject rewrites;
+      # all /api/* traffic is then handled by Caddy in production. Set them
+      # only when using `next dev` directly.
+      - AUTH_SERVICE_URL=${WEB_AUTH_UPSTREAM:-}
+      - API_SERVICE_URL=${WEB_API_UPSTREAM:-}
       - NEXT_PUBLIC_APP_NAME=Kirobi
+      - NEXT_TELEMETRY_DISABLED=1
     depends_on:
+      - auth
+      - api
+    networks:
+      - kirobi-net
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: kirobi-caddy
+    restart: unless-stopped
+    # Caddy is the LAN-facing entry point. We bind it to the public host
+    # so kirobi.local + the LAN IP resolve to this container, while every
+    # other service stays on KIROBI_BIND_HOST (127.0.0.1 by default).
+    ports:
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTP_PORT:-80}:80"
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTPS_PORT:-443}:443"
+    environment:
+      - KIROBI_HOSTNAME=${KIROBI_HOSTNAME:-kirobi.local}
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
       - auth
       - api
     networks:
