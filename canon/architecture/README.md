@@ -6,7 +6,10 @@
 Kanonische Dokumente für den Bereich **architecture**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Architektur-Entscheidungen (ADRs)\n- System-Diagramme\n- Technologie-Entscheidungen\n- Migrations-Guides
+- Architektur-Entscheidungen (ADRs)
+- System-Diagramme
+- Technologie-Entscheidungen
+- Migrations-Guides
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/architecture/ sammeln

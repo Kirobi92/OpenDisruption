@@ -6,7 +6,9 @@
 Kanonische Dokumente für den Bereich **policies**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Operative Policies\n- Compliance-Anforderungen\n- Sicherheits-Richtlinien
+- Operative Policies
+- Compliance-Anforderungen
+- Sicherheits-Richtlinien
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/policies/ sammeln

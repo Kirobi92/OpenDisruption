@@ -6,7 +6,9 @@
 Kanonische Dokumente für den Bereich **enterprise**. Diese Dokumente sind die verbindliche Referenz für alle Agenten.
 
 ## Inhalte
-- Enterprise-Anforderungen\n- Compliance und Datenschutz\n- Multi-User-Konzepte
+- Enterprise-Anforderungen
+- Compliance und Datenschutz
+- Multi-User-Konzepte
 
 ## Update-Prozess
 1. Neue Erkenntnisse in clusters/enterprise/ sammeln
