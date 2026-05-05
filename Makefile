@@ -13,15 +13,21 @@ help:
 @echo ""
 @echo "Kirobi / Disruptive OS – Verfügbare Befehle:"
 @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-@echo "  make init         – System initialisieren (erste Einrichtung)"
-@echo "  make up           – Alle Services starten"
-@echo "  make down         – Alle Services stoppen"
-@echo "  make restart      – Alle Services neu starten"
-@echo "  make status       – Status aller Services anzeigen"
-@echo "  make logs         – Logs aller Services (follow)"
-@echo "  make pull-models  – Ollama-Modelle herunterladen"
-@echo "  make backup       – Backup erstellen"
-@echo "  make clean        – Ungenutzte Docker-Ressourcen aufräumen"
+@echo "  make init            – System initialisieren (erste Einrichtung)"
+@echo "  make up              – Alle Services starten"
+@echo "  make down            – Alle Services stoppen"
+@echo "  make restart         – Alle Services neu starten"
+@echo "  make status          – Status aller Services anzeigen"
+@echo "  make logs            – Logs aller Services (follow)"
+@echo "  make pull-models     – Ollama-Modelle herunterladen"
+@echo ""
+@echo "Voice & Interview:"
+@echo "  make voice-test      – Voice Interface testen (STT + TTS)"
+@echo "  make start-interview – Family Interview starten"
+@echo "  make voice-logs      – Voice Service Logs anzeigen"
+@echo ""
+@echo "  make backup          – Backup erstellen"
+@echo "  make clean           – Ungenutzte Docker-Ressourcen aufräumen"
 @echo ""
 
 ## Erste Einrichtung
@@ -128,3 +134,38 @@ db-shell:
 qdrant-collections:
 @curl -s http://localhost:$${QDRANT_PORT:-6333}/collections | python3 -m json.tool 2>/dev/null || \
 echo "  ⚠ Qdrant nicht erreichbar"
+
+## Voice Interface testen
+voice-test:
+@echo "→ Teste Voice Interface..."
+@$(COMPOSE) exec voice-processing python3 voice_interface.py --test-tts "Hallo, ich bin Kirobi. Das ist ein Test."
+@echo "  ✓ TTS Test abgeschlossen"
+@echo ""
+@echo "Für STT Test (mit Mikrofon):"
+@echo "  docker compose exec voice-processing python3 voice_interface.py --test-stt"
+
+## Family Interview starten
+start-interview:
+@echo "╔════════════════════════════════════════════════════════════╗"
+@echo "║        Kirobi Family Interview - Willkommen!               ║"
+@echo "╚════════════════════════════════════════════════════════════╝"
+@echo ""
+@echo "Das Family Interview wird gestartet..."
+@echo "Bitte stelle sicher, dass dein Mikrofon funktioniert."
+@echo ""
+@read -p "Mit wem soll das Interview geführt werden? (Sven/Samira/Sineo): " NAME && \
+$(COMPOSE) exec supervisor python3 -c "import asyncio; from supervisor import KirobiSupervisor; s = KirobiSupervisor(); asyncio.run(s.start_family_interview('$$NAME'))"
+
+## Voice Service Logs
+voice-logs:
+@$(COMPOSE) logs -f voice-processing
+
+## Supervisor Logs
+supervisor-logs:
+@$(COMPOSE) logs -f supervisor
+
+## Alle Voice-relevanten Services neu starten
+voice-restart:
+@echo "→ Starte Voice Services neu..."
+@$(COMPOSE) restart voice-processing supervisor
+@echo "  ✓ Voice Services neu gestartet"
