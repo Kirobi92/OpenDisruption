@@ -213,9 +213,42 @@ parse_args() {
 #  Detection
 # ----------------------------------------------------------------------------- #
 detect_os() {
+  local installer_dir detect_script detect_json detect_fields
+
+  installer_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  detect_script="$installer_dir/infra/scripts/detect-system.sh"
+
   OS_KERNEL="$(uname -s)"
   OS_ARCH="$(uname -m)"
   OS_NAME="unknown"; OS_VERSION="unknown"; OS_FAMILY="unknown"
+
+  if [[ -x "$detect_script" ]]; then
+    debug "Using shared system detection: $detect_script --json"
+    if detect_json="$("$detect_script" --json 2>/dev/null)" && [[ -n "$detect_json" ]] && command -v python3 >/dev/null 2>&1; then
+      if detect_fields="$(python3 -c '
+import json, sys
+try:
+    data = json.loads(sys.stdin.read())
+except Exception:
+    sys.exit(1)
+keys = ("kernel", "arch", "name", "version", "family")
+values = [str(data.get(k, "")) for k in keys]
+sys.stdout.write("\t".join(values))
+' <<<"$detect_json" 2>/dev/null)"; then
+        IFS=$'\t' read -r detected_kernel detected_arch detected_name detected_version detected_family <<<"$detect_fields"
+
+        [[ -n "${detected_kernel:-}" ]] && OS_KERNEL="$detected_kernel"
+        [[ -n "${detected_arch:-}" ]] && OS_ARCH="$detected_arch"
+        [[ -n "${detected_name:-}" ]] && OS_NAME="$detected_name"
+        [[ -n "${detected_version:-}" ]] && OS_VERSION="$detected_version"
+        [[ -n "${detected_family:-}" ]] && OS_FAMILY="$detected_family"
+
+        debug "OS: $OS_NAME $OS_VERSION ($OS_FAMILY/$OS_KERNEL/$OS_ARCH)"
+        return
+      fi
+    fi
+    warn "Shared system detection failed, falling back to built-in detection"
+  fi
 
   case "$OS_KERNEL" in
     Linux)
