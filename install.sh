@@ -653,6 +653,8 @@ validate() {
     warn "No running containers found."; (( ++fail_count ))
   fi
   (( fail_count == 0 )) || warn "Validation finished with $fail_count warning(s)."
+  (( fail_count == 0 )) && return 0
+  return 1
 }
 
 # ----------------------------------------------------------------------------- #
