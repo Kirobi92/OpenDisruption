@@ -81,8 +81,7 @@ jobs:
           test "$rc" -eq 1 || (echo "expected exit 1 with placeholders, got $rc" && exit 1)
       - name: validate-env after replacing placeholders
         run: |
-          sed -i 's/AENDERE_DIESEN_SCHLUESSEL[A-Za-z_]*/$(openssl rand -hex 32)/g' .env || true
-          # generate real secrets per line
+          # generate fresh secret per placeholder line
           while IFS= read -r line; do
             if echo "$line" | grep -q 'AENDERE'; then
               key=$(echo "$line" | cut -d= -f1)
@@ -90,7 +89,7 @@ jobs:
               sed -i "s|^${key}=.*|${new}|" .env
             fi
           done < .env
-          # also fix the literal "changeme" defaults
+          # replace literal "changeme" defaults too
           sed -i 's/=changeme$/='"$(openssl rand -hex 16)"'/' .env
           sed -i 's/=changeme-in-production$/='"$(openssl rand -hex 32)"'/' .env
           set +e

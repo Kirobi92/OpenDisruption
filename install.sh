@@ -270,13 +270,13 @@ detect_hardware() {
 
 detect_agent_env() {
   AGENT_ENV="human"
-  [[ -n "${CURSOR_AGENT:-}" ]]               && AGENT_ENV="cursor"
-  [[ -n "${ANTHROPIC_API_KEY:-}" && -z "${TERM:-}" ]] && AGENT_ENV="claude"
+  [[ -n "${CURSOR_AGENT:-}" ]]                        && AGENT_ENV="cursor"
   [[ -n "${CLAUDE_CODE:-}" || -n "${CLAUDECODE:-}" ]] && AGENT_ENV="claude-code"
-  [[ -n "${COPILOT_AGENT_ID:-}" ]]           && AGENT_ENV="github-copilot"
-  [[ -n "${OPENAI_AGENT:-}" ]]               && AGENT_ENV="openai"
-  [[ "${TERM_PROGRAM:-}" == "vscode" ]]      && AGENT_ENV="vscode"
-  [[ -n "${CI:-}" ]]                         && AGENT_ENV="ci/${AGENT_ENV}"
+  [[ -n "${ANTHROPIC_AGENT:-}" ]]                     && AGENT_ENV="claude"
+  [[ -n "${COPILOT_AGENT_ID:-}" ]]                    && AGENT_ENV="github-copilot"
+  [[ -n "${OPENAI_AGENT:-}" ]]                        && AGENT_ENV="openai"
+  [[ "${TERM_PROGRAM:-}" == "vscode" ]]               && AGENT_ENV="vscode"
+  [[ -n "${CI:-}" ]]                                  && AGENT_ENV="ci/${AGENT_ENV}"
   debug "Agent env: $AGENT_ENV"
 
   # When running inside an automation environment, default to --auto unless a
@@ -431,11 +431,14 @@ clone_or_update_repo() {
 #  .env generation
 # ----------------------------------------------------------------------------- #
 gen_secret() {
+  # Returns a random hex string of length $1 (default 48). Hex keeps full
+  # entropy and is shell-safe (no '+', '/', '=', or newlines).
   local len="${1:-48}"
+  local bytes=$(( (len + 1) / 2 ))
   if have_cmd openssl; then
-    openssl rand -base64 "$len" | tr -d '\n=+/' | cut -c1-"$len"
+    openssl rand -hex "$bytes" | cut -c1-"$len"
   else
-    LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$len"
+    LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | head -c "$len"
   fi
 }
 

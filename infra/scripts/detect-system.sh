@@ -58,10 +58,10 @@ fi
 
 # GPU
 GPU_VENDOR="none"; GPU_MODEL="n/a"; GPU_VRAM_GB=0; GPU_COUNT=0
-if have nvidia-smi && nvidia-smi -L >/dev/null 2>&1; then
+if have nvidia-smi && nvidia_list="$(nvidia-smi -L 2>/dev/null)" && [[ -n "$nvidia_list" ]]; then
   GPU_VENDOR="nvidia"
   GPU_MODEL="$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -n1)"
-  GPU_COUNT="$(nvidia-smi -L | wc -l | tr -d ' ')"
+  GPU_COUNT="$(printf '%s\n' "$nvidia_list" | wc -l | tr -d ' ')"
   GPU_VRAM_GB=$(( $(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -n1) / 1024 ))
 elif have rocm-smi && rocm-smi --showproductname >/dev/null 2>&1; then
   GPU_VENDOR="amd"; GPU_MODEL="$(rocm-smi --showproductname 2>/dev/null | head -n1)"; GPU_COUNT=1
