@@ -743,8 +743,11 @@ write_profile_override() {
   if [[ -f "$env_path" ]]; then
     # Replace any existing COMPOSE_FILE= line, otherwise append.
     if grep -q '^COMPOSE_FILE=' "$env_path"; then
-      awk -v v="$compose_files" -F'=' \
-        'BEGIN{OFS="="} $1=="COMPOSE_FILE" {print "COMPOSE_FILE="v; next} {print}' \
+      # Anchor the match at the start of the line so a stray '=' inside an
+      # unrelated value can never collide with the rewrite.
+      awk -v v="$compose_files" '
+        /^COMPOSE_FILE=/ { print "COMPOSE_FILE=" v; next }
+        { print }' \
         "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
     else
       printf '\n# Auto-set by install.sh for layered profile (%s)\nCOMPOSE_FILE=%s\n' \

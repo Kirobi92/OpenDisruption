@@ -89,8 +89,11 @@ if (( DO_VEC )); then
         printf '[dry-run] curl POST /collections/%s/snapshots → GET snapshot file\n' "$col"
         continue
       fi
-      meta="$(curl -fsS -X POST "http://127.0.0.1:6333/collections/$col/snapshots" 2>/dev/null)" \
-        || { warn "qdrant snapshot create for $col failed"; continue; }
+      meta="$(curl -fsS --write-out '\nHTTP %{http_code}\n' \
+              -X POST "http://127.0.0.1:6333/collections/$col/snapshots" 2>&1)" \
+        || { warn "qdrant snapshot create for $col failed: ${meta##*$'\n'}"; continue; }
+      # Strip the trailing 'HTTP nnn' marker before persisting / parsing.
+      meta="${meta%$'\nHTTP '*}"
       printf '%s' "$meta" >"$WORK/qdrant/${col}.meta.json"
       # Snapshot name is the most recently reported one for this collection.
       snap_name="$(printf '%s' "$meta" | grep -oE '"name":"[^"]+"' | head -n1 | cut -d'"' -f4)"
