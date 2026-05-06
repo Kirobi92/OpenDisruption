@@ -1,6 +1,7 @@
 # docker-compose.override.yml — profile: development
-# Bind on 0.0.0.0 so colleagues can hit your dev box; mount source for
-# hot reload; verbose logging.
+# Mount source for hot reload and enable verbose logging. To expose services
+# on 0.0.0.0 for colleagues to hit your dev box, set KIROBI_BIND_HOST=0.0.0.0
+# (and any corresponding proxy bind host) in .env or the base compose config.
 services:
   api:
     environment:
