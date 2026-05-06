@@ -139,7 +139,19 @@ run() {
     return 0
   fi
   if (( VERBOSE )); then
-    "$@" 2>&1 | tee -a "$LOG_FILE"
+    "$@" \
+      > >(
+        while IFS= read -r line || [[ -n "$line" ]]; do
+          printf '%s\n' "$line"
+          printf '%s\n' "$line" >>"$LOG_FILE"
+        done
+      ) \
+      2> >(
+        while IFS= read -r line || [[ -n "$line" ]]; do
+          printf '%s\n' "$line" >&2
+          printf '%s\n' "$line" >>"$LOG_FILE"
+        done
+      )
   else
     "$@" >>"$LOG_FILE" 2>&1
   fi
