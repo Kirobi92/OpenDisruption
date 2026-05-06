@@ -1,0 +1,19 @@
+# docker-compose.override.yml — profile: development
+# Bind on 0.0.0.0 so colleagues can hit your dev box; mount source for
+# hot reload; verbose logging.
+services:
+  api:
+    environment:
+      - KIROBI_LOG_LEVEL=debug
+    volumes:
+      - ./services/api:/app:ro
+  auth:
+    environment:
+      - KIROBI_LOG_LEVEL=debug
+    volumes:
+      - ./services/auth:/app:ro
+  web:
+    environment:
+      - NEXT_PUBLIC_DEV=1
+    volumes:
+      - ./apps/web:/app:rw

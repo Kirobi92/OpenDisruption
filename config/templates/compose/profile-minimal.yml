@@ -1,0 +1,12 @@
+# docker-compose.override.yml — profile: minimal
+# Drops every non-essential service. Use on tiny boxes / Pis / for tests.
+# The base docker-compose.yml stays untouched; we just neutralise services.
+services:
+  open-webui:
+    profiles: ["disabled"]
+  flowise:
+    profiles: ["disabled"]
+  caddy:
+    profiles: ["disabled"]
+  voice-processing:
+    profiles: ["disabled"]

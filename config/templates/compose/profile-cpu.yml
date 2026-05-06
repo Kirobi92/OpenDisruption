@@ -1,0 +1,9 @@
+# docker-compose.override.yml — profile: cpu
+# Runs the full stack on CPU only. Removes the NVIDIA device reservation
+# from Ollama so the container starts on machines without a GPU.
+services:
+  ollama:
+    deploy: {}
+    environment:
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1

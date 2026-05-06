@@ -1,0 +1,12 @@
+# docker-compose.override.yml — profile: voice-full
+# Adds the voice processing stack on top of whatever GPU/CPU base profile.
+# This file is meant to be merged with profile-nvidia.yml or profile-cpu.yml
+# via `docker compose -f docker-compose.yml -f profile-cpu.yml -f profile-voice-full.yml`.
+services:
+  voice-processing:
+    profiles: []   # explicitly enable
+    restart: unless-stopped
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - PIPER_VOICE=${PIPER_VOICE:-de_DE-thorsten-medium}
+      - VOICE_DEVICE=${VOICE_DEVICE:-cpu}
