@@ -1,0 +1,42 @@
+# Caddyfile template — production
+# Drop into infra/caddy/Caddyfile when fronting the stack publicly.
+# Replace REPLACE_HOSTNAME with your real hostname.
+
+{
+    email   admin@REPLACE_HOSTNAME
+    auto_https disable_redirects
+}
+
+REPLACE_HOSTNAME, kirobi.local {
+    encode zstd gzip
+
+    # Family PWA (default route)
+    handle / {
+        reverse_proxy web:3002
+    }
+
+    handle /auth/* {
+        reverse_proxy auth:8002
+    }
+
+    handle /api/* {
+        reverse_proxy api:8003
+    }
+
+    handle /chat/* {
+        reverse_proxy open-webui:8080
+    }
+
+    handle /flows/* {
+        reverse_proxy flowise:3000
+    }
+
+    handle_errors {
+        respond "Service temporarily unavailable" 502
+    }
+
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}

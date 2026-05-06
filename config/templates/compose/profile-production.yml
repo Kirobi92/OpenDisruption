@@ -1,0 +1,27 @@
+# docker-compose.override.yml — profile: production
+# Hardened defaults: always restart, json logging with rotation, Caddy is
+# the only port exposed publicly, everything else local-only.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  ollama:        { restart: always, logging: *default-logging }
+  open-webui:    { restart: always, logging: *default-logging }
+  qdrant:        { restart: always, logging: *default-logging }
+  postgres:      { restart: always, logging: *default-logging }
+  flowise:       { restart: always, logging: *default-logging }
+  auth:          { restart: always, logging: *default-logging }
+  api:           { restart: always, logging: *default-logging }
+  web:           { restart: always, logging: *default-logging }
+  caddy:
+    restart: always
+    logging: *default-logging
+    ports:
+      # Honour the existing host-bind convention (see docker-compose.yml).
+      # In production the proxy is the only thing meant to be public; set
+      # KIROBI_PROXY_BIND_HOST=0.0.0.0 in .env to actually expose it.
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTP_PORT:-80}:80"
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTPS_PORT:-443}:443"
