@@ -75,11 +75,14 @@ if (( ${#MISSING[@]} )); then
 fi
 
 # 4. placeholder secrets
+#    Catch every AENDERE_* variant (DIESEN_SCHLUESSEL, DIESES_PASSWORT_SOFORT,
+#    BEIM_ERSTEN_LOGIN, …) plus the literal "changeme" defaults.
 PLACEHOLDER_KEYS=()
 for k in "${!IN_ENV[@]}"; do
-  if [[ "${IN_ENV[$k]}" == *"AENDERE_DIESEN_SCHLUESSEL"* ]] \
-  || [[ "${IN_ENV[$k]}" == "changeme" ]] \
-  || [[ "${IN_ENV[$k]}" == "changeme-in-production" ]]; then
+  v="${IN_ENV[$k]}"
+  if [[ "$v" == *"AENDERE_"* ]] \
+  || [[ "$v" == "changeme" ]] \
+  || [[ "$v" == "changeme-in-production" ]]; then
     PLACEHOLDER_KEYS+=("$k")
   fi
 done

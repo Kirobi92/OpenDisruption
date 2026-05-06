@@ -20,5 +20,8 @@ services:
     restart: always
     logging: *default-logging
     ports:
-      - "80:80"
-      - "443:443"
+      # Honour the existing host-bind convention (see docker-compose.yml).
+      # In production the proxy is the only thing meant to be public; set
+      # KIROBI_PROXY_BIND_HOST=0.0.0.0 in .env to actually expose it.
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTP_PORT:-80}:80"
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTPS_PORT:-443}:443"

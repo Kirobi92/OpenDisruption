@@ -1,6 +1,9 @@
 # docker-compose.override.yml — profile: minimal
 # Drops every non-essential service. Use on tiny boxes / Pis / for tests.
-# The base docker-compose.yml stays untouched; we just neutralise services.
+# In Compose, when a service depends on another service that is disabled
+# via a profile, both must be neutralised — otherwise Compose will pull the
+# dependency back in. So we disable voice-processing AND supervisor (which
+# depends on it). The minimum useful surface is: ollama + qdrant + postgres.
 services:
   open-webui:
     profiles: ["disabled"]
@@ -9,4 +12,8 @@ services:
   caddy:
     profiles: ["disabled"]
   voice-processing:
+    profiles: ["disabled"]
+  supervisor:
+    profiles: ["disabled"]
+  web:
     profiles: ["disabled"]

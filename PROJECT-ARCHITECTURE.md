@@ -95,18 +95,25 @@ experiences/                                 ↓
 | `auth` | `services/auth` | `8002` | postgres | all |
 | `api` | `services/api` | `8003` | postgres, qdrant | all |
 | `web` | `apps/web` | `3002` | auth, api | all |
-| `caddy` | `caddy:2` | `80/443` | web, api | production |
-| `voice-*` | `services/voice-processing` | – | ollama | voice-full |
+| `caddy` | `caddy:2` | `80/443` | web, api | all (hardened in `production`) |
+| `voice-processing` | `services/voice-processing` | `8001` | ollama | all by default; **disabled** in `cpu`/`minimal`, re-enabled by `voice-full` |
+| `supervisor` | `services/orchestrator` | – | postgres, ollama, voice-processing | mirrors `voice-processing` |
 
-Profiles supported by `install.sh` (templates in `config/templates/compose/`):
+Profiles supported by `install.sh` (templates in `config/templates/compose/`).
+The `--profile` flag accepts a comma-separated list, evaluated left-to-right
+(later overrides win):
 
-- `minimal`  — Ollama + Postgres + Qdrant only
-- `cpu`      — full stack on CPU (small models)
-- `nvidia`   — full stack with NVIDIA GPU
+- `minimal`  — Ollama + Postgres + Qdrant only (Voice/Supervisor disabled)
+- `cpu`      — full stack on CPU; voice-processing & supervisor disabled
+              (combine with `voice-full` for a CPU voice stack)
+- `nvidia`   — full stack with NVIDIA GPU; voice-processing keeps GPU
 - `amd`      — full stack with ROCm
-- `voice-full` — adds Whisper + Piper services
-- `production`  — enables Caddy + monitoring + restart policies
-- `development` — exposes ports on `0.0.0.0`, enables hot-reload mounts
+- `voice-full` — re-enables Whisper + Piper + Supervisor (CPU defaults);
+                 layer it: `--profile=cpu,voice-full` or `--profile=nvidia,voice-full`
+- `production`  — adds JSON log rotation, `restart: always`, exposes Caddy
+                  via `${KIROBI_PROXY_BIND_HOST}` (default `0.0.0.0`)
+- `development` — binds api/auth/web/open-webui on `0.0.0.0` and mounts
+                  source for hot-reload
 
 All ports default-bind to `${KIROBI_BIND_HOST:-127.0.0.1}` — local-first.
 

@@ -76,7 +76,8 @@ if (( DO_DB )); then
   fi
 fi
 
-# 4. Qdrant snapshots
+# 4. Qdrant snapshots — POST to create, then GET to actually download the
+#    snapshot artifact. Without the GET we'd only ship metadata, not vectors.
 if (( DO_VEC )); then
   if curl -fsS http://127.0.0.1:6333/collections >/dev/null 2>&1; then
     log "asking Qdrant for snapshots"
@@ -85,12 +86,21 @@ if (( DO_VEC )); then
         | grep -oE '"name":"[^"]+"' | cut -d'"' -f4); do
       log "  · $col"
       if (( DRY )); then
-        printf '[dry-run] curl POST /collections/%s/snapshots\n' "$col"
-      else
-        curl -fsS -X POST "http://127.0.0.1:6333/collections/$col/snapshots" \
-          -o "$WORK/qdrant/${col}.snapshot.json" \
-          || warn "qdrant snapshot for $col failed"
+        printf '[dry-run] curl POST /collections/%s/snapshots → GET snapshot file\n' "$col"
+        continue
       fi
+      meta="$(curl -fsS -X POST "http://127.0.0.1:6333/collections/$col/snapshots" 2>/dev/null)" \
+        || { warn "qdrant snapshot create for $col failed"; continue; }
+      printf '%s' "$meta" >"$WORK/qdrant/${col}.meta.json"
+      # Snapshot name is the most recently reported one for this collection.
+      snap_name="$(printf '%s' "$meta" | grep -oE '"name":"[^"]+"' | head -n1 | cut -d'"' -f4)"
+      if [[ -z "$snap_name" ]]; then
+        warn "could not parse snapshot name for $col"
+        continue
+      fi
+      curl -fsS "http://127.0.0.1:6333/collections/$col/snapshots/$snap_name" \
+        -o "$WORK/qdrant/${col}-${snap_name}" \
+        || warn "qdrant snapshot download for $col failed"
     done
   else
     warn "qdrant not reachable on 127.0.0.1:6333 — skipping vector snapshots"

@@ -73,16 +73,23 @@ This runs `install.sh` which:
 1. Detects OS, CPU, RAM, GPU, disk, agent environment.
 2. Checks prerequisites (`bash≥4`, `git`, `docker≥20.10`, `docker compose v2`).
 3. Clones the repo into `$HOME/OpenDisruption` (configurable).
-4. Generates `.env` from `.env.example` and replaces every `AENDERE_DIESEN_*`
-   placeholder with a 48-char random secret. `chmod 600`.
+4. Generates `.env` from `.env.example` and replaces every `AENDERE_*`
+   placeholder (`_DIESEN_SCHLUESSEL_`, `_DIESES_PASSWORT_SOFORT`,
+   `_BEIM_ERSTEN_LOGIN`, …) with a 48-char random hex secret. The original
+   placeholder string is propagated across the file so dependent values
+   (e.g. `DATABASE_URL=postgresql://kirobi:<PASSWORD>@…`) stay coherent.
+   `chmod 600`.
 5. Creates the five zone folders with correct permissions (`0700` for the
    private ones).
 6. Picks a Compose profile based on hardware (`nvidia`, `amd`, `cpu`,
    `minimal`) and writes `docker-compose.override.yml` from the matching
-   template under `config/templates/compose/`.
+   template under `config/templates/compose/`. Profiles can be **layered** —
+   pass a comma-separated list (e.g. `--profile=cpu,voice-full`) and the
+   installer concatenates the templates in order.
 7. `docker compose pull && docker compose up -d`.
 8. Pulls Ollama models via `infra/scripts/pull-models.sh`.
-9. Runs `infra/scripts/healthcheck.sh` for validation.
+9. Runs `infra/scripts/validate-env.sh` and `infra/scripts/healthcheck.sh`.
+   Hard validation failures cause the installer to exit `6`.
 10. Writes `.kirobi/install.json` with everything the agent might want to know.
 
 You may pass any of these flags after `--`:

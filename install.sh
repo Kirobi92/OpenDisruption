@@ -19,9 +19,12 @@
 #   --dry-run          print what would happen, change nothing
 #   --verbose          print every command (set -x)
 #   --quiet            suppress non-essential output
-#   --profile=NAME     compose profile: auto|minimal|cpu|nvidia|amd|voice-full|production|development
+#   --profile=NAMES    compose profile(s), comma-separated for layering, e.g.
+#                      auto | minimal | cpu | nvidia | amd | voice-full |
+#                      production | development | "cpu,voice-full"
 #   --target-dir=PATH  installation directory (default: $HOME/OpenDisruption)
 #   --branch=NAME      git branch to clone (default: main)
+#   --repo=URL         git repository URL (default: upstream OpenDisruption)
 #   --no-clone         assume we are already inside the repo
 #   --no-pull          do not pull docker images
 #   --no-models        do not download Ollama models
@@ -51,7 +54,7 @@ readonly REPO_URL_DEFAULT="https://github.com/Kirobi92/OpenDisruption.git"
 # shellcheck disable=SC2034  # exported for reference / extension scripts
 readonly REPO_RAW_BASE="https://raw.githubusercontent.com/Kirobi92/OpenDisruption"
 readonly MIN_DOCKER_VERSION="20.10"
-readonly MIN_COMPOSE_VERSION="2.0"
+readonly MIN_COMPOSE_VERSION="2.24"  # 2.24+ required for `!reset` directive used by voice-full
 readonly MIN_BASH_MAJOR=4
 readonly MIN_DISK_GB=20
 readonly MIN_RAM_GB=8
@@ -114,7 +117,50 @@ ${C_BOLD}${C_MAGENTA}╔══════════════════�
 EOF
 }
 
-usage() { sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() {
+  # Embedded help text — works whether the script lives on disk (./install.sh)
+  # or is being executed from stdin (curl … | bash), where $0 is "bash".
+  cat <<'USAGE'
+OpenDisruption / Kirobi OS — One-Command Bootstrap Installer
+
+USAGE:
+  bash install.sh [FLAGS]
+  curl -fsSL https://raw.githubusercontent.com/Kirobi92/OpenDisruption/main/install.sh \
+    | bash -s -- [FLAGS]
+
+FLAGS:
+  --auto                Non-interactive; pick safe defaults for every prompt.
+  --yes, -y             Answer "yes" to every confirmation.
+  --dry-run             Print actions, change nothing.
+  --verbose, -v         Echo every command (set -x).
+  --quiet, -q           Suppress non-essential output.
+  --profile=NAMES       Compose profile(s), comma-separated for layering.
+                        Single:  auto | minimal | cpu | nvidia | amd |
+                                 voice-full | production | development
+                        Layered: e.g. "cpu,voice-full" or "nvidia,production".
+                        "auto" picks one based on detected hardware.
+  --target-dir=PATH     Installation directory (default: $HOME/OpenDisruption).
+  --branch=NAME         Git branch to clone (default: main).
+  --repo=URL            Git repository URL (default: upstream OpenDisruption).
+  --no-clone            Assume we are already inside the repo.
+  --no-pull             Do not pull docker images.
+  --no-models           Do not download Ollama models.
+  --no-start            Do not run `docker compose up`.
+  --skip-checks         Skip prerequisite verification (NOT recommended).
+  --uninstall           Stop services and remove containers (data preserved).
+  --version             Print installer version and exit.
+  --help, -h            Print this help.
+
+EXIT CODES:
+  0  success
+  1  generic failure
+  2  missing prerequisite the user must install
+  3  unsupported platform
+  4  network failure
+  5  user aborted
+  6  validation / health check failed
+USAGE
+}
 
 # ----------------------------------------------------------------------------- #
 #  Error handling
@@ -212,6 +258,24 @@ parse_args() {
 # ----------------------------------------------------------------------------- #
 #  Detection
 # ----------------------------------------------------------------------------- #
+# When the helper scripts already exist on disk (i.e. the repo is checked out)
+# we delegate to them so that there is exactly *one* implementation of the
+# detection contract. Before the clone phase they are not yet available, so
+# we keep an inline fallback.
+detect_with_helper() {
+  local helper="$TARGET_DIR/infra/scripts/detect-system.sh"
+  [[ -x "$helper" ]] || return 1
+  # shellcheck disable=SC1090
+  eval "$("$helper" --shell --quiet 2>/dev/null)" || return 1
+  OS_FAMILY="${OS_FAMILY:-unknown}"; OS_NAME="${OS_NAME:-unknown}"
+  OS_VERSION="${OS_VERSION:-unknown}"; OS_ARCH="${ARCH:-unknown}"
+  CPU_CORES="${CPU_CORES:-1}"; RAM_GB="${RAM_GB:-0}"
+  GPU_VENDOR="${GPU_VENDOR:-none}"; GPU_MODEL="${GPU_MODEL:-n/a}"
+  GPU_VRAM_GB="${GPU_VRAM_GB:-0}"; DISK_FREE_GB="${DISK_FREE_GB:-0}"
+  debug "detection delegated to detect-system.sh"
+  return 0
+}
+
 detect_os() {
   OS_KERNEL="$(uname -s)"
   OS_ARCH="$(uname -m)"
@@ -240,6 +304,9 @@ detect_os() {
 }
 
 detect_hardware() {
+  # If the helper is on disk (after clone) it is the source of truth.
+  if detect_with_helper; then return; fi
+
   CPU_CORES="$( (nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null) || echo 1 )"
   if [[ "$OS_FAMILY" == "linux" ]] && [[ -r /proc/meminfo ]]; then
     RAM_KB="$(awk '/MemTotal/ {print $2}' /proc/meminfo)"
@@ -269,14 +336,20 @@ detect_hardware() {
 }
 
 detect_agent_env() {
-  AGENT_ENV="human"
-  [[ -n "${CURSOR_AGENT:-}" ]]                        && AGENT_ENV="cursor"
-  [[ -n "${CLAUDE_CODE:-}" || -n "${CLAUDECODE:-}" ]] && AGENT_ENV="claude-code"
-  [[ -n "${ANTHROPIC_AGENT:-}" ]]                     && AGENT_ENV="claude"
-  [[ -n "${COPILOT_AGENT_ID:-}" ]]                    && AGENT_ENV="github-copilot"
-  [[ -n "${OPENAI_AGENT:-}" ]]                        && AGENT_ENV="openai"
-  [[ "${TERM_PROGRAM:-}" == "vscode" ]]               && AGENT_ENV="vscode"
-  [[ -n "${CI:-}" ]]                                  && AGENT_ENV="ci/${AGENT_ENV}"
+  # Prefer the standalone helper (single source of truth) when available.
+  local helper="$TARGET_DIR/infra/scripts/agent-detect.sh"
+  if [[ -x "$helper" ]]; then
+    AGENT_ENV="$("$helper" 2>/dev/null || echo human)"
+  else
+    AGENT_ENV="human"
+    [[ -n "${CURSOR_AGENT:-}" ]]                        && AGENT_ENV="cursor"
+    [[ -n "${CLAUDE_CODE:-}" || -n "${CLAUDECODE:-}" ]] && AGENT_ENV="claude-code"
+    [[ -n "${ANTHROPIC_AGENT:-}" ]]                     && AGENT_ENV="claude"
+    [[ -n "${COPILOT_AGENT_ID:-}" ]]                    && AGENT_ENV="github-copilot"
+    [[ -n "${OPENAI_AGENT:-}" ]]                        && AGENT_ENV="openai"
+    [[ "${TERM_PROGRAM:-}" == "vscode" ]]               && AGENT_ENV="vscode"
+    [[ -n "${CI:-}" ]]                                  && AGENT_ENV="ci/${AGENT_ENV}"
+  fi
   debug "Agent env: $AGENT_ENV"
 
   # When running inside an automation environment, default to --auto unless a
@@ -343,7 +416,7 @@ check_prerequisites() {
   esac
 
   local missing=()
-  for cmd in curl git docker make awk sed grep tar; do
+  for cmd in curl git docker make awk sed grep tar tee; do
     if have_cmd "$cmd"; then
       debug "found: $cmd"
     else
@@ -459,18 +532,45 @@ setup_env_file() {
       _emit "${C_GREY}[dry-run]${C_RESET} would copy .env.example → .env and inject secrets"
     else
       cp "$example" "$env_path"
-      # Replace every "AENDERE_DIESEN_SCHLUESSEL" placeholder with a fresh secret.
+      # Replace every value that *is* an AENDERE_* placeholder, plus the
+      # literal "changeme" / "changeme-in-production" defaults, with a freshly
+      # generated 48-char hex secret. The original placeholder string is then
+      # propagated across the rest of the file, so dependent values like
+      # DATABASE_URL=postgresql://…:<PASSWORD>@… stay coherent.
+      local key value secret old_placeholder
       while IFS= read -r line; do
-        if [[ "$line" =~ ^([A-Z0-9_]+)=.*AENDERE_DIESEN_SCHLUESSEL ]]; then
-          local key="${BASH_REMATCH[1]}"
-          local secret; secret="$(gen_secret 48)"
-          # Use awk to replace the value safely (no regex headaches with /).
-          awk -v k="$key" -v v="$secret" -F'=' \
-            'BEGIN{OFS="="} $1==k {print k, v; next} {print}' \
+        # KEY=VALUE only — comments and blanks fall through.
+        [[ "$line" =~ ^([A-Z][A-Z0-9_]*)=(.*)$ ]] || continue
+        key="${BASH_REMATCH[1]}"
+        value="${BASH_REMATCH[2]}"
+
+        # We only treat a line as a "secret slot" when the value IS a
+        # placeholder, not when it merely embeds one (e.g. DATABASE_URL).
+        if [[ "$value" =~ ^AENDERE_[A-Z0-9_]+$ ]]; then
+          old_placeholder="$value"
+          secret="$(gen_secret 48)"
+          # Propagate everywhere the placeholder appears (covers this line
+          # AND any dependent URL / DSN that embeds the same token).
+          awk -v old="$old_placeholder" -v new="$secret" '
+            { i=index($0, old)
+              while (i>0) { $0 = substr($0,1,i-1) new substr($0,i+length(old)); i = index($0, old) }
+              print }' \
             "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
-          debug "generated secret for $key"
+          debug "generated secret for $key (propagated across .env)"
+        elif [[ "$value" == "changeme" || "$value" == "changeme-in-production" ]]; then
+          secret="$(gen_secret 48)"
+          awk -v k="$key" -v v="$secret" -F'=' \
+            'BEGIN{OFS="="} $1==k {sub(/^[^=]*=/, ""); print k, v; next} {print}' \
+            "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
+          debug "replaced 'changeme' default for $key"
         fi
       done <"$env_path"
+
+      # Sanity check: nothing AENDERE_* left, otherwise warn loudly.
+      if grep -qE '=.*AENDERE_' "$env_path"; then
+        warn ".env still contains AENDERE_* placeholders — please review:"
+        grep -nE '=.*AENDERE_' "$env_path" | sed 's/^/  /' >&2 || true
+      fi
       chmod 600 "$env_path"
       ok ".env generated with fresh secrets (chmod 600)."
     fi
@@ -505,7 +605,11 @@ EOF
 setup_folders() {
   hdr "Initialising folders"
   if [[ -x "$TARGET_DIR/infra/scripts/init-folders.sh" ]]; then
-    run bash "$TARGET_DIR/infra/scripts/init-folders.sh"
+    # init-folders.sh may try to create paths under /var that require root.
+    # We don't want to abort the whole installer for that — warn instead.
+    if ! run bash "$TARGET_DIR/infra/scripts/init-folders.sh"; then
+      warn "init-folders.sh exited non-zero (often a sudo/permission issue) — continuing."
+    fi
   fi
   # Ensure the five security zones exist with the right perms.
   for zone in sacred extracts/family-private quarantine; do
@@ -520,23 +624,90 @@ setup_folders() {
 }
 
 # ----------------------------------------------------------------------------- #
-#  Profile-specific compose override
+#  Profile-specific compose override (supports layering: --profile=cpu,voice-full)
 # ----------------------------------------------------------------------------- #
+# Compose merges multiple `-f` files cleanly (it's the official layering
+# mechanism), but a naive `cat` of two YAML files yields invalid YAML
+# (duplicate top-level `services:` keys). So:
+#   • A single profile  → write `docker-compose.override.yml` as before
+#                         (docker compose picks it up automatically).
+#   • Multiple profiles → write a header into `docker-compose.override.yml`
+#                         AND set `COMPOSE_FILE=...` in `.env`, so every
+#                         subsequent `docker compose …` call layers them in
+#                         the right order.
 write_profile_override() {
   hdr "Compose profile: $PROFILE"
   local override="$TARGET_DIR/docker-compose.override.yml"
-  local template="$TARGET_DIR/config/templates/compose/profile-${PROFILE}.yml"
+  local templates_dir="$TARGET_DIR/config/templates/compose"
+  local env_path="$TARGET_DIR/.env"
 
-  if [[ -f "$template" ]]; then
-    if (( DRY_RUN )); then
-      _emit "${C_GREY}[dry-run]${C_RESET} would copy $template → $override"
+  IFS=',' read -r -a profile_list <<<"$PROFILE"
+  local templates=() missing=()
+  for p in "${profile_list[@]}"; do
+    p="${p// /}"
+    [[ -z "$p" ]] && continue
+    local t="$templates_dir/profile-${p}.yml"
+    if [[ -f "$t" ]]; then
+      templates+=("$t")
     else
-      cp "$template" "$override"
-      ok "Wrote docker-compose.override.yml from profile template."
+      missing+=("$p")
     fi
-  else
-    debug "No template for profile '$PROFILE' — relying on docker-compose.yml defaults."
+  done
+
+  if (( ${#missing[@]} )); then
+    warn "No template for profile(s): ${missing[*]} — relying on docker-compose.yml defaults for those."
   fi
+
+  if (( ${#templates[@]} == 0 )); then
+    debug "Nothing to write — no matching templates."
+    return
+  fi
+
+  if (( ${#templates[@]} == 1 )); then
+    if (( DRY_RUN )); then
+      _emit "${C_GREY}[dry-run]${C_RESET} would copy ${templates[0]} → $override"
+      return
+    fi
+    cp "${templates[0]}" "$override"
+    chmod 644 "$override"
+    ok "Wrote docker-compose.override.yml from profile template."
+    return
+  fi
+
+  # Layered case: copy the FIRST template to docker-compose.override.yml
+  # (docker compose's default override slot) and ask compose to additionally
+  # apply the rest via COMPOSE_FILE.
+  if (( DRY_RUN )); then
+    _emit "${C_GREY}[dry-run]${C_RESET} would copy ${templates[0]} → $override"
+    _emit "${C_GREY}[dry-run]${C_RESET} would set COMPOSE_FILE in .env to layer ${#templates[@]} files"
+    return
+  fi
+  cp "${templates[0]}" "$override"
+  chmod 644 "$override"
+
+  # Build colon-separated list relative to TARGET_DIR.
+  local -a parts=( "docker-compose.yml" "docker-compose.override.yml" )
+  local i
+  for ((i=1; i<${#templates[@]}; i++)); do
+    # Template paths are absolute under TARGET_DIR; strip the prefix so the
+    # COMPOSE_FILE list works regardless of the user's cwd-via-make.
+    parts+=( "${templates[i]#"$TARGET_DIR/"}" )
+  done
+  local compose_files; compose_files="$(IFS=: ; echo "${parts[*]}")"
+
+  if [[ -f "$env_path" ]]; then
+    # Replace any existing COMPOSE_FILE= line, otherwise append.
+    if grep -q '^COMPOSE_FILE=' "$env_path"; then
+      awk -v v="$compose_files" -F'=' \
+        'BEGIN{OFS="="} $1=="COMPOSE_FILE" {print "COMPOSE_FILE="v; next} {print}' \
+        "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
+    else
+      printf '\n# Auto-set by install.sh for layered profile (%s)\nCOMPOSE_FILE=%s\n' \
+        "$PROFILE" "$compose_files" >>"$env_path"
+    fi
+    chmod 600 "$env_path"
+  fi
+  ok "Wrote layered profile (${#templates[@]} files) — COMPOSE_FILE pinned in .env."
 }
 
 # ----------------------------------------------------------------------------- #
@@ -569,19 +740,45 @@ pull_models() {
 validate() {
   hdr "Validation"
   local ok_count=0 fail_count=0
-  if [[ -x "$TARGET_DIR/infra/scripts/healthcheck.sh" ]]; then
-    if ( cd "$TARGET_DIR" && bash infra/scripts/healthcheck.sh ) >>"$LOG_FILE" 2>&1; then
-      ok "healthcheck.sh passed"; (( ++ok_count ))
+
+  # 1. .env sanity (placeholders, weak secrets, perms). Skip when .env was
+  #    not actually written (e.g. dry-run, or --no-clone in a fresh checkout).
+  if [[ -f "$TARGET_DIR/.env" ]] && [[ -x "$TARGET_DIR/infra/scripts/validate-env.sh" ]]; then
+    local rc=0
+    if ( cd "$TARGET_DIR" && bash infra/scripts/validate-env.sh --quiet ) >>"$LOG_FILE" 2>&1; then
+      ok ".env validation passed"; (( ++ok_count ))
     else
-      warn "healthcheck.sh reported issues — see $LOG_FILE"; (( ++fail_count ))
+      rc=$?
+      if (( rc == 2 )); then
+        warn ".env validation: warnings only (exit 2)"; (( ++ok_count ))
+      else
+        err  ".env validation FAILED (exit $rc) — see $LOG_FILE"
+        (( ++fail_count ))
+      fi
     fi
   fi
-  if ( cd "$TARGET_DIR" && docker compose ps --status=running --quiet ) | grep -q .; then
-    ok "Containers reported as running"; (( ++ok_count ))
-  else
-    warn "No running containers found."; (( ++fail_count ))
+
+  if (( DO_START )) && (( DRY_RUN == 0 )); then
+    if [[ -x "$TARGET_DIR/infra/scripts/healthcheck.sh" ]]; then
+      if ( cd "$TARGET_DIR" && bash infra/scripts/healthcheck.sh ) >>"$LOG_FILE" 2>&1; then
+        ok "healthcheck.sh passed"; (( ++ok_count ))
+      else
+        err "healthcheck.sh reported failures — see $LOG_FILE"; (( ++fail_count ))
+      fi
+    fi
+    if ( cd "$TARGET_DIR" && docker compose ps --status=running --quiet 2>/dev/null ) | grep -q .; then
+      ok "Containers reported as running"; (( ++ok_count ))
+    else
+      err "No running containers found."; (( ++fail_count ))
+    fi
   fi
-  (( fail_count == 0 )) || warn "Validation finished with $fail_count warning(s)."
+
+  if (( fail_count > 0 )); then
+    err "Validation finished with $fail_count failure(s) (and $ok_count passing check(s))."
+    return 6
+  fi
+  ok "Validation passed ($ok_count check(s))."
+  return 0
 }
 
 # ----------------------------------------------------------------------------- #
@@ -657,7 +854,11 @@ main() {
   pull_images
   start_services
   pull_models
-  validate
+  if ! validate; then
+    err "Bootstrap completed with validation failures — review the log: $LOG_FILE"
+    summary
+    exit 6
+  fi
   summary
 }
 

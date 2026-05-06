@@ -1,9 +1,21 @@
 # docker-compose.override.yml — profile: cpu
-# Runs the full stack on CPU only. Removes the NVIDIA device reservation
-# from Ollama so the container starts on machines without a GPU.
+# Runs the full stack on CPU only.
+#   • Removes the NVIDIA device reservation from `ollama`.
+#   • Disables the GPU-bound `voice-processing` service AND the `supervisor`
+#     that depends on it (Compose pulls profiled-disabled deps in implicitly,
+#     so we have to drop both). Layer `voice-full` on top to re-enable a
+#     CPU-only voice stack: `--profile=cpu,voice-full`.
 services:
   ollama:
     deploy: {}
     environment:
       - OLLAMA_NUM_PARALLEL=1
       - OLLAMA_MAX_LOADED_MODELS=1
+  voice-processing:
+    profiles: ["disabled"]
+    deploy: {}
+    environment:
+      - WHISPER_DEVICE=cpu
+      - WHISPER_COMPUTE_TYPE=int8
+  supervisor:
+    profiles: ["disabled"]
