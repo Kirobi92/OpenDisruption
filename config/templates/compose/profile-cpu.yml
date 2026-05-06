@@ -7,3 +7,7 @@ services:
     environment:
       - OLLAMA_NUM_PARALLEL=1
       - OLLAMA_MAX_LOADED_MODELS=1
+  voice-processing:
+    deploy: {}
+    environment:
+      - WHISPER_DEVICE=cpu
