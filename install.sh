@@ -459,18 +459,56 @@ setup_env_file() {
       _emit "${C_GREY}[dry-run]${C_RESET} would copy .env.example → .env and inject secrets"
     else
       cp "$example" "$env_path"
-      # Replace every "AENDERE_DIESEN_SCHLUESSEL" placeholder with a fresh secret.
+      # Replace every placeholder value containing "AENDERE_" with a fresh secret.
+      # Keep dependent values such as DATABASE_URL consistent with POSTGRES_PASSWORD.
+      declare -A generated_values=()
       while IFS= read -r line; do
-        if [[ "$line" =~ ^([A-Z0-9_]+)=.*AENDERE_DIESEN_SCHLUESSEL ]]; then
+        if [[ "$line" =~ ^([A-Z0-9_]+)=(.*AENDERE_.*)$ ]]; then
           local key="${BASH_REMATCH[1]}"
+          if [[ "$key" == "DATABASE_URL" ]]; then
+            continue
+          fi
           local secret; secret="$(gen_secret 48)"
-          # Use awk to replace the value safely (no regex headaches with /).
-          awk -v k="$key" -v v="$secret" -F'=' \
-            'BEGIN{OFS="="} $1==k {print k, v; next} {print}' \
-            "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
+          generated_values["$key"]="$secret"
           debug "generated secret for $key"
         fi
       done <"$env_path"
+
+      local postgres_password="${generated_values[POSTGRES_PASSWORD]:-}"
+      local postgres_password_awk=''
+      if [[ -n "$postgres_password" ]]; then
+        postgres_password_awk="${postgres_password//\\/\\\\}"
+        postgres_password_awk="${postgres_password_awk//&/\\&}"
+      fi
+
+      local awk_args=()
+      local generated_key
+      for generated_key in "${!generated_values[@]}"; do
+        awk_args+=(-v "generated_${generated_key}=${generated_values[$generated_key]}")
+      done
+      awk_args+=(-v "postgres_password=${postgres_password_awk}")
+
+      awk -F'=' "${awk_args[@]}" '
+        BEGIN { OFS="=" }
+        /^[A-Z0-9_]+=/ {
+          key = $1
+          value = substr($0, index($0, "=") + 1)
+
+          if (key == "DATABASE_URL" && value ~ /AENDERE_/ && postgres_password != "") {
+            sub(/:\/\/([^:@\/]+):[^@\/]+@/, "://\\1:" postgres_password "@", value)
+            print key, value
+            next
+          }
+
+          generated_var = "generated_" key
+          if ((value ~ /AENDERE_/) && (generated_var in ENVIRON)) {
+            print key, ENVIRON[generated_var]
+            next
+          }
+        }
+        { print }
+      ' "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
+
       chmod 600 "$env_path"
       ok ".env generated with fresh secrets (chmod 600)."
     fi
