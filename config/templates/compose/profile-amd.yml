@@ -1,0 +1,14 @@
+# docker-compose.override.yml — profile: amd
+# Full stack with AMD ROCm passthrough.
+services:
+  ollama:
+    image: ollama/ollama:rocm
+    deploy: {}
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - OLLAMA_NUM_PARALLEL=1

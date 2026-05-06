@@ -19,34 +19,46 @@ Kirobi ist ein persönliches, lokal betriebenes KI-Ökosystem, das als Superviso
 
 ## Schnellstart
 
-### Voraussetzungen
-- Docker & Docker Compose v2+
-- NVIDIA GPU mit CUDA-Support (empfohlen)
-- Mindestens 32 GB RAM, 500 GB SSD
-- Linux (Ubuntu 22.04+ empfohlen)
-
-### Installation
+### One-Command-Installation (empfohlen — Mensch oder Agent)
 
 ```bash
-# Repository klonen
+curl -fsSL https://raw.githubusercontent.com/Kirobi92/OpenDisruption/main/install.sh | bash
+```
+
+Vollständig autonom (für Coding-Agenten wie Claude, GPT, Cursor, Copilot):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Kirobi92/OpenDisruption/main/install.sh \
+  | bash -s -- --auto --yes --profile=auto
+```
+
+Der Installer erkennt OS, CPU, RAM, GPU und Agenten-Umgebung, generiert
+`.env` mit zufälligen Secrets, wählt das passende Compose-Profil
+(`minimal | cpu | nvidia | amd | voice-full | production | development`),
+zieht alle Images, startet die Services und führt einen Healthcheck aus.
+Idempotent — beliebig oft erneut ausführbar.
+
+Details: [`AGENT-INSTALLATION.md`](AGENT-INSTALLATION.md) ·
+Agenten-System-Prompt: [`AGENT-SYSTEM-PROMPT.md`](AGENT-SYSTEM-PROMPT.md) ·
+Architektur: [`PROJECT-ARCHITECTURE.md`](PROJECT-ARCHITECTURE.md).
+
+### Voraussetzungen
+- Docker & Docker Compose v2+
+- NVIDIA GPU mit CUDA-Support (empfohlen, optional — CPU-Fallback funktioniert)
+- Mindestens 8 GB RAM (32 GB empfohlen), 20 GB freier Speicherplatz
+- Linux (Ubuntu 22.04+ empfohlen) oder macOS (Apple Silicon)
+
+### Manuelle Installation (Alternative)
+
+```bash
 git clone https://github.com/Kirobi92/OpenDisruption.git
 cd OpenDisruption
-
-# Umgebungsvariablen konfigurieren
 cp .env.example .env
-nano .env  # Anpassen nach Bedarf
-
-# Infrastruktur initialisieren
-make init
-
-# System starten
-make up
-
-# Basis-Modelle herunterladen
-make pull-models
-
-# Status prüfen
-make status
+nano .env                 # Secrets anpassen
+make init                 # Verzeichnisse + Image-Pull
+make up                   # Services starten
+make pull-models          # Ollama-Modelle herunterladen
+make status               # Health prüfen
 ```
 
 ### Erste Schritte nach dem Start
