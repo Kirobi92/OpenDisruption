@@ -94,7 +94,11 @@ if (( DO_VEC )); then
         || {
           http_code="$(printf '%s\n' "$meta" | tail -n1 | grep -oE '[0-9]+' || true)"
           body_tail="$(printf '%s\n' "$meta" | sed '$d' | tail -n1 || true)"
-          warn "qdrant snapshot create for $col failed${http_code:+ (HTTP $http_code)}${body_tail:+: $body_tail}"
+          if [[ -n "$http_code" ]]; then
+            warn "qdrant snapshot create for $col failed (HTTP $http_code)${body_tail:+: $body_tail}"
+          else
+            warn "qdrant snapshot create for $col failed before HTTP response${body_tail:+: $body_tail}"
+          fi
           continue
         }
       # Strip the trailing 'HTTP nnn' marker before persisting / parsing.
