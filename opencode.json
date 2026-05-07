@@ -36,8 +36,8 @@
     "kirobi-context-db": {
       "type": "local",
       "command": ["python3", "-m", "kidi", "serve", "--port", "7700"],
-      "enabled": false,
-      "note": "Aktivieren sobald kidi/serve implementiert ist"
+      "enabled": true,
+      "note": "KeyCodi Context-DB MCP-Server — SQLite-basiert, Zone-aware"
     },
 
     "kirobi-supervisor": {
