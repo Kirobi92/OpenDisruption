@@ -13,18 +13,17 @@ status_json="$(tailscale status --json 2>/dev/null || true)"
 if [ -n "$status_json" ] && command -v jq >/dev/null 2>&1; then
   ts_name="$(printf '%s' "$status_json" | jq -r '.Self.DNSName // ""' 2>/dev/null | sed 's/[.]$//' || true)"
 elif [ -n "$status_json" ] && command -v python3 >/dev/null 2>&1; then
-  ts_name="$(python3 - "$status_json" <<'PY' || true
+  ts_name="$(printf '%s' "$status_json" | python3 -c '
 import json
 import sys
 
 try:
-    data = json.loads(sys.argv[1])
+    data = json.load(sys.stdin)
 except Exception:
     sys.exit(0)
 
 print(data.get("Self", {}).get("DNSName", "").rstrip("."))
-PY
-)"
+' || true)"
 fi
 
 if [ -n "$ts_name" ]; then
