@@ -91,7 +91,12 @@ if (( DO_VEC )); then
       fi
       meta="$(curl -fsS --write-out '\nHTTP %{http_code}\n' \
               -X POST "http://127.0.0.1:6333/collections/$col/snapshots" 2>&1)" \
-        || { warn "qdrant snapshot create for $col failed: ${meta##*$'\n'}"; continue; }
+        || {
+          http_code="$(printf '%s\n' "$meta" | tail -n1 | grep -oE '[0-9]+' || true)"
+          body_tail="$(printf '%s\n' "$meta" | sed '$d' | tail -n1 || true)"
+          warn "qdrant snapshot create for $col failed${http_code:+ (HTTP $http_code)}${body_tail:+: $body_tail}"
+          continue
+        }
       # Strip the trailing 'HTTP nnn' marker before persisting / parsing.
       meta="${meta%$'\nHTTP '*}"
       printf '%s' "$meta" >"$WORK/qdrant/${col}.meta.json"

@@ -82,13 +82,14 @@ jobs:
       - name: validate-env after replacing placeholders
         run: |
           # generate fresh secret per placeholder line
-          while IFS= read -r line; do
+          mapfile -t env_lines < .env
+          for line in "${env_lines[@]}"; do
             if echo "$line" | grep -q 'AENDERE'; then
               key=$(echo "$line" | cut -d= -f1)
               new="${key}=$(openssl rand -hex 32)"
               sed -i "s|^${key}=.*|${new}|" .env
             fi
-          done < .env
+          done
           # replace literal "changeme" defaults too
           sed -i 's/=changeme$/='"$(openssl rand -hex 16)"'/' .env
           sed -i 's/=changeme-in-production$/='"$(openssl rand -hex 32)"'/' .env

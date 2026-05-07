@@ -9,7 +9,7 @@
 # IMPORTANT: when layering on top of `cpu` or `minimal` (which mark the voice
 # stack as profile "disabled") we use Compose's `!reset` directive to clear
 # the inherited `profiles:` list. `!reset` requires Docker Compose ≥ 2.24
-# (released 2024-01) — the installer already enforces a higher minimum.
+# (released 2024-01) — install.sh enforces MIN_COMPOSE_VERSION=2.24.
 services:
   voice-processing:
     profiles: !reset []

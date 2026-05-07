@@ -74,8 +74,9 @@ This runs `install.sh` which:
 2. Checks prerequisites (`bash≥4`, `git`, `docker≥20.10`, `docker compose v2`).
 3. Clones the repo into `$HOME/OpenDisruption` (configurable).
 4. Generates `.env` from `.env.example` and replaces every `AENDERE_*`
-   placeholder (`_DIESEN_SCHLUESSEL_`, `_DIESES_PASSWORT_SOFORT`,
-   `_BEIM_ERSTEN_LOGIN`, …) with a 48-char random hex secret. The original
+   placeholder (for example `AENDERE_DIESEN_SCHLUESSEL_SOFORT`,
+   `AENDERE_DIESES_PASSWORT_SOFORT`, `AENDERE_BEIM_ERSTEN_LOGIN`, …) with a
+   48-char random hex secret. The original
    placeholder string is propagated across the file so dependent values
    (e.g. `DATABASE_URL=postgresql://kirobi:<PASSWORD>@…`) stay coherent.
    `chmod 600`.
