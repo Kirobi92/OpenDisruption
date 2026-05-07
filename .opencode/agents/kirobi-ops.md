@@ -1,6 +1,10 @@
 ---
 description: Kirobi Ops — DevOps-Spezialist für Docker Compose, Shell-Scripts, CI/CD, Infrastruktur-Konfiguration und Service-Deployment im OpenDisruption-Ökosystem.
 mode: subagent
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: medium
+  summary: auto
 temperature: 0.1
 permission:
   edit: allow

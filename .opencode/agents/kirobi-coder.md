@@ -1,6 +1,10 @@
 ---
 description: Kirobi Coder — Implementiert Python und TypeScript Code, schreibt Tests, behebt Bugs und refaktoriert im OpenDisruption-Ökosystem. Spezialist für FastAPI, asyncpg, pytest und kirobi_core.
 mode: subagent
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: medium
+  summary: auto
 temperature: 0.15
 permission:
   edit: allow

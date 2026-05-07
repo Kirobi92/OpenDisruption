@@ -1,6 +1,10 @@
 ---
 description: Kirobi Reviewer — Security-Audit, Code-Review, Qualitätssicherung und Verwundbarkeits-Analyse für das OpenDisruption-Ökosystem. Schreibt keinen neuen Code, verbessert bestehenden.
 mode: subagent
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: high
+  summary: auto
 temperature: 0.1
 permission:
   edit: allow

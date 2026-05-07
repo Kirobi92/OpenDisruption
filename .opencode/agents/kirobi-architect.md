@@ -1,6 +1,10 @@
 ---
 description: Kirobi Architect — System-Design, Architektur-Entscheidungen, Service-Graphen, API-Contracts und technische Blaupausen für das OpenDisruption-Ökosystem.
 mode: subagent
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: high
+  summary: auto
 temperature: 0.2
 permission:
   edit: allow

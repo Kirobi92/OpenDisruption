@@ -1,6 +1,10 @@
 ---
 description: Kirobi Frontend — Next.js 15, React 18, TypeScript und TailwindCSS Spezialist für die OpenDisruption Family PWA und Dashboard. Erschafft Interfaces die berühren.
 mode: subagent
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: medium
+  summary: auto
 temperature: 0.25
 permission:
   edit: allow
