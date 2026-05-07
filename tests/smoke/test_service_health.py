@@ -204,6 +204,53 @@ def test_web_health(base_url: str) -> None:
     )
 
 
+@pytest.mark.smoke
+def test_analytics_health(base_url: str) -> None:
+    """Prüft den /health Endpunkt des Analytics-Service (Port 8010)."""
+    url = _service_url(base_url, 8010)
+    _skip_if_unreachable(url)
+    response = _check_health(url)
+    assert response.status_code < 500, (
+        f"Analytics-Service antwortet mit Server-Fehler: {response.status_code}"
+    )
+
+
+@pytest.mark.smoke
+def test_music_generation_health(base_url: str) -> None:
+    """Prüft den /health Endpunkt des Music-Generation-Service (Port 8013)."""
+    url = _service_url(base_url, 8013)
+    _skip_if_unreachable(url)
+    response = _check_health(url)
+    assert response.status_code < 500, (
+        f"Music-Generation-Service antwortet mit Server-Fehler: {response.status_code}"
+    )
+
+
+@pytest.mark.smoke
+def test_video_generation_health(base_url: str) -> None:
+    """Prüft den /health Endpunkt des Video-Generation-Service (Port 8014)."""
+    url = _service_url(base_url, 8014)
+    _skip_if_unreachable(url)
+    response = _check_health(url)
+    assert response.status_code < 500, (
+        f"Video-Generation-Service antwortet mit Server-Fehler: {response.status_code}"
+    )
+
+
+@pytest.mark.smoke
+def test_dashboard_health(base_url: str) -> None:
+    """Prüft ob das Dashboard (Port 3003) erreichbar ist."""
+    url = "http://localhost:3003"
+    try:
+        with httpx.Client(timeout=TIMEOUT) as client:
+            response = client.get(url)
+        assert response.status_code < 500, (
+            f"Dashboard antwortet mit Server-Fehler: {response.status_code}"
+        )
+    except (httpx.ConnectError, httpx.TimeoutException, httpx.RemoteProtocolError, OSError):
+        pytest.skip("Dashboard nicht erreichbar (noch startend?)")
+
+
 # ---------------------------------------------------------------------------
 # Aggregierter Kritischer Test
 # ---------------------------------------------------------------------------
