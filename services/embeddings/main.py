@@ -115,7 +115,7 @@ class EmbedResponse(BaseModel):
 
 
 class BatchEmbedRequest(BaseModel):
-    texts: list[str] = Field(..., min_items=1, max_items=100, description="Liste von Texten")
+    texts: list[str] = Field(..., min_length=1, max_length=100, description="Liste von Texten")
 
 
 class BatchEmbedResponse(BaseModel):
@@ -159,7 +159,7 @@ def _validate_zone(zone: str) -> None:
     """Wirft HTTPException wenn die Zone ungültig ist."""
     if zone not in VALID_ZONES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Ungültige Zone '{zone}'. Erlaubt: {sorted(VALID_ZONES)}",
         )
 
@@ -291,7 +291,7 @@ async def embed_batch(request: BatchEmbedRequest) -> BatchEmbedResponse:
     for idx, text in enumerate(request.texts):
         if not text.strip():
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Text an Position {idx} ist leer.",
             )
         vec = await _get_embedding(text)

@@ -74,10 +74,16 @@ def _request(base_url: str, method: str, path: str, body: Any = None) -> tuple[i
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             raw = resp.read()
-            return resp.status, json.loads(raw) if raw else None
+            try:
+                return resp.status, json.loads(raw) if raw else None
+            except json.JSONDecodeError:
+                return resp.status, None
     except urllib.error.HTTPError as exc:
         raw = exc.read()
-        return exc.code, json.loads(raw) if raw else None
+        try:
+            return exc.code, json.loads(raw) if raw else None
+        except json.JSONDecodeError:
+            return exc.code, None
 
 
 def collection_exists(base_url: str, name: str) -> bool:
