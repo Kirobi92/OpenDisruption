@@ -1,0 +1,108 @@
+name: Installer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'install.sh'
+      - 'infra/scripts/**'
+      - 'config/templates/**'
+      - '.github/workflows/install-test.yml'
+  pull_request:
+    paths:
+      - 'install.sh'
+      - 'infra/scripts/**'
+      - 'config/templates/**'
+      - '.github/workflows/install-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Lint scripts
+        run: |
+          shellcheck -S warning install.sh
+          shellcheck -S warning infra/scripts/*.sh
+
+  installer-help:
+    name: Help & version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash install.sh --version
+      - run: bash install.sh --help
+
+  installer-dry-run:
+    name: Dry-run matrix (${{ matrix.profile }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [auto, minimal, cpu, nvidia, amd]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run installer in dry-run mode
+        run: |
+          bash install.sh \
+            --dry-run --no-clone --auto --skip-checks \
+            --no-pull --no-models --no-start \
+            --profile=${{ matrix.profile }}
+
+  detect-and-validate:
+    name: detect-system + validate-env
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: detect-system human + json + shell
+        run: |
+          bash infra/scripts/detect-system.sh
+          bash infra/scripts/detect-system.sh --json | tee /tmp/sys.json
+          bash infra/scripts/detect-system.sh --shell
+      - name: detect-system JSON is valid
+        run: python3 -c "import json,sys; json.load(open('/tmp/sys.json')); print('ok')"
+      - name: agent-detect
+        run: bash infra/scripts/agent-detect.sh && bash infra/scripts/agent-detect.sh --json
+      - name: validate-env happy path
+        run: |
+          cp .env.example .env
+          chmod 600 .env
+          # placeholders are still present → expect exit 1
+          set +e
+          bash infra/scripts/validate-env.sh --quiet
+          rc=$?
+          set -e
+          test "$rc" -eq 1 || (echo "expected exit 1 with placeholders, got $rc" && exit 1)
+      - name: validate-env after replacing placeholders
+        run: |
+          # generate fresh secret per placeholder line
+          while IFS= read -r line; do
+            if echo "$line" | grep -q 'AENDERE'; then
+              key=$(echo "$line" | cut -d= -f1)
+              new="${key}=$(openssl rand -hex 32)"
+              sed -i "s|^${key}=.*|${new}|" .env
+            fi
+          done < .env
+          # replace literal "changeme" defaults too
+          sed -i 's/=changeme$/='"$(openssl rand -hex 16)"'/' .env
+          sed -i 's/=changeme-in-production$/='"$(openssl rand -hex 32)"'/' .env
+          set +e
+          bash infra/scripts/validate-env.sh
+          rc=$?
+          set -e
+          # 0 = clean, 2 = warnings only — both acceptable
+          test "$rc" -eq 0 -o "$rc" -eq 2 || (echo "validate-env failed with $rc" && exit 1)
+
+  backup-update-dry:
+    name: backup.sh + update.sh dry-runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash infra/scripts/backup.sh --dry-run --quiet
+      - run: bash infra/scripts/update.sh --dry-run --no-backup --skip-validate
