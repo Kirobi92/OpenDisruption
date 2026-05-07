@@ -33,6 +33,13 @@
       "enabled": false
     },
 
+    "kirobi-context-db": {
+      "type": "local",
+      "command": ["python3", "-m", "kidi", "serve", "--port", "7700"],
+      "enabled": false,
+      "note": "Aktivieren sobald kidi/serve implementiert ist"
+    },
+
     "kirobi-supervisor": {
       "type": "local",
       "command": ["python3", "-m", "kirobi_core", "status", "--json"],
@@ -42,6 +49,11 @@
 
   "agent": {
     "keycodi": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": {
+        "effort": "high",
+        "summary": "auto"
+      },
       "permission": {
         "task": {
           "*": "allow"
@@ -79,6 +91,31 @@
           "docker compose config*": "allow"
         }
       }
+    },
+
+    "kirobi-architect": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": { "effort": "high", "summary": "auto" }
+    },
+    "kirobi-coder": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": { "effort": "medium", "summary": "auto" }
+    },
+    "kirobi-ops": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": { "effort": "medium", "summary": "auto" }
+    },
+    "kirobi-frontend": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": { "effort": "medium", "summary": "auto" }
+    },
+    "kirobi-reviewer": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": { "effort": "high", "summary": "auto" }
+    },
+    "kirobi-docs": {
+      "model": "github-copilot/gpt-5.5",
+      "reasoning": { "effort": "low", "summary": "auto" }
     }
   },
 

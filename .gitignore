@@ -188,3 +188,8 @@ archive/snapshots/*.tar.gz
 .pytest_cache/
 extracts/family-private/profiles/*.sensitive.json
 sacred/profiles/*.sensitive.json
+
+# -----------------------------------------------------------------------------
+# OBSIDIAN VAULT CONFIG
+# -----------------------------------------------------------------------------
+.obsidian/
