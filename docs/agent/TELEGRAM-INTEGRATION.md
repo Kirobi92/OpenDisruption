@@ -1,8 +1,8 @@
 # Telegram Integration — Zone Boundary & Opt-In Contract
 
-**Version:** 0.1 (Phase 0 — design only)
+**Version:** 0.2 (Phase 0 — decision recorded, design only)
 **Zone:** WORKSPACE
-**Status:** Draft for review — **REQUIRES HUMAN POLICY SIGN-OFF BEFORE PHASE 5**
+**Status:** Option A chosen by Sven — **IMPLEMENTATION STILL DEFERRED TO PHASE 5**
 **Owner:** kirobi-architect
 **Last Updated:** 2026-05-06
 
@@ -25,13 +25,17 @@ This document defines the only configuration in which Telegram may ship.
 
 ## 2. Decision required from the human (Sven)
 
-Before any Telegram code is written (Phase 5), one of the following must be chosen and recorded in this document's changelog:
+Sven chose:
+
+> **Option A — Restricted bridge.**
+
+Before any Telegram code is written (Phase 5), this choice remains binding unless Sven opens a separate policy-change PR:
 
 - **Option A — Restricted bridge (default proposal).** Telegram is enabled, but a hard zone gate at the boundary rejects any payload tagged above WORKSPACE. FAMILY_PRIVATE/SACRED/QUARANTINE never traverse the Telegram path. `CLAUDE.md` is **not** amended.
 - **Option B — Drop Telegram.** Telegram is removed from the rollout entirely. A local chat UI (within the existing Caddy/PWA surface) is the user-facing channel. `CLAUDE.md` is **not** amended.
 - **Option C — Amend `CLAUDE.md`.** Not recommended. Would require a separate threat-model review and is out of scope for this rollout.
 
-This PR (Phase 0) takes no position; it documents Option A's mechanics in case Sven chooses it.
+This PR (Phase 0) records the choice and configures safe placeholders only. Runtime bot code, Redis ACL scripts and cron integration remain deferred to Phase 5.
 
 ---
 
@@ -63,22 +67,23 @@ ctx:WORKSPACE:*
 
 This is defense in depth: even if the application-level zone gate is bypassed by a bug, the Redis ACL prevents the bot from seeing FAMILY_PRIVATE/SACRED keys at all.
 
-### 3.4 Token storage
+### 3.4 Token storage — chosen safest option: Docker Secrets
 
-Bot tokens live in `.env` (gitignored). `.env.example` ships placeholders only:
+Bot tokens live in Docker Secrets (or an equivalent host-local secret manager in production). `.env.example` ships only `*_FILE` placeholders pointing to `/run/secrets/...` and never contains token values:
 
 ```
 KIROBI_TELEGRAM_ENABLED=false
-KIROBI_TELEGRAM_KEYBRODI_TOKEN=CHANGEME
-KIROBI_TELEGRAM_OPENCODE_TOKEN=CHANGEME
-KIROBI_TELEGRAM_OPENCLAW_TOKEN=CHANGEME
-KIROBI_TELEGRAM_HERMES_TOKEN=CHANGEME
-KIROBI_TELEGRAM_OBSIDIAN_TOKEN=CHANGEME
-KIROBI_TELEGRAM_KIDI_TOKEN=CHANGEME
-KIROBI_TELEGRAM_CHANNEL_ID=CHANGEME
+KIROBI_TELEGRAM_TOKEN_SOURCE=docker_secret
+KIROBI_TELEGRAM_KEYBRODI_TOKEN_FILE=/run/secrets/telegram_keybrodi_token
+KIROBI_TELEGRAM_OPENCODE_TOKEN_FILE=/run/secrets/telegram_opencode_token
+KIROBI_TELEGRAM_OPENCLAW_TOKEN_FILE=/run/secrets/telegram_openclaw_token
+KIROBI_TELEGRAM_HERMES_TOKEN_FILE=/run/secrets/telegram_hermes_token
+KIROBI_TELEGRAM_OBSIDIAN_TOKEN_FILE=/run/secrets/telegram_obsidian_token
+KIROBI_TELEGRAM_KIDI_TOKEN_FILE=/run/secrets/telegram_kidi_token
+KIROBI_TELEGRAM_CHANNEL_ID_FILE=/run/secrets/telegram_channel_id
 ```
 
-`install.sh` (Phase 6) **does not** prompt for these interactively. The user fills `.env` manually before enabling the profile.
+`install.sh` (Phase 6) **does not** prompt for tokens interactively. It validates that required secret files exist before allowing the `telegram` profile to start.
 
 ### 3.5 Network egress
 
@@ -124,6 +129,7 @@ Per-bot menus follow the structure in the original problem statement, with one c
 
 ```
 0.1  2026-05-06  Initial draft. No option chosen yet.
+0.2  2026-05-07  Sven chose Option A. Safest token storage set to Docker Secrets / *_FILE placeholders.
 ```
 
 ---

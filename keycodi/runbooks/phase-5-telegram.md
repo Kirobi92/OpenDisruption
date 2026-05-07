@@ -9,8 +9,8 @@
 ## Vorbedingungen (alle müssen erfüllt sein)
 
 - Phase 4 ist `🟢 done`. KEYBRODI routet stabil.
-- Sven hat **Option A** (Restricted Bridge) bestätigt — sonst wird diese Phase übersprungen.
-- Sven hat Token-Storage-Verfahren bestätigt (env-Datei, Docker-Secret oder externer Manager).
+- Sven hat **Option A** (Restricted Bridge) bestätigt.
+- Sven hat Token-Storage-Verfahren bestätigt: **Docker Secrets / `*_FILE`**.
 - Mindestens ein erfolgreicher Test-Lauf des Zone-Filters in einer Sandbox liegt vor.
 
 Wenn auch nur **eine** Bedingung offen ist: Phase 5 startet nicht. KeyCodi springt zu Phase 6.
@@ -42,7 +42,7 @@ Sechs Container, jeder eigenes Service in `docker-compose.yml`, hinter Profile `
 Jeder Container:
 
 - Läuft mit `KIROBI_EGRESS_ALLOWED=true` (auf separater Network-Policy).
-- Nutzt seinen eigenen Token aus `${KIROBI_TELEGRAM_*_TOKEN}`.
+  - Nutzt seinen eigenen Token ausschließlich aus `${KIROBI_TELEGRAM_*_TOKEN_FILE}`.
 - Verbindet sich zu Redis mit dediziertem ACL-User (siehe Schritt 3).
 
 ### 3. Redis-ACL
@@ -66,17 +66,18 @@ Skript `infra/scripts/daily-team-meeting.sh`:
 
 ### 5. Env
 
-`.env.example` (nur Platzhalter):
+`.env.example` (nur `*_FILE`-Platzhalter):
 
 ```
 KIROBI_TELEGRAM_ENABLED=false
-KIROBI_TELEGRAM_KEYBRODI_TOKEN=CHANGEME
-KIROBI_TELEGRAM_OPENCODE_TOKEN=CHANGEME
-KIROBI_TELEGRAM_OPENCLAW_TOKEN=CHANGEME
-KIROBI_TELEGRAM_HERMES_TOKEN=CHANGEME
-KIROBI_TELEGRAM_OBSIDIAN_TOKEN=CHANGEME
-KIROBI_TELEGRAM_KIDI_TOKEN=CHANGEME
-KIROBI_TELEGRAM_CHANNEL_ID=CHANGEME
+KIROBI_TELEGRAM_TOKEN_SOURCE=docker_secret
+KIROBI_TELEGRAM_KEYBRODI_TOKEN_FILE=/run/secrets/telegram_keybrodi_token
+KIROBI_TELEGRAM_OPENCODE_TOKEN_FILE=/run/secrets/telegram_opencode_token
+KIROBI_TELEGRAM_OPENCLAW_TOKEN_FILE=/run/secrets/telegram_openclaw_token
+KIROBI_TELEGRAM_HERMES_TOKEN_FILE=/run/secrets/telegram_hermes_token
+KIROBI_TELEGRAM_OBSIDIAN_TOKEN_FILE=/run/secrets/telegram_obsidian_token
+KIROBI_TELEGRAM_KIDI_TOKEN_FILE=/run/secrets/telegram_kidi_token
+KIROBI_TELEGRAM_CHANNEL_ID_FILE=/run/secrets/telegram_channel_id
 ```
 
 `.gitignore`: `.env` ist bereits ausgeschlossen — verifizieren.
@@ -86,7 +87,7 @@ KIROBI_TELEGRAM_CHANNEL_ID=CHANGEME
 - Pro Bot mindestens ein Smoke-Test (mocked).
 - Refusal-Tests pro Zone.
 - ACL-Tests (mocked / dokumentiert).
-- Token-Leak-Test: `grep -R "TELEGRAM.*=.*[A-Za-z0-9]" -- :^.env.example :^docs/` → muss leer sein.
+- Token-Leak-Test: Tracked files dürfen nur `*_FILE`-Pfade und `CHANGEME`-freie Platzhalter enthalten, keine Bot-Token-Werte.
 
 ### 7. Sicherheits-Review
 
@@ -96,7 +97,7 @@ KIROBI_TELEGRAM_CHANNEL_ID=CHANGEME
 
 ## Definition of Done
 
-`KIROBI_TELEGRAM_ENABLED=false` ist Default. Jeder Reject-Pfad ist getestet. Kein Token im Repo. Keine Cron-Installation by default.
+`KIROBI_TELEGRAM_ENABLED=false` ist Default. Jeder Reject-Pfad ist getestet. Kein Token im Repo. Docker Secrets werden vor Start validiert. Keine Cron-Installation by default.
 
 ## Mögliche Stolpersteine
 
