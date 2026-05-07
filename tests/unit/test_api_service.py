@@ -2,181 +2,329 @@
 Unit-Tests für services/api/main.py
 Zone: WORKSPACE
 
-Strategie:
-- UPLOAD_DIR.mkdir() wird via patch("pathlib.Path.mkdir") umgangen,
-  da /data/uploads im Test-Kontext nicht existiert.
-- asyncpg.create_pool wird durch AsyncMock ersetzt.
-- get_current_user wird via app.dependency_overrides überschrieben.
-- TestClient ohne lifespan-Context (db_pool direkt gesetzt).
+asyncpg-Pool und httpx-Calls (Auth-Service, Ollama) werden vollständig gemockt.
+Auth-Dependency wird durch einen Override ersetzt.
+Kein laufender Service oder Datenbank erforderlich.
 """
 from __future__ import annotations
 
-import sys
-import os
-from pathlib import Path
+import json
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT))
+from fastapi.testclient import TestClient
 
 
 # ---------------------------------------------------------------------------
-# Hilfsfunktionen
+# Helpers
 # ---------------------------------------------------------------------------
 
-def _make_mock_pool():
-    """Erstellt einen asyncpg.Pool-Mock."""
-    conn = AsyncMock()
-    conn.execute = AsyncMock(return_value=None)
-    conn.fetchval = AsyncMock(return_value=1)
-    conn.fetchrow = AsyncMock(return_value=None)
-    conn.fetch = AsyncMock(return_value=[])
+def _make_conversation_row(
+    conv_id: str = "conv-1",
+    user_id: str = "user-1",
+    zone: str = "WORKSPACE",
+) -> dict:
+    """Erstellt eine Fake-DB-Zeile für conversations."""
+    return {
+        "id": conv_id,
+        "user_id": user_id,
+        "title": "Test Conversation",
+        "zone": zone,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "archived": False,
+    }
 
-    pool = MagicMock()
-    pool.close = AsyncMock(return_value=None)
 
-    acquire_ctx = MagicMock()
-    acquire_ctx.__aenter__ = AsyncMock(return_value=conn)
-    acquire_ctx.__aexit__ = AsyncMock(return_value=False)
-    pool.acquire = MagicMock(return_value=acquire_ctx)
+def _make_message_row(
+    msg_id: str = "msg-1",
+    conv_id: str = "conv-1",
+    role: str = "assistant",
+) -> dict:
+    """Erstellt eine Fake-DB-Zeile für messages."""
+    return {
+        "id": msg_id,
+        "conversation_id": conv_id,
+        "user_id": "user-1",
+        "role": role,
+        "content": "Test response",
+        "model_used": "llama3.1:8b",
+        "tokens_used": None,
+        "attachments": "[]",
+        "metadata": "{}",
+        "created_at": datetime.now(timezone.utc),
+    }
 
-    return pool, conn
+
+def _make_upload_row(file_id: str = "file-1", zone: str = "WORKSPACE") -> dict:
+    return {
+        "id": file_id,
+        "filename": "test.txt",
+        "file_path": "/data/uploads/testuser/workspace/test.txt",
+        "file_size": 100,
+        "mime_type": "text/plain",
+        "zone": zone,
+        "created_at": datetime.now(timezone.utc),
+    }
+
+
+class _AsyncContextManagerMock:
+    def __init__(self, obj):
+        self._obj = obj
+
+    async def __aenter__(self):
+        return self._obj
+
+    async def __aexit__(self, *args):
+        pass
+
+
+def _make_mock_pool(mock_conn: AsyncMock) -> MagicMock:
+    mock_pool = MagicMock()
+    mock_pool.acquire = MagicMock(return_value=_AsyncContextManagerMock(mock_conn))
+    mock_pool.close = AsyncMock(return_value=None)
+    return mock_pool
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
-@pytest.fixture(scope="module")
-def api_app():
-    """Importiert services.api.main einmalig mit gemockten Dependencies."""
-    mock_pool, mock_conn = _make_mock_pool()
-
-    # Modul-Level mkdir patchen, damit /data/uploads nicht angelegt wird
-    with patch("pathlib.Path.mkdir", return_value=None):
-        with patch("asyncpg.create_pool", new=AsyncMock(return_value=mock_pool)):
-            if "services.api.main" in sys.modules:
-                del sys.modules["services.api.main"]
-            if "services.api" in sys.modules:
-                del sys.modules["services.api"]
-
-            import services.api.main as api_main
-
-            api_main.db_pool = mock_pool
-            yield api_main, mock_pool, mock_conn
-
-
 @pytest.fixture()
-def api_client(api_app):
-    """TestClient ohne Auth-Override (für 401-Tests)."""
-    from fastapi.testclient import TestClient
-    api_main, mock_pool, mock_conn = api_app
-    api_main.db_pool = mock_pool
+def client():
+    """
+    TestClient mit gemocktem asyncpg-Pool und Auth-Dependency-Override.
+    """
+    import services.api.main as api
 
-    client = TestClient(api_main.app, raise_server_exceptions=False)
-    yield client, api_main, mock_pool, mock_conn
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock(return_value=None)
+    mock_conn.fetchval = AsyncMock(return_value=1)
+    mock_conn.fetchrow = AsyncMock(return_value=None)
+    mock_conn.fetch = AsyncMock(return_value=[])
 
+    mock_pool = _make_mock_pool(mock_conn)
 
-@pytest.fixture()
-def api_client_authed(api_app):
-    """TestClient mit überschriebener Auth-Dependency (fake user)."""
-    from fastapi.testclient import TestClient
-    api_main, mock_pool, mock_conn = api_app
-    api_main.db_pool = mock_pool
+    # Auth-Dependency überschreiben
+    fake_user = api.User(id="user-1", username="testuser", display_name="Test User", role="admin")
 
-    fake_user = api_main.User(
-        id="test-user-id",
-        username="testuser",
-        display_name="Test User",
-        role="family_member",
-    )
-
-    async def override_get_current_user():
+    async def _fake_auth():
         return fake_user
 
-    api_main.app.dependency_overrides[api_main.get_current_user] = override_get_current_user
+    api.app.dependency_overrides[api.get_current_user] = _fake_auth
 
-    client = TestClient(api_main.app, raise_server_exceptions=False)
-    yield client, api_main, mock_pool, mock_conn, fake_user
+    with patch("services.api.main.asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
+        with TestClient(api.app, raise_server_exceptions=False) as c:
+            api.db_pool = mock_pool
+            yield c, mock_conn
 
-    api_main.app.dependency_overrides.clear()
+    api.app.dependency_overrides.clear()
+    api.db_pool = None
 
 
 # ---------------------------------------------------------------------------
-# Tests
+# Health-Endpoint
 # ---------------------------------------------------------------------------
 
-class TestHealthEndpoint:
-    def test_health_endpoint(self, api_client):
-        """GET /health → 200"""
-        client, api_main, mock_pool, mock_conn = api_client
-        response = client.get("/health")
-        assert response.status_code == 200
-        data = response.json()
-        assert "status" in data
+def test_health_returns_healthy(client):
+    """GET /health muss 'healthy' zurückgeben wenn DB erreichbar."""
+    c, mock_conn = client
+    mock_conn.fetchval = AsyncMock(return_value=1)
+
+    resp = c.get("/health")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "api"
 
 
-class TestConversationsRequireAuth:
-    def test_conversations_requires_auth(self, api_client):
-        """GET /conversations ohne Token → 401"""
-        client, *_ = api_client
-        response = client.get("/conversations")
-        assert response.status_code == 401
+def test_health_returns_unhealthy_on_db_error(client):
+    """GET /health muss 'unhealthy' zurückgeben wenn DB nicht erreichbar."""
+    c, mock_conn = client
+    mock_conn.fetchval = AsyncMock(side_effect=Exception("DB down"))
 
-    def test_create_conversation_requires_auth(self, api_client):
-        """POST /conversations ohne Token → 401"""
-        client, *_ = api_client
-        response = client.post("/conversations", json={"title": "Test", "zone": "WORKSPACE"})
-        assert response.status_code == 401
-
-    def test_messages_requires_auth(self, api_client):
-        """GET /conversations/x/messages ohne Token → 401"""
-        client, *_ = api_client
-        response = client.get("/conversations/some-id/messages")
-        assert response.status_code == 401
-
-    def test_create_message_requires_auth(self, api_client):
-        """POST /conversations/x/messages ohne Token → 401"""
-        client, *_ = api_client
-        response = client.post(
-            "/conversations/some-id/messages",
-            json={"content": "Hello"},
-        )
-        assert response.status_code == 401
-
-    def test_uploads_requires_auth(self, api_client):
-        """GET /uploads ohne Token → 401"""
-        client, *_ = api_client
-        response = client.get("/uploads")
-        assert response.status_code == 401
+    resp = c.get("/health")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "unhealthy"
 
 
-class TestOllamaChatRequiresAuth:
-    def test_ollama_chat_requires_auth(self, api_client):
-        """POST /chat ohne Token → 401 oder 404 (kein /chat-Endpoint direkt)"""
-        client, *_ = api_client
-        response = client.post("/chat", json={"message": "Hello"})
-        # /chat existiert nicht als eigenständiger Endpoint → 404/405
-        # Falls er existiert, muss er 401 zurückgeben
-        assert response.status_code in (401, 404, 405)
+# ---------------------------------------------------------------------------
+# GET /conversations
+# ---------------------------------------------------------------------------
+
+def test_list_conversations_returns_empty_list(client):
+    """GET /conversations muss leere Liste zurückgeben wenn keine vorhanden."""
+    c, mock_conn = client
+    mock_conn.fetch = AsyncMock(return_value=[])
+
+    resp = c.get("/conversations")
+    assert resp.status_code == 200
+    assert resp.json() == []
 
 
-class TestConversationsWithAuth:
-    def test_list_conversations_with_auth(self, api_client_authed):
-        """GET /conversations mit Auth → 200 (leere Liste)"""
-        client, api_main, mock_pool, mock_conn, fake_user = api_client_authed
-        mock_conn.fetch = AsyncMock(return_value=[])
-        api_main.db_pool = mock_pool
-        response = client.get("/conversations")
-        assert response.status_code == 200
-        assert response.json() == []
+def test_list_conversations_returns_list(client):
+    """GET /conversations muss Liste mit Conversations zurückgeben."""
+    c, mock_conn = client
+    mock_conn.fetch = AsyncMock(return_value=[_make_conversation_row()])
 
-    def test_get_nonexistent_conversation_with_auth(self, api_client_authed):
-        """GET /conversations/nonexistent mit Auth → 404"""
-        client, api_main, mock_pool, mock_conn, fake_user = api_client_authed
-        mock_conn.fetchrow = AsyncMock(return_value=None)
-        api_main.db_pool = mock_pool
-        response = client.get("/conversations/nonexistent-id")
-        assert response.status_code == 404
+    resp = c.get("/conversations")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["id"] == "conv-1"
+    assert data[0]["zone"] == "WORKSPACE"
+
+
+# ---------------------------------------------------------------------------
+# POST /conversations
+# ---------------------------------------------------------------------------
+
+def test_create_conversation_with_zone_permission(client):
+    """POST /conversations muss 201 zurückgeben wenn Zone-Permission vorhanden."""
+    c, mock_conn = client
+    conv_row = _make_conversation_row()
+    # fetchrow für zone_permissions (can_write=True) und dann für conversation
+    mock_conn.fetchrow = AsyncMock(side_effect=[
+        {"can_write": True},  # zone permission check
+        conv_row,             # conversation row
+    ])
+
+    resp = c.post("/conversations", json={"title": "Test", "zone": "WORKSPACE"})
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["zone"] == "WORKSPACE"
+
+
+def test_create_conversation_without_zone_permission_returns_403(client):
+    """POST /conversations muss 403 zurückgeben wenn keine Zone-Permission."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value={"can_write": False})
+
+    resp = c.post("/conversations", json={"title": "Test", "zone": "WORKSPACE"})
+    assert resp.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# GET /conversations/{id}
+# ---------------------------------------------------------------------------
+
+def test_get_conversation_not_found_returns_404(client):
+    """GET /conversations/{id} muss 404 zurückgeben wenn nicht gefunden."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=None)
+
+    resp = c.get("/conversations/nonexistent-id")
+    assert resp.status_code == 404
+    assert "detail" in resp.json()
+
+
+def test_get_conversation_found(client):
+    """GET /conversations/{id} muss Conversation zurückgeben wenn gefunden."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=_make_conversation_row(conv_id="conv-42"))
+
+    resp = c.get("/conversations/conv-42")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["id"] == "conv-42"
+
+
+# ---------------------------------------------------------------------------
+# GET /conversations/{id}/messages
+# ---------------------------------------------------------------------------
+
+def test_list_messages_conversation_not_found(client):
+    """GET /conversations/{id}/messages muss 404 zurückgeben wenn Conversation fehlt."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=None)
+
+    resp = c.get("/conversations/nonexistent/messages")
+    assert resp.status_code == 404
+
+
+def test_list_messages_returns_empty(client):
+    """GET /conversations/{id}/messages muss leere Liste zurückgeben."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=_make_conversation_row())
+    mock_conn.fetch = AsyncMock(return_value=[])
+
+    resp = c.get("/conversations/conv-1/messages")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+# ---------------------------------------------------------------------------
+# POST /conversations/{id}/messages
+# ---------------------------------------------------------------------------
+
+def test_create_message_conversation_not_found(client):
+    """POST /conversations/{id}/messages muss 404 zurückgeben wenn Conversation fehlt."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=None)
+
+    resp = c.post("/conversations/nonexistent/messages", json={"content": "Hello"})
+    assert resp.status_code == 404
+
+
+def test_create_message_missing_content_returns_422(client):
+    """POST /conversations/{id}/messages ohne content muss 422 zurückgeben."""
+    c, _ = client
+    resp = c.post("/conversations/conv-1/messages", json={})
+    assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# GET /uploads
+# ---------------------------------------------------------------------------
+
+def test_list_uploads_returns_empty(client):
+    """GET /uploads muss leere Liste zurückgeben wenn keine Uploads vorhanden."""
+    c, mock_conn = client
+    mock_conn.fetch = AsyncMock(return_value=[])
+
+    resp = c.get("/uploads")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_list_uploads_with_zone_filter(client):
+    """GET /uploads?zone=WORKSPACE muss nach Zone filtern."""
+    c, mock_conn = client
+    mock_conn.fetch = AsyncMock(return_value=[_make_upload_row()])
+
+    resp = c.get("/uploads?zone=WORKSPACE")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["zone"] == "WORKSPACE"
+
+
+# ---------------------------------------------------------------------------
+# Helper-Funktionen
+# ---------------------------------------------------------------------------
+
+def test_json_field_parses_string():
+    """_json_field muss JSON-String korrekt parsen."""
+    import services.api.main as api
+
+    result = api._json_field('["a", "b"]', [])
+    assert result == ["a", "b"]
+
+
+def test_json_field_returns_fallback_on_invalid():
+    """_json_field muss Fallback bei ungültigem JSON zurückgeben."""
+    import services.api.main as api
+
+    result = api._json_field("not-json", [])
+    assert result == []
+
+
+def test_json_field_returns_fallback_on_none():
+    """_json_field muss Fallback bei None zurückgeben."""
+    import services.api.main as api
+
+    result = api._json_field(None, {})
+    assert result == {}

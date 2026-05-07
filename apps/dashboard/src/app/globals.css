@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply dark;
+  }
+
+  body {
+    @apply bg-gray-900 text-gray-100 antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+}
+
+@layer components {
+  .status-dot-green {
+    @apply w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_6px_theme(colors.emerald.400)];
+  }
+
+  .status-dot-red {
+    @apply w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_6px_theme(colors.red.500)];
+  }
+
+  .status-dot-yellow {
+    @apply w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_theme(colors.amber.400)];
+  }
+
+  .card {
+    @apply bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-lg;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30;
+  }
+
+  .nav-item-inactive {
+    @apply text-gray-400 hover:bg-gray-700/60 hover:text-gray-200;
+  }
+}

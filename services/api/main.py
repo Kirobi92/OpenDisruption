@@ -29,9 +29,9 @@ AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth:8000")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
-UPLOAD_DIR = Path("/data/uploads")
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "/data/uploads"))
 OLLAMA_FALLBACK_MODEL = "llama3.1:8b"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+# Verzeichnis wird lazy beim ersten Upload erstellt, nicht beim Import
 
 # Security
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
