@@ -437,3 +437,4 @@
  [2026-05-07 18:33:44.268043] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
  [2026-05-07 18:34:44.282893] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
  [2026-05-07 18:35:44.428235] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
+[2026-05-07 18:36:44.540277] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
