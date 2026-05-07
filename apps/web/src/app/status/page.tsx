@@ -19,7 +19,7 @@ const PARTS: { name: string; path: string; description: string; guard: string }[
   {
     name: 'Kirobi PWA',
     path: '/chat',
-    description: 'Family Chat, Login und Alltagseinstieg.',
+    description: 'Familie-Chat, Login und Alltagseinstieg.',
     guard: 'JWT-Login',
   },
   {
@@ -43,7 +43,7 @@ const PARTS: { name: string; path: string; description: string; guard: string }[
   {
     name: 'Qdrant Dashboard',
     path: '/qdrant/dashboard',
-    description: 'Vektor-DB Diagnoseoberfläche. Nur über den Caddy-Edge öffnen.',
+    description: 'Vektor-DB Diagnoseoberfläche. Nur über LAN/Tailscale erreichbar.',
     guard: 'LAN/Tailscale only',
   },
   {
