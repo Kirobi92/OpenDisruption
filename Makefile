@@ -269,9 +269,13 @@ webui-url:
 tailscale-url:
 	@if command -v tailscale >/dev/null 2>&1; then \
 		TS_IP=$$(tailscale ip -4 2>/dev/null | head -1); \
-		TS_NAME=$$(tailscale status --json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName','').rstrip('.'))" 2>/dev/null); \
+		TS_NAME=""; \
+		if command -v python3 >/dev/null 2>&1; then \
+			TS_NAME=$$(tailscale status --json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName','').rstrip('.'))" 2>/dev/null || true); \
+		fi; \
 		[ -n "$$TS_NAME" ] && echo "    http://$$TS_NAME/status                (Tailscale MagicDNS)"; \
 		[ -n "$$TS_IP" ] && echo "    http://$$TS_IP/status                  (Tailscale IP)"; \
+		[ -z "$$TS_NAME" ] && [ -z "$$TS_IP" ] && echo "    (Tailscale läuft, aber IP/MagicDNS konnte nicht ermittelt werden)"; \
 	else \
 		echo "    (tailscale CLI nicht gefunden; nutze deine Tailscale-IP oder MagicDNS manuell)"; \
 	fi
