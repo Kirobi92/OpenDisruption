@@ -11,6 +11,7 @@ volumes:
   uploads_data:
   caddy_data:
   caddy_config:
+  redis_data:
 
 services:
   ollama:
@@ -58,6 +59,33 @@ services:
       - qdrant_data:/qdrant/storage
     networks:
       - kirobi-net
+
+  # ─── KIDI — Redis ContextDB (Profile: kidi) ────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: kirobi-redis
+    profiles:
+      - kidi
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${KIROBI_REDIS_PASSWORD:-}
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:${KIROBI_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${KIROBI_REDIS_PASSWORD:-}", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   postgres:
     image: postgres:16-alpine

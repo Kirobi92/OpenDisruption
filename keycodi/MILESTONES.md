@@ -29,19 +29,19 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 
 ## Phase 1 — Redis ContextDB
 
-- [ ] `kidi/context_db/client.py`
-- [ ] `kidi/context_db/keys.py`
-- [ ] `kidi/context_db/zone_guard.py`
-- [ ] `kidi/context_db/errors.py`
-- [ ] `docker-compose.yml` redis-Service hinter Profile `kidi`
-- [ ] `.env.example` Redis-Variablen
-- [ ] `tests/unit/kidi/context_db/test_keys.py`
-- [ ] `tests/unit/kidi/context_db/test_zone_enforcement.py`
-- [ ] `tests/unit/kidi/context_db/test_merge.py`
-- [ ] `tests/unit/kidi/context_db/test_egress_guard.py`
-- [ ] `Makefile` Target `make test-kidi`
-- [ ] CI grün
-- [ ] Eintrag in `keycodi/learnings/`
+- [x] `kidi/context_db/client.py`
+- [x] `kidi/context_db/keys.py`
+- [x] `kidi/context_db/zone_guard.py`
+- [x] `kidi/context_db/errors.py`
+- [x] `docker-compose.yml` redis-Service hinter Profile `kidi`
+- [x] `.env.example` Redis-Variablen
+- [x] `tests/unit/kidi/context_db/test_keys.py`
+- [x] `tests/unit/kidi/context_db/test_zone_enforcement.py`
+- [x] `tests/unit/kidi/context_db/test_merge.py`
+- [x] `tests/unit/kidi/context_db/test_egress_guard.py`
+- [x] `Makefile` Target `make test-kidi`
+- [ ] CI grün (nach PR-Merge)
+- [x] Eintrag in `keycodi/learnings/`
 
 ## Phase 2 — Agenten-Skelette
 
