@@ -93,6 +93,50 @@
 		}
 	}
 
+	# Telegram Webhook: /telegram/* -> http://telegram:8005/*
+	# PUBLIC — Telegram sendet von externen IPs; kein IP-Filter hier.
+	handle_path /telegram/* {
+		reverse_proxy telegram:8005 {
+			header_up Host {host}
+		}
+	}
+
+	# Embeddings Service: /embeddings/* -> http://embeddings:8000/*
+	handle /embeddings/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /embeddings
+		reverse_proxy embeddings:8000 {
+			header_up Host {host}
+		}
+	}
+
+	# Ingest Service: /ingest/* -> http://ingest:8000/*
+	handle /ingest/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /ingest
+		reverse_proxy ingest:8000 {
+			header_up Host {host}
+		}
+	}
+
+	# Retrieval Service: /retrieval/* -> http://retrieval:8000/*
+	handle /retrieval/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /retrieval
+		reverse_proxy retrieval:8000 {
+			header_up Host {host}
+		}
+	}
+
+	# Model-Routing Service: /model-routing/* -> http://model-routing:8009/*
+	handle /model-routing/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /model-routing
+		reverse_proxy model-routing:8009 {
+			header_up Host {host}
+		}
+	}
+
 	# Everything else -> Next.js PWA on port 3000.
 	handle {
 		reverse_proxy web:3000 {
@@ -159,6 +203,40 @@
 	}
 	handle_path /api/* {
 		reverse_proxy api:8000
+	}
+
+	# Telegram Webhook: /telegram/* -> http://telegram:8005/*
+	# PUBLIC — Telegram sendet von externen IPs; kein IP-Filter hier.
+	handle_path /telegram/* {
+		reverse_proxy telegram:8005
+	}
+
+	# Embeddings Service: /embeddings/* -> http://embeddings:8000/*
+	handle /embeddings/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /embeddings
+		reverse_proxy embeddings:8000
+	}
+
+	# Ingest Service: /ingest/* -> http://ingest:8000/*
+	handle /ingest/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /ingest
+		reverse_proxy ingest:8000
+	}
+
+	# Retrieval Service: /retrieval/* -> http://retrieval:8000/*
+	handle /retrieval/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /retrieval
+		reverse_proxy retrieval:8000
+	}
+
+	# Model-Routing Service: /model-routing/* -> http://model-routing:8009/*
+	handle /model-routing/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /model-routing
+		reverse_proxy model-routing:8009
 	}
 	handle {
 		reverse_proxy web:3000

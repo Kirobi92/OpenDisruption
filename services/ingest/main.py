@@ -263,7 +263,7 @@ class IngestJobResponse(BaseModel):
 def _validate_zone(zone: str) -> None:
     if zone not in ALLOWED_ZONES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid zone '{zone}'. Allowed: {sorted(ALLOWED_ZONES)}",
         )
 
@@ -349,7 +349,7 @@ def _extract_text_from_pdf(raw: bytes) -> str:
         return "\n".join(pages).strip()
 
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail="PDF ingestion is not available: no PDF library installed (pdfplumber or PyPDF2).",
     )
 
@@ -450,7 +450,7 @@ async def ingest_file(
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in ALLOWED_EXTENSIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unsupported file type '{suffix}'. Allowed: {sorted(ALLOWED_EXTENSIONS)}",
         )
 

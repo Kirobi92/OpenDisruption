@@ -13,13 +13,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Non-root user
-RUN useradd -m -u 1000 kirobi && chown -R kirobi:kirobi /app
-USER kirobi
-
 # Ingest data directory is mounted at runtime; pre-create so the service
 # can start without a volume mount in development.
 RUN mkdir -p /data/ingest
+
+# Non-root user
+RUN useradd -m -u 1000 kirobi && chown -R kirobi:kirobi /app /data/ingest
+USER kirobi
 
 EXPOSE 8005
 
