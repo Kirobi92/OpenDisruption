@@ -128,14 +128,14 @@ def test_auth_service_has_safe_cors_config():
     assert "add_middleware(\n    CORSMiddleware,\n    **_cors_kwargs()" in src
     assert "KIROBI_PUBLIC_ORIGINS" in src
     assert "allow_origin_regex" in src
-    assert "100\\.(6[4-9]|[78]\\d|9\\d|10\\d|11\\d|12[0-7])" in src
+    assert "100\\.(6[4-9]|[7-9]\\d|1[0-1]\\d|12[0-7])" in src
 
 
 def test_api_service_has_safe_cors_config():
     src = (REPO_ROOT / "services" / "api" / "main.py").read_text()
     assert "add_middleware(\n    CORSMiddleware,\n    **_cors_kwargs()" in src
     assert "KIROBI_PUBLIC_ORIGINS" in src
-    assert "100\\.(6[4-9]|[78]\\d|9\\d|10\\d|11\\d|12[0-7])" in src
+    assert "100\\.(6[4-9]|[7-9]\\d|1[0-1]\\d|12[0-7])" in src
 
 
 # --- First-run user bootstrap ------------------------------------------------
