@@ -51,3 +51,13 @@ _register_hyphenated_service("model-routing", "model_routing")
 _register_hyphenated_service("image-generation", "image_generation")
 # services/media-processing → services.media_processing
 _register_hyphenated_service("media-processing", "media_processing")
+# services/music-generation → services.music_generation
+_register_hyphenated_service("music-generation", "music_generation")
+# services/video-generation → services.video_generation
+_register_hyphenated_service("video-generation", "video_generation")
+# services/analytics-service → services.analytics_service
+_register_hyphenated_service("analytics-service", "analytics_service")
+# services/music-generation → services.music_generation
+_register_hyphenated_service("music-generation", "music_generation")
+# services/video-generation → services.video_generation
+_register_hyphenated_service("video-generation", "video_generation")

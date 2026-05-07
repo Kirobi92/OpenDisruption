@@ -1,49 +1,66 @@
 ---
 zone: WORKSPACE
-created_by: kirobi-docs
-created_at: 2026-05-07
-reviewed_by: pending
-version: "1.0"
+created_by: kirobi-coder
+created_at: 2026-05-08
+version: 1.0.0
 ---
 
-# services/music-generation – Musik-Generierungs-Service
+# Kirobi Music Generation Service
 
-Geplanter Service zur KI-gestützten Musik-Generierung im Kirobi-Ökosystem. Ermöglicht die Erstellung von Hintergrundmusik, Soundscapes und kreativen Audio-Kompositionen – primär für Sineo (Creator-Workflow) und familiäre Erlebnisse.
+**Port:** 8013  
+**Zone:** WORKSPACE  
+**Zweck:** Asynchrone KI-Musikgenerierung via Ollama (Text-to-Music-Prompts)
 
-## Zweck
+## Endpoints
 
-Musik ist ein zentrales Ausdrucksmittel für Sineo und die Familie Darusi. Dieser Service soll lokale Musik-Generierung ermöglichen, ohne Kreativ-Daten an Cloud-Dienste zu senden.
+| Methode | Pfad | Beschreibung |
+|---------|------|--------------|
+| `GET` | `/health` | Health-Check (DB + Ollama) |
+| `POST` | `/generate` | Neuen Musik-Job erstellen (async) |
+| `GET` | `/jobs/{job_id}` | Job-Status abfragen |
+| `GET` | `/jobs` | Alle Jobs des Users (Header: `X-User-Id`) |
+| `GET` | `/styles` | Verfügbare Musikstile |
 
-## Status
+## Request-Beispiel
 
-**Konzept** – Noch nicht implementiert. Technologie-Evaluation läuft.
-
-## Geplante Technologie
-
-| Modell / Tool | Anbieter | Stärken | Ressourcen |
-|---------------|----------|---------|-----------|
-| MusicGen (small/medium) | Meta / lokal | Text-to-Music, offen | ~4–8 GB VRAM |
-| AudioCraft | Meta / lokal | Soundscapes, Effekte | ~4 GB VRAM |
-| Suno API | Cloud (optional) | Hochqualität, Gesang | Nur PUBLIC-Daten |
-| Udio API | Cloud (optional) | Stilvielfalt | Nur PUBLIC-Daten |
-
-## Geplante API
-
-```
-POST /generate
-  body: { prompt: str, duration_seconds: int, style: str }
-  response: { audio_url: str, job_id: str }
-
-GET /status/{job_id}
-  response: { status: "pending" | "done" | "error", audio_url?: str }
+```bash
+curl -X POST http://localhost:8013/generate \
+  -H "Content-Type: application/json" \
+  -H "X-User-Id: user-123" \
+  -d '{
+    "prompt": "Ruhige Ambient-Musik für Meditation",
+    "duration": 60,
+    "zone": "WORKSPACE",
+    "style": "ambient"
+  }'
 ```
 
-## Zonen-Hinweis
+## Umgebungsvariablen
 
-Generierte Musik auf Basis familiärer Prompts oder persönlicher Texte ist `FAMILY_PRIVATE`. Rein instrumentale, nicht-personenbezogene Generierungen können `WORKSPACE` sein.
+| Variable | Standard | Beschreibung |
+|----------|----------|--------------|
+| `POSTGRES_USER` | `kirobi` | DB-Benutzer |
+| `POSTGRES_PASSWORD` | `changeme` | DB-Passwort |
+| `POSTGRES_HOST` | `postgres` | DB-Host |
+| `POSTGRES_PORT` | `5432` | DB-Port |
+| `POSTGRES_DB` | `kirobi` | DB-Name |
+| `OLLAMA_HOST` | `http://ollama:11434` | Ollama-Endpunkt |
+| `MUSIC_STORAGE_PATH` | `/data/music` | Speicherpfad für generierte Musik |
 
-## Verwandte Verzeichnisse
+## Job-Status
 
-- `models/music/` – Musik-Modell-Konfigurationen
-- `models/speech/` – TTS-Modelle (Audio-Ausgabe allgemein)
-- `services/voice-processing/` – Voice-Service als Referenz-Implementierung
+- `pending` — Job erstellt, wartet auf Verarbeitung
+- `processing` — Wird gerade generiert
+- `completed` — Fertig, `file_path` enthält den Pfad zur Datei
+- `failed` — Fehler, `error` enthält die Fehlermeldung
+
+## Verfügbare Stile
+
+- `ambient` — Ruhige, atmosphärische Klänge
+- `electronic` — Elektronische Beats und Synthesizer
+- `classical` — Klassische Orchestermusik
+- `jazz` — Improvisierter Jazz
+- `lofi` — Entspannte Lo-Fi Hip-Hop Beats
+- `cinematic` — Filmmusik und epische Soundtracks
+- `nature` — Naturgeräusche und Klanglandschaften
+- `meditation` — Meditative Klänge und Binaural Beats
