@@ -54,7 +54,7 @@ readonly REPO_URL_DEFAULT="https://github.com/Kirobi92/OpenDisruption.git"
 # shellcheck disable=SC2034  # exported for reference / extension scripts
 readonly REPO_RAW_BASE="https://raw.githubusercontent.com/Kirobi92/OpenDisruption"
 readonly MIN_DOCKER_VERSION="20.10"
-readonly MIN_COMPOSE_VERSION="2.24"  # 2.24+ required for `!reset` directive used by voice-full
+readonly MIN_COMPOSE_VERSION="2.24"  # required for `!reset`; see config/templates/compose/profile-voice-full.yml
 readonly MIN_BASH_MAJOR=4
 readonly MIN_DISK_GB=20
 readonly MIN_RAM_GB=8
@@ -289,10 +289,11 @@ detect_with_helper() {
 }
 
 detect_os() {
-  local installer_dir detect_script detect_json detect_fields
+  local installer_dir detect_script detect_parser detect_json detect_fields
 
   installer_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   detect_script="$installer_dir/infra/scripts/detect-system.sh"
+  detect_parser="$installer_dir/infra/scripts/parse-detect-json.py"
 
   OS_KERNEL="$(uname -s)"
   OS_ARCH="$(uname -m)"
@@ -300,23 +301,9 @@ detect_os() {
 
   if [[ -x "$detect_script" ]]; then
     debug "Using shared system detection: $detect_script --json"
-    if detect_json="$("$detect_script" --json 2>/dev/null)" && [[ -n "$detect_json" ]] && command -v python3 >/dev/null 2>&1; then
-      if detect_fields="$(python3 -c '
-import json, platform, sys
-try:
-    data = json.loads(sys.stdin.read())
-except Exception:
-    sys.exit(1)
-os_data = data.get("os", {})
-values = [
-    str(data.get("kernel", "") or platform.system() or "unknown"),
-    str(data.get("arch", "") or os_data.get("arch", "")),
-    str(data.get("name", "") or os_data.get("name", "")),
-    str(data.get("version", "") or os_data.get("version", "")),
-    str(data.get("family", "") or os_data.get("family", "")),
-]
-sys.stdout.write("\t".join(values))
-' <<<"$detect_json" 2>/dev/null)"; then
+    if detect_json="$("$detect_script" --json 2>/dev/null)" && [[ -n "$detect_json" ]] \
+        && [[ -f "$detect_parser" ]] && command -v python3 >/dev/null 2>&1; then
+      if detect_fields="$(printf '%s' "$detect_json" | python3 "$detect_parser" 2>/dev/null)"; then
         IFS=$'\t' read -r detected_kernel detected_arch detected_name detected_version detected_family <<<"$detect_fields"
 
         [[ -n "${detected_kernel:-}" ]] && OS_KERNEL="$detected_kernel"
@@ -608,6 +595,9 @@ setup_env_file() {
           secret="$(gen_secret 48)"
           # Propagate everywhere the placeholder appears (covers this line
           # AND any dependent URL / DSN that embeds the same token).
+          # Example:
+          #   POSTGRES_PASSWORD=AENDERE_X              → POSTGRES_PASSWORD=abc123
+          #   DATABASE_URL=postgres://u:AENDERE_X@db  → DATABASE_URL=postgres://u:abc123@db
           awk -v old="$old_placeholder" -v new="$secret" '
             # For each line, replace all occurrences of the exact placeholder.
             # This keeps derived values coherent, e.g. if POSTGRES_PASSWORD is

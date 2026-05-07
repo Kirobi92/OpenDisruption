@@ -100,6 +100,9 @@ AGENT_ENV="human"
 json_escape() {
   local s="${1//\\/\\\\}"
   s="${s//\"/\\\"}"
+  s="${s//$'\t'/\\t}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\f'/\\f}"
   s="${s//$'\n'/ }"
   printf '%s' "$s"
 }
