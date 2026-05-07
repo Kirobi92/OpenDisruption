@@ -9,6 +9,8 @@
 
 ## Table of Contents
 
+> **Phase-0 Hinweis (KIDI-Rollout):** Die Architektur des Multi-Agent-/KIDI-/KEYBRODI-Layers ist als Design-Dokumente unter `docs/agent/` separat erfasst (siehe `docs/agent/MULTI-AGENT-ARCHITECTURE.md`, `AGENT-DECISION-MATRIX.md`). Runtime-Code folgt phasenweise.
+
 1. [System Overview](#system-overview)
 2. [Architectural Principles](#architectural-principles)
 3. [High-Level Architecture](#high-level-architecture)

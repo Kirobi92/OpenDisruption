@@ -1,0 +1,76 @@
+name: KeyCodi — Roadmap-Task
+description: Ein Item aus keycodi/MILESTONES.md als Backlog-Issue. Genau ein Issue pro Milestone-Bullet.
+title: "[phase-N] <kurze Aufgabenbeschreibung>"
+labels: ["keycodi", "task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bitte zuerst `keycodi/OPERATING-RULES.md` lesen. KeyCodi erstellt Issues automatisch — manuelle Issues bitte nur, wenn ein Milestone-Bullet noch fehlt.
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Welche Roadmap-Phase?
+      options:
+        - "phase-0"
+        - "phase-1"
+        - "phase-2"
+        - "phase-3"
+        - "phase-4"
+        - "phase-5"
+        - "phase-6"
+    validations:
+      required: true
+  - type: input
+    id: milestone-line
+    attributes:
+      label: Milestone-Eintrag
+      description: Exakter Wortlaut der Zeile aus `keycodi/MILESTONES.md`.
+      placeholder: "kidi/context_db/client.py"
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Erwartetes Ergebnis
+      description: Was muss am Ende existieren? Welche Tests?
+    validations:
+      required: true
+  - type: dropdown
+    id: zone
+    attributes:
+      label: Zone-Auswirkung
+      options:
+        - "PUBLIC"
+        - "WORKSPACE"
+        - "(keine — nur Doku)"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Definition of Done
+      description: Test-Pfade, Doku-Pfade, Make-Targets.
+      value: |
+        - [ ] Code/Doku
+        - [ ] Mindestens ein Refusal-Test + Happy-Path-Test
+        - [ ] `python -m pytest tests/unit -q` grün
+        - [ ] Phasen-spezifische Suite grün
+        - [ ] CI grün
+        - [ ] `keycodi/MILESTONES.md` aktualisiert
+        - [ ] Bei Reibung: Eintrag in `keycodi/learnings/`
+        - [ ] Bei Architekturwahl: ADR in `keycodi/decisions/`
+    validations:
+      required: true
+  - type: checkboxes
+    id: hard-rules
+    attributes:
+      label: Hard Rules (Pflicht-Bestätigung)
+      options:
+        - label: Diese Aufgabe ändert weder `CLAUDE.md` noch `metadata/ZONE-POLICY-MATRIX.md` ohne separaten Sven-Sign-off-PR.
+          required: true
+        - label: Diese Aufgabe sendet keine FAMILY_PRIVATE / SACRED / QUARANTINE-Daten an externe Dienste.
+          required: true
+        - label: Diese Aufgabe weicht nicht von der Reihenfolge in `keycodi/ROADMAP.md` ab.
+          required: true

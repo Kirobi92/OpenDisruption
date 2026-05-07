@@ -1,0 +1,69 @@
+name: KeyCodi — Bug
+description: Regression oder kaputtes Verhalten in einer KeyCodi-orchestrierten Komponente.
+title: "[bug] <kurze Beschreibung>"
+labels: ["keycodi", "bug"]
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Betroffene Phase
+      options:
+        - "phase-0"
+        - "phase-1"
+        - "phase-2"
+        - "phase-3"
+        - "phase-4"
+        - "phase-5"
+        - "phase-6"
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Symptom
+      description: Was passiert (max. 3 Sätze, keine Spekulation)?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduktionsschritte
+      description: Exakte Schritte (Befehle, Inputs, Umgebung).
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevante Log-Auszüge
+      description: Bitte keine Tokens / Geheimnisse / FAMILY_PRIVATE-Daten einfügen.
+      render: shell
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Schweregrad
+      options:
+        - "P0 — produktionskritisch / Sicherheits-Verstoß"
+        - "P1 — blockiert die laufende Phase"
+        - "P2 — beeinträchtigt einen Test"
+        - "P3 — kosmetisch"
+    validations:
+      required: true
+  - type: checkboxes
+    id: zone-check
+    attributes:
+      label: Sicherheits-Check
+      options:
+        - label: Ich habe keine SACRED- / FAMILY_PRIVATE-Daten in dieses Issue kopiert.
+          required: true
+        - label: Falls Tokens/Secrets im Stacktrace stehen, habe ich sie entfernt.
+          required: true

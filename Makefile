@@ -7,7 +7,8 @@ COMPOSE_FILE = docker-compose.yml
 ENV_FILE = .env
 
 .PHONY: help up down restart logs pull-models init status backup clean build \
-        bootstrap interview autonomous-once autonomous-loop doctor test scan backlog
+        bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
+        pwa-up webui-up webui-url tailscale-url
 
 ## Hilfe anzeigen
 help:
@@ -36,6 +37,9 @@ help:
 	@echo "  make autonomous-once  – Eine autonome Iteration (Dry-Run, Report nach .kirobi/reports/)"
 	@echo "  make autonomous-loop  – Autonome Schleife (Dry-Run, ITERATIONS=N optional)"
 	@echo "  make test             – pytest tests/unit"
+	@echo "  make webui-up         – Zentrales Web UI über Caddy starten (LAN/Tailscale)"
+	@echo "  make webui-url        – LAN/Tailscale URLs für das Web UI anzeigen"
+	@echo "  make tailscale-url    – Tailscale-URL anzeigen (falls tailscale CLI vorhanden)"
 	@echo ""
 	@echo "  make backup          – Backup erstellen"
 	@echo "  make clean           – Ungenutzte Docker-Ressourcen aufräumen"
@@ -247,6 +251,24 @@ pwa-up:
 	@LAN_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}'); \
 		[ -n "$$LAN_IP" ] && echo "    http://$$LAN_IP/                     (LAN-IP)"
 
+## Zentrales Web UI für alle OpenDisruption-Teile starten (LAN + Tailscale)
+webui-up:
+	@docker compose up -d caddy web auth api postgres open-webui ollama flowise qdrant voice-processing
+	@$(MAKE) --no-print-directory webui-url
+
+## LAN/Tailscale URLs für das zentrale Web UI anzeigen
+webui-url:
+	@echo "→ OpenDisruption Web UI:"
+	@echo "    http://$${KIROBI_HOSTNAME:-kirobi.local}/status"
+	@echo "    https://$${KIROBI_HOSTNAME:-kirobi.local}/status   (TLS via Caddy internal CA)"
+	@LAN_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}'); \
+		[ -n "$$LAN_IP" ] && echo "    http://$$LAN_IP/status                 (LAN-IP)"
+	@$(MAKE) --no-print-directory tailscale-url
+
+## Tailscale-URL anzeigen (kein Funnel; privater Tailnet-Zugriff)
+tailscale-url:
+	@bash infra/scripts/tailscale-url.sh
+
 ## mDNS / Avahi für kirobi.local einrichten (benötigt sudo)
 pwa-mdns:
 	@bash infra/scripts/setup-mdns.sh
@@ -267,6 +289,8 @@ integration-test:
 	@bash -n infra/scripts/healthcheck.sh && echo "  ✓ healthcheck.sh OK"
 	@echo "→ setup-mdns.sh syntax"
 	@bash -n infra/scripts/setup-mdns.sh && echo "  ✓ setup-mdns.sh OK"
+	@echo "→ tailscale-url.sh syntax"
+	@bash -n infra/scripts/tailscale-url.sh && echo "  ✓ tailscale-url.sh OK"
 	@echo "→ Caddyfile vorhanden"
 	@test -f infra/caddy/Caddyfile && echo "  ✓ Caddyfile present"
 	@echo "→ services/auth/main.py + services/api/main.py kompilieren"

@@ -91,8 +91,22 @@ if (( DO_VEC )); then
       fi
       meta="$(curl -fsS --write-out '\nHTTP %{http_code}\n' \
               -X POST "http://127.0.0.1:6333/collections/$col/snapshots" 2>&1)" \
-        || { warn "qdrant snapshot create for $col failed: ${meta##*$'\n'}"; continue; }
+        || {
+          http_code="$(printf '%s\n' "$meta" | tail -n1 | grep -oE '[0-9]+' || true)"
+          body_tail="$(printf '%s\n' "$meta" | sed '$d' | tail -n1 || true)"
+          if [[ -n "$http_code" ]]; then
+            warn "qdrant snapshot create for $col failed (HTTP $http_code)${body_tail:+: $body_tail}"
+          else
+            warn "qdrant snapshot create for $col failed before HTTP response${body_tail:+: $body_tail}"
+          fi
+          continue
+        }
       # Strip the trailing 'HTTP nnn' marker before persisting / parsing.
+      http_code="$(printf '%s\n' "$meta" | tail -n1 | grep -oE '[0-9]+' || true)"
+      if [[ ! "$http_code" =~ ^2[0-9][0-9]$ ]]; then
+        warn "qdrant snapshot create for $col returned unexpected HTTP status${http_code:+ $http_code}"
+        continue
+      fi
       meta="${meta%$'\nHTTP '*}"
       printf '%s' "$meta" >"$WORK/qdrant/${col}.meta.json"
       # Snapshot name is the most recently reported one for this collection.

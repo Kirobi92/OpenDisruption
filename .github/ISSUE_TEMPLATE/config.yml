@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: KeyCodi Operating Rules
+    url: https://github.com/Kirobi92/OpenDisruption/blob/main/keycodi/OPERATING-RULES.md
+    about: Bevor du ein Issue öffnest — KeyCodi-Regeln lesen.
+  - name: KeyCodi Roadmap
+    url: https://github.com/Kirobi92/OpenDisruption/blob/main/keycodi/ROADMAP.md
+    about: Phasen-Plan (0–6) und Milestones.
+  - name: Zone Policy Matrix
+    url: https://github.com/Kirobi92/OpenDisruption/blob/main/metadata/ZONE-POLICY-MATRIX.md
+    about: Welcher Agent darf was in welcher Zone.

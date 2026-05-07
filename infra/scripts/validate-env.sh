@@ -33,7 +33,7 @@ err()  { printf '%s✖%s %s\n' "$R" "$N" "$*" >&2; }
 [[ -f "$EXAMPLE" ]]    || { err ".env.example missing — repo corrupt."; exit 1; }
 
 # 1. permission check
-if [[ "$(stat -c '%a' "$ENV_FILE" 2>/dev/null || stat -f '%A' "$ENV_FILE")" != "600" ]]; then
+if [[ "$( (stat -c '%a' "$ENV_FILE" 2>/dev/null) || stat -f '%A' "$ENV_FILE" )" != "600" ]]; then
   warn ".env is not chmod 600 (running: chmod 600 $ENV_FILE)"
   chmod 600 "$ENV_FILE" || true
 fi

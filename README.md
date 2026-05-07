@@ -2,6 +2,10 @@
 
 > **Local-first, agentengesteuertes Betriebssystem & Ökosystem für Familie, Kreativität und Business**
 
+> 🚧 **KIDI/KEYBRODI Multi-Agent-Rollout (Phase 0):** Architektur, Roadmap und Vault-Topologie liegen in [`keycodi/`](./keycodi/README.md) und [`obsidian/`](./obsidian/README.md). Der lokale OpenCode-Agent ("KeyCodi") arbeitet die Phasen 0–6 aus [`keycodi/ROADMAP.md`](./keycodi/ROADMAP.md) sequentiell ab, bis KEYBRODI die Orchestrierung übernehmen kann.
+
+> 🌐 **LAN/Tailscale Web UI:** Der sichere Komfort-Zugriff läuft über genau einen Caddy-Edge. Starte mit `make webui-up` und öffne `/status`; Details in [`docs/REMOTE-ACCESS.md`](./docs/REMOTE-ACCESS.md).
+
 ---
 
 ## Was ist Kirobi / Disruptive OS?

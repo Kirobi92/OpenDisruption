@@ -54,7 +54,7 @@ readonly REPO_URL_DEFAULT="https://github.com/Kirobi92/OpenDisruption.git"
 # shellcheck disable=SC2034  # exported for reference / extension scripts
 readonly REPO_RAW_BASE="https://raw.githubusercontent.com/Kirobi92/OpenDisruption"
 readonly MIN_DOCKER_VERSION="20.10"
-readonly MIN_COMPOSE_VERSION="2.24"  # 2.24+ required for `!reset` directive used by voice-full
+readonly MIN_COMPOSE_VERSION="2.24"  # required for Compose `!reset` clearing layered profile lists; see profile-voice-full.yml
 readonly MIN_BASH_MAJOR=4
 readonly MIN_DISK_GB=20
 readonly MIN_RAM_GB=8
@@ -131,6 +131,7 @@ USAGE:
 FLAGS:
   --auto                Non-interactive; pick safe defaults for every prompt.
   --yes, -y             Answer "yes" to every confirmation.
+                        Interactive confirmations accept y=yes and j=ja.
   --dry-run             Print actions, change nothing.
   --verbose, -v         Echo every command (set -x).
   --quiet, -q           Suppress non-essential output.
@@ -214,7 +215,7 @@ confirm() {
     return 1
   fi
   local reply
-  read -r -p "$(printf '%b' "${C_YELLOW}? ${prompt} [y/N] ${C_RESET}")" reply
+  read -r -p "$(printf '%b' "${C_YELLOW}? ${prompt} [y/j/N] ${C_RESET}")" reply
   [[ "$reply" =~ ^[YyJj]$ ]]
 }
 
@@ -289,10 +290,11 @@ detect_with_helper() {
 }
 
 detect_os() {
-  local installer_dir detect_script detect_json detect_fields
+  local installer_dir detect_script detect_parser detect_json detect_fields
 
   installer_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   detect_script="$installer_dir/infra/scripts/detect-system.sh"
+  detect_parser="$installer_dir/infra/scripts/parse-detect-json.py"
 
   OS_KERNEL="$(uname -s)"
   OS_ARCH="$(uname -m)"
@@ -300,17 +302,9 @@ detect_os() {
 
   if [[ -x "$detect_script" ]]; then
     debug "Using shared system detection: $detect_script --json"
-    if detect_json="$("$detect_script" --json 2>/dev/null)" && [[ -n "$detect_json" ]] && command -v python3 >/dev/null 2>&1; then
-      if detect_fields="$(python3 -c '
-import json, sys
-try:
-    data = json.loads(sys.stdin.read())
-except Exception:
-    sys.exit(1)
-keys = ("kernel", "arch", "name", "version", "family")
-values = [str(data.get(k, "")) for k in keys]
-sys.stdout.write("\t".join(values))
-' <<<"$detect_json" 2>/dev/null)"; then
+    if detect_json="$("$detect_script" --json 2>/dev/null)" && [[ -n "$detect_json" ]] \
+        && [[ -f "$detect_parser" ]] && command -v python3 >/dev/null 2>&1; then
+      if detect_fields="$(printf '%s' "$detect_json" | python3 "$detect_parser" 2>/dev/null)"; then
         IFS=$'\t' read -r detected_kernel detected_arch detected_name detected_version detected_family <<<"$detect_fields"
 
         [[ -n "${detected_kernel:-}" ]] && OS_KERNEL="$detected_kernel"
@@ -577,13 +571,17 @@ setup_env_file() {
       _emit "${C_GREY}[dry-run]${C_RESET} would copy .env.example → .env and inject secrets"
     else
       cp "$example" "$env_path"
-      # Replace every value that *is* an AENDERE_* placeholder, plus the
+      # Replace every value that *is* an AENDERE_* placeholder (German:
+      # "change this"), plus the
       # literal "changeme" / "changeme-in-production" defaults, with a freshly
       # generated 48-char hex secret. The original placeholder string is then
       # propagated across the rest of the file, so dependent values like
       # DATABASE_URL=postgresql://…:<PASSWORD>@… stay coherent.
       local key value secret old_placeholder
-      while IFS= read -r line; do
+      local -a env_lines=()
+      local -A replaced_placeholders=()
+      mapfile -t env_lines <"$env_path"
+      for line in "${env_lines[@]}"; do
         # KEY=VALUE only — comments and blanks fall through.
         [[ "$line" =~ ^([A-Z][A-Z0-9_]*)=(.*)$ ]] || continue
         key="${BASH_REMATCH[1]}"
@@ -591,25 +589,38 @@ setup_env_file() {
 
         # We only treat a line as a "secret slot" when the value IS a
         # placeholder, not when it merely embeds one (e.g. DATABASE_URL).
-        if [[ "$value" =~ ^AENDERE_[A-Z0-9_]+$ ]]; then
+        # Embedded placeholders are handled by the propagation below.
+        if [[ "$value" =~ ^AENDERE_[A-Za-z0-9_]+$ ]]; then
           old_placeholder="$value"
+          [[ -n "${replaced_placeholders[$old_placeholder]:-}" ]] && continue
+          replaced_placeholders[$old_placeholder]=1
           secret="$(gen_secret 48)"
           # Propagate everywhere the placeholder appears (covers this line
           # AND any dependent URL / DSN that embeds the same token).
+          # Example:
+          #   POSTGRES_PASSWORD=AENDERE_X              → POSTGRES_PASSWORD=abc123
+          #   DATABASE_URL=postgres://u:AENDERE_X@db  → DATABASE_URL=postgres://u:abc123@db
           awk -v old="$old_placeholder" -v new="$secret" '
+            # For each line, replace all occurrences of the exact placeholder.
+            # This keeps derived values coherent, e.g. if POSTGRES_PASSWORD is
+            # generated from AENDERE_DIESES_PASSWORT_SOFORT, the same generated
+            # value is also inserted into DATABASE_URL where that placeholder is
+            # embedded inside a larger URL.
             { i=index($0, old)
               while (i>0) { $0 = substr($0,1,i-1) new substr($0,i+length(old)); i = index($0, old) }
               print }' \
             "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
           debug "generated secret for $key (propagated across .env)"
         elif [[ "$value" == "changeme" || "$value" == "changeme-in-production" ]]; then
+          # Simple literal defaults do not need propagation: only replace this
+          # exact KEY=value line.
           secret="$(gen_secret 48)"
           awk -v k="$key" -v v="$secret" -F'=' \
             'BEGIN{OFS="="} $1==k {sub(/^[^=]*=/, ""); print k, v; next} {print}' \
             "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
           debug "replaced 'changeme' default for $key"
         fi
-      done <"$env_path"
+      done
 
       # Sanity check: nothing AENDERE_* left, otherwise warn loudly.
       if grep -qE '=.*AENDERE_' "$env_path"; then

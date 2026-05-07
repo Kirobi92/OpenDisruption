@@ -112,7 +112,8 @@ app = FastAPI(
 # `allow_origins=["*"]` together with `allow_credentials=True` is invalid per
 # the CORS spec — browsers reject the preflight. We mirror the auth service
 # logic and resolve a concrete origin list from KIROBI_PUBLIC_ORIGINS, falling
-# back to a regex that covers localhost, *.local and RFC1918 LAN addresses.
+# back to a regex that covers localhost, *.local, RFC1918 LAN addresses and
+# Tailscale's 100.64.0.0/10 CGNAT range.
 def _cors_kwargs() -> dict:
     raw = os.getenv("KIROBI_PUBLIC_ORIGINS", "").strip()
     if raw:
@@ -124,7 +125,8 @@ def _cors_kwargs() -> dict:
         r"[a-zA-Z0-9-]+\.local(:\d+)?|"
         r"10\.\d+\.\d+\.\d+(:\d+)?|"
         r"192\.168\.\d+\.\d+(:\d+)?|"
-        r"172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?"
+        r"172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?|"
+        r"100\.(6[4-9]|[7-9]\d|1[0-1]\d|12[0-7])\.\d+\.\d+(:\d+)?"
         r")$"
     )
     return {"allow_origin_regex": pattern}
