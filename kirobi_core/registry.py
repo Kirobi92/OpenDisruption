@@ -34,9 +34,10 @@ _NAME_TO_CAPABILITIES: dict[str, tuple[str, ...]] = {
     "kirobi-ops": ("ops", "deploy", "infra", "monitoring", "backup"),
     "kirobi-observer": ("observability", "metrics", "report"),
     "hermes-extractor": ("ingest", "extract", "classify"),
-    "samira-heart": ("family", "mediation", "care"),
-    "sineo-creator": ("creative", "child", "story"),
+    "samira-heart-agent": ("family", "mediation", "care"),
+    "sineo-creator-coach": ("creative", "child", "story"),
     "research-crew": ("research", "summarize"),
+    "mediation-crew": ("family", "mediation", "multi-agent"),
     "creative-agent": ("creative", "writing", "image"),
     "voice-agent": ("voice", "stt", "tts"),
     "installer-agent": ("install", "setup"),
@@ -63,11 +64,14 @@ class AgentSpec:
 
 def _parse_zones(raw: str) -> tuple[Zone, ...]:
     raw_upper = raw.upper()
-    if "ALLE ZONEN" in raw_upper or "ALL ZONES" in raw_upper:
-        return tuple(Zone)
+    excluded: set[Zone] = set()
+    if "AUSSER SACRED" in raw_upper or "AUẞER SACRED" in raw_upper or "EXCEPT SACRED" in raw_upper:
+        excluded.add(Zone.SACRED)
+    if "ALLE ZONEN" in raw_upper or "ALLER ZONEN" in raw_upper or "ALL ZONES" in raw_upper:
+        return tuple(zone for zone in Zone if zone not in excluded)
     found: list[Zone] = []
     for zone in Zone:
-        if zone.value in raw_upper:
+        if zone.value in raw_upper and zone not in excluded:
             found.append(zone)
     return tuple(found) or (Zone.PUBLIC, Zone.WORKSPACE)
 

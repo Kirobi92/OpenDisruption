@@ -7,7 +7,7 @@ The zones mirror the model documented in ``CLAUDE.md`` and
 Zone                Folders / examples
 ==================  =====================================================
 PUBLIC              ``canon/public``, ``extracts/public``, top-level docs
-WORKSPACE           ``kirobi-core``, ``services``, ``infra``, ``metadata``,
+WORKSPACE           ``kirobi-core``, ``services``, ``infra``, ``config``, ``metadata``,
                     ``apps``, ``integrations``, ``prompts``, ``tests``,
                     ``kirobi_core``, ``tools``
 FAMILY_PRIVATE      ``extracts/family-private``, ``experiences/family``,
@@ -55,6 +55,7 @@ _ZONE_PREFIXES: tuple[tuple[str, Zone], ...] = (
     ("kirobi-core/", Zone.WORKSPACE),
     ("kirobi_core/", Zone.WORKSPACE),
     ("metadata/", Zone.WORKSPACE),
+    ("config/", Zone.WORKSPACE),
     ("prompts/", Zone.WORKSPACE),
     ("infra/", Zone.WORKSPACE),
     ("integrations/", Zone.WORKSPACE),

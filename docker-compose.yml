@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   kirobi-net:
     driver: bridge
@@ -240,6 +238,42 @@ services:
     depends_on:
       - auth
       - api
+    networks:
+      - kirobi-net
+
+  telegram:
+    build:
+      context: ./services/telegram
+      dockerfile: Dockerfile
+    container_name: kirobi-telegram
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:${TELEGRAM_SERVICE_PORT:-8005}:8005"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_ALLOWED_USER_IDS=${TELEGRAM_ALLOWED_USER_IDS:-}
+      - TELEGRAM_NOTIFY_CHANNEL_ID=${TELEGRAM_NOTIFY_CHANNEL_ID:-}
+      - TELEGRAM_NOTIFY_ON_START=${TELEGRAM_NOTIFY_ON_START:-false}
+      - TELEGRAM_WEBHOOK_HOST=${TELEGRAM_WEBHOOK_HOST:-}
+      - TELEGRAM_SERVICE_PORT=8005
+      - AUTH_SERVICE_URL=http://auth:8000
+      - KIROBI_AUTH_URL=http://auth:8000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - KIROBI_API_URL=http://api:8000
+      - KIROBI_API_TOKEN=${KIROBI_API_TOKEN:-}
+      - KIROBI_BOT_USER=${KIROBI_BOT_USER:-}
+      - KIROBI_BOT_PASSWORD=${KIROBI_BOT_PASSWORD:-}
+      - KIROBI_DEFAULT_USER=${KIROBI_DEFAULT_USER:-sven}
+      - KIROBI_DEFAULT_PASSWORD=${KIROBI_DEFAULT_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
     networks:
       - kirobi-net
 

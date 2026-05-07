@@ -10,6 +10,7 @@ def test_classify_workspace_paths():
     assert classify("kirobi_core/cli.py") is Zone.WORKSPACE
     assert classify("services/orchestrator/supervisor.py") is Zone.WORKSPACE
     assert classify("metadata/AGENTREGISTRY.md") is Zone.WORKSPACE
+    assert classify("config/opencode/keycodi-agent.prompt.md") is Zone.WORKSPACE
 
 
 def test_classify_family_private():

@@ -7,6 +7,7 @@ Sub-commands:
 ``scan``            Scan the repo and print a JSON summary.
 ``backlog``         Generate the backlog and print it as JSON.
 ``interview``       Run the guided interview and save a profile.
+``keycodi``         Plan a KeyCodi coding-orchestrator mission.
 ``autonomous-once`` Run one autonomous iteration (dry-run by default).
 ``autonomous-loop`` Repeat ``autonomous-once`` on a schedule.
 ``version``         Print the package version.
@@ -31,6 +32,7 @@ from .backlog import generate_backlog, prioritize
 from .config import ConfigStore
 from .doctor import render, run_doctor, summarize
 from .interview import run_and_save
+from .keycodi import plan_mission, render_text as render_keycodi
 from .registry import AgentRegistry
 from .scanner import scan_repository
 
@@ -114,6 +116,16 @@ def _cmd_registry(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_keycodi(args: argparse.Namespace) -> int:
+    mission = " ".join(args.mission).strip() or None
+    plan = plan_mission(args.repo_root, mission=mission, limit=args.limit)
+    if args.json:
+        print(json.dumps(plan.to_dict(), indent=2, ensure_ascii=False))
+    else:
+        print(render_keycodi(plan))
+    return 0
+
+
 def _cmd_autonomous_once(args: argparse.Namespace) -> int:
     audit = AuditLogger(Path(args.repo_root) / "kirobi-core" / "core-events.log")
     report = run_once(
@@ -179,6 +191,13 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("registry", help="Print the agent registry.")
     _add_common(p)
     p.set_defaults(func=_cmd_registry)
+
+    p = sub.add_parser("keycodi", help="Plan a KeyCodi coding-orchestrator mission.")
+    _add_common(p)
+    p.add_argument("--limit", type=int, default=8, help="Maximum backlog items to route.")
+    p.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    p.add_argument("mission", nargs="*", help="Mission text for KeyCodi.")
+    p.set_defaults(func=_cmd_keycodi)
 
     p = sub.add_parser("interview", help="Run the guided interview.")
     _add_common(p)

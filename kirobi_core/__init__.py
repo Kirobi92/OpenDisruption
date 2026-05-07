@@ -14,6 +14,7 @@ Public submodules:
 * :mod:`kirobi_core.scanner`       — repository structural scan
 * :mod:`kirobi_core.backlog`       — task backlog generator
 * :mod:`kirobi_core.orchestrator`  — minimal task router / supervisor
+* :mod:`kirobi_core.keycodi`       — KeyCodi coding mission planner
 * :mod:`kirobi_core.interview`     — guided onboarding interview
 * :mod:`kirobi_core.autonomous`    — safe autonomous development loop
 * :mod:`kirobi_core.doctor`        — environment health check

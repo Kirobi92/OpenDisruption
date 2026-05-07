@@ -8,7 +8,8 @@ ENV_FILE = .env
 
 .PHONY: help up down restart logs pull-models init status backup clean build \
         bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
-        pwa-up webui-up webui-url tailscale-url
+        pwa-up webui-up webui-url tailscale-url keycodi reset-default-password \
+        test-kidi kidi-up kidi-down
 
 ## Hilfe anzeigen
 help:
@@ -33,6 +34,7 @@ help:
 	@echo "  make doctor           – Health-Check der lokalen Umgebung"
 	@echo "  make scan             – Repository scannen (JSON-Zusammenfassung)"
 	@echo "  make backlog          – Backlog generieren (priorisierte Tasks als JSON)"
+	@echo "  make keycodi          – KeyCodi Mission planen (MISSION=... JSON=1 optional)"
 	@echo "  make interview        – Geführtes Onboarding-Interview (CLI)"
 	@echo "  make autonomous-once  – Eine autonome Iteration (Dry-Run, Report nach .kirobi/reports/)"
 	@echo "  make autonomous-loop  – Autonome Schleife (Dry-Run, ITERATIONS=N optional)"
@@ -40,6 +42,7 @@ help:
 	@echo "  make webui-up         – Zentrales Web UI über Caddy starten (LAN/Tailscale)"
 	@echo "  make webui-url        – LAN/Tailscale URLs für das Web UI anzeigen"
 	@echo "  make tailscale-url    – Tailscale-URL anzeigen (falls tailscale CLI vorhanden)"
+	@echo "  make reset-default-password – Bootstrap-Passwort im Auth-Service auf .env-Default setzen"
 	@echo ""
 	@echo "  make backup          – Backup erstellen"
 	@echo "  make clean           – Ungenutzte Docker-Ressourcen aufräumen"
@@ -213,6 +216,10 @@ scan:
 backlog:
 	@$(KIROBI) backlog --limit $${LIMIT:-20}
 
+## KeyCodi Mission planen (lokal-first, ohne Cloud-Call)
+keycodi:
+	@$(KIROBI) keycodi --limit $${LIMIT:-8} $${JSON:+--json} "$${MISSION:-Build the next safe OpenDisruption coding act}"
+
 ## Geführtes Onboarding-Interview
 interview:
 	@$(KIROBI) interview --profile $${PROFILE:-default}
@@ -232,6 +239,10 @@ autonomous-loop:
 ## Pytest-Suite ausführen (lokales Python-Core)
 test:
 	@$(PY) -m pytest tests/unit -q
+
+## Bootstrap-Passwort explizit auf den aktuellen .env-Default zurücksetzen
+reset-default-password:
+	@bash infra/scripts/reset-default-password.sh $${ARGS:-}
 
 ## Live-Status der laufenden Service-Stack
 status:
