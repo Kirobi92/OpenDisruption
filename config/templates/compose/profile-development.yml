@@ -1,0 +1,33 @@
+# docker-compose.override.yml — profile: development
+# Bind every service on 0.0.0.0 (LAN-accessible) so colleagues can hit your
+# dev box; mount source for hot reload; verbose logging.
+#
+# We override the `ports:` entries directly because the base file's
+# host-binding is driven by ${KIROBI_BIND_HOST}, which the user may not have
+# touched. If you'd rather flip a single env var than apply this profile,
+# set KIROBI_BIND_HOST=0.0.0.0 in .env instead.
+services:
+  api:
+    environment:
+      - KIROBI_LOG_LEVEL=debug
+    volumes:
+      - ./services/api:/app:ro
+    ports:
+      - "0.0.0.0:${API_PORT:-8003}:8000"
+  auth:
+    environment:
+      - KIROBI_LOG_LEVEL=debug
+    volumes:
+      - ./services/auth:/app:ro
+    ports:
+      - "0.0.0.0:${AUTH_PORT:-8002}:8000"
+  web:
+    environment:
+      - NEXT_PUBLIC_DEV=1
+    volumes:
+      - ./apps/web:/app:rw
+    ports:
+      - "0.0.0.0:${WEB_PORT:-3002}:3000"
+  open-webui:
+    ports:
+      - "0.0.0.0:${OPENWEBUI_PORT:-3000}:8080"
