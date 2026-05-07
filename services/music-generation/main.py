@@ -8,6 +8,7 @@ Port: 8013
 import os
 import uuid
 import json
+import asyncio
 from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
@@ -21,6 +22,12 @@ import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
+
+try:
+    from kirobi_core.analytics_client import track as _analytics_track
+except Exception:  # noqa: BLE001
+    async def _analytics_track(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        pass
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -429,6 +436,7 @@ async def generate_track(req: GenerateRequest):
             }),
         )
 
+    asyncio.create_task(_analytics_track("music_generation", zone=req.zone, model=model_used))
     return GeneratedTrackResponse(
         id=row["id"],
         file_path=row["file_path"],

@@ -308,3 +308,61 @@ def test_validate_zone_passes_for_valid():
 
     for zone in ["PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"]:
         emb._validate_zone(zone)  # Kein Exception erwartet
+
+
+# ---------------------------------------------------------------------------
+# GET /embed/single
+# ---------------------------------------------------------------------------
+
+def test_embed_single_returns_embedding(client):
+    """GET /embed/single muss Embedding-Vektor zurückgeben."""
+    c, mock_http, _ = client
+
+    fake_embedding = [0.1, 0.2, 0.3] * 256  # 768 Dimensionen
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    resp = c.get("/embed/single", params={"text": "Hallo Welt"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "embedding" in data
+    assert len(data["embedding"]) == 768
+    assert data["dim"] == 768
+    assert "model" in data
+
+
+def test_embed_single_validates_empty_text(client):
+    """GET /embed/single mit leerem text muss 422 zurückgeben."""
+    c, _, _ = client
+    resp = c.get("/embed/single", params={"text": ""})
+    assert resp.status_code == 422
+
+
+def test_embed_single_validates_missing_text(client):
+    """GET /embed/single ohne text-Parameter muss 422 zurückgeben."""
+    c, _, _ = client
+    resp = c.get("/embed/single")
+    assert resp.status_code == 422
+
+
+def test_embed_single_validates_max_length(client):
+    """GET /embed/single mit Text > 8000 Zeichen muss 422 zurückgeben."""
+    c, _, _ = client
+    resp = c.get("/embed/single", params={"text": "x" * 8001})
+    assert resp.status_code == 422
+
+
+def test_embed_single_returns_503_when_client_not_ready(client):
+    """GET /embed/single muss 503 zurückgeben wenn http_client None ist."""
+    import services.embeddings.main as emb
+    c, _, _ = client
+
+    original = emb.http_client
+    emb.http_client = None
+    try:
+        resp = c.get("/embed/single", params={"text": "Test"})
+        assert resp.status_code == 503
+    finally:
+        emb.http_client = original

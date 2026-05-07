@@ -7,6 +7,7 @@ Purpose: Main API for family interactions with Kirobi
 import os
 import json
 import uuid
+import asyncio
 from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
@@ -21,12 +22,19 @@ from dotenv import load_dotenv
 import aiofiles
 from pathlib import Path
 
+try:
+    from kirobi_core.analytics_client import track as _analytics_track
+except Exception:  # noqa: BLE001
+    async def _analytics_track(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        pass
+
 load_dotenv()
 
 # Configuration
 DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{os.getenv('POSTGRES_PASSWORD', 'changeme')}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth:8000")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
+RETRIEVAL_SERVICE_URL = os.getenv("RETRIEVAL_SERVICE_URL", "http://retrieval:8006")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "/data/uploads"))
@@ -257,6 +265,22 @@ async def check_zone_permission(user_id: str, zone: str, permission_type: str = 
         return bool(result and result[column])
 
 
+async def _get_rag_context(query: str, zone: str = "WORKSPACE") -> str:
+    """Holt RAG-Kontext vom Retrieval-Service. Gibt leeren String bei Fehler zurück."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.post(
+                f"{RETRIEVAL_SERVICE_URL}/rag",
+                json={"query": query, "zone": zone, "limit": 3},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data.get("context", "")
+    except Exception:
+        pass
+    return ""
+
+
 async def call_ollama(prompt: str, model: str = "llama3.1:8b", system_prompt: Optional[str] = None) -> str:
     """Call Ollama for LLM response"""
     messages = []
@@ -448,6 +472,12 @@ Zone: {conversation.zone}
 Sei persönlich, hilfsbereit und respektiere die Privatsphäre der Familie.
 Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
 
+    # RAG-Kontext aus Wissensbasis holen (Zone: WORKSPACE für allgemeine Anfragen)
+    rag_zone = conversation.zone if conversation.zone in ("PUBLIC", "WORKSPACE", "FAMILY_PRIVATE") else "WORKSPACE"
+    rag_context = await _get_rag_context(message_data.content, zone=rag_zone)
+    if rag_context:
+        system_prompt = f"Relevanter Kontext aus der Wissensbasis:\n{rag_context}\n\n{system_prompt}"
+
     # Call Ollama for response
     model = "llama3.1:8b"
     if current_user.role == "admin":
@@ -469,6 +499,7 @@ Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
             ai_response,
             model
         )
+        asyncio.create_task(_analytics_track("conversation", zone=conversation.zone, model=model))
 
         # Update conversation timestamp
         await conn.execute(

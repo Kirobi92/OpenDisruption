@@ -7,18 +7,25 @@ Zweck: Text-Embeddings via Ollama (nomic-embed-text) + Speicherung in Qdrant
 import logging
 import os
 import uuid
+import asyncio
 from contextlib import asynccontextmanager
 from typing import Any
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http import models as qdrant_models
 
 load_dotenv()
+
+try:
+    from kirobi_core.analytics_client import track as _analytics_track
+except Exception:  # noqa: BLE001
+    async def _analytics_track(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        pass
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -278,6 +285,22 @@ async def embed_text(request: EmbedRequest) -> EmbedResponse:
     )
 
 
+@app.get("/embed/single", tags=["Embeddings"])
+async def embed_single(
+    text: str = Query(..., min_length=1, max_length=8000, description="Zu embeddender Text"),
+) -> dict:
+    """
+    Gibt den Embedding-Vektor für einen einzelnen Text zurück (GET-Variante für Retrieval-Service).
+
+    - **text**: Der zu embeddende Text (Query-Parameter, min. 1, max. 8000 Zeichen)
+    """
+    if http_client is None:
+        raise HTTPException(status_code=503, detail="Service nicht bereit")
+    logger.info("GET /embed/single Anfrage für Text der Länge %d", len(text))
+    vector = await _get_embedding(text)
+    return {"embedding": vector, "model": EMBED_MODEL, "dim": len(vector)}
+
+
 @app.post("/embed/batch", response_model=BatchEmbedResponse, tags=["Embeddings"])
 async def embed_batch(request: BatchEmbedRequest) -> BatchEmbedResponse:
     """
@@ -367,6 +390,8 @@ async def store_embedding(request: StoreRequest) -> StoreResponse:
         ) from exc
 
     logger.info("Dokument '%s' erfolgreich gespeichert.", doc_id)
+
+    asyncio.create_task(_analytics_track("embedding_stored", zone=request.zone))
 
     return StoreResponse(
         id=doc_id,

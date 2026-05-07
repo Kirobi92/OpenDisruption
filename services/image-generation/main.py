@@ -8,6 +8,7 @@ Port: 8011
 import os
 import uuid
 import json
+import asyncio
 from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
@@ -19,6 +20,12 @@ from pydantic import BaseModel, Field
 import asyncpg
 import httpx
 from dotenv import load_dotenv
+
+try:
+    from kirobi_core.analytics_client import track as _analytics_track
+except Exception:  # noqa: BLE001
+    async def _analytics_track(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        pass
 
 load_dotenv()
 
@@ -307,6 +314,7 @@ async def generate_image(req: GenerateRequest):
             json.dumps({"ollama_host": OLLAMA_HOST}),
         )
 
+    asyncio.create_task(_analytics_track("image_generation", zone=req.zone, model=req.model))
     return GeneratedImageResponse(
         id=row["id"],
         file_path=row["file_path"],
