@@ -80,6 +80,7 @@ _ZONE_PREFIXES: tuple[tuple[str, Zone], ...] = (
     ("canon/", Zone.WORKSPACE),
     ("extracts/", Zone.WORKSPACE),
     ("sources/", Zone.WORKSPACE),
+    ("claude/", Zone.WORKSPACE),   # .claude/ after _normalize strips leading dot
 )
 
 # Top-level files that are explicitly safe to treat as PUBLIC.
@@ -109,6 +110,8 @@ _PUBLIC_TOP_LEVEL_FILES = frozenset(
         ".gitignore",
         "Makefile",
         "docker-compose.yml",
+        "docker-compose.override.yml",
+        "install.sh",
         "setup-family-profiles.sh",
     }
 )
