@@ -26,6 +26,7 @@ try:
     from PIL import Image as PILImage
     _PILLOW_AVAILABLE = True
 except ImportError:
+    PILImage = None  # type: ignore[assignment]
     _PILLOW_AVAILABLE = False
 
 try:
@@ -33,6 +34,8 @@ try:
     from mutagen import File as MutagenFile
     _MUTAGEN_AVAILABLE = True
 except ImportError:
+    mutagen = None  # type: ignore[assignment]
+    MutagenFile = None  # type: ignore[assignment]
     _MUTAGEN_AVAILABLE = False
 
 # ---------------------------------------------------------------------------

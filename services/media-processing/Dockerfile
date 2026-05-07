@@ -8,12 +8,12 @@ LABEL maintainer="kirobi-coder" \
 # System-Abhängigkeiten für Pillow (libjpeg, libpng, libwebp)
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-        libjpeg62-turbo \
-        libpng16-16 \
-        libwebp7 \
+        libjpeg-dev \
+        libpng-dev \
+        libwebp-dev \
         libopus0 \
         libvorbis0a \
-        libflac12 \
+        libflac-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # Non-root user anlegen

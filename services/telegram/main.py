@@ -8,6 +8,7 @@ import asyncio
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime
 from html import escape
 from typing import Optional
@@ -692,8 +693,48 @@ async def polling_loop() -> None:
             await asyncio.sleep(5)
 
 
-app = FastAPI(title="Kirobi Telegram Bot", version="2.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    if not BOT_TOKEN:
+        log.error("TELEGRAM_BOT_TOKEN fehlt — Bot inaktiv")
+    else:
+        log.info("KeyCodi Telegram-Bot v2 startet. Autorisierte User-Anzahl: %s", len(ALLOWED_USER_IDS))
+        await set_bot_commands()
+        await get_api_token()
 
+        if WEBHOOK_HOST:
+            webhook_url = f"{WEBHOOK_HOST.rstrip('/')}{WEBHOOK_PATH}"
+            result = await tg("setWebhook", url=webhook_url, drop_pending_updates=True)
+            log.info("Webhook gesetzt: %s", result.get("ok"))
+        else:
+            asyncio.create_task(polling_loop())
+
+        if NOTIFY_CHANNEL_ID and NOTIFY_ON_START:
+            try:
+                await send(
+                    NOTIFY_CHANNEL_ID,
+                    "🚀 <b>KeyCodi Telegram-Bot gestartet</b>\n"
+                    f"🕐 {datetime.now().strftime('%d.%m.%Y %H:%M')}\n\n"
+                    "Sende /start um das Menue zu oeffnen.",
+                    log_failures=False,
+                )
+            except Exception as exc:
+                log.warning("Startup-Notify fehlgeschlagen: %s", exc)
+
+    yield
+
+    # Shutdown
+    global db_pool, api_token_cache
+    if db_pool:
+        await db_pool.close()
+    db_pool = None
+    api_token_cache = None
+    if BOT_TOKEN and WEBHOOK_HOST:
+        await tg("deleteWebhook", drop_pending_updates=True)
+
+
+app = FastAPI(title="Kirobi Telegram Bot", version="2.0.0", lifespan=lifespan)
 
 @app.get("/health")
 async def health():
@@ -745,47 +786,6 @@ async def webhook(request: Request):
     except Exception as exc:
         log.error("Webhook-Fehler: %s", exc)
     return {"ok": True}
-
-
-@app.on_event("startup")
-async def startup():
-    if not BOT_TOKEN:
-        log.error("TELEGRAM_BOT_TOKEN fehlt — Bot inaktiv")
-        return
-
-    log.info("KeyCodi Telegram-Bot v2 startet. Autorisierte User-Anzahl: %s", len(ALLOWED_USER_IDS))
-    await set_bot_commands()
-    await get_api_token()
-
-    if WEBHOOK_HOST:
-        webhook_url = f"{WEBHOOK_HOST.rstrip('/')}{WEBHOOK_PATH}"
-        result = await tg("setWebhook", url=webhook_url, drop_pending_updates=True)
-        log.info("Webhook gesetzt: %s", result.get("ok"))
-    else:
-        asyncio.create_task(polling_loop())
-
-    if NOTIFY_CHANNEL_ID and NOTIFY_ON_START:
-        try:
-            await send(
-                NOTIFY_CHANNEL_ID,
-                "🚀 <b>KeyCodi Telegram-Bot gestartet</b>\n"
-                f"🕐 {datetime.now().strftime('%d.%m.%Y %H:%M')}\n\n"
-                "Sende /start um das Menue zu oeffnen.",
-                log_failures=False,
-            )
-        except Exception as exc:
-            log.warning("Startup-Notify fehlgeschlagen: %s", exc)
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    global db_pool, api_token_cache
-    if db_pool:
-        await db_pool.close()
-    db_pool = None
-    api_token_cache = None
-    if BOT_TOKEN and WEBHOOK_HOST:
-        await tg("deleteWebhook", drop_pending_updates=True)
 
 
 if __name__ == "__main__":
