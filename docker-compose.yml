@@ -330,3 +330,86 @@ services:
       - qdrant
     networks:
       - kirobi-net
+
+  # ─── KIDI — Agenten-Skelette (Profile: agents) ────────────────────────────
+  # Headless-Aufruf: docker compose --profile agents run --rm agent-opencode
+  # Oder via Makefile: make agent-opencode TASK='{"task_type":"generate_code","payload":{}}'
+
+  agent-opencode:
+    build:
+      context: .
+      dockerfile: agents/opencode/Dockerfile
+    image: kirobi-agent-opencode:latest
+    container_name: kirobi-agent-opencode
+    profiles:
+      - agents
+    restart: "no"
+    environment:
+      - KIROBI_REDIS_URL=${KIROBI_REDIS_URL:-redis://redis:6379/0}
+      - KIROBI_REDIS_PASSWORD=${KIROBI_REDIS_PASSWORD:-}
+      - KIROBI_EGRESS_ALLOWED=${KIROBI_EGRESS_ALLOWED:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      - redis
+    networks:
+      - kirobi-net
+
+  agent-openclaw:
+    build:
+      context: .
+      dockerfile: agents/openclaw/Dockerfile
+    image: kirobi-agent-openclaw:latest
+    container_name: kirobi-agent-openclaw
+    profiles:
+      - agents
+    restart: "no"
+    environment:
+      - KIROBI_REDIS_URL=${KIROBI_REDIS_URL:-redis://redis:6379/0}
+      - KIROBI_REDIS_PASSWORD=${KIROBI_REDIS_PASSWORD:-}
+      - KIROBI_EGRESS_ALLOWED=${KIROBI_EGRESS_ALLOWED:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      - redis
+    networks:
+      - kirobi-net
+
+  agent-hermes:
+    build:
+      context: .
+      dockerfile: agents/hermes/Dockerfile
+    image: kirobi-agent-hermes:latest
+    container_name: kirobi-agent-hermes
+    profiles:
+      - agents
+    restart: "no"
+    environment:
+      - KIROBI_REDIS_URL=${KIROBI_REDIS_URL:-redis://redis:6379/0}
+      - KIROBI_REDIS_PASSWORD=${KIROBI_REDIS_PASSWORD:-}
+      - KIROBI_EGRESS_ALLOWED=${KIROBI_EGRESS_ALLOWED:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      - redis
+    networks:
+      - kirobi-net
+
+  agent-obsidian:
+    build:
+      context: .
+      dockerfile: agents/obsidian/Dockerfile
+    image: kirobi-agent-obsidian:latest
+    container_name: kirobi-agent-obsidian
+    profiles:
+      - agents
+    restart: "no"
+    environment:
+      - KIROBI_REDIS_URL=${KIROBI_REDIS_URL:-redis://redis:6379/0}
+      - KIROBI_REDIS_PASSWORD=${KIROBI_REDIS_PASSWORD:-}
+      - KIROBI_EGRESS_ALLOWED=${KIROBI_EGRESS_ALLOWED:-false}
+      - KIROBI_VAULT_PATH=/vault
+      - PYTHONPATH=/app
+    volumes:
+      - ./obsidian:/vault:ro
+    depends_on:
+      - redis
+    networks:
+      - kirobi-net

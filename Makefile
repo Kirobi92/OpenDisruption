@@ -9,7 +9,8 @@ ENV_FILE = .env
 .PHONY: help up down restart logs pull-models init status backup clean build \
         bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
         pwa-up webui-up webui-url tailscale-url keycodi reset-default-password \
-        test-kidi kidi-up kidi-down
+        test-kidi kidi-up kidi-down \
+        test-agents agent-opencode agent-openclaw agent-hermes agent-obsidian agents-build
 
 ## Hilfe anzeigen
 help:
@@ -315,3 +316,68 @@ integration-test:
 	@echo "  ✓ alle PWA-Icons vorhanden"
 	@echo ""
 	@echo "Integration-Check abgeschlossen."
+
+# =============================================================================
+# KIDI — Phase 1: Redis ContextDB
+# =============================================================================
+
+## KIDI-Tests laufen lassen (fakeredis, kein Redis nötig)
+test-kidi:
+	@$(PY) -m pytest tests/unit/kidi -v
+
+## Redis-ContextDB starten (Profile: kidi)
+kidi-up:
+	@docker compose --profile kidi up -d redis
+	@echo "→ Redis ContextDB gestartet auf ${KIROBI_BIND_HOST:-127.0.0.1}:${KIROBI_REDIS_PORT:-6379}"
+
+## Redis-ContextDB stoppen
+kidi-down:
+	@docker compose --profile kidi stop redis
+
+# =============================================================================
+# KIDI — Phase 2: Agenten-Skelette
+# =============================================================================
+
+## Agenten-Tests laufen lassen
+test-agents:
+	@$(PY) -m pytest tests/unit/agents -v
+
+## Alle Agenten-Docker-Images bauen
+agents-build:
+	@docker compose --profile agents build
+
+## OpenCode-Agent headless ausführen (TASK='{"task_type":"generate_code","payload":{}}')
+agent-opencode:
+	@docker compose --profile agents run --rm agent-opencode \
+		python3 -c "import json,os,sys; \
+		from agents.opencode.agent import OpenCodeAgent; \
+		from agents._base.agent import Task; \
+		t=json.loads(os.environ.get('TASK','{}')) if os.environ.get('TASK') else {'task_type':'generate_code','payload':{}}; \
+		r=OpenCodeAgent().run(Task(**t)); print(json.dumps({'success':r.success,'payload':r.payload,'error':r.error},ensure_ascii=False,indent=2))"
+
+## OpenClaw-Agent headless ausführen
+agent-openclaw:
+	@docker compose --profile agents run --rm agent-openclaw \
+		python3 -c "import json,os; \
+		from agents.openclaw.agent import OpenClawAgent; \
+		from agents._base.agent import Task; \
+		t=json.loads(os.environ.get('TASK','{}')) if os.environ.get('TASK') else {'task_type':'web_fetch','zone':'PUBLIC','payload':{}}; \
+		r=OpenClawAgent().run(Task(**t)); print(json.dumps({'success':r.success,'payload':r.payload,'error':r.error},ensure_ascii=False,indent=2))"
+
+## Hermes-Reasoner-Agent headless ausführen
+agent-hermes:
+	@docker compose --profile agents run --rm agent-hermes \
+		python3 -c "import json,os; \
+		from agents.hermes.agent import HermesReasonerAgent; \
+		from agents._base.agent import Task; \
+		t=json.loads(os.environ.get('TASK','{}')) if os.environ.get('TASK') else {'task_type':'chain_of_thought','payload':{'question':'Was ist KIDI?'}}; \
+		r=HermesReasonerAgent().run(Task(**t)); print(json.dumps({'success':r.success,'payload':r.payload,'error':r.error},ensure_ascii=False,indent=2))"
+
+## Obsidian-Vault-Agent headless ausführen
+agent-obsidian:
+	@docker compose --profile agents run --rm agent-obsidian \
+		python3 -c "import json,os; \
+		from agents.obsidian.agent import ObsidianAgent; \
+		from agents._base.agent import Task; \
+		t=json.loads(os.environ.get('TASK','{}')) if os.environ.get('TASK') else {'task_type':'vault_read','payload':{'path':'README.md'}}; \
+		r=ObsidianAgent().run(Task(**t)); print(json.dumps({'success':r.success,'payload':r.payload,'error':r.error},ensure_ascii=False,indent=2))"

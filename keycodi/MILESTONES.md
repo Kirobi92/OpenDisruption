@@ -45,15 +45,15 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 
 ## Phase 2 — Agenten-Skelette
 
-- [ ] `agents/_base/agent.py`
-- [ ] `agents/opencode/agent.py` + Dockerfile
-- [ ] `agents/openclaw/agent.py` + Dockerfile
-- [ ] `agents/hermes/agent.py` + Dockerfile
-- [ ] `agents/obsidian/agent.py` + Dockerfile
-- [ ] `docker-compose.yml` Profile `agents`
-- [ ] `Makefile` Targets `make agent-<name> TASK='...'`
-- [ ] Tests pro Agent (`smoke`, `zone_refusal`)
-- [ ] CI grün
+- [x] `agents/_base/agent.py`
+- [x] `agents/opencode/agent.py` + Dockerfile
+- [x] `agents/openclaw/agent.py` + Dockerfile
+- [x] `agents/hermes/agent.py` + Dockerfile
+- [x] `agents/obsidian/agent.py` + Dockerfile
+- [x] `docker-compose.yml` Profile `agents`
+- [x] `Makefile` Targets `make agent-<name> TASK='...'`
+- [x] Tests pro Agent (`smoke`, `zone_refusal`) — 52 Tests, 0.16s
+- [ ] CI grün (nach PR-Merge)
 
 ## Phase 3 — Obsidian-Vault + Knowledge-Graph
 
