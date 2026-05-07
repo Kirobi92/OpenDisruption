@@ -5,6 +5,7 @@ Purpose: User authentication, session management, and zone-based access control
 """
 
 import os
+import json
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
@@ -365,7 +366,7 @@ async def create_session(user_id: str, token: str, request: Request) -> str:
             session_id,
             user_id,
             token,
-            {},  # device_info placeholder
+            json.dumps({}),
             request.client.host,
             request.headers.get("user-agent", ""),
             expires_at
@@ -384,7 +385,7 @@ async def log_audit_event(user_id: str, action: str, resource_type: str, details
             user_id,
             action,
             resource_type,
-            details,
+            json.dumps(details),
             request.client.host,
             request.headers.get("user-agent", "")
         )

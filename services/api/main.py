@@ -5,6 +5,7 @@ Purpose: Main API for family interactions with Kirobi
 """
 
 import os
+import json
 import uuid
 from datetime import datetime
 from typing import Optional, List
@@ -29,6 +30,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 UPLOAD_DIR = Path("/data/uploads")
+OLLAMA_FALLBACK_MODEL = "llama3.1:8b"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Security
@@ -36,6 +38,64 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Database connection pool
 db_pool: Optional[asyncpg.Pool] = None
+
+
+API_SCHEMA = """
+CREATE TABLE IF NOT EXISTS conversations (
+    id          TEXT PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    title       TEXT,
+    zone        TEXT NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    archived    BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE TABLE IF NOT EXISTS messages (
+    id              TEXT PRIMARY KEY,
+    conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    user_id         TEXT,
+    role            TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+    content         TEXT NOT NULL,
+    model_used      TEXT,
+    tokens_used     INTEGER,
+    attachments     JSONB NOT NULL DEFAULT '[]'::JSONB,
+    metadata        JSONB NOT NULL DEFAULT '{}'::JSONB,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS file_uploads (
+    id                  TEXT PRIMARY KEY,
+    user_id             TEXT NOT NULL,
+    filename            TEXT NOT NULL,
+    original_filename   TEXT NOT NULL,
+    file_path           TEXT NOT NULL,
+    file_size           BIGINT NOT NULL,
+    mime_type           TEXT,
+    zone                TEXT NOT NULL,
+    processed           BOOLEAN NOT NULL DEFAULT FALSE,
+    metadata            JSONB NOT NULL DEFAULT '{}'::JSONB,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS conversations_user_archived_idx
+    ON conversations(user_id, archived);
+CREATE INDEX IF NOT EXISTS conversations_updated_at_idx
+    ON conversations(updated_at DESC);
+CREATE INDEX IF NOT EXISTS messages_conversation_created_idx
+    ON messages(conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS file_uploads_user_created_idx
+    ON file_uploads(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS file_uploads_zone_idx
+    ON file_uploads(zone);
+"""
+
+
+async def _ensure_schema() -> None:
+    """Create API-owned tables on first boot.
+
+    Auth owns users and zone_permissions. The API only bootstraps its own
+    storage so the chat/upload flow can come up on a fresh database.
+    """
+    async with db_pool.acquire() as conn:
+        await conn.execute(API_SCHEMA)
 
 
 # Pydantic Models
@@ -89,12 +149,34 @@ class FileUploadResponse(BaseModel):
     created_at: datetime
 
 
+def _json_field(value, fallback):
+    if value is None:
+        return fallback
+    if isinstance(value, type(fallback)):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return fallback
+        return parsed if isinstance(parsed, type(fallback)) else fallback
+    return fallback
+
+
+def _message_from_row(row: asyncpg.Record) -> Message:
+    data = dict(row)
+    data["attachments"] = _json_field(data.get("attachments"), [])
+    data["metadata"] = _json_field(data.get("metadata"), {})
+    return Message(**data)
+
+
 # Lifespan context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
+    await _ensure_schema()
     yield
     # Shutdown
     await db_pool.close()
@@ -162,13 +244,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
 async def check_zone_permission(user_id: str, zone: str, permission_type: str = "read") -> bool:
     """Check if user has permission for a specific zone"""
+    # Whitelist to prevent SQL injection via permission_type
+    if permission_type not in ("read", "write"):
+        raise HTTPException(status_code=400, detail=f"Invalid permission_type: {permission_type}")
+    column = "can_read" if permission_type == "read" else "can_write"
     async with db_pool.acquire() as conn:
         result = await conn.fetchrow(
-            f"SELECT can_{permission_type} FROM zone_permissions WHERE user_id = $1 AND zone = $2",
+            f"SELECT {column} FROM zone_permissions WHERE user_id = $1 AND zone = $2",
             user_id,
             zone
         )
-        return result and result[f"can_{permission_type}"]
+        return bool(result and result[column])
 
 
 async def call_ollama(prompt: str, model: str = "llama3.1:8b", system_prompt: Optional[str] = None) -> str:
@@ -180,19 +266,24 @@ async def call_ollama(prompt: str, model: str = "llama3.1:8b", system_prompt: Op
 
     async with httpx.AsyncClient(timeout=120.0) as client:
         try:
-            response = await client.post(
-                f"{OLLAMA_HOST}/api/chat",
-                json={
-                    "model": model,
-                    "messages": messages,
-                    "stream": False
-                }
-            )
+            async def _chat_once(model_name: str) -> httpx.Response:
+                return await client.post(
+                    f"{OLLAMA_HOST}/api/chat",
+                    json={
+                        "model": model_name,
+                        "messages": messages,
+                        "stream": False
+                    }
+                )
+
+            response = await _chat_once(model)
+            if response.status_code == 404 and model != OLLAMA_FALLBACK_MODEL:
+                response = await _chat_once(OLLAMA_FALLBACK_MODEL)
+
             if response.status_code == 200:
                 data = response.json()
                 return data.get("message", {}).get("content", "")
-            else:
-                return f"Error calling Ollama: {response.status_code}"
+            return f"Error calling Ollama: {response.status_code}"
         except Exception as e:
             return f"Error calling Ollama: {str(e)}"
 
@@ -307,7 +398,7 @@ async def list_messages(
             conversation_id,
             limit
         )
-        return [Message(**dict(row)) for row in rows]
+        return [_message_from_row(row) for row in rows]
 
 
 @app.post("/conversations/{conversation_id}/messages", response_model=Message)
@@ -333,7 +424,7 @@ async def create_message(
             current_user.id,
             "user",
             message_data.content,
-            message_data.attachments
+            json.dumps(message_data.attachments or [])
         )
 
         # Get conversation history for context
@@ -393,7 +484,7 @@ Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
             """,
             ai_message_id
         )
-        return Message(**dict(row))
+        return _message_from_row(row)
 
 
 @app.post("/upload", response_model=FileUploadResponse)
