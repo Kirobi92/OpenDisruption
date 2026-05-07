@@ -47,3 +47,7 @@ def _register_hyphenated_service(dir_name: str, module_name: str) -> None:
 
 # services/model-routing → services.model_routing
 _register_hyphenated_service("model-routing", "model_routing")
+# services/image-generation → services.image_generation
+_register_hyphenated_service("image-generation", "image_generation")
+# services/media-processing → services.media_processing
+_register_hyphenated_service("media-processing", "media_processing")

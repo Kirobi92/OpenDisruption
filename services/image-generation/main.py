@@ -34,7 +34,10 @@ DATABASE_URL = (
     f"/{os.getenv('POSTGRES_DB', 'kirobi')}"
 )
 IMAGE_STORAGE_PATH = Path(os.getenv("IMAGE_STORAGE_PATH", "/data/images"))
-IMAGE_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+try:
+    IMAGE_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+except PermissionError:
+    pass  # Im Container wird das Volume gemountet; außerhalb ignorieren
 
 # ---------------------------------------------------------------------------
 # DB schema
