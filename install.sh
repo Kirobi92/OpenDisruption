@@ -214,7 +214,7 @@ confirm() {
     return 1
   fi
   local reply
-  read -r -p "$(printf '%b' "${C_YELLOW}? ${prompt} [y/N] ${C_RESET}")" reply
+  read -r -p "$(printf '%b' "${C_YELLOW}? ${prompt} [y/j/N] ${C_RESET}")" reply
   [[ "$reply" =~ ^[YyJj]$ ]]
 }
 
@@ -302,13 +302,19 @@ detect_os() {
     debug "Using shared system detection: $detect_script --json"
     if detect_json="$("$detect_script" --json 2>/dev/null)" && [[ -n "$detect_json" ]] && command -v python3 >/dev/null 2>&1; then
       if detect_fields="$(python3 -c '
-import json, sys
+import json, platform, sys
 try:
     data = json.loads(sys.stdin.read())
 except Exception:
     sys.exit(1)
-keys = ("kernel", "arch", "name", "version", "family")
-values = [str(data.get(k, "")) for k in keys]
+os_data = data.get("os", {})
+values = [
+    str(data.get("kernel", "") or platform.system() or "unknown"),
+    str(data.get("arch", "") or os_data.get("arch", "")),
+    str(data.get("name", "") or os_data.get("name", "")),
+    str(data.get("version", "") or os_data.get("version", "")),
+    str(data.get("family", "") or os_data.get("family", "")),
+]
 sys.stdout.write("\t".join(values))
 ' <<<"$detect_json" 2>/dev/null)"; then
         IFS=$'\t' read -r detected_kernel detected_arch detected_name detected_version detected_family <<<"$detect_fields"
@@ -583,7 +589,10 @@ setup_env_file() {
       # propagated across the rest of the file, so dependent values like
       # DATABASE_URL=postgresql://…:<PASSWORD>@… stay coherent.
       local key value secret old_placeholder
-      while IFS= read -r line; do
+      local -a env_lines=()
+      local -A replaced_placeholders=()
+      mapfile -t env_lines <"$env_path"
+      for line in "${env_lines[@]}"; do
         # KEY=VALUE only — comments and blanks fall through.
         [[ "$line" =~ ^([A-Z][A-Z0-9_]*)=(.*)$ ]] || continue
         key="${BASH_REMATCH[1]}"
@@ -591,25 +600,35 @@ setup_env_file() {
 
         # We only treat a line as a "secret slot" when the value IS a
         # placeholder, not when it merely embeds one (e.g. DATABASE_URL).
-        if [[ "$value" =~ ^AENDERE_[A-Z0-9_]+$ ]]; then
+        # Embedded placeholders are handled by the propagation below.
+        if [[ "$value" =~ ^AENDERE_[A-Za-z0-9_]+$ ]]; then
           old_placeholder="$value"
+          [[ -n "${replaced_placeholders[$old_placeholder]:-}" ]] && continue
+          replaced_placeholders[$old_placeholder]=1
           secret="$(gen_secret 48)"
           # Propagate everywhere the placeholder appears (covers this line
           # AND any dependent URL / DSN that embeds the same token).
           awk -v old="$old_placeholder" -v new="$secret" '
+            # For each line, replace all occurrences of the exact placeholder.
+            # This keeps derived values coherent, e.g. if POSTGRES_PASSWORD is
+            # generated from AENDERE_DIESES_PASSWORT_SOFORT, the same generated
+            # value is also inserted into DATABASE_URL where that placeholder is
+            # embedded inside a larger URL.
             { i=index($0, old)
               while (i>0) { $0 = substr($0,1,i-1) new substr($0,i+length(old)); i = index($0, old) }
               print }' \
             "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
           debug "generated secret for $key (propagated across .env)"
         elif [[ "$value" == "changeme" || "$value" == "changeme-in-production" ]]; then
+          # Simple literal defaults do not need propagation: only replace this
+          # exact KEY=value line.
           secret="$(gen_secret 48)"
           awk -v k="$key" -v v="$secret" -F'=' \
             'BEGIN{OFS="="} $1==k {sub(/^[^=]*=/, ""); print k, v; next} {print}' \
             "$env_path" >"$env_path.tmp" && mv "$env_path.tmp" "$env_path"
           debug "replaced 'changeme' default for $key"
         fi
-      done <"$env_path"
+      done
 
       # Sanity check: nothing AENDERE_* left, otherwise warn loudly.
       if grep -qE '=.*AENDERE_' "$env_path"; then
