@@ -263,5 +263,8 @@ services:
       - web
       - auth
       - api
+      - open-webui
+      - flowise
+      - qdrant
     networks:
       - kirobi-net

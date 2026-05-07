@@ -7,7 +7,8 @@ COMPOSE_FILE = docker-compose.yml
 ENV_FILE = .env
 
 .PHONY: help up down restart logs pull-models init status backup clean build \
-        bootstrap interview autonomous-once autonomous-loop doctor test scan backlog
+        bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
+        pwa-up webui-up webui-url tailscale-url
 
 ## Hilfe anzeigen
 help:
@@ -36,6 +37,9 @@ help:
 	@echo "  make autonomous-once  – Eine autonome Iteration (Dry-Run, Report nach .kirobi/reports/)"
 	@echo "  make autonomous-loop  – Autonome Schleife (Dry-Run, ITERATIONS=N optional)"
 	@echo "  make test             – pytest tests/unit"
+	@echo "  make webui-up         – Zentrales Web UI über Caddy starten (LAN/Tailscale)"
+	@echo "  make webui-url        – LAN/Tailscale URLs für das Web UI anzeigen"
+	@echo "  make tailscale-url    – Tailscale-URL anzeigen (falls tailscale CLI vorhanden)"
 	@echo ""
 	@echo "  make backup          – Backup erstellen"
 	@echo "  make clean           – Ungenutzte Docker-Ressourcen aufräumen"
@@ -246,6 +250,31 @@ pwa-up:
 	@echo "    https://$${KIROBI_HOSTNAME:-kirobi.local}/   (TLS via Caddy internal CA)"
 	@LAN_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}'); \
 		[ -n "$$LAN_IP" ] && echo "    http://$$LAN_IP/                     (LAN-IP)"
+
+## Zentrales Web UI für alle OpenDisruption-Teile starten (LAN + Tailscale)
+webui-up:
+	@docker compose up -d caddy web auth api postgres open-webui ollama flowise qdrant voice-processing
+	@$(MAKE) --no-print-directory webui-url
+
+## LAN/Tailscale URLs für das zentrale Web UI anzeigen
+webui-url:
+	@echo "→ OpenDisruption Web UI:"
+	@echo "    http://$${KIROBI_HOSTNAME:-kirobi.local}/status"
+	@echo "    https://$${KIROBI_HOSTNAME:-kirobi.local}/status   (TLS via Caddy internal CA)"
+	@LAN_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}'); \
+		[ -n "$$LAN_IP" ] && echo "    http://$$LAN_IP/status                 (LAN-IP)"
+	@$(MAKE) --no-print-directory tailscale-url
+
+## Tailscale-URL anzeigen (kein Funnel; privater Tailnet-Zugriff)
+tailscale-url:
+	@if command -v tailscale >/dev/null 2>&1; then \
+		TS_IP=$$(tailscale ip -4 2>/dev/null | head -1); \
+		TS_NAME=$$(tailscale status --json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName','').rstrip('.'))" 2>/dev/null); \
+		[ -n "$$TS_NAME" ] && echo "    http://$$TS_NAME/status                (Tailscale MagicDNS)"; \
+		[ -n "$$TS_IP" ] && echo "    http://$$TS_IP/status                  (Tailscale IP)"; \
+	else \
+		echo "    (tailscale CLI nicht gefunden; nutze deine Tailscale-IP oder MagicDNS manuell)"; \
+	fi
 
 ## mDNS / Avahi für kirobi.local einrichten (benötigt sudo)
 pwa-mdns:

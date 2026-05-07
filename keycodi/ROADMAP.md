@@ -33,12 +33,15 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 **Exit-Kriterien**
 1. Sven hat Architektur abgenickt (Kommentar im PR oder Issue mit Label `keycodi:approved`).
-2. Drei offene Entscheidungen aus `TELEGRAM-INTEGRATION.md` §2 sind beantwortet.
+2. Drei offene Entscheidungen sind beantwortet:
+   - Telegram: **Option A — Restricted Bridge**.
+   - Token-Storage: **Docker Secrets / `*_FILE`**.
+   - Installer: **repo-lokales `install.sh`, `--dry-run` als sicherer Default**.
 3. CI grün.
 4. README verlinkt auf `keycodi/` und `obsidian/`.
 
 **Hard-Blocker**
-- Telegram-Policy (Option A/B/C) ungeklärt → Phase 5 darf nicht starten, Phasen 1–4 dürfen.
+- Telegram-Policy ist entschieden (Option A), aber Phase 5 bleibt gated bis Phase 4 grün ist und die Docker-Secret-Dateien lokal existieren.
 
 ---
 
@@ -128,7 +131,7 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 ## Phase 5 — Telegram-Integration (GATED)
 
-**Voraussetzung:** Sven hat Option A/B/C aus `docs/agent/TELEGRAM-INTEGRATION.md` §2 entschieden. **Wenn B → diese Phase entfällt komplett.**
+**Voraussetzung:** Sven hat Option A aus `docs/agent/TELEGRAM-INTEGRATION.md` §2 gewählt. Phase 5 bleibt trotzdem gated bis Phasen 1–4 abgeschlossen und Docker Secrets lokal vorhanden sind.
 
 **Lieferumfang (nur bei Option A)**
 - Sechs Bot-Handler in eigenen Containern, jeweils unter Profile `telegram`.
@@ -146,7 +149,7 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 ## Phase 6 — `install.sh` + Doku-Polish
 
-**Ziel:** Repo-lokaler `install.sh`, der `bootstrap.sh` umhüllt und neue Phasen integriert. Kein `curl | bash` ohne Checksum + `--dry-run`-Default.
+**Ziel:** Repo-lokaler `install.sh`, der `bootstrap.sh` umhüllt und neue Phasen integriert. Gewählte Option: komfortabel und sicher — lokal aus dem Clone, `--dry-run` als Standard, `--apply` explizit.
 
 **Lieferumfang**
 - `install.sh` mit `--dry-run` als Standard.
@@ -163,19 +166,19 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 Phasen sind **strikt linear**: 0 → 1 → 2 → 3 → 4 → (5) → 6.
 
-Phase 5 ist die einzige optionale Phase und wird übersprungen, wenn Sven Option B wählt. Alle anderen Phasen müssen abgeschlossen sein, bevor die nächste startet.
+Phase 5 ist gewählt (Option A), bleibt aber durch Zone-Filter, Docker Secrets und explizites Opt-in geschützt. Alle Phasen müssen abgeschlossen sein, bevor die nächste startet.
 
 ---
 
 ## Status-Zeile (KeyCodi pflegt)
 
 ```
-Phase 0: 🟡 IN PROGRESS  (Architektur-Sign-off ausstehend)
+Phase 0: 🟡 IN PROGRESS  (Entscheidungen gesetzt: Telegram A, Docker Secrets, repo-local install.sh; Architektur-Sign-off ausstehend)
 Phase 1: ⚪ PENDING
 Phase 2: ⚪ PENDING
 Phase 3: ⚪ PENDING
 Phase 4: ⚪ PENDING
-Phase 5: ⚪ PENDING (gated)
+Phase 5: ⚪ PENDING (Option A gewählt, gated)
 Phase 6: ⚪ PENDING
 ```
 

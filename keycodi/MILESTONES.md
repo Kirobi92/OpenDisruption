@@ -22,9 +22,10 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 - [x] `obsidian/` Vault-Topologie angelegt
 - [x] `.github/ISSUE_TEMPLATE/` Backlog-Templates
 - [ ] Sven nickt Architektur ab
-- [ ] Telegram-Option (A/B/C) entschieden
-- [ ] Token-Storage entschieden (falls A)
-- [ ] `install.sh`-Distribution entschieden
+- [x] Telegram-Option entschieden: **A — Restricted Bridge**
+- [x] Token-Storage entschieden: **Docker Secrets / `*_FILE`**
+- [x] `install.sh`-Distribution entschieden: **repo-lokal, `--dry-run` Default**
+- [x] Tailscale/LAN Web UI Entscheidung dokumentiert: **Caddy-only edge, Backends auf `127.0.0.1`**
 
 ## Phase 1 — Redis ContextDB
 
@@ -76,7 +77,7 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 
 ## Phase 5 — Telegram (gated)
 
-> Sperre: nur starten, wenn Sven Option A bestätigt.
+> Sperre: Option A ist bestätigt; Phase 5 startet trotzdem erst nach grünem Abschluss von Phase 4 und vorhandenen lokalen Docker Secrets.
 
 - [ ] `agents/_telegram/zone_filter.py`
 - [ ] Sechs Bot-Handler unter Profile `telegram`
@@ -100,11 +101,11 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 ## Status-Zeile
 
 ```
-Phase 0: 🟡 IN PROGRESS  — 11/15 Items, Sven-Sign-off ausstehend
+Phase 0: 🟡 IN PROGRESS  — 15/16 Items, Sven-Sign-off ausstehend
 Phase 1: ⚪ PENDING
 Phase 2: ⚪ PENDING
 Phase 3: ⚪ PENDING
 Phase 4: ⚪ PENDING
-Phase 5: ⚪ PENDING (gated)
+Phase 5: ⚪ PENDING (Option A gewählt, gated)
 Phase 6: ⚪ PENDING
 ```

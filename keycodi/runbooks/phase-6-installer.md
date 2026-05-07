@@ -14,12 +14,12 @@
 
 ### 1. `install.sh`
 
-Repo-lokales Skript (`./install.sh`), das `infra/scripts/bootstrap.sh` umhüllt.
+Repo-lokales Skript (`./install.sh`), das `infra/scripts/bootstrap.sh` umhüllt. Das ist die gewählte Option: komfortabel (ein lokaler Befehl) und sicher (kein Remote-Pipe, Dry-Run als Default).
 
 - Default-Modus: `--dry-run`. Skript zeigt nur, was es täte, führt nichts aus.
 - `--apply` ist explizit erforderlich, um zu installieren.
 - Niemals `curl … | bash` empfehlen.
-- Falls Sven explizit ein gehostetes Skript wünscht: Checksum-Verifikation (`sha256sum -c install.sh.sha256`) wird Pflicht; dieses ist ein separater PR und braucht ADR.
+- Falls Sven später explizit ein gehostetes Skript wünscht: Checksum-Verifizierung (`sha256sum -c install.sh.sha256`) wird Pflicht; dieses ist ein separater PR und braucht ADR.
 
 ### 2. Phasen-Integration
 
@@ -31,6 +31,7 @@ Repo-lokales Skript (`./install.sh`), das `infra/scripts/bootstrap.sh` umhüllt.
 ./install.sh --apply --profile kidi    # plus ContextDB
 ./install.sh --apply --profile agents  # plus agent skeletons
 ./install.sh --apply --profile telegram # only after Sven sign-off
+./install.sh --apply --profile webui    # Caddy edge for LAN/Tailscale access
 ```
 
 ### 3. Sicherheits-Checks im Installer
@@ -38,6 +39,8 @@ Repo-lokales Skript (`./install.sh`), das `infra/scripts/bootstrap.sh` umhüllt.
 - Prüft `git status --porcelain` — Abbruch bei dirty tree, außer mit `--allow-dirty`.
 - Prüft `.env` Existenz; wenn fehlend, kopiert `.env.example` und warnt zu Token-Befüllung.
 - Prüft `KIROBI_BIND_HOST`; wenn `0.0.0.0`, fragt explizit nach.
+- Prüft `KIROBI_PROXY_BIND_HOST`; wenn nicht `0.0.0.0` und `KIROBI_ACCESS_MODE=lan-tailscale`, warnt es, dass LAN/Tailscale nicht erreichbar ist.
+- Prüft bei `--profile telegram`, dass alle `KIROBI_TELEGRAM_*_TOKEN_FILE`- und `KIROBI_TELEGRAM_CHANNEL_ID_FILE`-Pfade existieren.
 - Schreibt eine Pre-Install-Snapshot der wichtigsten Dirs (`canon/`, `experiences/`) gemäß bestehender Backup-Konvention.
 
 ### 4. Docs
