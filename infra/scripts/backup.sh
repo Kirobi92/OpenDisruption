@@ -102,6 +102,11 @@ if (( DO_VEC )); then
           continue
         }
       # Strip the trailing 'HTTP nnn' marker before persisting / parsing.
+      http_code="$(printf '%s\n' "$meta" | tail -n1 | grep -oE '[0-9]+' || true)"
+      if [[ ! "$http_code" =~ ^2[0-9][0-9]$ ]]; then
+        warn "qdrant snapshot create for $col returned unexpected HTTP status${http_code:+ $http_code}"
+        continue
+      fi
       meta="${meta%$'\nHTTP '*}"
       printf '%s' "$meta" >"$WORK/qdrant/${col}.meta.json"
       # Snapshot name is the most recently reported one for this collection.

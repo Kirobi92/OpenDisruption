@@ -82,17 +82,29 @@ jobs:
       - name: validate-env after replacing placeholders
         run: |
           # generate fresh secret per placeholder line
-          mapfile -t env_lines < .env
-          for line in "${env_lines[@]}"; do
-            if echo "$line" | grep -q 'AENDERE'; then
-              key=$(echo "$line" | cut -d= -f1)
-              new="${key}=$(openssl rand -hex 32)"
-              sed -i "s|^${key}=.*|${new}|" .env
-            fi
-          done
-          # replace literal "changeme" defaults too
-          sed -i 's/=changeme$/='"$(openssl rand -hex 16)"'/' .env
-          sed -i 's/=changeme-in-production$/='"$(openssl rand -hex 32)"'/' .env
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import secrets
+
+          path = Path(".env")
+          text = path.read_text()
+          generated = {}
+
+          def placeholder(match):
+              token = match.group(0)
+              generated.setdefault(token, secrets.token_hex(32))
+              return generated[token]
+
+          text = re.sub(r"AENDERE_[A-Za-z0-9_]+", placeholder, text)
+          text = re.sub(
+              r"=(changeme|changeme-in-production)$",
+              lambda _match: "=" + secrets.token_hex(32),
+              text,
+              flags=re.MULTILINE,
+          )
+          path.write_text(text)
+          PY
           set +e
           bash infra/scripts/validate-env.sh
           rc=$?

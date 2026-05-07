@@ -54,7 +54,7 @@ readonly REPO_URL_DEFAULT="https://github.com/Kirobi92/OpenDisruption.git"
 # shellcheck disable=SC2034  # exported for reference / extension scripts
 readonly REPO_RAW_BASE="https://raw.githubusercontent.com/Kirobi92/OpenDisruption"
 readonly MIN_DOCKER_VERSION="20.10"
-readonly MIN_COMPOSE_VERSION="2.24"  # required for `!reset`; see config/templates/compose/profile-voice-full.yml
+readonly MIN_COMPOSE_VERSION="2.24"  # required for Compose `!reset` clearing layered profile lists; see profile-voice-full.yml
 readonly MIN_BASH_MAJOR=4
 readonly MIN_DISK_GB=20
 readonly MIN_RAM_GB=8
@@ -131,6 +131,7 @@ USAGE:
 FLAGS:
   --auto                Non-interactive; pick safe defaults for every prompt.
   --yes, -y             Answer "yes" to every confirmation.
+                        Interactive confirmations accept y=yes and j=ja.
   --dry-run             Print actions, change nothing.
   --verbose, -v         Echo every command (set -x).
   --quiet, -q           Suppress non-essential output.
@@ -570,7 +571,8 @@ setup_env_file() {
       _emit "${C_GREY}[dry-run]${C_RESET} would copy .env.example → .env and inject secrets"
     else
       cp "$example" "$env_path"
-      # Replace every value that *is* an AENDERE_* placeholder, plus the
+      # Replace every value that *is* an AENDERE_* placeholder (German:
+      # "change this"), plus the
       # literal "changeme" / "changeme-in-production" defaults, with a freshly
       # generated 48-char hex secret. The original placeholder string is then
       # propagated across the rest of the file, so dependent values like
