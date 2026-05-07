@@ -1,0 +1,51 @@
+name: KeyCodi — Learning
+description: Erkenntnis / Reibung, die in keycodi/learnings/ gespiegelt werden soll.
+title: "[learning] <kurze Erkenntnis>"
+labels: ["keycodi", "learning"]
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - "phase-0"
+        - "phase-1"
+        - "phase-2"
+        - "phase-3"
+        - "phase-4"
+        - "phase-5"
+        - "phase-6"
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: Was wurde beobachtet?
+    validations:
+      required: true
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Hypothesen / Versuche
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Ergebnis / Ursache
+    validations:
+      required: true
+  - type: textarea
+    id: lesson
+    attributes:
+      label: Lehre für KeyCodi
+      description: Was tut KeyCodi nächstes Mal anders?
+    validations:
+      required: true
+  - type: input
+    id: filename
+    attributes:
+      label: Vorgesehener Dateiname in keycodi/learnings/
+      placeholder: "0007-redis-aof-vs-rdb.md"
+    validations:
+      required: true
