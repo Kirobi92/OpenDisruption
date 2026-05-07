@@ -20,7 +20,8 @@ def main() -> int:
     except json.JSONDecodeError:
         return 1
 
-    os_data = data.get("os", {}) if isinstance(data.get("os", {}), dict) else {}
+    os_raw = data.get("os", {})
+    os_data = os_raw if isinstance(os_raw, dict) else {}
     values = [
         str(data.get("kernel", "") or platform.system() or "unknown"),
         str(data.get("arch", "") or os_data.get("arch", "")),
