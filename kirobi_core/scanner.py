@@ -42,7 +42,7 @@ _SKIP_DIRS = frozenset(
 _CODE_EXTS = frozenset(
     {".py", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs", ".sh", ".yml", ".yaml"}
 )
-_DOC_EXTS = frozenset({".md", ".rst", ".txt"})
+_DOC_EXTS = frozenset({".md", ".rst"})
 
 
 @dataclass
