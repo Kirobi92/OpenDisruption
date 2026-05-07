@@ -70,10 +70,58 @@
 		}
 	}
 
+	# Dashboard: /dashboard* -> http://dashboard:3003
+	redir /dashboard /dashboard/ 308
+	handle /dashboard/* {
+		reverse_proxy dashboard:3003 {
+			header_up Host {host}
+		}
+	}
+
 	# Auth service: /api/auth/* -> http://auth:8000/*
 	handle_path /api/auth/* {
 		reverse_proxy auth:8000 {
 			header_up X-Forwarded-Prefix /api/auth
+			header_up Host {host}
+		}
+	}
+
+	# Analytics API: /api/analytics/* -> http://analytics:8010/*
+	handle_path /api/analytics/* {
+		reverse_proxy analytics:8010 {
+			header_up X-Forwarded-Prefix /api/analytics
+			header_up Host {host}
+		}
+	}
+
+	# Image-Generation API: /api/image-generation/* -> http://image-generation:8011/*
+	handle_path /api/image-generation/* {
+		reverse_proxy image-generation:8011 {
+			header_up X-Forwarded-Prefix /api/image-generation
+			header_up Host {host}
+		}
+	}
+
+	# Media-Processing API: /api/media-processing/* -> http://media-processing:8012/*
+	handle_path /api/media-processing/* {
+		reverse_proxy media-processing:8012 {
+			header_up X-Forwarded-Prefix /api/media-processing
+			header_up Host {host}
+		}
+	}
+
+	# Music-Generation API: /api/music-generation/* -> http://music-generation:8013/*
+	handle_path /api/music-generation/* {
+		reverse_proxy music-generation:8013 {
+			header_up X-Forwarded-Prefix /api/music-generation
+			header_up Host {host}
+		}
+	}
+
+	# Video-Generation API: /api/video-generation/* -> http://video-generation:8014/*
+	handle_path /api/video-generation/* {
+		reverse_proxy video-generation:8014 {
+			header_up X-Forwarded-Prefix /api/video-generation
 			header_up Host {host}
 		}
 	}
@@ -164,6 +212,24 @@
 		}
 	}
 
+	# Music-Generation Service: /music-generation/* -> http://music-generation:8013/*
+	handle /music-generation/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /music-generation
+		reverse_proxy music-generation:8013 {
+			header_up Host {host}
+		}
+	}
+
+	# Video-Generation Service: /video-generation/* -> http://video-generation:8014/*
+	handle /video-generation/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /video-generation
+		reverse_proxy video-generation:8014 {
+			header_up Host {host}
+		}
+	}
+
 	# Everything else -> Next.js PWA on port 3000.
 	handle {
 		reverse_proxy web:3000 {
@@ -222,9 +288,43 @@
 		}
 	}
 
+	# Dashboard: /dashboard* -> http://dashboard:3003
+	redir /dashboard /dashboard/ 308
+	handle /dashboard/* {
+		reverse_proxy dashboard:3003 {
+			header_up Host {host}
+		}
+	}
+
 	handle_path /api/auth/* {
 		reverse_proxy auth:8000
 	}
+
+	# Analytics API: /api/analytics/* -> http://analytics:8010/*
+	handle_path /api/analytics/* {
+		reverse_proxy analytics:8010
+	}
+
+	# Image-Generation API: /api/image-generation/* -> http://image-generation:8011/*
+	handle_path /api/image-generation/* {
+		reverse_proxy image-generation:8011
+	}
+
+	# Media-Processing API: /api/media-processing/* -> http://media-processing:8012/*
+	handle_path /api/media-processing/* {
+		reverse_proxy media-processing:8012
+	}
+
+	# Music-Generation API: /api/music-generation/* -> http://music-generation:8013/*
+	handle_path /api/music-generation/* {
+		reverse_proxy music-generation:8013
+	}
+
+	# Video-Generation API: /api/video-generation/* -> http://video-generation:8014/*
+	handle_path /api/video-generation/* {
+		reverse_proxy video-generation:8014
+	}
+
 	handle_path /voice/* {
 		reverse_proxy voice-processing:8001
 	}
@@ -285,6 +385,20 @@
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /media-processing
 		reverse_proxy media-processing:8012
+	}
+
+	# Music-Generation Service: /music-generation/* -> http://music-generation:8013/*
+	handle /music-generation/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /music-generation
+		reverse_proxy music-generation:8013
+	}
+
+	# Video-Generation Service: /video-generation/* -> http://video-generation:8014/*
+	handle /video-generation/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /video-generation
+		reverse_proxy video-generation:8014
 	}
 
 	handle {

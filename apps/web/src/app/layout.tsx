@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import AppNav from '@/components/AppNav'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -57,7 +58,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" className="dark">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <AppNav />
+        {children}
+      </body>
     </html>
   )
 }

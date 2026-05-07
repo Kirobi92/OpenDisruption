@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --border: #334155;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --accent: #0ea5e9;
+}
+
+html,
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sanftes Pulsieren des Mikrofon-Rings während der Aufnahme */
+@keyframes mic-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.mic-ring-active {
+  animation: mic-ring 1.4s ease-out infinite;
+}

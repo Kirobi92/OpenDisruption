@@ -14,6 +14,8 @@ volumes:
   caddy_config:
   redis_data:
   images_data:
+  music_data:
+  video_data:
 
 services:
   ollama:
@@ -228,6 +230,64 @@ services:
       - kirobi-net
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8012/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  music-generation:
+    build:
+      context: ./services/music-generation
+      dockerfile: Dockerfile
+    container_name: kirobi-music-generation
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8013:8013"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - OLLAMA_HOST=http://ollama:11434
+      - MUSIC_STORAGE_PATH=/data/music
+    volumes:
+      - music_data:/data/music
+    depends_on:
+      - postgres
+      - ollama
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8013/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  video-generation:
+    build:
+      context: ./services/video-generation
+      dockerfile: Dockerfile
+    container_name: kirobi-video-generation
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8014:8014"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - OLLAMA_HOST=http://ollama:11434
+      - VIDEO_STORAGE_PATH=/data/videos
+    volumes:
+      - video_data:/data/videos
+    depends_on:
+      - postgres
+      - ollama
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8014/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -494,6 +554,28 @@ services:
     networks:
       - kirobi-net
 
+  dashboard:
+    build:
+      context: ./apps/dashboard
+      dockerfile: Dockerfile
+    container_name: kirobi-dashboard
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:3003:3003"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=/api
+    depends_on:
+      - api
+      - auth
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   caddy:
     image: caddy:2-alpine
     container_name: kirobi-caddy
@@ -512,6 +594,7 @@ services:
       - caddy_config:/config
     depends_on:
       - web
+      - dashboard
       - auth
       - api
       - open-webui
