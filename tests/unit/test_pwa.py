@@ -111,6 +111,14 @@ def test_compose_includes_caddy_with_lan_binding():
     assert "caddy:2-alpine" in compose
 
 
+def test_tailscale_url_helper_exists_and_is_used_by_makefile():
+    script = REPO_ROOT / "infra" / "scripts" / "tailscale-url.sh"
+    makefile = (REPO_ROOT / "Makefile").read_text()
+    assert script.is_file()
+    assert "bash infra/scripts/tailscale-url.sh" in makefile
+    assert "tailscale ip -4" in script.read_text()
+
+
 # --- CORS in services -------------------------------------------------------
 def test_auth_service_has_safe_cors_config():
     src = (REPO_ROOT / "services" / "auth" / "main.py").read_text()
@@ -120,14 +128,14 @@ def test_auth_service_has_safe_cors_config():
     assert "add_middleware(\n    CORSMiddleware,\n    **_cors_kwargs()" in src
     assert "KIROBI_PUBLIC_ORIGINS" in src
     assert "allow_origin_regex" in src
-    assert "100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])" in src
+    assert "100\\.(6[4-9]|[78]\\d|9\\d|10\\d|11\\d|12[0-7])" in src
 
 
 def test_api_service_has_safe_cors_config():
     src = (REPO_ROOT / "services" / "api" / "main.py").read_text()
     assert "add_middleware(\n    CORSMiddleware,\n    **_cors_kwargs()" in src
     assert "KIROBI_PUBLIC_ORIGINS" in src
-    assert "100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])" in src
+    assert "100\\.(6[4-9]|[78]\\d|9\\d|10\\d|11\\d|12[0-7])" in src
 
 
 # --- First-run user bootstrap ------------------------------------------------

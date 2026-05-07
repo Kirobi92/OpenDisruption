@@ -19,7 +19,7 @@ const PARTS: { name: string; path: string; description: string; guard: string }[
   {
     name: 'Kirobi PWA',
     path: '/chat',
-    description: 'Familie-Chat, Login und Alltagseinstieg.',
+    description: 'Familien-Chat, Login und Alltagseinstieg.',
     guard: 'JWT-Login',
   },
   {
