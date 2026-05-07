@@ -68,6 +68,11 @@ _ZONE_PREFIXES: tuple[tuple[str, Zone], ...] = (
     ("analytics/", Zone.WORKSPACE),
     ("tools/", Zone.WORKSPACE),
     ("archive/", Zone.WORKSPACE),
+    ("agents/", Zone.WORKSPACE),
+    ("kidi/", Zone.WORKSPACE),
+    ("github/", Zone.WORKSPACE),   # .github/ after _normalize strips leading dot
+    ("opencode/", Zone.WORKSPACE),  # .opencode/ after _normalize
+    ("agents/", Zone.WORKSPACE),
     ("extracts/workspace/", Zone.WORKSPACE),
     ("extracts/technical/", Zone.WORKSPACE),
     ("clusters/", Zone.WORKSPACE),
