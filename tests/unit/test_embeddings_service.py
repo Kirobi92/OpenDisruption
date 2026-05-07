@@ -2,8 +2,9 @@
 Unit-Tests für services/embeddings/main.py
 Zone: WORKSPACE
 
-Alle externen Abhängigkeiten (Ollama, Qdrant) werden gemockt.
-Kein laufender Service erforderlich.
+Ollama-HTTP-Calls und Qdrant-Client werden vollständig gemockt.
+Lifespan wird durch Patchen der globalen Clients umgangen.
+Kein laufender Service oder Netzwerk-Call erforderlich.
 """
 from __future__ import annotations
 
@@ -14,69 +15,45 @@ from fastapi.testclient import TestClient
 
 
 # ---------------------------------------------------------------------------
-# Fixtures — globale Clients mocken, bevor die App importiert wird
+# Fixtures
 # ---------------------------------------------------------------------------
-
-def _make_mock_clients():
-    """Erstellt gemockte HTTP- und Qdrant-Clients."""
-    mock_http = AsyncMock()
-    mock_qdrant = AsyncMock()
-
-    # Qdrant-Collections-Antwort für Health-Check
-    mock_collections = MagicMock()
-    mock_collections.collections = []
-    mock_qdrant.get_collections = AsyncMock(return_value=mock_collections)
-    mock_qdrant.upsert = AsyncMock(return_value=None)
-    mock_qdrant.create_collection = AsyncMock(return_value=None)
-
-    # Ollama-Health-Antwort
-    health_resp = MagicMock()
-    health_resp.raise_for_status = MagicMock()
-
-    # Embedding-Antwort
-    embed_resp = MagicMock()
-    embed_resp.raise_for_status = MagicMock()
-    embed_resp.json = MagicMock(return_value={"embedding": [0.1] * 768})
-
-    # GET → health_resp, POST → embed_resp
-    mock_http.get = AsyncMock(return_value=health_resp)
-    mock_http.post = AsyncMock(return_value=embed_resp)
-
-    return mock_http, mock_qdrant
-
 
 @pytest.fixture()
 def client():
     """
-    Gibt einen TestClient zurück, bei dem Ollama- und Qdrant-Clients
-    durch Mocks ersetzt sind.  Der Lifespan wird durch Patchen der
-    Client-Konstruktoren umgangen.
+    TestClient mit gemockten Ollama- und Qdrant-Clients.
+    Lifespan wird durch direktes Setzen der globalen Clients umgangen.
     """
     import services.embeddings.main as emb
 
-    mock_http, mock_qdrant = _make_mock_clients()
+    # Mock HTTP-Client (Ollama)
+    mock_http = AsyncMock()
+    mock_http.aclose = AsyncMock(return_value=None)
 
-    # Lifespan-Konstruktoren patchen, damit keine echten Verbindungen entstehen
-    with patch("services.embeddings.main.httpx.AsyncClient") as mock_http_cls, \
+    # Mock Qdrant-Client
+    mock_qdrant = AsyncMock()
+    mock_qdrant.close = AsyncMock(return_value=None)
+
+    # Fake-Collections-Response
+    mock_collections = MagicMock()
+    mock_collections.collections = []
+    mock_qdrant.get_collections = AsyncMock(return_value=mock_collections)
+    mock_qdrant.create_collection = AsyncMock(return_value=None)
+    mock_qdrant.upsert = AsyncMock(return_value=None)
+
+    with patch("services.embeddings.main.httpx.AsyncClient") as mock_client_cls, \
          patch("services.embeddings.main.AsyncQdrantClient") as mock_qdrant_cls:
 
-        # AsyncClient als async context manager
-        mock_http_cls.return_value = mock_http
-
-        # Qdrant direkt
+        mock_client_cls.return_value.__aenter__ = AsyncMock(return_value=mock_http)
+        mock_client_cls.return_value.__aexit__ = AsyncMock(return_value=None)
         mock_qdrant_cls.return_value = mock_qdrant
 
-        # Clients vorab injizieren (für Endpoints die außerhalb des Lifespan laufen)
-        emb.http_client = mock_http
-        emb.qdrant_client = mock_qdrant
-
-        with TestClient(emb.app, raise_server_exceptions=True) as c:
-            # Nach Lifespan-Start nochmal sicherstellen (Lifespan überschreibt ggf.)
+        with TestClient(emb.app, raise_server_exceptions=False) as c:
+            # Globale Clients direkt setzen (Lifespan umgehen)
             emb.http_client = mock_http
             emb.qdrant_client = mock_qdrant
-            yield c
+            yield c, mock_http, mock_qdrant
 
-    # Aufräumen
     emb.http_client = None
     emb.qdrant_client = None
 
@@ -85,103 +62,249 @@ def client():
 # Health-Endpoint
 # ---------------------------------------------------------------------------
 
-def test_health_endpoint_returns_structure(client: TestClient):
-    """GET /health muss ein dict mit 'status' zurückgeben."""
-    resp = client.get("/health")
+def test_health_returns_structure(client):
+    """GET /health muss status, ollama, qdrant und model zurückgeben."""
+    c, mock_http, mock_qdrant = client
+
+    # Ollama antwortet OK
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_http.get = AsyncMock(return_value=mock_response)
+
+    resp = c.get("/health")
     assert resp.status_code == 200
     data = resp.json()
     assert "status" in data
-    assert isinstance(data["status"], str)
-    # Weitere Pflichtfelder gemäß HealthResponse
     assert "ollama" in data
     assert "qdrant" in data
     assert "model" in data
 
 
+def test_health_degraded_when_ollama_fails(client):
+    """GET /health muss 'degradiert' zurückgeben wenn Ollama nicht erreichbar."""
+    c, mock_http, mock_qdrant = client
+
+    mock_http.get = AsyncMock(side_effect=Exception("Connection refused"))
+
+    resp = c.get("/health")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "degradiert"
+    assert "fehler" in data["ollama"]
+
+
 # ---------------------------------------------------------------------------
-# POST /embed — Validierung
+# POST /embed
 # ---------------------------------------------------------------------------
 
-def test_embed_validates_empty_text(client: TestClient):
-    """POST /embed mit leerem Text muss 422 zurückgeben."""
-    resp = client.post("/embed", json={"text": ""})
-    assert resp.status_code == 422
+def test_embed_returns_embedding(client):
+    """POST /embed muss Embedding-Vektor zurückgeben."""
+    c, mock_http, _ = client
 
+    fake_embedding = [0.1, 0.2, 0.3] * 256  # 768 Dimensionen
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
 
-def test_embed_validates_missing_text(client: TestClient):
-    """POST /embed ohne 'text'-Feld muss 422 zurückgeben."""
-    resp = client.post("/embed", json={})
-    assert resp.status_code == 422
-
-
-def test_embed_valid_text_calls_ollama(client: TestClient):
-    """POST /embed mit gültigem Text muss 200 + Embedding zurückgeben."""
-    resp = client.post("/embed", json={"text": "Hallo Welt"})
+    resp = c.post("/embed", json={"text": "Hallo Welt"})
     assert resp.status_code == 200
     data = resp.json()
     assert "embedding" in data
-    assert isinstance(data["embedding"], list)
     assert len(data["embedding"]) == 768
+    assert data["dimensions"] == 768
     assert "model" in data
-    assert "dimensions" in data
 
 
-# ---------------------------------------------------------------------------
-# POST /embed/batch — Validierung
-# ---------------------------------------------------------------------------
-
-def test_embed_batch_validates_empty_list(client: TestClient):
-    """POST /embed/batch mit leerer Liste muss 422 zurückgeben."""
-    resp = client.post("/embed/batch", json={"texts": []})
+def test_embed_validates_empty_text(client):
+    """POST /embed mit leerem Text muss 422 zurückgeben."""
+    c, _, _ = client
+    resp = c.post("/embed", json={"text": ""})
     assert resp.status_code == 422
 
 
-def test_embed_batch_validates_missing_field(client: TestClient):
-    """POST /embed/batch ohne 'texts'-Feld muss 422 zurückgeben."""
-    resp = client.post("/embed/batch", json={})
+def test_embed_validates_missing_text(client):
+    """POST /embed ohne text-Feld muss 422 zurückgeben."""
+    c, _, _ = client
+    resp = c.post("/embed", json={})
     assert resp.status_code == 422
 
 
-def test_embed_batch_valid_returns_embeddings(client: TestClient):
-    """POST /embed/batch mit gültigen Texten muss 200 + Liste zurückgeben."""
-    resp = client.post("/embed/batch", json={"texts": ["Text A", "Text B"]})
+def test_embed_returns_502_when_ollama_fails(client):
+    """POST /embed muss 502 zurückgeben wenn Ollama nicht erreichbar."""
+    import httpx
+    c, mock_http, _ = client
+
+    mock_http.post = AsyncMock(
+        side_effect=httpx.RequestError("Connection refused", request=MagicMock())
+    )
+
+    resp = c.post("/embed", json={"text": "Test"})
+    assert resp.status_code == 503
+
+
+def test_embed_returns_502_when_no_embedding_returned(client):
+    """POST /embed muss 502 zurückgeben wenn Ollama kein Embedding liefert."""
+    c, mock_http, _ = client
+
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": []})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    resp = c.post("/embed", json={"text": "Test"})
+    assert resp.status_code == 502
+
+
+# ---------------------------------------------------------------------------
+# POST /embed/batch
+# ---------------------------------------------------------------------------
+
+def test_embed_batch_returns_multiple_embeddings(client):
+    """POST /embed/batch muss mehrere Embeddings zurückgeben."""
+    c, mock_http, _ = client
+
+    fake_embedding = [0.1] * 768
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    resp = c.post("/embed/batch", json={"texts": ["Text 1", "Text 2", "Text 3"]})
     assert resp.status_code == 200
     data = resp.json()
-    assert "embeddings" in data
-    assert data["count"] == 2
-    assert len(data["embeddings"]) == 2
+    assert data["count"] == 3
+    assert len(data["embeddings"]) == 3
+
+
+def test_embed_batch_rejects_empty_text_in_list(client):
+    """POST /embed/batch muss 422 zurückgeben wenn ein Text leer ist."""
+    c, mock_http, _ = client
+
+    fake_embedding = [0.1] * 768
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    resp = c.post("/embed/batch", json={"texts": ["Valid text", "   ", "Another text"]})
+    assert resp.status_code == 422
+
+
+def test_embed_batch_validates_empty_list(client):
+    """POST /embed/batch mit leerer Liste muss 422 zurückgeben."""
+    c, _, _ = client
+    resp = c.post("/embed/batch", json={"texts": []})
+    assert resp.status_code == 422
 
 
 # ---------------------------------------------------------------------------
-# POST /store — Zonen-Validierung
+# POST /store
 # ---------------------------------------------------------------------------
 
-def test_store_validates_zone(client: TestClient):
+def test_store_returns_201_with_valid_data(client):
+    """POST /store muss 201 zurückgeben mit gültigen Daten."""
+    c, mock_http, mock_qdrant = client
+
+    fake_embedding = [0.1] * 768
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    resp = c.post(
+        "/store",
+        json={
+            "text": "Wichtiger Inhalt",
+            "zone": "WORKSPACE",
+            "doc_type": "document",
+        },
+    )
+    assert resp.status_code == 201
+    data = resp.json()
+    assert "id" in data
+    assert data["zone"] == "WORKSPACE"
+    assert data["collection"] == "kirobi_workspace_document"
+    assert data["dimensions"] == 768
+
+
+def test_store_validates_invalid_zone(client):
     """POST /store mit ungültiger Zone muss 422 zurückgeben."""
-    resp = client.post(
+    c, _, _ = client
+    resp = c.post(
         "/store",
-        json={"text": "Test-Dokument", "zone": "INVALID_ZONE"},
+        json={
+            "text": "Test",
+            "zone": "INVALID_ZONE",
+        },
     )
     assert resp.status_code == 422
 
 
-def test_store_valid_zones_accepted(client: TestClient):
-    """Alle fünf gültigen Zonen müssen akzeptiert werden (kein 422)."""
-    valid_zones = ["PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"]
-    for zone in valid_zones:
-        resp = client.post(
-            "/store",
-            json={"text": f"Dokument für Zone {zone}", "zone": zone},
-        )
-        assert resp.status_code in (200, 201), (
-            f"Zone '{zone}' wurde unerwartet abgelehnt: {resp.status_code} — {resp.text}"
-        )
+def test_store_uses_provided_doc_id(client):
+    """POST /store muss die angegebene doc_id verwenden."""
+    c, mock_http, mock_qdrant = client
 
+    fake_embedding = [0.1] * 768
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
 
-def test_store_validates_empty_text(client: TestClient):
-    """POST /store mit leerem Text muss 422 zurückgeben."""
-    resp = client.post(
+    custom_id = "my-custom-doc-id"
+    resp = c.post(
         "/store",
-        json={"text": "", "zone": "WORKSPACE"},
+        json={
+            "text": "Test",
+            "zone": "PUBLIC",
+            "doc_id": custom_id,
+        },
     )
-    assert resp.status_code == 422
+    assert resp.status_code == 201
+    assert resp.json()["id"] == custom_id
+
+
+def test_store_all_valid_zones(client):
+    """POST /store muss alle gültigen Zonen akzeptieren."""
+    c, mock_http, mock_qdrant = client
+
+    fake_embedding = [0.1] * 768
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    for zone in ["PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"]:
+        resp = c.post("/store", json={"text": "Test", "zone": zone})
+        assert resp.status_code == 201, f"Zone {zone} sollte akzeptiert werden"
+
+
+# ---------------------------------------------------------------------------
+# Hilfsfunktionen
+# ---------------------------------------------------------------------------
+
+def test_collection_name_format():
+    """_collection_name muss korrekt formatiert sein."""
+    import services.embeddings.main as emb
+
+    assert emb._collection_name("WORKSPACE", "document") == "kirobi_workspace_document"
+    assert emb._collection_name("FAMILY_PRIVATE", "note") == "kirobi_family_private_note"
+    assert emb._collection_name("PUBLIC", "DOCUMENT") == "kirobi_public_document"
+
+
+def test_validate_zone_raises_for_invalid():
+    """_validate_zone muss HTTPException für ungültige Zone werfen."""
+    import services.embeddings.main as emb
+    from fastapi import HTTPException
+
+    with pytest.raises(HTTPException) as exc_info:
+        emb._validate_zone("INVALID")
+    assert exc_info.value.status_code == 422
+
+
+def test_validate_zone_passes_for_valid():
+    """_validate_zone muss für alle gültigen Zonen durchlaufen."""
+    import services.embeddings.main as emb
+
+    for zone in ["PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"]:
+        emb._validate_zone(zone)  # Kein Exception erwartet

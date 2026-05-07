@@ -15,7 +15,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 from pydantic import BaseModel, EmailStr, Field
 import asyncpg
 from dotenv import load_dotenv
@@ -31,7 +31,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 30
 DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{os.getenv('POSTGRES_PASSWORD', 'changeme')}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
 
 # Security
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# bcrypt direkt nutzen (passlib inkompatibel mit bcrypt >= 4.x)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # Database connection pool
@@ -188,7 +188,7 @@ async def _ensure_default_user() -> None:
             user_id,
             username,
             display,
-            pwd_context.hash(password),
+            get_password_hash(password),
             role,
         )
         zones = [
@@ -259,11 +259,11 @@ app.add_middleware(
 
 # Helper functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return _bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt(rounds=12)).decode()
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

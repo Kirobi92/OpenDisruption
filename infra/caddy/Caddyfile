@@ -137,6 +137,33 @@
 		}
 	}
 
+	# Analytics Service: /analytics/* -> http://analytics:8010/*
+	handle /analytics/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /analytics
+		reverse_proxy analytics:8010 {
+			header_up Host {host}
+		}
+	}
+
+	# Image-Generation Service: /image-generation/* -> http://image-generation:8011/*
+	handle /image-generation/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /image-generation
+		reverse_proxy image-generation:8011 {
+			header_up Host {host}
+		}
+	}
+
+	# Media-Processing Service: /media-processing/* -> http://media-processing:8012/*
+	handle /media-processing/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /media-processing
+		reverse_proxy media-processing:8012 {
+			header_up Host {host}
+		}
+	}
+
 	# Everything else -> Next.js PWA on port 3000.
 	handle {
 		reverse_proxy web:3000 {
@@ -238,6 +265,28 @@
 		uri strip_prefix /model-routing
 		reverse_proxy model-routing:8009
 	}
+
+	# Analytics Service: /analytics/* -> http://analytics:8010/*
+	handle /analytics/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /analytics
+		reverse_proxy analytics:8010
+	}
+
+	# Image-Generation Service: /image-generation/* -> http://image-generation:8011/*
+	handle /image-generation/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /image-generation
+		reverse_proxy image-generation:8011
+	}
+
+	# Media-Processing Service: /media-processing/* -> http://media-processing:8012/*
+	handle /media-processing/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /media-processing
+		reverse_proxy media-processing:8012
+	}
+
 	handle {
 		reverse_proxy web:3000
 	}

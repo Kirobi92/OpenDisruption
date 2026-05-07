@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 EMBEDDINGS_URL = os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:8006")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
-PORT = int(os.getenv("RETRIEVAL_SERVICE_PORT", "8008"))
+PORT = int(os.getenv("RETRIEVAL_SERVICE_PORT", "8000"))
 
 # Erlaubte Collections pro Zone (Zone-Enforcement)
 ZONE_COLLECTIONS = {

@@ -13,6 +13,7 @@ volumes:
   caddy_data:
   caddy_config:
   redis_data:
+  images_data:
 
 services:
   ollama:
@@ -161,6 +162,75 @@ services:
       - ollama
     networks:
       - kirobi-net
+
+  analytics:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    container_name: kirobi-analytics
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8010:8010"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+    depends_on:
+      - postgres
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  image-generation:
+    build:
+      context: ./services/image-generation
+      dockerfile: Dockerfile
+    container_name: kirobi-image-generation
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8011:8011"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - IMAGE_STORAGE_PATH=/data/images
+    volumes:
+      - images_data:/data/images
+    depends_on:
+      - ollama
+      - postgres
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8011/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  media-processing:
+    build:
+      context: ./services/media-processing
+      dockerfile: Dockerfile
+    container_name: kirobi-media-processing
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8012:8012"
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8012/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   supervisor:
     build:
