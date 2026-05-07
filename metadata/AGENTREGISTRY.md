@@ -351,3 +351,56 @@ Das Kirobi-Ökosystem umfasst 14 spezialisierte Agenten, die als Flowise-Flows i
 | **hermes** | ✅ | ❌ | ❌ | ❌ | ✅ | – | ❌ | ❌ |
 | **samira** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | – | ✅ |
 | **sineo** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | – |
+
+---
+
+## KIDI-Rollout: Neue Agenten (Phase 0 — Design)
+
+> Status: Architektur dokumentiert, Runtime-Code folgt in Phasen 1–6. Siehe
+> `docs/agent/MULTI-AGENT-ARCHITECTURE.md`, `AGENT-DECISION-MATRIX.md`,
+> `docs/agent/CONTEXT-WINDOW.md`, `docs/agent/KIDI-ENGINE.md`,
+> `docs/agent/KEYBRODI-SUPERINTELLIGENZ.md`,
+> `docs/agent/TELEGRAM-INTEGRATION.md`.
+
+### 15. opencode
+
+- **Rolle:** Code-Generierung, Refactoring, CI/CD-Authoring, Test-Generierung.
+- **Modell:** noch offen (Phase 2). Default-Vorschlag: lokales Coding-Modell aus `metadata/MODEL-REGISTRY.md`.
+- **Zone-Zugriff:** Lesen PUBLIC, WORKSPACE — Schreiben PUBLIC, WORKSPACE.
+- **Werkzeuge:** ContextDB, Git (read), Test-Runner. Commits/Deploys erfordern Human-Approval.
+- **Quelle (geplant):** `agents/opencode/`.
+
+### 16. openclaw
+
+- **Rolle:** Tool-Use (Web, API, Filesystem, Browser-Automation) für PUBLIC/WORKSPACE-Daten.
+- **Zone-Zugriff:** Lesen PUBLIC, WORKSPACE, QUARANTINE — Schreiben PUBLIC, WORKSPACE, QUARANTINE.
+- **Hartes Verbot:** keine API-Calls, die FAMILY_PRIVATE/SACRED-Daten ausgehend transportieren.
+- **Quelle (geplant):** `agents/openclaw/`.
+
+### 17. hermes-reasoner
+
+- **Rolle:** Mehrstufiges Reasoning, Pro/Contra-Debatte, Hypothesen-Validierung, Forschungssynthese.
+  *Nicht zu verwechseln mit `hermes-extractor` (Ingestion-Agent, oben gelistet).*
+- **Zone-Zugriff:** Lesen PUBLIC, WORKSPACE — Schreiben PUBLIC, WORKSPACE.
+- **Quelle (geplant):** `agents/hermes/`.
+
+### 18. obsidian
+
+- **Rolle:** Obsidian-Vault-CRUD, Knowledge-Graph-Queries, Daily-Notes, MOCs.
+- **Zone-Zugriff:** Lesen PUBLIC, WORKSPACE, FAMILY_PRIVATE (lokal) — Schreiben PUBLIC, WORKSPACE, FAMILY_PRIVATE (lokal, mit Approval).
+- **Deployment-Zwang:** läuft nur auf Hosts mit `KIROBI_EGRESS_ALLOWED=false`.
+- **Quelle (geplant):** `agents/obsidian/`.
+
+### 19. kidi
+
+- **Rolle:** Konfidenz-gewichtete Synthese über ContextDB-Einträge mehrerer Agenten; Konflikt-Erkennung.
+- **Zone-Zugriff:** Lesen/Schreiben PUBLIC, WORKSPACE. Kein direkter FAMILY_PRIVATE/SACRED-Zugriff.
+- **Garantie:** `output.zone <= min(input.zone)` — keine Zonen-Eskalation.
+- **Quelle (geplant):** `kidi/core/`, `kidi/context_db/`.
+
+### 20. keybrodi
+
+- **Rolle:** Master-Orchestrator: Task-Routing gemäß `AGENT-DECISION-MATRIX.md`, Metrik-Sammlung in `kirobi-core/core-events.log`.
+- **Zone-Zugriff:** Routing-Metadaten in WORKSPACE; **keine** Inhalte aus FAMILY_PRIVATE/SACRED.
+- **Hart ausgeschlossen:** Selbst-modifizierender RL-Loop, prädiktive Orchestrierung ohne Human-PR.
+- **Quelle (geplant):** `kidi/keybrodi/`.

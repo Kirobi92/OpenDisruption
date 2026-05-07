@@ -4,6 +4,8 @@
 # Goals:
 #   * Make the family PWA reachable at http(s)://kirobi.local AND at the
 #     host's LAN IP from any device on the same network.
+#   * Make the existing admin UIs reachable through ONE edge entry point
+#     (LAN + Tailscale) without exposing their Docker ports directly.
 #   * Terminate TLS locally with `tls internal` (Caddy's self-signed CA)
 #     so service workers / "Install app" prompts work.
 #   * Provide a stable /api/* surface for the PWA (no env-driven rewrites
@@ -31,6 +33,42 @@
 	encode zstd gzip
 	@health path /healthz
 	respond @health "ok" 200
+	@not_edge_private {
+		not remote_ip private_ranges 100.64.0.0/10
+	}
+
+	# Admin / workbench UIs. These are intentionally reachable only from
+	# private LAN or Tailscale clients. Raw database/admin ports remain bound to
+	# KIROBI_BIND_HOST (127.0.0.1 by default); Caddy is the only edge entry.
+	redir /open-webui /open-webui/ 308
+	handle /open-webui/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /open-webui
+		reverse_proxy open-webui:8080 {
+			header_up X-Forwarded-Prefix /open-webui
+			header_up Host {host}
+		}
+	}
+
+	redir /flowise /flowise/ 308
+	handle /flowise/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /flowise
+		reverse_proxy flowise:3000 {
+			header_up X-Forwarded-Prefix /flowise
+			header_up Host {host}
+		}
+	}
+
+	redir /qdrant /qdrant/dashboard 308
+	handle /qdrant/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /qdrant
+		reverse_proxy qdrant:6333 {
+			header_up X-Forwarded-Prefix /qdrant
+			header_up Host {host}
+		}
+	}
 
 	# Auth service: /api/auth/* -> http://auth:8000/*
 	handle_path /api/auth/* {
@@ -79,6 +117,39 @@
 	encode zstd gzip
 	@health path /healthz
 	respond @health "ok" 200
+	@not_edge_private {
+		not remote_ip private_ranges 100.64.0.0/10
+	}
+
+	redir /open-webui /open-webui/ 308
+	handle /open-webui/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /open-webui
+		reverse_proxy open-webui:8080 {
+			header_up X-Forwarded-Prefix /open-webui
+			header_up Host {host}
+		}
+	}
+
+	redir /flowise /flowise/ 308
+	handle /flowise/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /flowise
+		reverse_proxy flowise:3000 {
+			header_up X-Forwarded-Prefix /flowise
+			header_up Host {host}
+		}
+	}
+
+	redir /qdrant /qdrant/dashboard 308
+	handle /qdrant/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /qdrant
+		reverse_proxy qdrant:6333 {
+			header_up X-Forwarded-Prefix /qdrant
+			header_up Host {host}
+		}
+	}
 
 	handle_path /api/auth/* {
 		reverse_proxy auth:8000

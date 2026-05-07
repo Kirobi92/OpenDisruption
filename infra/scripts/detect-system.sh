@@ -97,10 +97,20 @@ AGENT_ENV="human"
 [[ "${TERM_PROGRAM:-}" == "vscode" ]]       && AGENT_ENV="vscode"
 [[ -n "${CI:-}" ]]                          && AGENT_ENV="ci/${AGENT_ENV}"
 
+json_escape() {
+  local s="${1//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\t'/\\t}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\f'/\\f}"
+  s="${s//$'\n'/ }"
+  printf '%s' "$s"
+}
+
 case "$OUTPUT" in
   json)
     cat <<EOF
-{"os":{"family":"$OS_FAMILY","name":"$OS_NAME","version":"$OS_VERSION","arch":"$ARCH"},"cpu":{"cores":$CPU_CORES,"model":"$CPU_MODEL"},"ram_gb":$RAM_GB,"gpu":{"vendor":"$GPU_VENDOR","model":"$GPU_MODEL","count":$GPU_COUNT,"vram_gb":$GPU_VRAM_GB},"disk_free_gb":$DISK_FREE_GB,"docker":{"version":"$DOCKER_VERSION","compose":"$COMPOSE_VERSION","running":$DOCKER_RUNNING},"recommended_profile":"$PROFILE","agent_env":"$AGENT_ENV"}
+{"os":{"family":"$(json_escape "$OS_FAMILY")","name":"$(json_escape "$OS_NAME")","version":"$(json_escape "$OS_VERSION")","arch":"$(json_escape "$ARCH")"},"cpu":{"cores":$CPU_CORES,"model":"$(json_escape "$CPU_MODEL")"},"ram_gb":$RAM_GB,"gpu":{"vendor":"$(json_escape "$GPU_VENDOR")","model":"$(json_escape "$GPU_MODEL")","count":$GPU_COUNT,"vram_gb":$GPU_VRAM_GB},"disk_free_gb":$DISK_FREE_GB,"docker":{"version":"$(json_escape "$DOCKER_VERSION")","compose":"$(json_escape "$COMPOSE_VERSION")","running":$DOCKER_RUNNING},"recommended_profile":"$(json_escape "$PROFILE")","agent_env":"$(json_escape "$AGENT_ENV")"}
 EOF
     ;;
   shell)
