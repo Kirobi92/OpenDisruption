@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 import asyncpg
+import httpx
 from pydantic import BaseModel
 
 # Optional integration with the local-first kirobi_core package. We
@@ -128,6 +129,12 @@ class SupervisorConfig:
     QDRANT_HOST = os.getenv('QDRANT_HOST', 'qdrant')
     QDRANT_PORT = int(os.getenv('QDRANT_PORT', 6333))
 
+    # Agent-Service-Endpunkte (konfigurierbar via Umgebungsvariablen)
+    EMBEDDINGS_SERVICE_URL = os.getenv('EMBEDDINGS_SERVICE_URL', 'http://embeddings:8004')
+    INGEST_SERVICE_URL = os.getenv('INGEST_SERVICE_URL', 'http://ingest:8005')
+    RETRIEVAL_SERVICE_URL = os.getenv('RETRIEVAL_SERVICE_URL', 'http://retrieval:8006')
+    API_SERVICE_URL = os.getenv('API_SERVICE_URL', 'http://api:8000')
+
     # Operation
     MAIN_LOOP_INTERVAL = int(os.getenv('SUPERVISOR_LOOP_INTERVAL', 30))  # seconds
     HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 60))
@@ -158,6 +165,9 @@ class KirobiSupervisor:
             'uptime_start': datetime.now(),
             'last_health_check': None
         }
+
+        # Cached API token for Kirobi API calls
+        self._api_token: Optional[str] = None
 
         logger.info("Kirobi Supervisor initializing...")
 
@@ -427,16 +437,293 @@ class KirobiSupervisor:
                 ''', task.status.value, datetime.now(), task.id)
 
     async def route_to_agent(self, task: Task) -> Any:
-        """Route task to appropriate agent"""
-        # This is a placeholder for actual agent routing
-        # In real implementation, this would invoke specific agents via Flowise or direct API
+        """Route task to the appropriate agent handler.
 
-        logger.info(f"Routing task {task.name} to agent: {task.assigned_agent or 'auto'}")
+        Dispatches based on ``task.assigned_agent``:
 
-        # Simulate work
-        await asyncio.sleep(1)
+        - Known kirobi agents → Kirobi API conversation endpoint
+        - ``"voice-agent"``   → Voice TTS service
+        - ``None`` / unknown  → LLM-based auto-routing via Ollama
 
-        return {"status": "success"}
+        Never raises — errors are caught, logged, and returned as a
+        structured dict so the supervisor loop stays stable.
+        """
+        logger.info(f"Routing task '{task.name}' to agent: {task.assigned_agent or 'auto'}")
+
+        _KIROBI_AGENTS = {
+            "kirobi-coder",
+            "kirobi-architect",
+            "kirobi-ops",
+            "kirobi-reviewer",
+            "kirobi-frontend",
+            "kirobi-docs",
+        }
+
+        agent = task.assigned_agent
+        if agent in _KIROBI_AGENTS:
+            return await self._route_to_kirobi_api(task)
+        elif agent == "voice-agent":
+            return await self._route_to_voice(task)
+        else:
+            return await self._route_auto(task)
+
+    async def _get_api_token(self) -> Optional[str]:
+        """Return a Bearer token for the Kirobi API.
+
+        Checks ``KIROBI_API_TOKEN`` env first; otherwise performs a
+        password-grant login against the auth service and caches the
+        result in ``self._api_token``.
+        """
+        env_token = os.getenv("KIROBI_API_TOKEN")
+        if env_token:
+            return env_token
+
+        if self._api_token:
+            return self._api_token
+
+        auth_url = os.getenv("KIROBI_AUTH_URL", "http://auth:8000")
+        username = os.getenv("KIROBI_DEFAULT_USER", "admin")
+        password = os.getenv("KIROBI_DEFAULT_PASSWORD", "changeme")
+
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(
+                    f"{auth_url}/token",
+                    data={"username": username, "password": password},
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                self._api_token = data.get("access_token")
+                return self._api_token
+        except Exception as exc:
+            logger.warning(f"Could not obtain API token: {exc}")
+            return None
+
+    async def _route_to_kirobi_api(self, task: Task) -> Any:
+        """Send task to a Kirobi agent via the API conversation endpoint.
+
+        1. POST /conversations  → conversation_id
+        2. POST /conversations/{id}/messages with task.description
+        Returns a structured result dict; never raises.
+        """
+        api_url = os.getenv("KIROBI_API_URL", "http://api:8000")
+        try:
+            token = await self._get_api_token()
+            headers: Dict[str, str] = {}
+            if token:
+                headers["Authorization"] = f"Bearer {token}"
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                # 1. Create conversation
+                conv_resp = await client.post(
+                    f"{api_url}/conversations",
+                    json={"title": task.name, "agent": task.assigned_agent},
+                    headers=headers,
+                )
+                conv_resp.raise_for_status()
+                conversation_id = conv_resp.json()["id"]
+
+                # 2. Send message and retrieve AI response
+                msg_resp = await client.post(
+                    f"{api_url}/conversations/{conversation_id}/messages",
+                    json={"content": task.description, "role": "user"},
+                    headers=headers,
+                )
+                msg_resp.raise_for_status()
+                ai_response = msg_resp.json().get("content", "")
+
+            return {
+                "status": "success",
+                "response": ai_response,
+                "agent": task.assigned_agent,
+            }
+        except Exception as exc:
+            logger.error(f"Kirobi API routing failed for task '{task.name}': {exc}")
+            return {"status": "error", "error": str(exc)}
+
+    async def _route_auto(self, task: Task) -> Any:
+        """Use Ollama to determine the best agent, then delegate to Kirobi API.
+
+        Sends a short prompt to Ollama asking which agent fits the task.
+        Parses the response for a known agent name, sets
+        ``task.assigned_agent``, and calls ``_route_to_kirobi_api``.
+        Falls back to ``{"status": "skipped"}`` on any error.
+        """
+        ollama_host = SupervisorConfig.OLLAMA_HOST
+        model = SupervisorConfig.SUPERVISOR_MODEL
+        prompt = (
+            f"Task: {task.name}\n"
+            f"Description: {task.description}\n"
+            "Which agent? (kirobi-coder/kirobi-architect/kirobi-ops/"
+            "kirobi-reviewer/kirobi-frontend/kirobi-docs/none)\n"
+            "Answer with just the agent name:"
+        )
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(
+                    f"{ollama_host}/api/generate",
+                    json={"model": model, "prompt": prompt, "stream": False},
+                )
+                resp.raise_for_status()
+                raw = resp.json().get("response", "").strip().lower()
+
+            _VALID = {
+                "kirobi-coder", "kirobi-architect", "kirobi-ops",
+                "kirobi-reviewer", "kirobi-frontend", "kirobi-docs",
+            }
+            detected: Optional[str] = None
+            for token in raw.split():
+                candidate = token.strip(".,;:")
+                if candidate in _VALID:
+                    detected = candidate
+                    break
+
+            if detected:
+                task.assigned_agent = detected
+                logger.info(f"Auto-routing task '{task.name}' → {detected}")
+                return await self._route_to_kirobi_api(task)
+
+            logger.info(
+                f"Auto-routing found no suitable agent for '{task.name}' (raw: {raw!r})"
+            )
+            return {"status": "skipped", "reason": "no suitable agent determined"}
+
+        except Exception as exc:
+            logger.warning(f"Auto-routing unavailable for task '{task.name}': {exc}")
+            return {"status": "skipped", "reason": "auto-routing unavailable"}
+
+    async def _route_to_voice(self, task: Task) -> Any:
+        """Send task description to the voice TTS service.
+
+        POST {VOICE_SERVICE_URL}/tts with ``{"text": task.description}``.
+        Returns a structured result dict; never raises.
+        """
+        voice_url = SupervisorConfig.VOICE_SERVICE_URL
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                resp = await client.post(
+                    f"{voice_url}/tts",
+                    json={"text": task.description},
+                )
+                resp.raise_for_status()
+            return {"status": "success", "agent": "voice-agent"}
+        except Exception as exc:
+            logger.warning(f"Voice service unavailable for task '{task.name}': {exc}")
+            return {"status": "skipped", "reason": "voice service unavailable"}
+
+    def _infer_agent(self, task: Task) -> str:
+        """Leitet den passenden Agenten aus Task-Name und -Beschreibung ab."""
+        text = f"{task.name} {task.description}".lower()
+        if any(kw in text for kw in ("code", "implement", "bug", "test", "refactor")):
+            return "kirobi-coder"
+        if any(kw in text for kw in ("architecture", "design", "schema", "adr")):
+            return "kirobi-architect"
+        if any(kw in text for kw in ("docker", "deploy", "infra", "compose", "script")):
+            return "kirobi-ops"
+        if any(kw in text for kw in ("frontend", "ui", "pwa", "react", "next")):
+            return "kirobi-frontend"
+        if any(kw in text for kw in ("interview", "family", "onboarding")):
+            return "family-interviewer"
+        if any(kw in text for kw in ("voice", "speech", "audio")):
+            return "voice-agent"
+        return "kirobi-core"
+
+    # Agent-Handler-Registry
+    @property
+    def _AGENT_HANDLERS(self) -> dict:
+        return {
+            "kirobi-coder": self._handle_coding_task,
+            "kirobi-architect": self._handle_architecture_task,
+            "kirobi-ops": self._handle_ops_task,
+            "kirobi-core": self._handle_generic,
+            "family-interviewer": self._handle_interview_task,
+            "voice-agent": self._handle_voice_task,
+        }
+
+    async def _handle_coding_task(self, task: Task) -> dict:
+        """Coding-Tasks: Ollama mit qwen2.5-coder oder llama3.1."""
+        return await self._call_ollama(
+            model=os.getenv("MODEL_CODE_PRIMARY", "qwen2.5-coder:7b"),
+            prompt=f"Task: {task.name}\n\n{task.description}\n\nAnalysiere und schlage eine Implementierung vor.",
+            task=task,
+        )
+
+    async def _handle_architecture_task(self, task: Task) -> dict:
+        """Architektur-Tasks: Ollama mit deepseek-r1 für Reasoning."""
+        return await self._call_ollama(
+            model=os.getenv("MODEL_REASONING_PRIMARY", "deepseek-r1:7b"),
+            prompt=f"Architektur-Aufgabe: {task.name}\n\n{task.description}\n\nErstelle eine strukturierte Analyse.",
+            task=task,
+        )
+
+    async def _handle_ops_task(self, task: Task) -> dict:
+        """Ops-Tasks: Ollama mit llama3.1:8b."""
+        return await self._call_ollama(
+            model=os.getenv("MODEL_CHAT_PRIMARY", "llama3.1:8b"),
+            prompt=f"DevOps-Aufgabe: {task.name}\n\n{task.description}",
+            task=task,
+        )
+
+    async def _handle_interview_task(self, task: Task) -> dict:
+        """Interview-Tasks: Voice-Service aufrufen."""
+        logger.info(f"Interview-Task: {task.name} — Voice-Service wird benachrichtigt")
+        # Voice-Service benachrichtigen (best-effort)
+        try:
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.config.VOICE_SERVICE_URL}/interview/start",
+                    json={"participant": task.metadata.get("participant", "Sven"), "task_id": task.id},
+                    timeout=aiohttp.ClientTimeout(total=5),
+                ) as resp:
+                    if resp.status == 200:
+                        return {"status": "interview_started", "agent": "family-interviewer"}
+        except Exception as e:
+            logger.warning(f"Voice-Service nicht erreichbar: {e}")
+        return {"status": "queued", "agent": "family-interviewer", "note": "Voice-Service offline"}
+
+    async def _handle_voice_task(self, task: Task) -> dict:
+        """Voice-Tasks: Voice-Processing-Service."""
+        return {"status": "voice_task_queued", "agent": "voice-agent"}
+
+    async def _handle_generic(self, task: Task) -> dict:
+        """Generischer Handler: Ollama mit Standard-Modell."""
+        return await self._call_ollama(
+            model=self.config.SUPERVISOR_MODEL,
+            prompt=f"Aufgabe: {task.name}\n\n{task.description}",
+            task=task,
+        )
+
+    async def _call_ollama(self, model: str, prompt: str, task: Task) -> dict:
+        """Ruft Ollama auf und gibt strukturiertes Ergebnis zurück."""
+        try:
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.config.OLLAMA_HOST}/api/generate",
+                    json={
+                        "model": model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {"temperature": 0.3, "num_predict": 512},
+                    },
+                    timeout=aiohttp.ClientTimeout(total=self.config.TASK_EXECUTION_TIMEOUT),
+                ) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        return {
+                            "status": "success",
+                            "model": model,
+                            "response": data.get("response", ""),
+                            "task_id": task.id,
+                        }
+                    else:
+                        logger.warning(f"Ollama {resp.status} für Task {task.id}")
+                        return {"status": "ollama_error", "code": resp.status, "task_id": task.id}
+        except Exception as e:
+            logger.error(f"Ollama-Aufruf fehlgeschlagen: {e}")
+            return {"status": "error", "error": str(e), "task_id": task.id}
 
     async def start_family_interview(self, participant: str):
         """Initiate family interview"""
