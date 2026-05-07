@@ -23,10 +23,13 @@ class TestObsidianZoneRefusal:
         result = agent.run(task)
         assert result.success is False
 
-    def test_family_private_zone_read_erlaubt(self):
+    def test_family_private_zone_read_erlaubt(self, tmp_path):
         """Obsidian ist der EINZIGE neue Agent der FAMILY_PRIVATE anfassen darf."""
-        agent = ObsidianAgent()
-        task = Task(task_type="vault_read", zone="FAMILY_PRIVATE", payload={})
+        note = tmp_path / "family" / "note.md"
+        note.parent.mkdir(parents=True)
+        note.write_text("privat", encoding="utf-8")
+        agent = ObsidianAgent(vault_path=tmp_path)
+        task = Task(task_type="vault_read", zone="FAMILY_PRIVATE", payload={"path": "family/note.md"})
         result = agent.run(task)
         assert result.success is True
 
