@@ -267,18 +267,7 @@ webui-url:
 
 ## Tailscale-URL anzeigen (kein Funnel; privater Tailnet-Zugriff)
 tailscale-url:
-	@if command -v tailscale >/dev/null 2>&1; then \
-		TS_IP=$$(tailscale ip -4 2>/dev/null | head -1); \
-		TS_NAME=""; \
-		if command -v python3 >/dev/null 2>&1; then \
-			TS_NAME=$$(tailscale status --json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('Self',{}).get('DNSName','').rstrip('.'))" 2>/dev/null || true); \
-		fi; \
-		[ -n "$$TS_NAME" ] && echo "    http://$$TS_NAME/status                (Tailscale MagicDNS)"; \
-		[ -n "$$TS_IP" ] && echo "    http://$$TS_IP/status                  (Tailscale IP)"; \
-		[ -z "$$TS_NAME" ] && [ -z "$$TS_IP" ] && echo "    (Tailscale läuft, aber IP/MagicDNS konnte nicht ermittelt werden)"; \
-	else \
-		echo "    (tailscale CLI nicht gefunden; nutze deine Tailscale-IP oder MagicDNS manuell)"; \
-	fi
+	@bash infra/scripts/tailscale-url.sh
 
 ## mDNS / Avahi für kirobi.local einrichten (benötigt sudo)
 pwa-mdns:
@@ -300,6 +289,8 @@ integration-test:
 	@bash -n infra/scripts/healthcheck.sh && echo "  ✓ healthcheck.sh OK"
 	@echo "→ setup-mdns.sh syntax"
 	@bash -n infra/scripts/setup-mdns.sh && echo "  ✓ setup-mdns.sh OK"
+	@echo "→ tailscale-url.sh syntax"
+	@bash -n infra/scripts/tailscale-url.sh && echo "  ✓ tailscale-url.sh OK"
 	@echo "→ Caddyfile vorhanden"
 	@test -f infra/caddy/Caddyfile && echo "  ✓ Caddyfile present"
 	@echo "→ services/auth/main.py + services/api/main.py kompilieren"
