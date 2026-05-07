@@ -15,10 +15,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+import asyncio
+
 import aiofiles
 import asyncpg
 import httpx
 from dotenv import load_dotenv
+
+try:
+    from kirobi_core.analytics_client import track as _analytics_track
+except Exception:  # noqa: BLE001
+    async def _analytics_track(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        pass
 from fastapi import (
     Depends,
     FastAPI,
@@ -416,6 +424,7 @@ async def ingest_text(
     try:
         await _send_to_embeddings(job_id, request.text, request.zone, meta)
         await _update_job(job_id, "completed")
+        asyncio.create_task(_analytics_track("ingest", zone=request.zone, metadata={"source": "text", "job_id": job_id}))
         logger.info("Text ingest completed. job_id=%s zone=%s", job_id, request.zone)
     except Exception as exc:
         err_msg = f"{type(exc).__name__}: {exc}"
@@ -502,6 +511,7 @@ async def ingest_file(
     try:
         await _send_to_embeddings(job_id, text, zone, meta)
         await _update_job(job_id, "completed")
+        asyncio.create_task(_analytics_track("ingest", zone=zone, metadata={"source": suffix.lstrip("."), "job_id": job_id}))
         logger.info(
             "File ingest completed. job_id=%s zone=%s file=%s",
             job_id,
