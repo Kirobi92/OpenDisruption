@@ -53,7 +53,7 @@ echo ""
 
 echo "→ Datenbank-Services:"
 check_tcp "PostgreSQL" "localhost" "$POSTGRES_PORT"
-check_http "Qdrant REST" "http://localhost:$QDRANT_PORT/health"
+check_http "Qdrant REST" "http://localhost:$QDRANT_PORT/collections"
 
 echo ""
 echo "→ KI-Services:"

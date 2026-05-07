@@ -5,12 +5,18 @@ import contextlib
 import http.server
 import json
 import socket
+import subprocess
+import sys
 import threading
+from pathlib import Path
 from typing import Any
 
 import pytest
 
 from kirobi_core import services
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class _Handler(http.server.BaseHTTPRequestHandler):
@@ -137,3 +143,40 @@ def test_probe_all_returns_one_per_service(monkeypatch):
     names = [s.name for s in statuses]
     assert names == ["ollama", "qdrant", "postgres", "voice", "auth", "api", "open-webui", "flowise"]
     assert all(not s.ok for s in statuses)
+
+
+def test_new_python_entrypoints_compile():
+    import py_compile
+
+    for path in (
+        REPO_ROOT / "infra" / "scripts" / "init-qdrant.py",
+        REPO_ROOT / "services" / "telegram" / "main.py",
+        REPO_ROOT / "kirobi_core" / "keycodi.py",
+    ):
+        py_compile.compile(str(path), doraise=True)
+
+
+def test_qdrant_init_dry_run_without_live_qdrant():
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "infra" / "scripts" / "init-qdrant.py"),
+            "--dry-run",
+            "--qdrant-url",
+            "http://127.0.0.1:9",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert "DRY-RUN" in result.stdout
+    assert "Alle 7 Collections verarbeitet" in result.stdout
+
+
+def test_telegram_service_escapes_html_replies():
+    src = (REPO_ROOT / "services" / "telegram" / "main.py").read_text()
+    assert "from html import escape" in src
+    assert "def _html" in src
+    assert "_html(ai_response)" in src

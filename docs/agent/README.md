@@ -51,6 +51,7 @@ install.sh
 | `validate-env.sh`     | check `.env` completeness, secrets, perms | `--fix`, `--quiet` |
 | `init-folders.sh`     | create the zone folder layout | – |
 | `init-family-profiles.sh` | seed default family profiles | – |
+| `reset-default-password.sh` | resync bootstrap auth password to current `.env` default | `--dry-run` |
 | `setup-mdns.sh`       | publish `kirobi.local` on the LAN | – |
 | `pull-models.sh`      | pre-fetch Ollama models | – |
 | `build-pwa-icons.py`  | regenerate PWA icons | – |
@@ -120,3 +121,12 @@ When you add a file under `docs/agent/`:
 3. Include a **Decision matrix excerpt** if the topic involves zone changes.
 4. Include a **Recovery note** if the topic involves destructive ops.
 5. Link back here from the table at the top of this file.
+
+---
+
+## Additional docs
+
+| File | Purpose |
+|------|---------|
+| [`opencode-role.md`](./opencode-role.md) | define the safe role of the compose-adjacent `kirobi-opencode` UI |
+| [`keycodi-orchestrator.md`](./keycodi-orchestrator.md) | operate KeyCodi, the repo-owned coding mission orchestrator |

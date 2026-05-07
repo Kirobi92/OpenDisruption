@@ -43,3 +43,16 @@ def test_registry_find_by_capability():
     reg = AgentRegistry(parse_registry(SAMPLE))
     coders = reg.find_by_capability("code")
     assert any(a.name == "kirobi-coder" for a in coders)
+
+
+def test_parse_registry_handles_all_zones_except_sacred():
+    specs = parse_registry(
+        """## 1. kirobi-observer
+**Rolle:** Observer
+**Modell:** mistral:7b
+**Zone-Zugriff:** Lesen aller Zonen (außer SACRED)
+"""
+    )
+    zones = {zone.value for zone in specs[0].zones}
+    assert "SACRED" not in zones
+    assert {"PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE"}.issubset(zones)

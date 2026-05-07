@@ -7,6 +7,16 @@ set -euo pipefail
 
 OLLAMA_PORT="${OLLAMA_PORT:-11434}"
 OLLAMA_URL="http://localhost:$OLLAMA_PORT"
+OLLAMA_CMD=(ollama)
+
+if ! command -v ollama >/dev/null 2>&1; then
+  if command -v docker >/dev/null 2>&1 && docker compose ps --services --status running 2>/dev/null | grep -qx 'ollama'; then
+    OLLAMA_CMD=(docker compose exec -T ollama ollama)
+  else
+    echo "❌ Ollama CLI nicht gefunden und kein laufender Ollama-Container erkannt"
+    exit 1
+  fi
+fi
 
 # Prüfen ob Ollama erreichbar ist
 if ! curl -s "$OLLAMA_URL/api/tags" > /dev/null 2>&1; then
@@ -22,7 +32,7 @@ pull_model() {
   local model="$1"
   local priority="$2"
   echo "  → Lade $model (Priorität: $priority)..."
-  if ollama pull "$model"; then
+  if "${OLLAMA_CMD[@]}" pull "$model"; then
     echo "  ✅ $model heruntergeladen"
   else
     echo "  ❌ Fehler beim Herunterladen von $model"
@@ -42,7 +52,10 @@ pull_model "mistral:7b" "KRITISCH"
 
 echo ""
 echo "→ Phase 2: Erweiterte Modelle (~25 GB zusätzlich)"
-read -p "Jetzt Phase 2 Modelle herunterladen? [j/N] " confirm
+confirm=""
+if [ -t 0 ]; then
+  read -p "Jetzt Phase 2 Modelle herunterladen? [j/N] " confirm
+fi
 if [ "${confirm,,}" = "j" ]; then
   pull_model "phi3.5:3.8b" "HOCH"
   pull_model "qwen2.5-coder:7b" "HOCH"
@@ -51,7 +64,10 @@ fi
 
 echo ""
 echo "→ Phase 3: Spezialmodelle (optional)"
-read -p "Jetzt Phase 3 Modelle herunterladen? [j/N] " confirm
+confirm=""
+if [ -t 0 ]; then
+  read -p "Jetzt Phase 3 Modelle herunterladen? [j/N] " confirm
+fi
 if [ "${confirm,,}" = "j" ]; then
   pull_model "deepseek-r1:32b" "OPTIONAL"
   pull_model "qwen2.5-coder:32b" "OPTIONAL"
@@ -62,4 +78,4 @@ fi
 echo ""
 echo "✅ Modell-Download abgeschlossen!"
 echo "→ Verfügbare Modelle:"
-ollama list
+"${OLLAMA_CMD[@]}" list
