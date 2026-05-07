@@ -1,6 +1,10 @@
 ---
 description: KeyCodi — Master-Code-Orchestrator des OpenDisruption-Ökosystems. Plant, delegiert, integriert und erschafft technologische Kunstwerke mit emotionaler Intelligenz.
 mode: primary
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: high
+  summary: auto
 temperature: 0.3
 permission:
   edit: allow

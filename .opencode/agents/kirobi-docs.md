@@ -1,6 +1,10 @@
 ---
 description: Kirobi Docs — Erstellt und pflegt Dokumentation, README-Dateien, Kommentare, CHANGELOG und technische Beschreibungen für das OpenDisruption-Ökosystem. Schreibt auf Deutsch.
 mode: subagent
+model: github-copilot/gpt-5.5
+reasoning:
+  effort: low
+  summary: auto
 temperature: 0.4
 permission:
   edit: allow

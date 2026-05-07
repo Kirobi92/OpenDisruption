@@ -9,6 +9,7 @@ volumes:
   postgres_data:
   flowise_data:
   uploads_data:
+  ingest_data:
   caddy_data:
   caddy_config:
   redis_data:
@@ -24,6 +25,13 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - kirobi-net
+    environment:
+      # RTX 3090 — 24 GB VRAM: 4 parallele Anfragen, 90% VRAM für Modell-Layer
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-4}
+      - OLLAMA_GPU_MEMORY_FRACTION=${OLLAMA_GPU_MEMORY_FRACTION:-0.90}
+      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-2}
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=q8_0
     deploy:
       resources:
         reservations:
@@ -175,6 +183,9 @@ services:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - VOICE_SERVICE_URL=http://voice-processing:8001
+      - EMBEDDINGS_SERVICE_URL=http://embeddings:8000
+      - INGEST_SERVICE_URL=http://ingest:8000
+      - RETRIEVAL_SERVICE_URL=http://retrieval:8000
       - SUPERVISOR_MODEL=${SUPERVISOR_MODEL:-llama3.1:70b}
     depends_on:
       postgres:
@@ -244,6 +255,87 @@ services:
     networks:
       - kirobi-net
 
+  embeddings:
+    build:
+      context: ./services/embeddings
+      dockerfile: Dockerfile
+    container_name: kirobi-embeddings
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8004:8000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-nomic-embed-text}
+      - VECTOR_DIMENSION=${VECTOR_DIMENSION:-768}
+    depends_on:
+      - ollama
+      - qdrant
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ingest:
+    build:
+      context: ./services/ingest
+      dockerfile: Dockerfile
+    container_name: kirobi-ingest
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8007:8000"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
+      - EMBEDDINGS_SERVICE_URL=http://embeddings:8000
+      - AUTH_SERVICE_URL=http://auth:8000
+    volumes:
+      - uploads_data:/data/uploads
+      - ingest_data:/data/ingest
+    depends_on:
+      - postgres
+      - embeddings
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  retrieval:
+    build:
+      context: ./services/retrieval
+      dockerfile: Dockerfile
+    container_name: kirobi-retrieval
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8006:8000"
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - EMBEDDINGS_SERVICE_URL=http://embeddings:8000
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1:8b}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-120}
+    depends_on:
+      - qdrant
+      - embeddings
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   web:
     build:
       context: ./apps/web
@@ -302,6 +394,33 @@ services:
         condition: service_healthy
       api:
         condition: service_started
+    networks:
+      - kirobi-net
+
+  model-routing:
+    build:
+      context: ./services/model-routing
+      dockerfile: Dockerfile
+    image: kirobi-model-routing:latest
+    container_name: kirobi-model-routing
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
+      - MODEL_CHAT_PRIMARY=${MODEL_CHAT_PRIMARY:-llama3.1:8b}
+      - MODEL_CODE_PRIMARY=${MODEL_CODE_PRIMARY:-qwen2.5-coder:7b}
+      - MODEL_REASONING_PRIMARY=${MODEL_REASONING_PRIMARY:-deepseek-r1:7b}
+      - MODEL_ROUTING_PORT=8009
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:8009:8009"
+    depends_on:
+      ollama:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8009/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     networks:
       - kirobi-net
 

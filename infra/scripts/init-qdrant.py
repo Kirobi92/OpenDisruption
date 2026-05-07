@@ -1,187 +1,195 @@
 #!/usr/bin/env python3
+# zone: WORKSPACE
 """
-Qdrant Collections Init-Skript
-Zone: WORKSPACE
-Zweck: Erstellt die 7 Kirobi-Collections in Qdrant beim ersten Start.
-       Idempotent — bereits vorhandene Collections werden übersprungen.
+Qdrant Collections Initialisierung
+Erstellt alle benötigten Collections für das Kirobi-Ökosystem (idempotent).
 
 Verwendung:
-    python infra/scripts/init-qdrant.py
-    python infra/scripts/init-qdrant.py --dry-run
-    QDRANT_URL=http://qdrant:6333 python infra/scripts/init-qdrant.py
+    python3 infra/scripts/init-qdrant.py [--dry-run] [--qdrant-url URL]
+
+Optionen:
+    --dry-run           Zeigt an, was erstellt würde, ohne echte Requests zu senden.
+    --qdrant-url URL    Überschreibt QDRANT_HOST/QDRANT_PORT (z.B. http://localhost:6333)
+
+Umgebungsvariablen:
+    QDRANT_HOST  - Qdrant-Hostname (Standard: localhost)
+    QDRANT_PORT  - Qdrant-Port     (Standard: 6333)
 """
 
-import argparse
-import json
+import os
 import sys
 import urllib.request
 import urllib.error
-import os
-from typing import Optional
+import json
+import argparse
+from typing import Any
 
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "")
+# ---------------------------------------------------------------------------
+# Konfiguration
+# ---------------------------------------------------------------------------
 
-# Collection-Definitionen gemäß metadata/COLLECTION-MAPPING.md
-COLLECTIONS = [
-    {
-        "name": "kirobi_workspace",
-        "description": "WORKSPACE-Wissen: Code, Docs, Configs",
-        "zone": "WORKSPACE",
-        "vector_size": 1024,    # bge-m3
-        "distance": "Cosine",
-    },
-    {
-        "name": "kirobi_family",
-        "description": "FAMILY_PRIVATE: Familienwissen, persönliche Daten",
-        "zone": "FAMILY_PRIVATE",
-        "vector_size": 1024,    # bge-m3
-        "distance": "Cosine",
-    },
-    {
-        "name": "kirobi_canon",
-        "description": "Canon: autorisiertes, geprüftes Wissen",
-        "zone": "mixed",
-        "vector_size": 1024,    # bge-m3
-        "distance": "Cosine",
-    },
-    {
-        "name": "kirobi_experiences",
-        "description": "FAMILY_PRIVATE: Lernpfade, Projekte, Erlebnisse",
-        "zone": "FAMILY_PRIVATE",
-        "vector_size": 1024,    # bge-m3
-        "distance": "Cosine",
-    },
-    {
-        "name": "kirobi_public",
-        "description": "PUBLIC: Allgemeines, öffentliches Wissen",
-        "zone": "PUBLIC",
-        "vector_size": 768,     # nomic-embed-text
-        "distance": "Cosine",
-    },
-    {
-        "name": "kirobi_code",
-        "description": "WORKSPACE: Code-Embeddings für semantische Code-Suche",
-        "zone": "WORKSPACE",
-        "vector_size": 768,     # nomic-embed-text
-        "distance": "Cosine",
-    },
-    {
-        "name": "kirobi_quarantine",
-        "description": "QUARANTINE: Noch nicht geprüfte Inhalte",
-        "zone": "QUARANTINE",
-        "vector_size": 768,     # nomic-embed-text
-        "distance": "Cosine",
-    },
-]
+QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", "6333"))
+
+# Vektor-Dimension für nomic-embed-text
+VECTOR_SIZE: int = 768
+
+# Collections: Name → Beschreibung
+# 7 Collections insgesamt (PUBLIC 1 + WORKSPACE 4 + FAMILY_PRIVATE 1 + SACRED 1)
+COLLECTIONS: dict[str, str] = {
+    "kirobi_public_documents":         "Öffentliche Dokumente (PUBLIC-Zone)",
+    "kirobi_workspace_documents":      "Workspace-Dokumente (WORKSPACE-Zone)",
+    "kirobi_workspace_code":           "Code-Artefakte (WORKSPACE-Zone)",
+    "kirobi_workspace_notes":          "Notizen und Learnings (WORKSPACE-Zone)",
+    "kirobi_workspace_research":       "Recherche-Ergebnisse (WORKSPACE-Zone)",
+    "kirobi_family_private_documents": "Familien-Dokumente (FAMILY_PRIVATE-Zone)",
+    "kirobi_sacred_documents":         "Vertrauliche Dokumente (SACRED-Zone)",
+}
 
 
-def _headers() -> dict:
-    h = {"Content-Type": "application/json"}
-    if QDRANT_API_KEY:
-        h["api-key"] = QDRANT_API_KEY
-    return h
+# ---------------------------------------------------------------------------
+# HTTP-Hilfsfunktionen (stdlib-only, kein httpx/requests nötig)
+# ---------------------------------------------------------------------------
 
+def _request(base_url: str, method: str, path: str, body: Any = None) -> tuple[int, Any]:
+    """Führt einen HTTP-Request gegen Qdrant aus.
 
-def _request(method: str, path: str, body: Optional[dict] = None) -> tuple[int, dict]:
-    url = f"{QDRANT_URL.rstrip('/')}{path}"
-    data = json.dumps(body).encode() if body else None
-    req = urllib.request.Request(url, data=data, headers=_headers(), method=method)
+    Args:
+        base_url: Basis-URL des Qdrant-Servers
+        method:   HTTP-Methode (GET, PUT, DELETE, …)
+        path:     URL-Pfad relativ zu base_url
+        body:     Optionaler Request-Body (wird als JSON serialisiert)
+
+    Returns:
+        Tupel aus (HTTP-Statuscode, geparste JSON-Antwort oder None)
+    """
+    url = f"{base_url}{path}"
+    data: bytes | None = None
+    headers: dict[str, str] = {"Content-Type": "application/json"}
+
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
+
+    req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
-            return resp.status, json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        raw_body = e.read()
-        try:
-            return e.code, json.loads(raw_body) if raw_body else {}
-        except json.JSONDecodeError:
-            return e.code, {"error": raw_body.decode("utf-8", errors="replace")}
-    except Exception as e:
-        return 0, {"error": str(e)}
+            raw = resp.read()
+            return resp.status, json.loads(raw) if raw else None
+    except urllib.error.HTTPError as exc:
+        raw = exc.read()
+        return exc.code, json.loads(raw) if raw else None
 
 
-def collection_exists(name: str) -> bool:
-    status, body = _request("GET", f"/collections/{name}")
+def collection_exists(base_url: str, name: str) -> bool:
+    """Prüft ob eine Collection bereits existiert."""
+    status, _ = _request(base_url, "GET", f"/collections/{name}")
     return status == 200
 
 
-def create_collection(col: dict, dry_run: bool) -> bool:
-    name = col["name"]
-    if dry_run:
-        print(f"  DRY   {name} — würde geprüft/erstellt (size={col['vector_size']}, zone={col['zone']})")
-        return True
+def create_collection(base_url: str, name: str) -> bool:
+    """Erstellt eine Collection mit Cosine-Distanz und 768-dim Vektoren.
 
-    if collection_exists(name):
-        print(f"  SKIP  {name} (bereits vorhanden)")
-        return True
-
+    Returns:
+        True wenn erfolgreich erstellt, False bei Fehler.
+    """
     payload = {
         "vectors": {
-            "size": col["vector_size"],
-            "distance": col["distance"],
-        },
-        "optimizers_config": {
-            "indexing_threshold": 20000,
-        },
-        "on_disk_payload": True,
+            "size": VECTOR_SIZE,
+            "distance": "Cosine",
+        }
     }
-
-    status, body = _request("PUT", f"/collections/{name}", payload)
+    status, response = _request(base_url, "PUT", f"/collections/{name}", body=payload)
     if status in (200, 201):
-        print(f"  OK    {name} (size={col['vector_size']}, zone={col['zone']})")
         return True
-    else:
-        print(f"  FAIL  {name} — HTTP {status}: {body}", file=sys.stderr)
-        return False
-
-
-def wait_for_qdrant(retries: int = 10, delay: float = 2.0) -> bool:
-    import time
-    for i in range(retries):
-        status, _ = _request("GET", "/collections")
-        if status == 200:
-            return True
-        print(f"  Warte auf Qdrant ({i+1}/{retries})...")
-        time.sleep(delay)
+    print(f"  FEHLER: HTTP {status} – {response}", file=sys.stderr)
     return False
 
 
-def main():
-    global QDRANT_URL
+# ---------------------------------------------------------------------------
+# Hauptprogramm
+# ---------------------------------------------------------------------------
 
-    parser = argparse.ArgumentParser(description="Kirobi Qdrant Collections initialisieren")
-    parser.add_argument("--dry-run", action="store_true", help="Nur anzeigen, nichts erstellen")
-    parser.add_argument("--qdrant-url", default=QDRANT_URL, help=f"Qdrant-URL (default: {QDRANT_URL})")
+def main() -> int:
+    """Initialisiert alle Qdrant-Collections.
+
+    Returns:
+        Exit-Code: 0 = Erfolg, 1 = mindestens ein Fehler
+    """
+    parser = argparse.ArgumentParser(
+        description="Qdrant Collections für das Kirobi-Ökosystem initialisieren"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Zeigt an, was erstellt würde, ohne echte Requests zu senden",
+    )
+    parser.add_argument(
+        "--qdrant-url",
+        default=None,
+        help="Qdrant-URL überschreiben (z.B. http://localhost:6333)",
+    )
     args = parser.parse_args()
 
-    QDRANT_URL = args.qdrant_url
+    # Basis-URL bestimmen
+    if args.qdrant_url:
+        base_url = args.qdrant_url.rstrip("/")
+    else:
+        base_url = f"http://{QDRANT_HOST}:{QDRANT_PORT}"
 
-    print(f"Kirobi Qdrant Init — {QDRANT_URL}")
-    if args.dry_run:
-        print("(DRY-RUN — keine Änderungen)")
-    print()
+    dry_run: bool = args.dry_run
 
-    if not args.dry_run:
-        print("Verbindung zu Qdrant prüfen...")
-        if not wait_for_qdrant():
-            print("FEHLER: Qdrant nicht erreichbar", file=sys.stderr)
-            sys.exit(1)
-        print("Qdrant erreichbar.\n")
+    if dry_run:
+        print(f"[DRY-RUN] Würde Verbindung zu Qdrant unter {base_url} herstellen …")
+    else:
+        print(f"Verbinde mit Qdrant unter {base_url} …")
 
-    errors = 0
-    for col in COLLECTIONS:
-        ok = create_collection(col, args.dry_run)
-        if not ok:
+        # Verbindungstest
+        status, _ = _request(base_url, "GET", "/healthz")
+        if status != 200:
+            # Qdrant < 1.x nutzt /health statt /healthz
+            status, _ = _request(base_url, "GET", "/health")
+        if status != 200:
+            print(f"FEHLER: Qdrant nicht erreichbar (HTTP {status})", file=sys.stderr)
+            return 1
+
+        print("Verbindung erfolgreich.\n")
+
+    errors: int = 0
+    processed: int = 0
+
+    for collection_name, description in COLLECTIONS.items():
+        processed += 1
+
+        if dry_run:
+            print(f"  [DRY-RUN] Würde erstellen: {collection_name}  ({description})")
+            continue
+
+        if collection_exists(base_url, collection_name):
+            print(f"  [ÜBERSPRUNGEN] {collection_name}  ← bereits vorhanden")
+            continue
+
+        print(f"  [ERSTELLE]     {collection_name}  ({description})")
+        success = create_collection(base_url, collection_name)
+        if success:
+            print(f"  [OK]           {collection_name}")
+        else:
+            print(f"  [FEHLER]       {collection_name}", file=sys.stderr)
             errors += 1
 
+    total = len(COLLECTIONS)
     print()
-    if errors:
-        print(f"FEHLER: {errors} Collections konnten nicht erstellt werden", file=sys.stderr)
-        sys.exit(1)
+
+    if dry_run:
+        print(f"[DRY-RUN] Alle {total} Collections verarbeitet (kein echter Request gesendet).")
+        return 0
+
+    if errors == 0:
+        print(f"Initialisierung abgeschlossen – alle {total} Collections bereit.")
+        return 0
     else:
-        mode = "DRY-RUN" if args.dry_run else "OK"
-        print(f"{mode}: Alle {len(COLLECTIONS)} Collections verarbeitet.")
+        print(f"Initialisierung mit {errors} Fehler(n) abgeschlossen.", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
