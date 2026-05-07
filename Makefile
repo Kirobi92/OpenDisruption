@@ -10,7 +10,8 @@ ENV_FILE = .env
         bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
         pwa-up webui-up webui-url tailscale-url keycodi reset-default-password \
         test-kidi kidi-up kidi-down \
-        test-agents agent-opencode agent-openclaw agent-hermes agent-obsidian agents-build
+        test-agents agent-opencode agent-openclaw agent-hermes agent-obsidian agents-build \
+        obsidian-daily obsidian-moc
 
 ## Hilfe anzeigen
 help:
@@ -372,6 +373,14 @@ agent-hermes:
 		from agents._base.agent import Task; \
 		t=json.loads(os.environ.get('TASK','{}')) if os.environ.get('TASK') else {'task_type':'chain_of_thought','payload':{'question':'Was ist KIDI?'}}; \
 		r=HermesReasonerAgent().run(Task(**t)); print(json.dumps({'success':r.success,'payload':r.payload,'error':r.error},ensure_ascii=False,indent=2))"
+
+## Obsidian Daily-Note für heute anlegen (idempotent)
+obsidian-daily:
+	@bash infra/scripts/obsidian-daily-note.sh
+
+## Map-of-Content für alle Agenten (oder einen: make obsidian-moc AGENT=opencode)
+obsidian-moc:
+	@if [ -n "$(AGENT)" ]; then bash infra/scripts/obsidian-moc-generator.sh --agent "$(AGENT)"; else bash infra/scripts/obsidian-moc-generator.sh; fi
 
 ## Obsidian-Vault-Agent headless ausführen
 agent-obsidian:

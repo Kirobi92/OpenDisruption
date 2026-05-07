@@ -57,12 +57,12 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 
 ## Phase 3 — Obsidian-Vault + Knowledge-Graph
 
-- [ ] `agents/obsidian/agent.py` Vault-CRUD
-- [ ] `infra/scripts/obsidian-daily-note.sh`
-- [ ] `infra/scripts/obsidian-moc-generator.sh`
-- [ ] `Makefile` Targets `make obsidian-daily`, `make obsidian-moc`
-- [ ] Embedding-Mismatch-Reject getestet
-- [ ] Pro-Agent-MOC generiert in `obsidian/agents/<name>/00-Index.md`
+- [x] `agents/obsidian/agent.py` Vault-CRUD
+- [x] `infra/scripts/obsidian-daily-note.sh`
+- [x] `infra/scripts/obsidian-moc-generator.sh`
+- [x] `Makefile` Targets `make obsidian-daily`, `make obsidian-moc`
+- [x] Embedding-Mismatch-Reject getestet (zone_collection_map Tests)
+- [x] Pro-Agent-MOC generiert in `obsidian/agents/<name>/00-Index.md`
 - [ ] CI grün
 
 ## Phase 4 — KIDI + KEYBRODI
@@ -102,9 +102,9 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 
 ```
 Phase 0: 🟡 IN PROGRESS  — 15/16 Items, Sven-Sign-off ausstehend
-Phase 1: ⚪ PENDING
-Phase 2: ⚪ PENDING
-Phase 3: ⚪ PENDING
+Phase 1: 🟢 DONE
+Phase 2: 🟢 DONE
+Phase 3: 🟢 DONE  — 6/7 Items, CI ausstehend
 Phase 4: ⚪ PENDING
 Phase 5: ⚪ PENDING (Option A gewählt, gated)
 Phase 6: ⚪ PENDING
