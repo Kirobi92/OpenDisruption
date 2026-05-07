@@ -80,6 +80,12 @@ class TaskStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     BLOCKED = "blocked"
+    DEAD_LETTER = "dead_letter"
+
+
+# Retry configuration
+MAX_RETRY_ATTEMPTS = 3
+RETRY_BACKOFF_BASE = 1  # seconds; attempt n → sleep 2^(n-1) seconds
 
 
 class Task(BaseModel):

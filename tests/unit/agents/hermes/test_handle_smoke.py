@@ -35,22 +35,23 @@ class TestHermesSmoke:
         assert result.success is True
 
     def test_payload_enthaelt_reasoning_struktur(self):
-        """Phase-2-Skelett enthält die richtigen Felder für spätere LLM-Befüllung."""
+        """Graceful degradation: leeres Payload → success=True mit Fallback-Feldern."""
         agent = HermesReasonerAgent()
         task = Task(task_type="chain_of_thought", payload={})
         result = agent.run(task)
+        assert result.success is True
         assert "reasoning_steps" in result.payload
         assert "conclusion" in result.payload
         assert "sources" in result.payload
 
     def test_zone_public_erlaubt(self):
         agent = HermesReasonerAgent()
-        task = Task(task_type="debate", zone="PUBLIC", payload={})
+        task = Task(task_type="debate", zone="PUBLIC", payload={"topic": "Test"})
         result = agent.run(task)
         assert result.success is True
 
     def test_zone_workspace_erlaubt(self):
         agent = HermesReasonerAgent()
-        task = Task(task_type="debate", zone="WORKSPACE", payload={})
+        task = Task(task_type="debate", zone="WORKSPACE", payload={"topic": "Test"})
         result = agent.run(task)
         assert result.success is True
