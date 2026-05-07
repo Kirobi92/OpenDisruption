@@ -104,6 +104,7 @@ def check_no_committed_secrets(root: Path) -> CheckResult:
         if ".git" not in s.parts
         and "node_modules" not in s.parts
         and "venv" not in s.parts
+        and ".venv" not in s.parts
     ]
     if suspicious:
         return CheckResult(
