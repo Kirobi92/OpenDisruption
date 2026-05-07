@@ -36,7 +36,7 @@
     "kirobi-supervisor": {
       "type": "local",
       "command": ["python3", "-m", "kirobi_core", "status", "--json"],
-      "enabled": false
+      "enabled": true
     }
   },
 
@@ -52,9 +52,20 @@
           "python3 -m kirobi_core*": "allow",
           "docker compose config*": "allow",
           "docker compose ps*": "allow",
+          "docker compose build*": "allow",
+          "docker compose --profile*": "allow",
           "git status*": "allow",
           "git log*": "allow",
-          "git diff*": "allow"
+          "git diff*": "allow",
+          "git add*": "allow",
+          "git commit*": "allow",
+          "gh issue*": "allow",
+          "gh pr*": "allow",
+          "gh label*": "allow",
+          "make test*": "allow",
+          "make kidi*": "allow",
+          "make agent*": "allow",
+          "shellcheck*": "allow"
         }
       }
     },

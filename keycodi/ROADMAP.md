@@ -173,10 +173,10 @@ Phase 5 ist gewählt (Option A), bleibt aber durch Zone-Filter, Docker Secrets u
 ## Status-Zeile (KeyCodi pflegt)
 
 ```
-Phase 0: 🟡 IN PROGRESS  (Entscheidungen gesetzt: Telegram A, Docker Secrets, repo-local install.sh; Architektur-Sign-off ausstehend)
-Phase 1: ⚪ PENDING
-Phase 2: ⚪ PENDING
-Phase 3: ⚪ PENDING
+Phase 0: 🟢 DONE
+Phase 1: 🟢 DONE
+Phase 2: 🟢 DONE
+Phase 3: 🟡 IN PROGRESS
 Phase 4: ⚪ PENDING
 Phase 5: ⚪ PENDING (Option A gewählt, gated)
 Phase 6: ⚪ PENDING
