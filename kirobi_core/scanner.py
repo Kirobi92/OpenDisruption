@@ -35,6 +35,9 @@ _SKIP_DIRS = frozenset(
         "ollama_data",
         "openwebui_data",
         "flowise_data",
+        ".next",          # Next.js Build-Artefakte — kein echter Code
+        "standalone",     # Next.js standalone output
+        "chunks",         # Next.js Webpack-Chunks
     }
 )
 

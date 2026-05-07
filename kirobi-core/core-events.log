@@ -6419,3 +6419,480 @@
  [2026-05-07T23:26:02.279820+00:00] [opencode] WARN action=zone_refusal task_id=2922ec5e-71b7-46ca-b961-2a9f667fa9e5 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
  [2026-05-07T23:26:02.280315+00:00] [opencode] WARN action=zone_refusal task_id=4cbb13ef-4a38-44b6-b287-b9076f14839c zone=QUARANTINE reason="Agent 'opencode' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
  [2026-05-07T23:26:02.281349+00:00] [opencode] WARN action=zone_refusal task_id=01812254-9c9e-4df5-bb6f-71a3dbd8e465 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+{"action": "autonomous.iteration.start", "actor": "kirobi-core", "data": {"dry_run": true, "limit": 10}, "ts": "2026-05-07T23:26:35+00:00"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-0d4ff4e5"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-0ef3296b"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-0ef5d7d5"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-12c75952"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-18b48768"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-24263c65"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-2b7eafa3"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-3a6ec9d2"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-4714ca75"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-coder", "allowed": true, "kind": "oversized-file", "reason": "Routed to kirobi-coder (Code-Entwicklung, Debugging, Code-Reviews).", "task_id": "oversized-4a182d97"}, "ts": "2026-05-07T23:26:35+00:00", "zone": "WORKSPACE"}
+{"action": "autonomous.report.written", "actor": "kirobi-core", "data": {"path": ".kirobi/reports/autonomous-20260507T232635Z.json"}, "ts": "2026-05-07T23:26:35+00:00"}
+{"action": "autonomous.iteration.end", "actor": "kirobi-core", "data": {"blocked": 0, "dry_run": true, "tasks": 10}, "ts": "2026-05-07T23:26:35+00:00"}
+[2026-05-07 23:26:46.505997] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
+{"action": "autonomous.iteration.start", "actor": "kirobi-core", "data": {"dry_run": true, "limit": 10}, "ts": "2026-05-07T23:26:58+00:00"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-1f529cf1"}, "ts": "2026-05-07T23:26:58+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-68f5df85"}, "ts": "2026-05-07T23:26:58+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-c1078dc2"}, "ts": "2026-05-07T23:26:58+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-dbe6f2f0"}, "ts": "2026-05-07T23:26:58+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-f5a4ab74"}, "ts": "2026-05-07T23:26:58+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-fcb5097f"}, "ts": "2026-05-07T23:26:58+00:00", "zone": "WORKSPACE"}
+{"action": "autonomous.report.written", "actor": "kirobi-core", "data": {"path": ".kirobi/reports/autonomous-20260507T232658Z.json"}, "ts": "2026-05-07T23:26:58+00:00"}
+{"action": "autonomous.iteration.end", "actor": "kirobi-core", "data": {"blocked": 0, "dry_run": true, "tasks": 6}, "ts": "2026-05-07T23:26:58+00:00"}
+{"action": "autonomous.iteration.start", "actor": "kirobi-core", "data": {"dry_run": true, "limit": 10}, "ts": "2026-05-07T23:27:03+00:00"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-1f529cf1"}, "ts": "2026-05-07T23:27:03+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-68f5df85"}, "ts": "2026-05-07T23:27:03+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-c1078dc2"}, "ts": "2026-05-07T23:27:03+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-dbe6f2f0"}, "ts": "2026-05-07T23:27:03+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-f5a4ab74"}, "ts": "2026-05-07T23:27:03+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-fcb5097f"}, "ts": "2026-05-07T23:27:03+00:00", "zone": "WORKSPACE"}
+{"action": "autonomous.report.written", "actor": "kirobi-core", "data": {"path": ".kirobi/reports/autonomous-20260507T232703Z.json"}, "ts": "2026-05-07T23:27:03+00:00"}
+{"action": "autonomous.iteration.end", "actor": "kirobi-core", "data": {"blocked": 0, "dry_run": true, "tasks": 6}, "ts": "2026-05-07T23:27:03+00:00"}
+ [2026-05-07T23:27:16.042438+00:00] [hermes-reasoner] INFO action=handle_complete task_id=4870fb72-cfd3-4807-a6a4-601ed24997d1 zone=WORKSPACE success=true latency_ms=53
+ [2026-05-07T23:27:16.062309+00:00] [hermes-reasoner] INFO action=handle_complete task_id=0c07debc-1995-4c8f-a8d5-206492664d8a zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:27:16.082212+00:00] [hermes-reasoner] INFO action=handle_complete task_id=7c6d370f-c8cf-47eb-baf8-4be282888d57 zone=WORKSPACE success=true latency_ms=19
+ [2026-05-07T23:27:16.100243+00:00] [hermes-reasoner] INFO action=handle_complete task_id=d1b5b84a-c8c3-4bc2-acb0-ac6079ae6991 zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:27:16.118850+00:00] [hermes-reasoner] INFO action=handle_complete task_id=743cc97b-a6c2-4a87-999e-d4f3c6ca1dd5 zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:27:16.140543+00:00] [hermes-reasoner] INFO action=handle_complete task_id=0a7fb5fb-2128-44c1-9a38-03c24c1df4d5 zone=PUBLIC success=true latency_ms=21
+ [2026-05-07T23:27:16.160171+00:00] [hermes-reasoner] INFO action=handle_complete task_id=2e1bcc2f-c1cd-4f2d-a2b5-16bbcd035386 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:27:16.160987+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=90f645f4-f34a-4b2c-8a3a-70541540da3d zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.161555+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=d78b9c4e-8705-4cfb-acfb-83cb66c1e369 zone=SACRED reason="Agent 'hermes-reasoner' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.162098+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=13196ad8-c8ab-4d53-96d7-fa651e24f373 zone=QUARANTINE reason="Agent 'hermes-reasoner' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.162727+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=9c4297f4-f6a4-47da-ae0a-ca9494bb9596 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.164874+00:00] [obsidian] INFO action=handle_complete task_id=903a9e54-f004-4399-b18e-25778f7dcfd3 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.166212+00:00] [obsidian] INFO action=handle_complete task_id=018888f5-7976-48ab-b260-a65236f0f896 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.167422+00:00] [obsidian] INFO action=handle_complete task_id=c3589680-d729-495a-89db-daf8f58515b7 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.168615+00:00] [obsidian] INFO action=handle_complete task_id=a032d936-adb1-4b67-98bb-7816da4af8a2 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.169696+00:00] [obsidian] INFO action=handle_complete task_id=ded967b3-7e1d-4a90-9df2-e91392af972e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.171003+00:00] [obsidian] INFO action=handle_complete task_id=72f2ca13-1164-4fd1-a281-8da77fdc5f3b zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.172436+00:00] [obsidian] INFO action=handle_complete task_id=96cef1a2-3d83-44cf-9774-15ed9c3ecff3 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.173809+00:00] [obsidian] INFO action=handle_complete task_id=26a4994c-711c-4b59-98a0-9bce3ce230df zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.175221+00:00] [obsidian] INFO action=handle_complete task_id=f59e15cb-792f-4bbd-a676-3702baa9614f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.176374+00:00] [obsidian] INFO action=handle_complete task_id=7c985bae-b1a5-490a-9024-6d81e6279708 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.178726+00:00] [obsidian] INFO action=handle_complete task_id=df71f9c2-15bb-4c91-b2eb-c1b029c74113 zone=WORKSPACE success=true latency_ms=1
+ [2026-05-07T23:27:16.180493+00:00] [obsidian] INFO action=handle_complete task_id=6320c345-eaab-44cc-aa71-758234306961 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.181837+00:00] [obsidian] INFO action=handle_complete task_id=bc86b964-e699-4e0b-9f09-bf25ac63b992 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.183688+00:00] [obsidian] INFO action=handle_complete task_id=70dbaf97-988f-49d9-b8b1-624d69bb0899 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.185109+00:00] [obsidian] INFO action=handle_complete task_id=30cb6456-e429-4821-8512-5c881656e83f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.186338+00:00] [obsidian] INFO action=handle_complete task_id=c5b5cd3c-6e1a-4ef7-a0d7-4229048d7d54 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.187871+00:00] [obsidian] INFO action=handle_complete task_id=839c4cc6-0fa9-432a-b677-a3112e22c1ba zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.189452+00:00] [obsidian] INFO action=handle_complete task_id=d99aa8a6-88cb-4743-9f66-5fc6fe3ece72 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.190773+00:00] [obsidian] INFO action=handle_complete task_id=58e4044f-e079-4801-b7a7-6ff1e02ce1ac zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.192131+00:00] [obsidian] INFO action=handle_complete task_id=990e12ed-3c9c-4806-8b66-faf72253c8fc zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.192262+00:00] [obsidian] INFO action=handle_complete task_id=990e12ed-3c9c-4806-8b66-faf72253c8fc zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.193766+00:00] [obsidian] INFO action=handle_complete task_id=39b57d42-c1ed-433a-9af6-66d307277336 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.195031+00:00] [obsidian] INFO action=handle_complete task_id=b2f85810-2fdc-46b6-b4dd-9bc339fca0f0 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.196494+00:00] [obsidian] INFO action=handle_complete task_id=6ad1bde0-d27b-48df-bafd-6290daf44845 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.197842+00:00] [obsidian] INFO action=handle_complete task_id=d3873bf0-dc79-4919-98f4-bb323e473506 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.199199+00:00] [obsidian] INFO action=handle_complete task_id=47725e5f-25c9-4e9f-ad89-9977e37a401e zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.200633+00:00] [obsidian] INFO action=handle_complete task_id=fcb76108-ed13-4703-9a34-b9a5bbe8848a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.201804+00:00] [obsidian] INFO action=handle_complete task_id=caa4371a-79a4-427a-a6f9-9a4eeb040898 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.202946+00:00] [obsidian] INFO action=handle_complete task_id=cb5b71ca-917d-44a6-bee8-226b35c13a16 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.204320+00:00] [obsidian] INFO action=handle_complete task_id=fe919c40-79bd-4bbd-8818-e2f2fb805cf7 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.204387+00:00] [obsidian] INFO action=handle_complete task_id=ce0d9a3d-ca84-4f70-8a01-bc0c80ec81d2 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.204444+00:00] [obsidian] INFO action=handle_complete task_id=a6443661-40b4-48ac-b4f4-e984de85e877 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.205682+00:00] [obsidian] INFO action=handle_complete task_id=51441a9d-227a-40fe-b06a-1484573821cc zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.205746+00:00] [obsidian] INFO action=handle_complete task_id=0d6c4320-33a7-4c52-ad7e-8349c8bee397 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.205803+00:00] [obsidian] INFO action=handle_complete task_id=08ed7d3e-724f-458b-843d-dad7f8daec7f zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.207035+00:00] [obsidian] INFO action=handle_complete task_id=ea7a20d5-e788-4d7b-8971-402fe1b0f201 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.207115+00:00] [obsidian] INFO action=handle_complete task_id=4cc01cd1-d383-467c-84fc-559c71886326 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.207171+00:00] [obsidian] INFO action=handle_complete task_id=31d822c8-bc8e-4467-9038-c8f53c24f8c9 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.208394+00:00] [obsidian] INFO action=handle_complete task_id=eb32c0fc-c934-4fd9-b738-dbacf670d091 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.208457+00:00] [obsidian] INFO action=handle_complete task_id=ce22c351-7e59-4203-b644-14091e3554ef zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.208512+00:00] [obsidian] INFO action=handle_complete task_id=197950e7-cdab-46c8-9587-e031d9c7df93 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.209683+00:00] [obsidian] INFO action=handle_complete task_id=483f2d84-f2ad-4aed-9126-e9bafba9fb5b zone=FAMILY_PRIVATE success=false latency_ms=0
+ [2026-05-07T23:27:16.211257+00:00] [obsidian] INFO action=handle_complete task_id=a824b1a2-1935-4fb4-9a83-1ce0015629f8 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:27:16.212964+00:00] [obsidian] INFO action=handle_complete task_id=14a05157-506e-4d29-9fb7-62f748880ab8 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:27:16.214444+00:00] [obsidian] INFO action=handle_complete task_id=81028a3d-7748-4899-82a2-207df597b024 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.215095+00:00] [obsidian] WARN action=zone_refusal task_id=30b89363-f05d-41c3-b35e-b9bb50fac261 zone=SACRED reason="Agent 'obsidian' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.215639+00:00] [obsidian] WARN action=zone_refusal task_id=4ecf1a38-98a0-4908-86cf-465b241a03c7 zone=QUARANTINE reason="Agent 'obsidian' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.216714+00:00] [obsidian] INFO action=handle_complete task_id=ebf0f7c3-3568-4d2b-be0d-70f52f8ff2b3 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:27:16.217267+00:00] [obsidian] INFO action=handle_complete task_id=3a4d30f1-acab-4fad-bb0f-a331ecb7a808 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.218039+00:00] [openclaw] INFO action=handle_complete task_id=7e0c058d-f0d7-4644-a616-08b5f196676d zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:27:16.218548+00:00] [openclaw] INFO action=handle_complete task_id=664a6aef-47f4-4484-8f5d-c06b8db6dded zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.219037+00:00] [openclaw] INFO action=handle_complete task_id=16d22c6c-e801-4a49-bcc8-7a8bc901c532 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.219523+00:00] [openclaw] INFO action=handle_complete task_id=a1a6c4e8-42e9-4004-92d3-5c7ca40751e7 zone=QUARANTINE success=true latency_ms=0
+ [2026-05-07T23:27:16.220003+00:00] [openclaw] INFO action=handle_complete task_id=fa5fa2a4-d476-4dd5-812b-30f9ac29b755 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:27:16.220578+00:00] [openclaw] INFO action=handle_complete task_id=ca74b532-912c-46ad-9e32-53fa2d07c2ab zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.221068+00:00] [openclaw] INFO action=handle_complete task_id=6b30d335-2ca0-45c6-a3f9-f95c24c24d43 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.221655+00:00] [openclaw] WARN action=zone_refusal task_id=1c4f6e79-f139-4cc6-8655-e9471807d188 zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:27:16.222154+00:00] [openclaw] WARN action=zone_refusal task_id=4fd4d8c5-473d-46bb-9e38-25e805b7cf89 zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:27:16.222635+00:00] [openclaw] WARN action=zone_refusal task_id=e4830954-1a05-4156-9d1a-665dc0b2ae91 zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:27:16.223135+00:00] [openclaw] WARN action=zone_refusal task_id=8ae1ec21-9614-465d-a6f9-3a3031ef4e6b zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:27:16.224348+00:00] [opencode] INFO action=handle_complete task_id=a11f507f-3712-49d7-b4fd-afb33d9ee264 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.224832+00:00] [opencode] INFO action=handle_complete task_id=b64b8338-8200-47e0-8e3f-ac32543f2fc0 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.225321+00:00] [opencode] INFO action=handle_complete task_id=test-uuid-123 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.225800+00:00] [opencode] INFO action=handle_complete task_id=9627e0cc-cc0f-4e47-a5de-1af2bacd6463 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.226293+00:00] [opencode] INFO action=handle_complete task_id=6d8033f3-9417-49a2-ba7e-497c7e81d441 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:27:16.226842+00:00] [opencode] INFO action=handle_complete task_id=6b2d169d-09f6-45c1-a82e-e28351efd0f8 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.227382+00:00] [opencode] INFO action=handle_complete task_id=48940858-c913-4a2e-9811-7e3a667735bd zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.227925+00:00] [opencode] INFO action=handle_complete task_id=a38f9f01-e800-410a-9d70-b157371897d4 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.228436+00:00] [opencode] INFO action=handle_complete task_id=1ca5fc06-3c43-4582-83e9-d5c95e056b11 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:27:16.228978+00:00] [opencode] INFO action=handle_complete task_id=43fa752d-02ae-49c6-bd44-fea606512f9f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:27:16.229572+00:00] [opencode] WARN action=zone_refusal task_id=eaa29a60-e9e8-4253-989a-eb36dcc505fc zone=FAMILY_PRIVATE reason="Agent 'opencode' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.230051+00:00] [opencode] WARN action=zone_refusal task_id=a8760949-8b97-4e6d-99d4-5dcecea715b8 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.230536+00:00] [opencode] WARN action=zone_refusal task_id=04bb6221-d704-46d3-8f83-bb3e104666c0 zone=QUARANTINE reason="Agent 'opencode' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:27:16.231862+00:00] [opencode] WARN action=zone_refusal task_id=e56ed9ec-409a-45db-b81d-dfbe4a56bed8 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+[2026-05-07 23:27:46.656679] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
+[2026-05-07 23:28:46.786656] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
+ [2026-05-07T23:29:11.893138+00:00] [hermes-reasoner] INFO action=handle_complete task_id=54134d39-c6ce-4097-a7d7-3b835edf81ba zone=WORKSPACE success=true latency_ms=53
+ [2026-05-07T23:29:11.914982+00:00] [hermes-reasoner] INFO action=handle_complete task_id=d4d883b6-8e3e-4172-b908-9d8117f07219 zone=WORKSPACE success=true latency_ms=20
+ [2026-05-07T23:29:11.936273+00:00] [hermes-reasoner] INFO action=handle_complete task_id=95d69e63-383d-4883-ab14-6431741c06c5 zone=WORKSPACE success=true latency_ms=20
+ [2026-05-07T23:29:11.954852+00:00] [hermes-reasoner] INFO action=handle_complete task_id=656cbe4a-6632-4f32-9947-6c61caeb5273 zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:29:11.972701+00:00] [hermes-reasoner] INFO action=handle_complete task_id=6df43298-7ee3-4cf1-b040-82b958ff8a24 zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:29:11.992257+00:00] [hermes-reasoner] INFO action=handle_complete task_id=2959a938-4a38-4891-a7c1-19c1b7e52513 zone=PUBLIC success=true latency_ms=18
+ [2026-05-07T23:29:12.011803+00:00] [hermes-reasoner] INFO action=handle_complete task_id=a8a5c06a-35ce-4b5a-8c72-c70951e2aca7 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:29:12.012626+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=01e54316-a13a-47f4-838d-2b109f03a2a5 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.013149+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=07f92f15-8f58-40d6-ade0-d7f37348d499 zone=SACRED reason="Agent 'hermes-reasoner' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.013655+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=7878ddfb-d724-49fe-8cb3-90064ff2d41a zone=QUARANTINE reason="Agent 'hermes-reasoner' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.014166+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=ec085d2d-8bbe-4ff1-8414-38e5b03bebec zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.016227+00:00] [obsidian] INFO action=handle_complete task_id=7869eccb-25cb-42a9-a701-fd54dc0e6b49 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.017616+00:00] [obsidian] INFO action=handle_complete task_id=9704c56c-0391-4b23-8425-0eda370b2398 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.019032+00:00] [obsidian] INFO action=handle_complete task_id=99a22cf5-3270-46fa-baad-3e76dd2a4fd9 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.020416+00:00] [obsidian] INFO action=handle_complete task_id=36f84dd5-3f68-49fe-af1c-1e76a4b64319 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.021510+00:00] [obsidian] INFO action=handle_complete task_id=a0026df0-5e49-49f7-86fd-50642beb10b9 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.023051+00:00] [obsidian] INFO action=handle_complete task_id=b07b3293-5e46-4a9f-ae79-d3619e5a6e29 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.024461+00:00] [obsidian] INFO action=handle_complete task_id=6d422d2c-73e0-468c-8b80-1f36e4243bd4 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.025765+00:00] [obsidian] INFO action=handle_complete task_id=746610fe-0c34-429c-888e-09b9a2807b36 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.027170+00:00] [obsidian] INFO action=handle_complete task_id=4c0ca5d9-d917-4038-b4dc-89db57664a1c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.028309+00:00] [obsidian] INFO action=handle_complete task_id=9e912518-e7e7-412e-8e1f-9ad7a7f22178 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.029541+00:00] [obsidian] INFO action=handle_complete task_id=601b0c2b-4b44-47cc-8d73-fdce1d4777fb zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.032619+00:00] [obsidian] INFO action=handle_complete task_id=16771f46-dbb6-4644-ad56-f6ebb1022e76 zone=WORKSPACE success=false latency_ms=1
+ [2026-05-07T23:29:12.035726+00:00] [obsidian] INFO action=handle_complete task_id=82f8706e-b99f-4e5e-849f-2e6eefc4b177 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.037395+00:00] [obsidian] INFO action=handle_complete task_id=4aba19ff-fd9e-4662-b1da-3579767c2cdf zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.038834+00:00] [obsidian] INFO action=handle_complete task_id=0b33c469-c3bf-493e-b0a4-74efa058e56a zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.040043+00:00] [obsidian] INFO action=handle_complete task_id=d45ba4f7-47ec-48dd-af58-7c5a0ce5ff8a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.041483+00:00] [obsidian] INFO action=handle_complete task_id=17faed80-2099-446c-a769-0678b24abb32 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.043055+00:00] [obsidian] INFO action=handle_complete task_id=ccce144c-4521-4a23-a86e-197979f1fab9 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.044452+00:00] [obsidian] INFO action=handle_complete task_id=0bef1e44-7ad6-4393-9c41-1f1ed3b80d10 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.045824+00:00] [obsidian] INFO action=handle_complete task_id=133fb291-f555-4bd5-b039-4d4b46e5a21c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.045947+00:00] [obsidian] INFO action=handle_complete task_id=133fb291-f555-4bd5-b039-4d4b46e5a21c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.047458+00:00] [obsidian] INFO action=handle_complete task_id=70107594-ad01-4b26-8295-ade71eed79bd zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.048661+00:00] [obsidian] INFO action=handle_complete task_id=21b4164d-dca3-4afe-a253-c3f03c3de647 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.050027+00:00] [obsidian] INFO action=handle_complete task_id=26057c32-3676-440c-b301-156f7886db6f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.051212+00:00] [obsidian] INFO action=handle_complete task_id=40b8f367-7cf5-49bd-a47b-0fb1df5c495b zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.052351+00:00] [obsidian] INFO action=handle_complete task_id=ae737354-803e-45f6-9576-6e40675af0ae zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.053488+00:00] [obsidian] INFO action=handle_complete task_id=f1f8f474-0100-4d42-898f-e08f94a27478 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.054624+00:00] [obsidian] INFO action=handle_complete task_id=6413df0e-0c41-4e3b-87c7-0521c26c7c8c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.055767+00:00] [obsidian] INFO action=handle_complete task_id=9324a708-f0bf-4e45-95dd-9bfd7852712e zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.056968+00:00] [obsidian] INFO action=handle_complete task_id=1ffa68b1-22ea-410e-bcb9-4b2550159c5f zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.057038+00:00] [obsidian] INFO action=handle_complete task_id=3c1054cd-a986-4fec-9bc1-050c37d299ad zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.057104+00:00] [obsidian] INFO action=handle_complete task_id=c707c05d-99a1-4f05-88d0-0aed28ee45ac zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.058335+00:00] [obsidian] INFO action=handle_complete task_id=6aaabe3d-ede7-4299-8436-360b663b677e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.058400+00:00] [obsidian] INFO action=handle_complete task_id=20c7b6fe-af6b-4b7c-9845-bc7e3a954834 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.058456+00:00] [obsidian] INFO action=handle_complete task_id=8440c08f-f579-405a-8f3a-e501a6af80a2 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.059682+00:00] [obsidian] INFO action=handle_complete task_id=4a36d282-ad79-41be-8f85-ad103c86651c zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.059745+00:00] [obsidian] INFO action=handle_complete task_id=f8809fa9-fc93-4409-add8-738d5e23886e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.059800+00:00] [obsidian] INFO action=handle_complete task_id=e16756bf-c9a4-4737-853a-f32deb5e9df3 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.061017+00:00] [obsidian] INFO action=handle_complete task_id=ea5da550-2f87-4e7e-b87f-2a862bbbd37e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.061093+00:00] [obsidian] INFO action=handle_complete task_id=d7e0d250-bedf-4abc-ac8f-da0ad57ced80 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.061150+00:00] [obsidian] INFO action=handle_complete task_id=1e4bfc8f-c46e-4606-a75a-125c4590430f zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.062311+00:00] [obsidian] INFO action=handle_complete task_id=a5c7fdc1-7634-41d4-a850-69f7a5791b89 zone=FAMILY_PRIVATE success=false latency_ms=0
+ [2026-05-07T23:29:12.063640+00:00] [obsidian] INFO action=handle_complete task_id=438be524-a3d7-4744-8419-c1091386fb5b zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:12.064980+00:00] [obsidian] INFO action=handle_complete task_id=b3d85d91-929a-4826-96ff-b4d6f4645360 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:12.066154+00:00] [obsidian] INFO action=handle_complete task_id=e9ffc44a-3841-465e-8434-168a7951c320 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.066795+00:00] [obsidian] WARN action=zone_refusal task_id=06fc33f7-56bd-42b2-abd1-bb0bd01378f8 zone=SACRED reason="Agent 'obsidian' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.067311+00:00] [obsidian] WARN action=zone_refusal task_id=0a207874-e7c3-47f0-8a9f-a503c70878ee zone=QUARANTINE reason="Agent 'obsidian' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.068492+00:00] [obsidian] INFO action=handle_complete task_id=8b87ce0e-7e49-41ee-aaed-f82e6b7b12a7 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:12.069181+00:00] [obsidian] INFO action=handle_complete task_id=29e7d05a-731f-4627-9a5c-a93f9ea45916 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.069979+00:00] [openclaw] INFO action=handle_complete task_id=1fd96ecf-5a54-4de4-9ae9-d8c9ccc738c2 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:12.070499+00:00] [openclaw] INFO action=handle_complete task_id=6ddf41af-16f4-4224-b54f-f3bf56f7c857 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.071002+00:00] [openclaw] INFO action=handle_complete task_id=2faa8cf3-b818-46e3-ac0e-065ffab8fd19 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.071584+00:00] [openclaw] INFO action=handle_complete task_id=4fc9842a-daba-46d8-abbc-1ec0e83c164b zone=QUARANTINE success=true latency_ms=0
+ [2026-05-07T23:29:12.072107+00:00] [openclaw] INFO action=handle_complete task_id=9d94a6cf-0e25-466a-86ec-c369ef60ada7 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:12.072609+00:00] [openclaw] INFO action=handle_complete task_id=d956dc7a-b81c-4006-93f4-9dd056516d26 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.073118+00:00] [openclaw] INFO action=handle_complete task_id=eb99297e-dc36-4c3d-ba4a-5c127dc7f1f1 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.073810+00:00] [openclaw] WARN action=zone_refusal task_id=a7a570c7-76b9-4e82-be1c-46eeaff82fbf zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:12.074328+00:00] [openclaw] WARN action=zone_refusal task_id=e04a58e0-a43b-40bd-a0d8-14d493c49261 zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:12.074870+00:00] [openclaw] WARN action=zone_refusal task_id=576e2626-d3f2-4a28-aae7-07f52e6b82e7 zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:12.075382+00:00] [openclaw] WARN action=zone_refusal task_id=e28e289f-232e-4ff0-bc4e-bc5decbe9aa8 zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:12.076703+00:00] [opencode] INFO action=handle_complete task_id=85feea26-d2b1-4002-a2ff-3ee17ad3f308 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.077224+00:00] [opencode] INFO action=handle_complete task_id=8238f1f6-8fb9-4f6f-808c-50d0a324b8a9 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.077713+00:00] [opencode] INFO action=handle_complete task_id=test-uuid-123 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.078240+00:00] [opencode] INFO action=handle_complete task_id=4f43ab4b-a8a9-40a8-b374-b0cfd483d8a1 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.078782+00:00] [opencode] INFO action=handle_complete task_id=de2bf144-8bd6-40b1-a51d-c1a92cba4418 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:12.079306+00:00] [opencode] INFO action=handle_complete task_id=d1fd0a6b-cc9f-4b8e-981f-462c8ab23946 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.079800+00:00] [opencode] INFO action=handle_complete task_id=d1b34858-4f0e-4c92-a076-ebaa9ee85eca zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.080318+00:00] [opencode] INFO action=handle_complete task_id=47f90871-ab2f-4d2f-8810-e98292aeb521 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.080799+00:00] [opencode] INFO action=handle_complete task_id=fbb9db9b-c031-4514-961e-dd82fef1da8a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:12.081307+00:00] [opencode] INFO action=handle_complete task_id=c90ab0ab-b8c6-4ed1-a0d9-ba88ae3b8b35 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:12.081935+00:00] [opencode] WARN action=zone_refusal task_id=b5dbdc46-b826-468f-bfb0-eb23133bd10d zone=FAMILY_PRIVATE reason="Agent 'opencode' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.082479+00:00] [opencode] WARN action=zone_refusal task_id=750de458-fddd-4689-98ce-93149ee87f9a zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.082962+00:00] [opencode] WARN action=zone_refusal task_id=795bc3b2-5de8-4d35-a9b5-5e7ed1c51878 zone=QUARANTINE reason="Agent 'opencode' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:12.083994+00:00] [opencode] WARN action=zone_refusal task_id=1d98a477-1457-495e-a8dc-cfb5e16a8685 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.114337+00:00] [hermes-reasoner] INFO action=handle_complete task_id=3c585201-d91f-4d75-b941-22df3bbcbca0 zone=WORKSPACE success=true latency_ms=48
+ [2026-05-07T23:29:31.133741+00:00] [hermes-reasoner] INFO action=handle_complete task_id=977c8ad3-75eb-4752-8a1b-860fe5bfd10c zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:29:31.155767+00:00] [hermes-reasoner] INFO action=handle_complete task_id=be140278-ef23-4d0b-bd69-d260678dc276 zone=WORKSPACE success=true latency_ms=21
+ [2026-05-07T23:29:31.175033+00:00] [hermes-reasoner] INFO action=handle_complete task_id=f8477f16-82f5-40c7-be99-0dbc272d2e11 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:29:31.195666+00:00] [hermes-reasoner] INFO action=handle_complete task_id=a23a8984-5c31-441c-8dd6-481ec28bbfbe zone=WORKSPACE success=true latency_ms=19
+ [2026-05-07T23:29:31.215880+00:00] [hermes-reasoner] INFO action=handle_complete task_id=c0c06683-d227-4c66-8140-8e1a0b03af7f zone=PUBLIC success=true latency_ms=19
+ [2026-05-07T23:29:31.235378+00:00] [hermes-reasoner] INFO action=handle_complete task_id=3e38e89a-9e4d-4b72-8387-6314aa7ad2e4 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:29:31.236194+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=1040b6de-dd88-49ec-b99f-3f9f2fe49898 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.236703+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=a567db53-3911-4a71-844e-e381c1735e6d zone=SACRED reason="Agent 'hermes-reasoner' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.237213+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=5202b784-0a99-4571-a8a1-2e9be4361099 zone=QUARANTINE reason="Agent 'hermes-reasoner' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.237708+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=20d03153-4339-4af1-81b3-694826326bdb zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.239775+00:00] [obsidian] INFO action=handle_complete task_id=e7cb953e-95e9-4ee9-a4fe-92758b5341a9 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.241021+00:00] [obsidian] INFO action=handle_complete task_id=5656b3f3-a748-4078-9ebc-ce20b6a36711 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.242167+00:00] [obsidian] INFO action=handle_complete task_id=a76f5f3d-e871-4036-8da9-f331ef34114f zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.243352+00:00] [obsidian] INFO action=handle_complete task_id=918d1b7d-acfa-4020-aa5d-b27c8d6594c5 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.244438+00:00] [obsidian] INFO action=handle_complete task_id=b646eb2d-d6b6-46bc-855c-3accf7bc7d1e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.245668+00:00] [obsidian] INFO action=handle_complete task_id=b01daf0d-f2c9-432d-bca5-f66f6b03a9e6 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.247026+00:00] [obsidian] INFO action=handle_complete task_id=20a9dbab-9c1f-44ca-8ad9-a33960fecb8a zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.248367+00:00] [obsidian] INFO action=handle_complete task_id=8234a70d-87f5-4753-a028-b5e6c0b38fb0 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.250034+00:00] [obsidian] INFO action=handle_complete task_id=84a26814-c3a0-483a-94a6-87b3d2b0af70 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.251534+00:00] [obsidian] INFO action=handle_complete task_id=a0ca7d98-21e1-457a-b08a-67e2e60e47f0 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.252872+00:00] [obsidian] INFO action=handle_complete task_id=693d5d5a-7c57-41bf-80f6-742d2dab557b zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.255283+00:00] [obsidian] INFO action=handle_complete task_id=be7572c6-c2d2-4ffa-8788-84561d9ccda8 zone=WORKSPACE success=false latency_ms=1
+ [2026-05-07T23:29:31.256714+00:00] [obsidian] INFO action=handle_complete task_id=f2acb75d-7dc7-48b4-8a22-dea183d54c55 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.258300+00:00] [obsidian] INFO action=handle_complete task_id=f3c5401d-8323-4638-8ef3-4a53e97c94d0 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.259863+00:00] [obsidian] INFO action=handle_complete task_id=a50a008f-7378-495e-bebe-d225d1a50c59 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.261167+00:00] [obsidian] INFO action=handle_complete task_id=f20f5556-3d16-4052-a503-e5b7e0e93173 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.262666+00:00] [obsidian] INFO action=handle_complete task_id=91ba5168-71a3-4c4c-b48b-9f9091cfec63 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.264332+00:00] [obsidian] INFO action=handle_complete task_id=f2eb1a88-c1b6-4a71-b2cd-16cd6765feb4 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.265663+00:00] [obsidian] INFO action=handle_complete task_id=08b70ecb-7f99-4353-84c2-31a7caebd944 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.267036+00:00] [obsidian] INFO action=handle_complete task_id=82affd14-8169-405c-88a7-05594863031d zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.267165+00:00] [obsidian] INFO action=handle_complete task_id=82affd14-8169-405c-88a7-05594863031d zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.268634+00:00] [obsidian] INFO action=handle_complete task_id=53ca68ff-3375-42b1-9a77-8b0385c863d3 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.269814+00:00] [obsidian] INFO action=handle_complete task_id=6c59b7cf-3db6-4dcc-900c-0020677ad963 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.271181+00:00] [obsidian] INFO action=handle_complete task_id=db28e7e8-5f16-4286-805b-a7ca63dffc9e zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.272353+00:00] [obsidian] INFO action=handle_complete task_id=7e96b73b-fdcd-4412-b81d-6b6373d72e6c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.273485+00:00] [obsidian] INFO action=handle_complete task_id=28347a9b-76ec-44e1-b005-86f0b8a1d1e4 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.274599+00:00] [obsidian] INFO action=handle_complete task_id=eaf13100-80c1-480c-9e2c-b3ccd47af7a3 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.276019+00:00] [obsidian] INFO action=handle_complete task_id=3485edb2-32e4-479b-89a3-9e5073b649fa zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.277212+00:00] [obsidian] INFO action=handle_complete task_id=7a495ada-37a7-4a77-a6dd-4d50ef0edae8 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.278504+00:00] [obsidian] INFO action=handle_complete task_id=e12a799c-6d2c-41a0-9284-e4572e5eba1b zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.278567+00:00] [obsidian] INFO action=handle_complete task_id=cb7d47d4-20a7-4d08-bba8-bb5df34aa722 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.278622+00:00] [obsidian] INFO action=handle_complete task_id=36bf93e9-e5a6-46cc-8f72-cacd0074ea37 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.279835+00:00] [obsidian] INFO action=handle_complete task_id=b539899e-69dc-41b8-adda-3104ea08b447 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.279902+00:00] [obsidian] INFO action=handle_complete task_id=f0f90dca-9ae5-422a-a290-9d7f9dd5139a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.279956+00:00] [obsidian] INFO action=handle_complete task_id=b044bf39-d3dd-4cdc-bed4-96dc331cdf55 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.281171+00:00] [obsidian] INFO action=handle_complete task_id=ca539d6d-c3b8-4023-8063-7e452323581a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.281234+00:00] [obsidian] INFO action=handle_complete task_id=e135180d-6feb-459a-bb91-6ac6c8a898cb zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.281288+00:00] [obsidian] INFO action=handle_complete task_id=f4f4fafd-53f7-4b80-8d45-dd0e98e6822a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.282491+00:00] [obsidian] INFO action=handle_complete task_id=39be118f-a7ee-4937-bb37-be3407f6ddca zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.282552+00:00] [obsidian] INFO action=handle_complete task_id=51cc07ab-433f-4ab7-b64b-558ada837947 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.282607+00:00] [obsidian] INFO action=handle_complete task_id=dfe06935-8527-40f3-864c-bcc597b214a6 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.283740+00:00] [obsidian] INFO action=handle_complete task_id=9a72b378-166e-4aaf-b108-da39b4af39cb zone=FAMILY_PRIVATE success=false latency_ms=0
+ [2026-05-07T23:29:31.285034+00:00] [obsidian] INFO action=handle_complete task_id=277fd097-722f-4dbd-9695-4a7fb893607c zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:31.286392+00:00] [obsidian] INFO action=handle_complete task_id=ad42ae51-2e5b-4e92-8325-b692bd860911 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:31.287560+00:00] [obsidian] INFO action=handle_complete task_id=b2de467c-4cda-4bcf-bcda-b38a0edff8e5 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.288217+00:00] [obsidian] WARN action=zone_refusal task_id=caf8df6a-545b-4ab2-a76b-bdf906734da9 zone=SACRED reason="Agent 'obsidian' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.288732+00:00] [obsidian] WARN action=zone_refusal task_id=a92d04c3-0a1d-4632-b97b-138e5a5405e6 zone=QUARANTINE reason="Agent 'obsidian' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.289759+00:00] [obsidian] INFO action=handle_complete task_id=4d793688-6c1b-4f43-a537-14a6027b38cf zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:31.290302+00:00] [obsidian] INFO action=handle_complete task_id=44b069f5-be7f-4201-a808-a75b733d3080 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.291093+00:00] [openclaw] INFO action=handle_complete task_id=6176c4ba-f512-449e-92fb-74f673821fdf zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:31.291607+00:00] [openclaw] INFO action=handle_complete task_id=eba7e0cb-c2a7-4f38-868e-e7dbe54af1fb zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.292115+00:00] [openclaw] INFO action=handle_complete task_id=5da3db45-1e94-4e76-bc17-54ee3896cf75 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.292612+00:00] [openclaw] INFO action=handle_complete task_id=ccf31f96-6615-4e52-940c-52a78b041212 zone=QUARANTINE success=true latency_ms=0
+ [2026-05-07T23:29:31.293112+00:00] [openclaw] INFO action=handle_complete task_id=8653fd57-e6f1-49dd-9431-aa3176fda1ff zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:31.293607+00:00] [openclaw] INFO action=handle_complete task_id=e26850fe-b21e-492b-8f40-2ffb74624bac zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.294112+00:00] [openclaw] INFO action=handle_complete task_id=cd52fe2f-e706-4533-be3f-673663e2d899 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.294766+00:00] [openclaw] WARN action=zone_refusal task_id=4132649e-818b-41ea-a538-a53f268f393b zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:31.295282+00:00] [openclaw] WARN action=zone_refusal task_id=5d99f4be-22bb-411e-82ad-e5cb32e23b1b zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:31.295779+00:00] [openclaw] WARN action=zone_refusal task_id=424c402d-ddea-4cd3-95ef-185b55aca6eb zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:31.296276+00:00] [openclaw] WARN action=zone_refusal task_id=c5044e8e-3629-4eea-975f-c3ae5fc952fc zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:31.297491+00:00] [opencode] INFO action=handle_complete task_id=e27c522c-37ab-4863-bbce-ab33ddd7f503 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.297998+00:00] [opencode] INFO action=handle_complete task_id=248ea7a1-894b-4954-9e14-c9b6bc4ae91c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.298508+00:00] [opencode] INFO action=handle_complete task_id=test-uuid-123 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.299005+00:00] [opencode] INFO action=handle_complete task_id=66c44596-0693-4e33-a813-eef9fab0dce7 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.299511+00:00] [opencode] INFO action=handle_complete task_id=472aa4b3-2698-4048-8cf8-6587ae612f27 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:31.300006+00:00] [opencode] INFO action=handle_complete task_id=9b631f64-3d43-4a03-ab97-62d9adc96aaf zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.300522+00:00] [opencode] INFO action=handle_complete task_id=8ad3e549-85e2-4cd2-8770-a14c91ddaa3d zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.301017+00:00] [opencode] INFO action=handle_complete task_id=7884e5ab-0241-4c18-aec5-0ddf5b637c9f zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.301514+00:00] [opencode] INFO action=handle_complete task_id=856a7c6f-c1eb-42d8-9694-e760aebca515 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:31.302020+00:00] [opencode] INFO action=handle_complete task_id=4ecf7327-8aa9-4a91-b59f-9ad127b17d58 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:31.302616+00:00] [opencode] WARN action=zone_refusal task_id=aa789964-1918-4e0e-bfe4-7edf3b96d4d3 zone=FAMILY_PRIVATE reason="Agent 'opencode' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.303116+00:00] [opencode] WARN action=zone_refusal task_id=8cbe6aa4-bbd9-4304-9aef-f64799b6a8a5 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.303614+00:00] [opencode] WARN action=zone_refusal task_id=b177f41d-98e2-4c9d-99b1-7da9e05cc6d6 zone=QUARANTINE reason="Agent 'opencode' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:31.304633+00:00] [opencode] WARN action=zone_refusal task_id=9dfdadc3-51d3-4bc2-9cc6-85de3c401e5f zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.695241+00:00] [hermes-reasoner] INFO action=handle_complete task_id=c8706114-4dc3-49ca-9bdf-7de0d5f751c5 zone=WORKSPACE success=true latency_ms=48
+ [2026-05-07T23:29:35.713470+00:00] [hermes-reasoner] INFO action=handle_complete task_id=c60e302e-d024-4290-acc5-032e7e718e4a zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:29:35.733728+00:00] [hermes-reasoner] INFO action=handle_complete task_id=21005750-6a73-4d7a-ab28-097331029f8d zone=WORKSPACE success=true latency_ms=19
+ [2026-05-07T23:29:35.752541+00:00] [hermes-reasoner] INFO action=handle_complete task_id=466e973e-6132-4930-80ba-34b9030960d6 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:29:35.771600+00:00] [hermes-reasoner] INFO action=handle_complete task_id=7921e42b-783a-47f5-aac8-463d6140bfc3 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:29:35.793222+00:00] [hermes-reasoner] INFO action=handle_complete task_id=9c5a2625-7645-4819-b376-e08de2cd987c zone=PUBLIC success=true latency_ms=20
+ [2026-05-07T23:29:35.813815+00:00] [hermes-reasoner] INFO action=handle_complete task_id=ccc959df-b9ca-42af-9df5-3d792ebe5021 zone=WORKSPACE success=true latency_ms=19
+ [2026-05-07T23:29:35.814566+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=c082ec5f-6986-46d1-8c1b-c20dca8d44a8 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.815098+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=9e393446-cd3c-47b7-bfd0-edc070a0e29d zone=SACRED reason="Agent 'hermes-reasoner' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.815618+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=a5d34270-aa44-453a-bb69-3fc272f01a0f zone=QUARANTINE reason="Agent 'hermes-reasoner' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.816144+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=fc7fe6b6-ca02-45dd-9210-779766826948 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.818308+00:00] [obsidian] INFO action=handle_complete task_id=f961b0eb-8c4b-492c-8afd-ae1789834fc4 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.819592+00:00] [obsidian] INFO action=handle_complete task_id=a6049eee-ed45-4dea-96c6-6c3aeabfb991 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.821266+00:00] [obsidian] INFO action=handle_complete task_id=0aa2eb90-de0a-4c17-80aa-b24a88dbf61b zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.822668+00:00] [obsidian] INFO action=handle_complete task_id=42ffd1a1-280c-4eb3-9b53-28d346d20c35 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.823833+00:00] [obsidian] INFO action=handle_complete task_id=f5317f63-cd98-441f-a0bf-8a4dd6ad8415 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.825151+00:00] [obsidian] INFO action=handle_complete task_id=9b6c7b43-6b86-4dcc-a949-9689744e59e9 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.826520+00:00] [obsidian] INFO action=handle_complete task_id=095c65f6-e9c3-46b8-8331-47f9fa72e97f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.827826+00:00] [obsidian] INFO action=handle_complete task_id=44025926-5aff-43fd-8fe0-6a5508bfd58c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.829212+00:00] [obsidian] INFO action=handle_complete task_id=a1c6a622-0e36-4e92-b6fe-987244cf7613 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.830356+00:00] [obsidian] INFO action=handle_complete task_id=3adde4b5-8235-45ab-98b9-2462d616f65f zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.831579+00:00] [obsidian] INFO action=handle_complete task_id=490e80ff-3217-4b41-a1a3-08f29d960f6e zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.834699+00:00] [obsidian] INFO action=handle_complete task_id=3db9bd3d-cda5-467c-8dc8-e7070d27850f zone=WORKSPACE success=false latency_ms=1
+ [2026-05-07T23:29:35.836341+00:00] [obsidian] INFO action=handle_complete task_id=5b6f97f1-6e8c-473b-9a01-eb1626744b40 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.837823+00:00] [obsidian] INFO action=handle_complete task_id=4c0f7a47-fc12-4d24-be29-27bf46b793e1 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.839218+00:00] [obsidian] INFO action=handle_complete task_id=2ba16b1a-9c89-431b-a11f-85790015ee40 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.840436+00:00] [obsidian] INFO action=handle_complete task_id=e91b8fb7-0959-434b-8371-3fbc0b8bbf40 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.841877+00:00] [obsidian] INFO action=handle_complete task_id=6c3e955b-5bb3-48f8-ba32-e0a578e531c2 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.843422+00:00] [obsidian] INFO action=handle_complete task_id=29ce3299-cbd0-416a-b10a-2c261d81d4cc zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.844750+00:00] [obsidian] INFO action=handle_complete task_id=5d06b3e2-cbaa-4d7a-9614-576d803ad135 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.846066+00:00] [obsidian] INFO action=handle_complete task_id=006296de-5c14-4b01-a43b-f56a4d52086f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.846195+00:00] [obsidian] INFO action=handle_complete task_id=006296de-5c14-4b01-a43b-f56a4d52086f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.847650+00:00] [obsidian] INFO action=handle_complete task_id=2df5916e-c373-49da-b4ba-db75f24aa566 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.848834+00:00] [obsidian] INFO action=handle_complete task_id=828c93f4-b97d-4fd8-9f01-8bba3b637bac zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.850220+00:00] [obsidian] INFO action=handle_complete task_id=d77f0538-648b-445e-be0f-31ee0c747f0d zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.851382+00:00] [obsidian] INFO action=handle_complete task_id=3facd403-5768-4612-9eb5-65d1e4cb5c6c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.852535+00:00] [obsidian] INFO action=handle_complete task_id=2f64e122-99e4-4ddb-a122-d4ee6f88566c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.853684+00:00] [obsidian] INFO action=handle_complete task_id=9f3f6776-7a30-4a05-8822-9ff02544e2e5 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.854827+00:00] [obsidian] INFO action=handle_complete task_id=a97acf78-36ee-4875-9b8f-53dabb798ef2 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.855975+00:00] [obsidian] INFO action=handle_complete task_id=afe582c4-6aa9-4b97-b6b3-49a0f536e4f1 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.857234+00:00] [obsidian] INFO action=handle_complete task_id=9d231d55-aac1-41f2-a731-07af85746259 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.857306+00:00] [obsidian] INFO action=handle_complete task_id=1a545651-1ff9-440c-b9b3-8a771fa40537 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.857363+00:00] [obsidian] INFO action=handle_complete task_id=d59fae80-5ddf-473d-a96d-71373ac1ffec zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.858599+00:00] [obsidian] INFO action=handle_complete task_id=557f8955-5de1-4781-98b3-ce7c30687008 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.858669+00:00] [obsidian] INFO action=handle_complete task_id=b37dca46-a6c8-4739-967d-904f1a30875b zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.858725+00:00] [obsidian] INFO action=handle_complete task_id=9f73a268-beba-4546-a34a-c899c95b337c zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.859951+00:00] [obsidian] INFO action=handle_complete task_id=ae18ecb2-cc1a-4dfd-9249-74e3f9d778bb zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.860016+00:00] [obsidian] INFO action=handle_complete task_id=5e94b68a-d73a-40eb-9a76-39f7a4738473 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.860085+00:00] [obsidian] INFO action=handle_complete task_id=5a1e5ac7-01a8-409b-bc3d-247571167d72 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.861302+00:00] [obsidian] INFO action=handle_complete task_id=4fcea100-8570-4568-9dd9-9c45c0365ed3 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.861367+00:00] [obsidian] INFO action=handle_complete task_id=1292b3d9-18a7-470c-a67f-76b9426bb0df zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.861423+00:00] [obsidian] INFO action=handle_complete task_id=844d79ab-ed9a-46f8-a329-e1bca24d5a82 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.862595+00:00] [obsidian] INFO action=handle_complete task_id=fd4012de-377b-418e-b727-bc3e89b8cb75 zone=FAMILY_PRIVATE success=false latency_ms=0
+ [2026-05-07T23:29:35.863913+00:00] [obsidian] INFO action=handle_complete task_id=f90cc0cd-c461-4dfd-91dd-8d9dc95fc286 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:35.865270+00:00] [obsidian] INFO action=handle_complete task_id=11860acc-0a8d-476a-8c1c-f1afb5e26172 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:35.866442+00:00] [obsidian] INFO action=handle_complete task_id=a97da71c-b6eb-48c3-9e07-36bd51eeeb35 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.867097+00:00] [obsidian] WARN action=zone_refusal task_id=4331f4ee-c89a-4843-a8b7-2138d98bf04a zone=SACRED reason="Agent 'obsidian' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.867602+00:00] [obsidian] WARN action=zone_refusal task_id=e8b3f330-b17b-4ef3-a790-a929cc284451 zone=QUARANTINE reason="Agent 'obsidian' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.868642+00:00] [obsidian] INFO action=handle_complete task_id=4015a88d-8d71-4fba-aed6-8bd62bd8ebdf zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:29:35.869176+00:00] [obsidian] INFO action=handle_complete task_id=9b046a27-2553-4843-ad17-90a3acace6ef zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.869943+00:00] [openclaw] INFO action=handle_complete task_id=be88bd3a-c6ff-4f95-be61-1bf6407a68a9 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:35.870447+00:00] [openclaw] INFO action=handle_complete task_id=1bbe1ffe-f61c-4d52-993f-6c07bc59733a zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.870935+00:00] [openclaw] INFO action=handle_complete task_id=fa472d99-6f9b-4c79-bae4-a9ad9e1c334c zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.871443+00:00] [openclaw] INFO action=handle_complete task_id=2064e0fc-0ea8-465c-a508-b25ead528a90 zone=QUARANTINE success=true latency_ms=0
+ [2026-05-07T23:29:35.871943+00:00] [openclaw] INFO action=handle_complete task_id=38abf3d8-b603-488e-9fa9-1ac8248bab21 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:35.872437+00:00] [openclaw] INFO action=handle_complete task_id=03f3ad59-ef08-4ac9-8ade-1b10aa08cafc zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.872945+00:00] [openclaw] INFO action=handle_complete task_id=78f8c4df-d3e4-4a7c-af91-6106d3772c8d zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.873626+00:00] [openclaw] WARN action=zone_refusal task_id=500a1ee4-cedd-49e5-a23d-4bb8e3063b66 zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:35.874141+00:00] [openclaw] WARN action=zone_refusal task_id=d644bbf5-2533-4f22-92f7-b7e3b2d2ba29 zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:35.874622+00:00] [openclaw] WARN action=zone_refusal task_id=7985caf2-ed91-428a-995d-afcb070fce6d zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:35.875105+00:00] [openclaw] WARN action=zone_refusal task_id=22038be6-69b6-4819-bda1-499fa8b575c0 zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:29:35.876402+00:00] [opencode] INFO action=handle_complete task_id=9d5137ed-85e2-4d53-a364-5c86003c37c0 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.876901+00:00] [opencode] INFO action=handle_complete task_id=c549a84d-af6d-4f5f-979b-b91679940e5b zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.877397+00:00] [opencode] INFO action=handle_complete task_id=test-uuid-123 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.877875+00:00] [opencode] INFO action=handle_complete task_id=dbf66a3a-1693-4dc9-97b5-acb4c8abd345 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.878433+00:00] [opencode] INFO action=handle_complete task_id=e9866f8e-3217-4bbc-b2b7-c64523c53f65 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:29:35.878923+00:00] [opencode] INFO action=handle_complete task_id=d41929a6-3d7f-4f8e-8246-f51d17ed6321 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.879442+00:00] [opencode] INFO action=handle_complete task_id=7611b45d-368a-442d-be27-b721754c97ee zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.879924+00:00] [opencode] INFO action=handle_complete task_id=57aa1fb1-2489-4add-8ce7-f1ee94c7100a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.880409+00:00] [opencode] INFO action=handle_complete task_id=95aae539-2b91-4eed-9bd8-81dc398c81d1 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:29:35.880897+00:00] [opencode] INFO action=handle_complete task_id=4082a837-633a-4e55-8ad9-2715872911aa zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:29:35.881510+00:00] [opencode] WARN action=zone_refusal task_id=d0ea0f7e-e5ab-478c-902b-8a72e907f079 zone=FAMILY_PRIVATE reason="Agent 'opencode' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.882123+00:00] [opencode] WARN action=zone_refusal task_id=d780f52c-ecf9-4a19-a072-b65b5a0e5dfa zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.882609+00:00] [opencode] WARN action=zone_refusal task_id=dd0ca61d-d6ed-4688-9b01-96af856199e2 zone=QUARANTINE reason="Agent 'opencode' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:29:35.883628+00:00] [opencode] WARN action=zone_refusal task_id=75f1026c-b2ac-4ac1-be02-dd6e1a95f35f zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+[2026-05-07 23:29:46.801188] [health_check] Health check completed: {'supervisor': 'healthy', 'database': 'healthy', 'ollama': 'healthy', 'voice': 'healthy', 'qdrant': 'unknown'}
+{"action": "autonomous.iteration.start", "actor": "kirobi-core", "data": {"dry_run": true, "limit": 10}, "ts": "2026-05-07T23:29:47+00:00"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-0fbf2254"}, "ts": "2026-05-07T23:29:47+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-16cfd218"}, "ts": "2026-05-07T23:29:47+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-205d6049"}, "ts": "2026-05-07T23:29:47+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-ccd4d587"}, "ts": "2026-05-07T23:29:47+00:00", "zone": "WORKSPACE"}
+{"action": "autonomous.report.written", "actor": "kirobi-core", "data": {"path": ".kirobi/reports/autonomous-20260507T232947Z.json"}, "ts": "2026-05-07T23:29:47+00:00"}
+{"action": "autonomous.iteration.end", "actor": "kirobi-core", "data": {"blocked": 0, "dry_run": true, "tasks": 4}, "ts": "2026-05-07T23:29:47+00:00"}
+{"action": "autonomous.iteration.start", "actor": "kirobi-core", "data": {"dry_run": true, "limit": 10}, "ts": "2026-05-07T23:29:51+00:00"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-0fbf2254"}, "ts": "2026-05-07T23:29:51+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-16cfd218"}, "ts": "2026-05-07T23:29:51+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-205d6049"}, "ts": "2026-05-07T23:29:51+00:00", "zone": "WORKSPACE"}
+{"action": "task.routed", "actor": "kirobi-core", "data": {"agent": "kirobi-architect", "allowed": true, "kind": "missing-readme", "reason": "Routed to kirobi-architect (System-Design, Planung, Architektur-Entscheidungen).", "task_id": "readme-ccd4d587"}, "ts": "2026-05-07T23:29:51+00:00", "zone": "WORKSPACE"}
+{"action": "autonomous.report.written", "actor": "kirobi-core", "data": {"path": ".kirobi/reports/autonomous-20260507T232951Z.json"}, "ts": "2026-05-07T23:29:51+00:00"}
+{"action": "autonomous.iteration.end", "actor": "kirobi-core", "data": {"blocked": 0, "dry_run": true, "tasks": 4}, "ts": "2026-05-07T23:29:51+00:00"}
+{"action": "autonomous.iteration.start", "actor": "kirobi-core", "data": {"dry_run": true, "limit": 10}, "ts": "2026-05-07T23:30:28+00:00"}
+{"action": "autonomous.report.written", "actor": "kirobi-core", "data": {"path": ".kirobi/reports/autonomous-20260507T233029Z.json"}, "ts": "2026-05-07T23:30:29+00:00"}
+{"action": "autonomous.iteration.end", "actor": "kirobi-core", "data": {"blocked": 0, "dry_run": true, "tasks": 0}, "ts": "2026-05-07T23:30:29+00:00"}
+ [2026-05-07T23:30:29.807361+00:00] [hermes-reasoner] INFO action=handle_complete task_id=36c068fa-0a87-4579-bbc2-4788372554c3 zone=WORKSPACE success=true latency_ms=50
+ [2026-05-07T23:30:29.826865+00:00] [hermes-reasoner] INFO action=handle_complete task_id=15adf95b-cbb8-43c8-80f0-16b50bae9125 zone=WORKSPACE success=true latency_ms=18
+ [2026-05-07T23:30:29.847914+00:00] [hermes-reasoner] INFO action=handle_complete task_id=fbe29167-d570-41ec-ad36-f89bd71fa1ef zone=WORKSPACE success=true latency_ms=20
+ [2026-05-07T23:30:29.866147+00:00] [hermes-reasoner] INFO action=handle_complete task_id=b9da4f45-6882-4ef3-bd54-e389dfeac119 zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:30:29.884355+00:00] [hermes-reasoner] INFO action=handle_complete task_id=709a8c77-edaa-4964-8fc6-29beeab836d3 zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:30:29.905369+00:00] [hermes-reasoner] INFO action=handle_complete task_id=ea74e165-dc6b-467e-b68d-069ee871fc4f zone=PUBLIC success=true latency_ms=20
+ [2026-05-07T23:30:29.923869+00:00] [hermes-reasoner] INFO action=handle_complete task_id=4901e2c6-eda7-4fef-927a-e9c26ea4ab1a zone=WORKSPACE success=true latency_ms=17
+ [2026-05-07T23:30:29.924749+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=9c12c1ce-5640-4ebb-a33e-b4ccf93c8976 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.925349+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=3ee54c4a-bf6d-4957-ac36-e50a3f3f8c4d zone=SACRED reason="Agent 'hermes-reasoner' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.925927+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=f70d86de-e7c7-48ce-bf3c-322c8df72e15 zone=QUARANTINE reason="Agent 'hermes-reasoner' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.926471+00:00] [hermes-reasoner] WARN action=zone_refusal task_id=f56f0770-b30d-4a48-a28a-2795e769ead0 zone=FAMILY_PRIVATE reason="Agent 'hermes-reasoner' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.928614+00:00] [obsidian] INFO action=handle_complete task_id=f40bcaca-52ec-42ff-b665-c8198e59df1e zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.929894+00:00] [obsidian] INFO action=handle_complete task_id=7df7b2ae-4866-421c-9514-2a63a1874e80 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.931052+00:00] [obsidian] INFO action=handle_complete task_id=7c0210aa-4a76-4324-a7a9-b5bc0bfb5e5e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.932273+00:00] [obsidian] INFO action=handle_complete task_id=6eeb161a-60e1-43d0-8d6a-3f96b3202c1f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.933394+00:00] [obsidian] INFO action=handle_complete task_id=4cab08c7-36d5-4100-925f-2f4f1213168c zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.934630+00:00] [obsidian] INFO action=handle_complete task_id=10f0a82b-11a6-4ff9-b17f-7d022cee1db9 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.935984+00:00] [obsidian] INFO action=handle_complete task_id=3f65b3bf-155e-4568-a748-e36d27e4f8f7 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.937352+00:00] [obsidian] INFO action=handle_complete task_id=173dee11-9532-4f03-bc04-4c9a252ae1a8 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.938782+00:00] [obsidian] INFO action=handle_complete task_id=e901341c-e8f0-4213-a73d-f7c04306ec74 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.939953+00:00] [obsidian] INFO action=handle_complete task_id=4d0d7b37-6ae8-4afb-984c-2507e6401afa zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.941333+00:00] [obsidian] INFO action=handle_complete task_id=72e59ddd-d03b-4015-8561-808afbe368e8 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.944427+00:00] [obsidian] INFO action=handle_complete task_id=77968f9a-cb09-407e-9280-198b7d3ce994 zone=WORKSPACE success=false latency_ms=1
+ [2026-05-07T23:30:29.945932+00:00] [obsidian] INFO action=handle_complete task_id=df4e2a53-c1f7-4ab3-922d-d89259c8d1cf zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.947400+00:00] [obsidian] INFO action=handle_complete task_id=a6f1c960-15a2-4742-b75c-e473d1041741 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.948749+00:00] [obsidian] INFO action=handle_complete task_id=a8fa412d-b42f-4449-92f5-462e1351a342 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.949933+00:00] [obsidian] INFO action=handle_complete task_id=e1a01216-b512-4919-ba13-509aed2676f4 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.951370+00:00] [obsidian] INFO action=handle_complete task_id=6214645c-2f2a-4fe0-b67b-e97cc0b83056 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.952902+00:00] [obsidian] INFO action=handle_complete task_id=1c9d96a7-b0ce-4905-976c-d04f533849fe zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.954400+00:00] [obsidian] INFO action=handle_complete task_id=09ae19e7-54bf-43d3-adb5-cd16ffd5984f zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.955749+00:00] [obsidian] INFO action=handle_complete task_id=f40188d4-ae80-4217-be86-83f64715f847 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.955870+00:00] [obsidian] INFO action=handle_complete task_id=f40188d4-ae80-4217-be86-83f64715f847 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.957348+00:00] [obsidian] INFO action=handle_complete task_id=1d8277c8-f5a1-4d5e-967a-323c7f9ee4b3 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.958540+00:00] [obsidian] INFO action=handle_complete task_id=0cbfdbc8-954a-4f56-ba76-19b2927cbf06 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.959911+00:00] [obsidian] INFO action=handle_complete task_id=60da47af-9779-4aae-adc1-b16d63b69ebb zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.961095+00:00] [obsidian] INFO action=handle_complete task_id=15cac23d-10f9-4e9d-8e56-30118ef0e01e zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.962226+00:00] [obsidian] INFO action=handle_complete task_id=4668aa7b-56f6-4f09-b570-9c0f1c053220 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.963381+00:00] [obsidian] INFO action=handle_complete task_id=20fd2cbc-1925-405b-a54b-6dc1a6ef94cd zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.964558+00:00] [obsidian] INFO action=handle_complete task_id=20995cff-79f9-4542-893d-d1e14f9779c9 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.965725+00:00] [obsidian] INFO action=handle_complete task_id=6381bb3f-f934-4efe-95a7-e8c8c2788649 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.967004+00:00] [obsidian] INFO action=handle_complete task_id=8a11933c-5225-4d77-956d-7bbf61b75fdc zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.967084+00:00] [obsidian] INFO action=handle_complete task_id=203992a3-1967-47a7-bb93-43c65310a39b zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.967141+00:00] [obsidian] INFO action=handle_complete task_id=d51901d2-89a1-4a54-a31c-cf936cf3e73d zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.968376+00:00] [obsidian] INFO action=handle_complete task_id=ff736ee9-8b87-43e0-8c8f-e8bad2911ac9 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.968441+00:00] [obsidian] INFO action=handle_complete task_id=53d77dff-99e7-4862-8140-418ac8bfbe6e zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.968497+00:00] [obsidian] INFO action=handle_complete task_id=441ff07f-3a85-4a7d-b7d7-44e93e5f5153 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.969724+00:00] [obsidian] INFO action=handle_complete task_id=cf81efe9-1f20-4739-9da9-57142b018714 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.969788+00:00] [obsidian] INFO action=handle_complete task_id=3f794b7c-ac19-43f8-8bff-881a581606cf zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.969848+00:00] [obsidian] INFO action=handle_complete task_id=3e02ab7d-fbfa-4b84-acb0-8373399f89e8 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.971085+00:00] [obsidian] INFO action=handle_complete task_id=1f49059c-5faf-47d4-915c-3ed3b98dfd51 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.971150+00:00] [obsidian] INFO action=handle_complete task_id=214fb9dd-22aa-4cc4-8930-99958a15967a zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.971203+00:00] [obsidian] INFO action=handle_complete task_id=6464ff97-caab-4442-bf9a-5ae28e5cd1e1 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.972364+00:00] [obsidian] INFO action=handle_complete task_id=2f51713f-7e37-4939-9661-9ff11ab76715 zone=FAMILY_PRIVATE success=false latency_ms=0
+ [2026-05-07T23:30:29.973668+00:00] [obsidian] INFO action=handle_complete task_id=2a3200b2-31b3-468a-a76a-2428b26ac73d zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:30:29.975016+00:00] [obsidian] INFO action=handle_complete task_id=dce9ad99-25ad-4676-8cfb-2136caa8de4f zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:30:29.976203+00:00] [obsidian] INFO action=handle_complete task_id=33ed8d62-c681-4391-87d3-033e456e2a83 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.976918+00:00] [obsidian] WARN action=zone_refusal task_id=d457e03e-ad18-4a10-9122-f4a5e25d1c58 zone=SACRED reason="Agent 'obsidian' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.977451+00:00] [obsidian] WARN action=zone_refusal task_id=b0c19265-c742-492d-b2de-44bfaab00560 zone=QUARANTINE reason="Agent 'obsidian' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['FAMILY_PRIVATE', 'PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.978493+00:00] [obsidian] INFO action=handle_complete task_id=a87eb4f4-f1d0-4eed-b855-658c791a7d09 zone=FAMILY_PRIVATE success=true latency_ms=0
+ [2026-05-07T23:30:29.979020+00:00] [obsidian] INFO action=handle_complete task_id=532c0a74-87e6-4d21-b187-33c0cdc2b9a0 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.979793+00:00] [openclaw] INFO action=handle_complete task_id=af347101-45d4-4892-aa45-644fb7412f05 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:30:29.980304+00:00] [openclaw] INFO action=handle_complete task_id=1f67d603-d393-43a2-b59c-987170ea9742 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.980796+00:00] [openclaw] INFO action=handle_complete task_id=68cee25e-154e-4bd3-aba7-fe16db9ea191 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.981362+00:00] [openclaw] INFO action=handle_complete task_id=b27d2da0-a2c8-4b58-8efe-ffc624d805d6 zone=QUARANTINE success=true latency_ms=0
+ [2026-05-07T23:30:29.981856+00:00] [openclaw] INFO action=handle_complete task_id=924c6dd0-d242-4d95-a880-2a195df47528 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:30:29.982361+00:00] [openclaw] INFO action=handle_complete task_id=9c21d235-15ea-43c3-927e-3c9f9267db4d zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.982854+00:00] [openclaw] INFO action=handle_complete task_id=dfdbabc6-78ad-4ae5-9caa-a6a860eaacf4 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.983520+00:00] [openclaw] WARN action=zone_refusal task_id=370bb077-fcca-4931-9920-fc8474443b66 zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:30:29.984020+00:00] [openclaw] WARN action=zone_refusal task_id=c5d5edd1-0e4f-4a81-ae64-d64c04e741b0 zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:30:29.984517+00:00] [openclaw] WARN action=zone_refusal task_id=3d36d5c4-8bf6-444e-98c7-368e15fced4a zone=SACRED reason="Agent 'openclaw' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:30:29.984995+00:00] [openclaw] WARN action=zone_refusal task_id=d5d9667d-4698-4214-a596-91222a68451d zone=FAMILY_PRIVATE reason="Agent 'openclaw' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'QUARANTINE', 'WORKSPACE']"
+ [2026-05-07T23:30:29.986217+00:00] [opencode] INFO action=handle_complete task_id=fd3a2169-48d0-4823-a976-07934f8ea3f2 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.986707+00:00] [opencode] INFO action=handle_complete task_id=d95fab0e-536a-47dd-a8d3-1cd642a063b8 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.987198+00:00] [opencode] INFO action=handle_complete task_id=test-uuid-123 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.987681+00:00] [opencode] INFO action=handle_complete task_id=ea3b1595-c173-4fec-9aec-336dba6eaf2b zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.988188+00:00] [opencode] INFO action=handle_complete task_id=47720cae-1483-4b1b-85dd-de355b5d44f2 zone=PUBLIC success=true latency_ms=0
+ [2026-05-07T23:30:29.988661+00:00] [opencode] INFO action=handle_complete task_id=3a8a1086-d266-4be5-9c4d-e7334971f378 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.989153+00:00] [opencode] INFO action=handle_complete task_id=6f24fc0c-af99-4138-b779-e8063d615028 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.989636+00:00] [opencode] INFO action=handle_complete task_id=9ba66537-c554-49a8-b5db-97d31035cb33 zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.990124+00:00] [opencode] INFO action=handle_complete task_id=6da49952-d93b-4ebe-971f-39fd3d061ffa zone=WORKSPACE success=false latency_ms=0
+ [2026-05-07T23:30:29.990621+00:00] [opencode] INFO action=handle_complete task_id=24a3e06f-843f-42bd-964f-25edc129e410 zone=WORKSPACE success=true latency_ms=0
+ [2026-05-07T23:30:29.991199+00:00] [opencode] WARN action=zone_refusal task_id=9465238c-8f1f-4cf5-95e5-a53c342522e4 zone=FAMILY_PRIVATE reason="Agent 'opencode' darf Zone 'FAMILY_PRIVATE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.991683+00:00] [opencode] WARN action=zone_refusal task_id=68a90136-7795-4b49-aafe-164c4b4839c0 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.992191+00:00] [opencode] WARN action=zone_refusal task_id=40aa0d89-20ea-4bcb-b756-e87056552ac7 zone=QUARANTINE reason="Agent 'opencode' darf Zone 'QUARANTINE' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"
+ [2026-05-07T23:30:29.993415+00:00] [opencode] WARN action=zone_refusal task_id=971d5c30-e7d5-4c77-9071-164705cb3592 zone=SACRED reason="Agent 'opencode' darf Zone 'SACRED' nicht als Input verarbeiten. Erlaubt: ['PUBLIC', 'WORKSPACE']"

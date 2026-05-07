@@ -101,6 +101,8 @@ class Task(BaseModel):
     completed_at: Optional[datetime] = None
     metadata: Dict[str, Any] = {}
     dependencies: List[str] = []
+    retry_count: int = 0
+    last_error: Optional[str] = None
 
 
 class SupervisorState(str, Enum):
@@ -223,9 +225,24 @@ class KirobiSupervisor:
                     updated_at TIMESTAMP NOT NULL,
                     completed_at TIMESTAMP,
                     metadata JSONB,
-                    dependencies TEXT[]
+                    dependencies TEXT[],
+                    retry_count INTEGER NOT NULL DEFAULT 0,
+                    last_error TEXT
                 )
             ''')
+
+            # Add columns if they don't exist yet (idempotent migration)
+            for col_def in (
+                "retry_count INTEGER NOT NULL DEFAULT 0",
+                "last_error TEXT",
+            ):
+                col_name = col_def.split()[0]
+                try:
+                    await conn.execute(
+                        f"ALTER TABLE supervisor_tasks ADD COLUMN IF NOT EXISTS {col_def}"
+                    )
+                except Exception:
+                    pass  # column already exists on older Postgres versions
 
             # Events table
             await conn.execute('''
@@ -242,12 +259,21 @@ class KirobiSupervisor:
             logger.info("Database schema initialized")
 
     async def load_pending_tasks(self):
-        """Load pending tasks from database"""
+        """Load pending tasks from database, ordered by priority then age."""
         async with self.db_pool.acquire() as conn:
             rows = await conn.fetch('''
                 SELECT * FROM supervisor_tasks
                 WHERE status IN ('pending', 'in_progress', 'blocked')
-                ORDER BY priority DESC, created_at ASC
+                ORDER BY
+                    CASE priority
+                        WHEN 'critical'   THEN 0
+                        WHEN 'high'       THEN 1
+                        WHEN 'medium'     THEN 2
+                        WHEN 'low'        THEN 3
+                        WHEN 'background' THEN 4
+                        ELSE 5
+                    END ASC,
+                    created_at ASC
             ''')
 
             for row in rows:
@@ -262,7 +288,9 @@ class KirobiSupervisor:
                     updated_at=row['updated_at'],
                     completed_at=row['completed_at'],
                     metadata=row['metadata'] or {},
-                    dependencies=row['dependencies'] or []
+                    dependencies=row['dependencies'] or [],
+                    retry_count=row['retry_count'] if 'retry_count' in row.keys() else 0,
+                    last_error=row['last_error'] if 'last_error' in row.keys() else None,
                 )
                 self.task_queue.append(task)
 
@@ -362,10 +390,12 @@ class KirobiSupervisor:
         async with self.db_pool.acquire() as conn:
             await conn.execute('''
                 INSERT INTO supervisor_tasks
-                (id, name, description, priority, status, assigned_agent, created_at, updated_at, metadata)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                (id, name, description, priority, status, assigned_agent, created_at, updated_at,
+                 metadata, retry_count, last_error)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             ''', task.id, task.name, task.description, task.priority.value, task.status.value,
-                task.assigned_agent, task.created_at, task.updated_at, json.dumps(task.metadata))
+                task.assigned_agent, task.created_at, task.updated_at, json.dumps(task.metadata),
+                task.retry_count, task.last_error)
 
         self.task_queue.append(task)
         logger.info(f"Created task: {task.name} (priority: {task.priority})")
@@ -373,16 +403,14 @@ class KirobiSupervisor:
         return task
 
     async def process_task_queue(self):
-        """Process tasks from queue"""
+        """Process tasks from queue, highest priority first."""
         if not self.task_queue:
             return
 
-        # Sort by priority
+        # Sort in-memory queue: priority ASC (critical=0), then created_at ASC
+        _PRIO = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3, 'background': 4}
         self.task_queue.sort(
-            key=lambda t: (
-                {'critical': 0, 'high': 1, 'medium': 2, 'low': 3, 'background': 4}[t.priority.value],
-                t.created_at
-            )
+            key=lambda t: (_PRIO.get(t.priority.value, 9), t.created_at)
         )
 
         # Get next available task
@@ -392,55 +420,79 @@ class KirobiSupervisor:
                 break
 
     async def execute_task(self, task: Task):
-        """Execute a single task"""
+        """Execute a single task with retry logic and dead-letter handling."""
+        logger.info(f"Executing task: {task.name} (attempt {task.retry_count + 1}/{MAX_RETRY_ATTEMPTS})")
+        self.active_tasks[task.id] = task
+
+        # Update status to in_progress
+        task.status = TaskStatus.IN_PROGRESS
+        task.updated_at = datetime.now()
+        async with self.db_pool.acquire() as conn:
+            await conn.execute(
+                'UPDATE supervisor_tasks SET status = $1, updated_at = $2 WHERE id = $3',
+                task.status.value, task.updated_at, task.id,
+            )
+
         try:
-            logger.info(f"Executing task: {task.name}")
-            self.active_tasks[task.id] = task
-
-            # Update status
-            task.status = TaskStatus.IN_PROGRESS
-            task.updated_at = datetime.now()
-
-            async with self.db_pool.acquire() as conn:
-                await conn.execute('''
-                    UPDATE supervisor_tasks
-                    SET status = $1, updated_at = $2
-                    WHERE id = $3
-                ''', task.status.value, task.updated_at, task.id)
-
-            # Route to appropriate agent
             result = await self.route_to_agent(task)
 
             # Mark complete
             task.status = TaskStatus.COMPLETED
             task.completed_at = datetime.now()
             task.updated_at = datetime.now()
-
             async with self.db_pool.acquire() as conn:
-                await conn.execute('''
-                    UPDATE supervisor_tasks
-                    SET status = $1, completed_at = $2, updated_at = $3
-                    WHERE id = $4
-                ''', task.status.value, task.completed_at, task.updated_at, task.id)
+                await conn.execute(
+                    'UPDATE supervisor_tasks SET status = $1, completed_at = $2, updated_at = $3 WHERE id = $4',
+                    task.status.value, task.completed_at, task.updated_at, task.id,
+                )
 
-            # Remove from active
             del self.active_tasks[task.id]
             self.task_queue.remove(task)
             self.stats['tasks_completed'] += 1
-
             logger.info(f"Task completed: {task.name}")
 
         except Exception as e:
-            logger.error(f"Task execution failed: {e}")
-            task.status = TaskStatus.FAILED
-            self.stats['tasks_failed'] += 1
+            error_msg = str(e)
+            logger.error(f"Task execution failed: {task.name} — {error_msg}")
 
-            async with self.db_pool.acquire() as conn:
-                await conn.execute('''
-                    UPDATE supervisor_tasks
-                    SET status = $1, updated_at = $2
-                    WHERE id = $3
-                ''', task.status.value, datetime.now(), task.id)
+            task.retry_count += 1
+            task.last_error = error_msg
+
+            if task.retry_count >= MAX_RETRY_ATTEMPTS:
+                # Move to dead-letter
+                task.status = TaskStatus.DEAD_LETTER
+                task.updated_at = datetime.now()
+                async with self.db_pool.acquire() as conn:
+                    await conn.execute(
+                        '''UPDATE supervisor_tasks
+                           SET status = $1, updated_at = $2, retry_count = $3, last_error = $4
+                           WHERE id = $5''',
+                        task.status.value, task.updated_at, task.retry_count, task.last_error, task.id,
+                    )
+                del self.active_tasks[task.id]
+                self.task_queue.remove(task)
+                self.stats['tasks_failed'] += 1
+                logger.warning(f"Task moved to dead-letter after {MAX_RETRY_ATTEMPTS} attempts: {task.name}")
+                await self.log_event(
+                    'task_dead_letter', 'warning',
+                    f"Task '{task.name}' dead-lettered after {MAX_RETRY_ATTEMPTS} attempts: {error_msg}",
+                    {'task_id': task.id},
+                )
+            else:
+                # Schedule retry with exponential backoff
+                backoff = RETRY_BACKOFF_BASE * (2 ** (task.retry_count - 1))
+                task.status = TaskStatus.PENDING
+                task.updated_at = datetime.now()
+                async with self.db_pool.acquire() as conn:
+                    await conn.execute(
+                        '''UPDATE supervisor_tasks
+                           SET status = $1, updated_at = $2, retry_count = $3, last_error = $4
+                           WHERE id = $5''',
+                        task.status.value, task.updated_at, task.retry_count, task.last_error, task.id,
+                    )
+                del self.active_tasks[task.id]
+                logger.info(f"Task '{task.name}' will retry in {backoff}s (attempt {task.retry_count}/{MAX_RETRY_ATTEMPTS})")
+                await asyncio.sleep(backoff)
 
     async def route_to_agent(self, task: Task) -> Any:
         """Route task to the appropriate agent handler.
@@ -823,6 +875,23 @@ class KirobiSupervisor:
             "Welcome greeting displayed"
         )
 
+    async def _write_heartbeat(self):
+        """Write a heartbeat line to kirobi-core/core-events.log."""
+        queue_depth = len(self.task_queue)
+        msg = (
+            f"[{datetime.now().isoformat(timespec='seconds')}] [supervisor] "
+            f"HEARTBEAT: processed={self.stats['tasks_completed']}, "
+            f"failed={self.stats['tasks_failed']}, "
+            f"queue_depth={queue_depth}"
+        )
+        logger.info(msg)
+        try:
+            log_file = self.config.KIROBI_CORE_PATH / 'core-events.log'
+            with open(log_file, 'a') as f:
+                f.write(msg + "\n")
+        except Exception as exc:
+            logger.warning(f"Heartbeat write failed: {exc}")
+
     async def main_loop(self):
         """Main supervisor control loop"""
         logger.info("Starting main supervisor loop...")
@@ -848,6 +917,8 @@ class KirobiSupervisor:
             )
 
         loop_count = 0
+        last_heartbeat = datetime.now()
+        HEARTBEAT_INTERVAL = 60  # seconds
 
         while not self.shutdown_flag:
             try:
@@ -860,6 +931,12 @@ class KirobiSupervisor:
                 if loop_count % (self.config.HEALTH_CHECK_INTERVAL // self.config.MAIN_LOOP_INTERVAL) == 0:
                     await self.health_check()
 
+                # Heartbeat every 60 seconds
+                now = datetime.now()
+                if (now - last_heartbeat).total_seconds() >= HEARTBEAT_INTERVAL:
+                    await self._write_heartbeat()
+                    last_heartbeat = now
+
                 # Periodic stats logging
                 if loop_count % 20 == 0:
                     uptime = datetime.now() - self.stats['uptime_start']
@@ -868,12 +945,23 @@ class KirobiSupervisor:
                                f"Failed: {self.stats['tasks_failed']}, "
                                f"Queue size: {len(self.task_queue)}")
 
-                # Sleep
-                await asyncio.sleep(self.config.MAIN_LOOP_INTERVAL)
+                # Sleep — use short slices so SIGTERM is noticed quickly
+                for _ in range(self.config.MAIN_LOOP_INTERVAL):
+                    if self.shutdown_flag:
+                        break
+                    await asyncio.sleep(1)
 
             except Exception as e:
                 logger.error(f"Main loop error: {e}")
                 await asyncio.sleep(self.config.MAIN_LOOP_INTERVAL)
+
+        # Finish any in-progress tasks before exiting
+        if self.active_tasks:
+            logger.info(f"Waiting for {len(self.active_tasks)} active task(s) to finish...")
+            for _ in range(30):  # max 30s grace period
+                if not self.active_tasks:
+                    break
+                await asyncio.sleep(1)
 
         logger.info("Main loop shutting down...")
 
@@ -895,13 +983,19 @@ class KirobiSupervisor:
             # Initialize
             await self.initialize()
 
-            # Setup signal handlers
-            def signal_handler(signum, frame):
-                logger.info(f"Received signal {signum}")
+            # Setup async-safe signal handlers
+            loop = asyncio.get_running_loop()
+
+            def _signal_handler(signum: int) -> None:
+                logger.info(f"Received signal {signum} — initiating graceful shutdown")
                 self.shutdown_flag = True
 
-            signal.signal(signal.SIGINT, signal_handler)
-            signal.signal(signal.SIGTERM, signal_handler)
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                try:
+                    loop.add_signal_handler(sig, _signal_handler, sig)
+                except (NotImplementedError, RuntimeError):
+                    # Fallback for environments that don't support add_signal_handler
+                    signal.signal(sig, lambda s, f: _signal_handler(s))
 
             # Run main loop
             await self.main_loop()
