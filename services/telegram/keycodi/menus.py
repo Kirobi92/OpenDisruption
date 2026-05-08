@@ -1,18 +1,18 @@
 """
 services/telegram/keycodi/menus.py
-Alle Inline-Keyboards und Screen-Texte für den KeyCodi Bot v3.
+Alle Inline-Keyboards und Screen-Texte für den KeyCodi Telegram Bot.
 
 Menü-Hierarchie:
-  🏠 Hauptmenü
-  ├── 📊 Status        (System, GPU, LLM, Tasks)
-  ├── 📋 Tasks         (Liste, Detail, Anlegen)
-  ├── 🤖 Agenten       (opencode, openclaw, hermes, obsidian, kidi, keybrodi)
-  ├── 📚 Vault         (MOC, Daily Note, Suche)
-  ├── 📡 Events        (letzte Ereignisse)
+  🏠 KeyCodi-Menü
+  ├── 💬 KeyCodi       (direkter Chat)
+  ├── 📊 Status        (System, GPU, LLM, Aufgaben)
+  ├── 📋 Aufgaben      (Liste, Detail, Anlegen)
   ├── ❓ Entscheidungen (offene Fragen von Agenten)
-  ├── ⚙️ Hardware       (GPU/CPU/RAM Auslastung, Modelle)
-  ├── 💬 Chat          (KeyCodi direkt fragen)
-  └── 🔧 System        (Konfiguration, API-Status)
+  ├── 📡 Ereignisse    (letzte Ereignisse)
+  ├── 📚 Vault         (MOC, Daily Note, Suche)
+  ├── 🤖 Agenten       (KeyCodi + weitere Agentenoberflächen)
+  ├── ⚙️ Hardware      (GPU/CPU/RAM Auslastung, Modelle)
+  └── 🔧 System        (Bot/API/Konfiguration)
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from datetime import datetime
 from typing import Optional
 
 from . import db
-from .llm import is_available, loaded_models, available_models
+from .llm import available_models, is_available, loaded_models, provider
 
 
 # ─── Keyboards ───────────────────────────────────────────────────────────────
@@ -30,41 +30,47 @@ def kb_main() -> dict:
     return {
         "inline_keyboard": [
             [
+                {"text": "💬 KeyCodi",      "callback_data": "m:chat"},
+                {"text": "🤝 Copilot",      "callback_data": "m:copilot"},
+            ],
+            [
                 {"text": "📊 Status",       "callback_data": "m:status"},
-                {"text": "📋 Tasks",        "callback_data": "m:tasks"},
+                {"text": "📋 Aufgaben",     "callback_data": "m:tasks"},
             ],
             [
-                {"text": "🤖 Agenten",      "callback_data": "m:agents"},
+                {"text": "❓ Entscheidungen", "callback_data": "m:decisions"},
+                {"text": "📡 Ereignisse",   "callback_data": "m:events"},
+            ],
+            [
                 {"text": "📚 Vault",        "callback_data": "m:vault"},
-            ],
-            [
-                {"text": "📡 Events",       "callback_data": "m:events"},
-                {"text": "❓ Entscheidungen","callback_data": "m:decisions"},
+                {"text": "🤖 Agenten",      "callback_data": "m:agents"},
             ],
             [
                 {"text": "⚙️ Hardware",     "callback_data": "m:hardware"},
                 {"text": "🔧 System",       "callback_data": "m:system"},
             ],
-            [{"text": "💬 Chat mit KeyCodi", "callback_data": "m:chat"}],
+            [
+                {"text": "♻️ Neuer Chat",    "callback_data": "m:reset_chat"},
+            ],
         ]
     }
 
 
 def kb_back(target: str = "m:home") -> dict:
-    return {"inline_keyboard": [[{"text": "🏠 Hauptmenü", "callback_data": target}]]}
+    return {"inline_keyboard": [[{"text": "🏠 KeyCodi-Menü", "callback_data": target}]]}
 
 
 def kb_back_tasks() -> dict:
     return {"inline_keyboard": [
         [
-            {"text": "◀️ Tasks", "callback_data": "m:tasks"},
-            {"text": "🏠 Hauptmenü", "callback_data": "m:home"},
+            {"text": "◀️ Aufgaben", "callback_data": "m:tasks"},
+            {"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"},
         ]
     ]}
 
 
 def kb_cancel() -> dict:
-    return {"inline_keyboard": [[{"text": "❌ Abbrechen", "callback_data": "m:home"}]]}
+    return {"inline_keyboard": [[{"text": "❌ Zurück zu KeyCodi", "callback_data": "m:home"}]]}
 
 
 def kb_tasks(tasks: list[dict]) -> dict:
@@ -81,7 +87,7 @@ def kb_tasks(tasks: list[dict]) -> dict:
     rows.append([
         {"text": "➕ Neuer Task",        "callback_data": "m:add_task"},
         {"text": "🚨 SOFORT-Task",       "callback_data": "m:add_sofort"},
-        {"text": "🏠 Hauptmenü",         "callback_data": "m:home"},
+        {"text": "🏠 KeyCodi-Menü",      "callback_data": "m:home"},
     ])
     return {"inline_keyboard": rows}
 
@@ -101,7 +107,7 @@ def kb_agents() -> dict:
                 {"text": "🔮 KIDI",        "callback_data": "agent:kidi"},
                 {"text": "👑 KeyBrodi",    "callback_data": "agent:keybrodi"},
             ],
-            [{"text": "🏠 Hauptmenü", "callback_data": "m:home"}],
+            [{"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"}],
         ]
     }
 
@@ -116,7 +122,7 @@ def kb_vault() -> dict:
             [
                 {"text": "📄 Note lesen",           "callback_data": "vault:read_prompt"},
             ],
-            [{"text": "🏠 Hauptmenü", "callback_data": "m:home"}],
+            [{"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"}],
         ]
     }
 
@@ -128,7 +134,7 @@ def kb_decisions(decisions: list[dict]) -> dict:
             "text": f"❓ {d['question'][:35]}",
             "callback_data": f"dec:v:{d['id'][:20]}",
         }])
-    rows.append([{"text": "🏠 Hauptmenü", "callback_data": "m:home"}])
+    rows.append([{"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"}])
     return {"inline_keyboard": rows}
 
 
@@ -140,7 +146,7 @@ def kb_decision_answer(decision_id: str, options: list[str]) -> dict:
             "callback_data": f"dec:ans:{decision_id[:20]}:{i}",
         }])
     rows.append([{"text": "✍️ Freitext-Antwort", "callback_data": f"dec:free:{decision_id[:20]}"}])
-    rows.append([{"text": "🏠 Hauptmenü", "callback_data": "m:home"}])
+    rows.append([{"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"}])
     return {"inline_keyboard": rows}
 
 
@@ -150,7 +156,7 @@ def kb_system() -> dict:
             [{"text": "🔐 API-Status",       "callback_data": "sys:api"}],
             [{"text": "🤖 Bot-Info",         "callback_data": "sys:bot"}],
             [{"text": "📋 Konfiguration",    "callback_data": "sys:config"}],
-            [{"text": "🏠 Hauptmenü",        "callback_data": "m:home"}],
+            [{"text": "🏠 KeyCodi-Menü",     "callback_data": "m:home"}],
         ]
     }
 
@@ -162,13 +168,13 @@ async def screen_home(user_name: str) -> tuple[str, dict]:
     now = datetime.now().strftime("%H:%M")
     text = (
         f"👋 <b>Hey {_e(user_name)}!</b> — {now}\n\n"
-        "<b>KeyCodi OS</b> — Dein KI-Ökosystem\n\n"
+        "<b>KeyCodi</b> — dein direkter Code-Orchestrator für unterwegs\n\n"
         "📋 <b>Schnellübersicht:</b>\n"
         f"  ⏳ Pending: <b>{counts.get('pending', '?')}</b>  "
         f"🔄 Aktiv: <b>{counts.get('running', '?')}</b>  "
         f"❌ Fehler: <b>{counts.get('failed', '?')}</b>\n"
         + (f"  🚨 <b>SOFORT: {counts['sofort']}</b>\n" if counts.get('sofort') else "")
-        + "\nWähle eine Aktion:"
+        + "\n\nWähle direkt, was du brauchst:"
     )
     return text, kb_main()
 
@@ -178,6 +184,7 @@ async def screen_status() -> tuple[str, dict]:
     counts = await db.task_counts()
     llm_ok = await is_available()
     models = await loaded_models()
+    llm_provider = provider()
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
     # GPU
@@ -203,8 +210,9 @@ async def screen_status() -> tuple[str, dict]:
         f"📊 <b>System-Status</b> — {now}\n\n"
         f"{gpu_line}\n"
         f"🧠 LLM: {'✅ bereit' if llm_ok else '❌ offline'} | "
+        f"Provider: <code>{_e(llm_provider)}</code> | "
         f"Geladen: <code>{_e(model_str)}</code>\n\n"
-        "<b>Tasks:</b>\n"
+        "<b>Aufgaben:</b>\n"
         f"  ⏳ Pending: <b>{counts.get('pending', '?')}</b>\n"
         f"  🔄 Aktiv: <b>{counts.get('running', '?')}</b>\n"
         f"  ✅ Erledigt: <b>{counts.get('completed', '?')}</b>\n"
@@ -217,10 +225,10 @@ async def screen_status() -> tuple[str, dict]:
 async def screen_tasks() -> tuple[str, dict]:
     tasks = await db.tasks_list(limit=12)
     if not tasks:
-        return "📋 <b>Keine Tasks.</b>\n\nLege einen neuen Task an.", kb_back()
+        return "📋 <b>Keine Aufgaben in der Queue.</b>\n\nLege bei Bedarf eine neue Aufgabe an.", kb_back()
     sofort_tasks = [t for t in tasks if t.get("sofort")]
     normal_tasks = [t for t in tasks if not t.get("sofort")]
-    lines = [f"📋 <b>Tasks</b> ({len(tasks)} angezeigt)\n"]
+    lines = [f"📋 <b>Aufgaben</b> ({len(tasks)} angezeigt)\n"]
     if sofort_tasks:
         lines.append("🚨 <b>SOFORT:</b>")
         for t in sofort_tasks:
@@ -253,25 +261,28 @@ async def screen_task_detail(task_id: str) -> tuple[str, dict]:
 
 async def screen_agents(agent_name: Optional[str] = None) -> tuple[str, dict]:
     agent_info = {
-        "opencode":  ("🧑‍💻", "OpenCode",  "Code-Generierung, Refactoring, Reviews\nLLM: qwen2.5-coder:32b (GPU)"),
-        "openclaw":  ("🌐", "OpenClaw",  "Web-Fetch, API-Calls, Filesystem-Zugriff"),
-        "hermes":    ("🧠", "Hermes",    "Chain-of-Thought, Debate, Research\nLLM: deepseek-r1:32b (GPU)"),
-        "obsidian":  ("📖", "Obsidian",  "Vault-CRUD, MOC, Daily Notes, Backlinks"),
-        "kidi":      ("🔮", "KIDI",      "ContextDB (Redis), Zone-Guard, Memory"),
-        "keybrodi":  ("👑", "KeyBrodi",  "Superintelligenz-Orchestrator (Phase 4+)"),
+        "opencode":  ("🧑‍💻", "OpenCode",  "Coding-Oberfläche. Aktuell eher vorbereitend als voll autonom."),
+        "openclaw":  ("🌐", "OpenClaw",  "Web-/API-orientierte Agentenoberfläche mit Fokus auf externe Recherchepfade."),
+        "hermes":    ("🧠", "Hermes",    "Primärer Telegram-Agent für Analyse, Planung, Schlussfolgerungen und lokale Antworten."),
+        "obsidian":  ("📖", "Obsidian",  "Vault-Notizen, Daily Notes, MOCs und strukturierte Wissenspflege."),
+        "kidi":      ("🔮", "KIDI",      "Lokale Kontext- und Gedächtnisschicht für spätere Orchestrierung."),
+        "keybrodi":  ("👑", "KeyBrodi",  "Geplante Orchestrierungsinstanz. Noch nicht der primäre Laufzeitpfad."),
     }
     if agent_name and agent_name in agent_info:
         icon, name, desc = agent_info[agent_name]
         text = f"{icon} <b>{name}</b>\n\n{_e(desc)}"
         return text, kb_back("m:agents")
-    text = "🤖 <b>Agenten-Übersicht</b>\n\nWähle einen Agenten:"
+    text = (
+        "🤖 <b>Agenten-Übersicht</b>\n\n"
+        "Hermes ist hier dein direkter Gesprächspartner. Die anderen Einträge zeigen den Status weiterer Agentenpfade."
+    )
     return text, kb_agents()
 
 
 async def screen_vault() -> tuple[str, dict]:
     text = (
         "📚 <b>Obsidian-Vault</b>\n\n"
-        "Der Vault ist die Wissensbasis des Ökosystems.\n\n"
+        "Der Vault ist die Wissensbasis des Systems und wird über den Obsidian-Agenten bedient.\n\n"
         "Wähle eine Aktion:"
     )
     return text, kb_vault()
