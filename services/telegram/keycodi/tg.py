@@ -6,11 +6,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
 from typing import Optional
 
 import httpx
 
-from .config import TELEGRAM_API
+from .config import TELEGRAM_API, TELEGRAM_FILE_API
 
 log = logging.getLogger("keycodi.tg")
 
@@ -88,3 +89,55 @@ async def answer_cb(callback_query_id: str, text: str = "", alert: bool = False)
 async def set_commands(commands: list[dict]) -> None:
     result = await tg("setMyCommands", commands=commands)
     log.info("Bot-Commands gesetzt: %s", result.get("ok"))
+
+
+async def download_file(file_id: str, target_path: str | Path) -> Path:
+    """Laedt eine Telegram-Datei anhand ihrer file_id herunter."""
+    meta = await tg("getFile", file_id=file_id)
+    file_path = meta.get("result", {}).get("file_path")
+    if not file_path:
+        raise RuntimeError(f"Telegram-Datei nicht gefunden: {file_id}")
+
+    target = Path(target_path)
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.get(f"{TELEGRAM_FILE_API}/{file_path}")
+        response.raise_for_status()
+    target.write_bytes(response.content)
+    return target
+
+
+async def send_audio(
+    chat_id: int | str,
+    audio_path: str | Path,
+    *,
+    caption: str | None = None,
+    title: str = "KeyCodi",
+    performer: str = "KeyCodi",
+) -> dict:
+    """Sendet eine Audiodatei an Telegram."""
+    target = Path(audio_path)
+    data = {
+        "chat_id": str(chat_id),
+        "title": title,
+        "performer": performer,
+    }
+    if caption:
+        data["caption"] = caption
+
+    async with httpx.AsyncClient(timeout=120) as client:
+        with target.open("rb") as handle:
+            files = {
+                "audio": (target.name, handle, "audio/wav"),
+            }
+            response = await client.post(
+                f"{TELEGRAM_API}/sendAudio",
+                data=data,
+                files=files,
+            )
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = {"ok": False, "status_code": response.status_code}
+    if not payload.get("ok"):
+        log.warning("Telegram sendAudio failed: %s", payload.get("description", response.status_code))
+    return payload

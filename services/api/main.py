@@ -134,6 +134,31 @@ class MessageCreate(BaseModel):
     attachments: Optional[List[str]] = []
 
 
+class ChatMessage(BaseModel):
+    role: str = Field(..., pattern="^(system|user|assistant)$")
+    content: str
+
+
+class ChatRequest(BaseModel):
+    """Compatibility request for lightweight clients.
+
+    Voice/Desktop clients use this endpoint without owning a persisted
+    conversation yet. It is intentionally WORKSPACE-only and does not fetch
+    FAMILY_PRIVATE/SACRED context.
+    """
+    message: Optional[str] = None
+    messages: Optional[List[ChatMessage]] = None
+    model: Optional[str] = None
+
+
+class ChatResponse(BaseModel):
+    message: str
+    response: str
+    content: str
+    model_used: str
+    zone: str = "WORKSPACE"
+
+
 class Message(BaseModel):
     id: str
     conversation_id: str
@@ -312,6 +337,19 @@ async def call_ollama(prompt: str, model: str = "llama3.1:8b", system_prompt: Op
             return f"Error calling Ollama: {str(e)}"
 
 
+def _extract_chat_prompt(request: ChatRequest) -> str:
+    """Extract the latest user prompt from compatibility chat payloads."""
+    if request.message and request.message.strip():
+        return request.message.strip()
+
+    if request.messages:
+        for message in reversed(request.messages):
+            if message.role == "user" and message.content.strip():
+                return message.content.strip()
+
+    raise HTTPException(status_code=422, detail="message or messages with user content required")
+
+
 # API Routes
 @app.get("/health")
 async def health_check():
@@ -322,6 +360,32 @@ async def health_check():
         return {"status": "healthy", "service": "api"}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_compat(request: ChatRequest):
+    """Lightweight WORKSPACE chat endpoint for Voice/Desktop clients.
+
+    This endpoint deliberately avoids persisted family conversations and private
+    RAG zones. It gives local apps a stable `/chat` contract while the richer
+    conversation API remains the source of truth for authenticated history.
+    """
+    prompt = _extract_chat_prompt(request)
+    model = request.model or OLLAMA_FALLBACK_MODEL
+    system_prompt = """Du bist KeyCodi im OpenDisruption-Ökosystem.
+
+Antworte direkt, warm und präzise auf Deutsch. Nutze ausschließlich lokalen
+WORKSPACE-Kontext aus dieser Anfrage. Greife nicht auf FAMILY_PRIVATE oder
+SACRED Inhalte zu und erfinde keine privaten Details."""
+
+    response = await call_ollama(prompt, model=model, system_prompt=system_prompt)
+    await _analytics_track("chat_compat", zone="WORKSPACE", model=model)
+    return ChatResponse(
+        message=response,
+        response=response,
+        content=response,
+        model_used=model,
+    )
 
 
 @app.get("/conversations", response_model=List[Conversation])

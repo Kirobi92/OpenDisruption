@@ -277,6 +277,57 @@ def test_create_message_missing_content_returns_422(client):
 
 
 # ---------------------------------------------------------------------------
+# POST /chat compatibility endpoint
+# ---------------------------------------------------------------------------
+
+def test_chat_compat_accepts_desktop_message(client):
+    """POST /chat muss den Desktop-Chat-Vertrag bedienen."""
+    c, _ = client
+
+    with patch("services.api.main.call_ollama", AsyncMock(return_value="Hallo Sven.")) as mock_call:
+        resp = c.post("/chat", json={"message": "Hallo KeyCodi"})
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["message"] == "Hallo Sven."
+    assert data["response"] == "Hallo Sven."
+    assert data["content"] == "Hallo Sven."
+    assert data["zone"] == "WORKSPACE"
+    mock_call.assert_awaited_once()
+    _, kwargs = mock_call.call_args
+    assert "FAMILY_PRIVATE" in kwargs["system_prompt"]
+    assert "SACRED" in kwargs["system_prompt"]
+
+
+def test_chat_compat_accepts_voice_messages_history(client):
+    """POST /chat muss die letzte User-Nachricht aus Voice-History nutzen."""
+    c, _ = client
+
+    with patch("services.api.main.call_ollama", AsyncMock(return_value="Ich höre dich.")) as mock_call:
+        resp = c.post(
+            "/chat",
+            json={
+                "messages": [
+                    {"role": "assistant", "content": "Hallo"},
+                    {"role": "user", "content": "Kannst du mich hören?"},
+                ]
+            },
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["response"] == "Ich höre dich."
+    args, _ = mock_call.call_args
+    assert args[0] == "Kannst du mich hören?"
+
+
+def test_chat_compat_rejects_empty_payload(client):
+    """POST /chat ohne User-Inhalt bleibt ein Validierungsfehler."""
+    c, _ = client
+    resp = c.post("/chat", json={"messages": [{"role": "assistant", "content": "Hallo"}]})
+    assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
 # GET /uploads
 # ---------------------------------------------------------------------------
 

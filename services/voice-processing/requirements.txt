@@ -1,8 +1,5 @@
 # Kirobi Voice Processing Service - Python Dependencies
 
-# Core
-python>=3.10
-
 # Speech-to-Text (Whisper)
 faster-whisper>=1.0.0
 torch>=2.1.0
@@ -28,6 +25,7 @@ python-dotenv>=1.0.0
 fastapi>=0.104.0
 uvicorn>=0.24.0
 pydantic>=2.0.0
+python-multipart>=0.0.9
 
 # Database
 asyncpg>=0.29.0

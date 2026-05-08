@@ -22,6 +22,7 @@ WEBHOOK_HOST: str = os.getenv("TELEGRAM_WEBHOOK_HOST", "").strip()
 WEBHOOK_PATH: str = "/telegram/webhook"
 PORT: int = int(os.getenv("TELEGRAM_SERVICE_PORT", "8005"))
 TELEGRAM_API: str = f"https://api.telegram.org/bot{BOT_TOKEN}"
+TELEGRAM_FILE_API: str = f"https://api.telegram.org/file/bot{BOT_TOKEN}"
 
 # ─── Kirobi API / Auth ───────────────────────────────────────────────────────
 KIROBI_API_URL: str = os.getenv("KIROBI_API_URL", "http://api:8000").rstrip("/")
@@ -40,10 +41,20 @@ DATABASE_URL: str = (
 )
 
 # ─── Ollama / LLM ────────────────────────────────────────────────────────────
+LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "auto").strip().lower()
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434").rstrip("/")
 OLLAMA_DEFAULT_MODEL: str = os.getenv("OLLAMA_DEFAULT_MODEL", "llama3.1:8b")
 OLLAMA_CODE_MODEL: str = os.getenv("OLLAMA_CODE_MODEL", "qwen2.5-coder:32b")
 OLLAMA_NUM_PARALLEL: int = int(os.getenv("OLLAMA_NUM_PARALLEL", "4"))
+GITHUB_MODELS_TOKEN: str = os.getenv("GITHUB_MODELS_TOKEN", "").strip()
+GITHUB_MODELS_URL: str = os.getenv(
+    "GITHUB_MODELS_URL",
+    "https://models.github.ai/inference/chat/completions",
+).rstrip("/")
+GITHUB_CHAT_MODEL: str = os.getenv("GITHUB_CHAT_MODEL", "openai/gpt-4.1-mini").strip()
+GITHUB_REASONING_MODEL: str = os.getenv("GITHUB_REASONING_MODEL", "openai/gpt-4.1").strip()
+GITHUB_CODE_MODEL: str = os.getenv("GITHUB_CODE_MODEL", GITHUB_REASONING_MODEL).strip()
+VOICE_SERVICE_URL: str = os.getenv("VOICE_SERVICE_URL", "http://voice-processing:8001").rstrip("/")
 
 # ─── Hardware / Parallelisierung ─────────────────────────────────────────────
 CPU_CORES: int = int(os.getenv("KIROBI_CPU_CORES", "0")) or __import__("os").cpu_count() or 4
@@ -52,6 +63,9 @@ MAX_PARALLEL_CLOUD_MODELS: int = int(os.getenv("KIROBI_MAX_PARALLEL_CLOUD", "3")
 
 # ─── Cron / Reports ──────────────────────────────────────────────────────────
 CRON_REPORT_INTERVAL_MIN: int = int(os.getenv("KIROBI_CRON_REPORT_INTERVAL", "30"))
+KIROBI_TELEGRAM_PROGRESS_INTERVAL_SEC: int = int(
+    os.getenv("KIROBI_TELEGRAM_PROGRESS_INTERVAL_SEC", "60")
+)
 
 # ─── Events-Log ──────────────────────────────────────────────────────────────
 EVENTS_LOG_PATH: str = os.getenv("KIROBI_EVENTS_LOG", "kirobi-core/core-events.log")

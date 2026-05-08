@@ -5,7 +5,7 @@ KeyCodi Telegram Bot v3 — FastAPI-Einstiegspunkt
 Zone: WORKSPACE
 Zweck: Orchestriert alle keycodi/-Module zu einem vollständigen Telegram-Bot.
        Unterstützt Webhook- und Long-Polling-Modus, State-Machine für
-       Konversationen, Auth-Guard, Cron-Jobs und Health-Endpoints.
+       Sitzungen, Auth-Guard, Cron-Jobs und Health-Endpoints.
 
 Architektur:
   config   → Zentrale Konfiguration (Env-Vars)
@@ -20,8 +20,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import tempfile
 from datetime import datetime
 from html import escape
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -30,6 +33,7 @@ from fastapi import FastAPI, Request
 from .config import (
     ALLOWED_USER_IDS,
     BOT_TOKEN,
+    KIROBI_TELEGRAM_PROGRESS_INTERVAL_SEC,
     KIROBI_API_URL,
     KIROBI_AUTH_URL,
     KIROBI_BOT_PASS,
@@ -38,12 +42,13 @@ from .config import (
     NOTIFY_ON_START,
     PORT,
     TELEGRAM_API,
+    VOICE_SERVICE_URL,
     WEBHOOK_HOST,
     WEBHOOK_PATH,
 )
 from . import db, cron
-from .responder import build_keycodi_response
-from .tg import answer_cb, edit_msg, send, set_commands
+from .responder import build_keycodi_response_with_context
+from .tg import answer_cb, download_file, edit_msg, send, send_audio, set_commands
 from .menus import (
     kb_cancel,
     screen_agents,
@@ -74,6 +79,12 @@ _user_state: dict[int, dict] = {}
 # user_id → conversation_id (Kirobi-API)
 _conversation_by_user: dict[int, str] = {}
 
+# user_id → letzte Chat-Turns fuer lokalen KeyCodi-Kontext
+_chat_history_by_user: dict[int, list[tuple[str, str]]] = {}
+
+# user_id → aktiver Chat-Modus ("keycodi" | "copilot")
+_chat_mode_by_user: dict[int, str] = {}
+
 # Gecachter JWT-Token für Kirobi-API
 _api_token_cache: Optional[str] = None
 
@@ -86,6 +97,77 @@ _cron_task: Optional[asyncio.Task] = None  # type: ignore[type-arg]
 def _html(value: object) -> str:
     """Escaped einen Wert für HTML-Ausgabe in Telegram."""
     return escape(str(value), quote=False)
+
+
+def _message_id_from(result: dict) -> Optional[int]:
+    """Extrahiert die message_id aus einer Telegram-API-Antwort."""
+    payload = result.get("result")
+    if isinstance(payload, dict):
+        message_id = payload.get("message_id")
+        if isinstance(message_id, int):
+            return message_id
+    return None
+
+
+def _append_chat_turn(user_id: int, role: str, text: str, *, limit: int = 8) -> None:
+    """Speichert die letzten Chat-Turns fuer den lokalen KeyCodi-Kontext."""
+    history = _chat_history_by_user.setdefault(user_id, [])
+    history.append((role, " ".join(text.split())))
+    if len(history) > limit:
+        del history[:-limit]
+
+
+def _chat_context_for(user_id: int) -> str:
+    """Rendert den letzten Chatverlauf kompakt fuer KeyCodi."""
+    history = _chat_history_by_user.get(user_id, [])
+    if not history:
+        return ""
+    lines: list[str] = []
+    for role, text in history[-6:]:
+        label = "Sven" if role == "user" else "Agent"
+        lines.append(f"{label}: {text}")
+    return "\n".join(lines)
+
+
+def _response_title(source: str) -> str:
+    """Human-readable Label fuer die aktuelle Antwortquelle."""
+    if source in {"keycodi_local", "hermes_reasoner"}:
+        return "KeyCodi"
+    if source == "copilot_cloud":
+        return "Copilot"
+    if source == "local_keycodi_plan":
+        return "KeyCodi Fallback"
+    return "KeyCodi"
+
+
+def _chat_mode_for(user_id: int) -> str:
+    """Gibt den aktiven Chat-Modus zurück."""
+    return _chat_mode_by_user.get(user_id, "keycodi")
+
+
+def _status_text(step: int) -> str:
+    """Statusmeldung fuer lange Telegram-Anfragen."""
+    minute_word = "Minute" if step == 1 else "Minuten"
+    return (
+        "⏳ <b>KeyCodi arbeitet noch...</b>\n\n"
+        f"Zwischenstand: {step} {minute_word} in Bearbeitung.\n"
+        "Ich prüfe weiter die Anfrage und melde mich mit dem Ergebnis."
+    )
+
+
+async def _progress_reporter(chat_id: int, message_id: int, stop_event: asyncio.Event) -> None:
+    """Aktualisiert die sichtbare Telegram-Statusmeldung periodisch."""
+    step = 0
+    while True:
+        try:
+            await asyncio.wait_for(
+                stop_event.wait(),
+                timeout=max(1, KIROBI_TELEGRAM_PROGRESS_INTERVAL_SEC),
+            )
+            return
+        except asyncio.TimeoutError:
+            step += 1
+            await edit_msg(chat_id, message_id, _status_text(step))
 
 
 def _is_authorized(user_id: int) -> bool:
@@ -165,7 +247,7 @@ async def _api_post(client: httpx.AsyncClient, path: str, payload: dict) -> http
 async def _ensure_conversation(
     client: httpx.AsyncClient, user_id: int, title_seed: str
 ) -> tuple[Optional[str], Optional[str]]:
-    """Stellt sicher, dass eine Kirobi-Konversation für den User existiert."""
+    """Stellt sicher, dass eine API-Sitzung für den User existiert."""
     if user_id in _conversation_by_user:
         return _conversation_by_user[user_id], None
     response = await _api_post(
@@ -190,18 +272,68 @@ async def _ensure_conversation(
 async def _send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
     """Beantwortet Telegram-Chats zuerst ueber den lokalen KeyCodi-Pfad."""
     log.info("Chat-Nachricht von user_id=%s, Länge=%s", user_id, len(text))
-    await send(chat_id, "⌛ KeyCodi denkt nach...")
+    persona = _chat_mode_for(user_id)
+    start_label = "Copilot" if persona == "copilot" else "KeyCodi"
+    start_text = (
+        "Ich prüfe deine Anfrage gegen den Repo-Kontext."
+        if persona == "copilot"
+        else "Ich analysiere deine Anfrage jetzt als KeyCodi — lokal, klar und ohne Placeholder."
+    )
+    pending = await send(
+        chat_id,
+        f"⌛ <b>{start_label} startet…</b>\n\n{start_text}",
+    )
+    pending_message_id = _message_id_from(pending)
+    stop_progress = asyncio.Event()
+    progress_task: Optional[asyncio.Task] = None
+    if pending_message_id is not None:
+        progress_task = asyncio.create_task(
+            _progress_reporter(chat_id, pending_message_id, stop_progress)
+        )
 
     try:
-        local_response = await build_keycodi_response(text)
+        local_response = await build_keycodi_response_with_context(
+            text,
+            context=_chat_context_for(user_id),
+            persona=persona,
+        )
         ai_response = local_response.content
         if len(ai_response) > 3800:
             ai_response = ai_response[:3800] + "\n\n<i>... (Antwort gekürzt)</i>"
+        _append_chat_turn(user_id, "user", text)
+        _append_chat_turn(user_id, "assistant", ai_response)
+        stop_progress.set()
+        if progress_task is not None:
+            await progress_task
+        if pending_message_id is not None:
+            await edit_msg(
+                chat_id,
+                pending_message_id,
+                f"✅ <b>{_response_title(local_response.source)}</b> hat geantwortet.",
+            )
         from .menus import kb_back
-        await send(chat_id, f"🤖 <b>KeyCodi:</b>\n\n{_html(ai_response)}", kb_back())
+        model_hint = (
+            f"\n<i>Modell: {_html(local_response.model_used)}</i>"
+            if local_response.model_used
+            else ""
+        )
+        await send(
+            chat_id,
+            f"🧠 <b>{_response_title(local_response.source)}:</b>{model_hint}\n\n{_html(ai_response)}",
+            kb_back(),
+        )
         return
     except Exception as exc:
         log.warning("Lokaler KeyCodi-Antwortpfad nicht verfügbar: %s", type(exc).__name__)
+        stop_progress.set()
+        if progress_task is not None:
+            await progress_task
+        if pending_message_id is not None:
+            await edit_msg(
+                chat_id,
+                pending_message_id,
+                "⚠️ <b>Lokaler Agent nicht verfügbar.</b>\n\nIch versuche jetzt den API-Fallback.",
+            )
 
     if not await _get_api_token():
         await send(
@@ -246,13 +378,144 @@ async def _send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
 
             if len(ai_response) > 3800:
                 ai_response = ai_response[:3800] + "\n\n<i>... (Antwort gekürzt)</i>"
+            _append_chat_turn(user_id, "user", text)
+            _append_chat_turn(user_id, "assistant", ai_response)
+            if pending_message_id is not None:
+                await edit_msg(chat_id, pending_message_id, "✅ <b>API-Fallback</b> hat geantwortet.")
 
             from .menus import kb_back
-            await send(chat_id, f"🤖 <b>KeyCodi:</b>\n\n{_html(ai_response)}", kb_back())
+            await send(chat_id, f"🧠 <b>KeyCodi API-Fallback:</b>\n\n{_html(ai_response)}", kb_back())
 
     except Exception as exc:
         log.error("Chat-Fehler: %s", exc)
         await send(chat_id, f"❌ Fehler: {_html(exc)}", kb_cancel())
+
+
+async def _transcribe_telegram_audio(audio_path: str | Path, *, language: str = "de") -> str:
+    """Gibt die Transkription einer Telegram-Audiodatei zurück."""
+    async with httpx.AsyncClient(timeout=180) as client:
+        with open(audio_path, "rb") as handle:
+            files = {"audio_file": (Path(audio_path).name, handle, "application/octet-stream")}
+            response = await client.post(
+                f"{VOICE_SERVICE_URL}/stt/transcribe",
+                files=files,
+                data={"language": language},
+            )
+    response.raise_for_status()
+    data = response.json()
+    return str(data.get("text", "")).strip()
+
+
+async def _synthesize_telegram_audio(text: str, *, language: str = "de") -> Path:
+    """Erzeugt eine Audiodatei aus Text über den lokalen Voice-Service."""
+    async with httpx.AsyncClient(timeout=180) as client:
+        response = await client.post(
+            f"{VOICE_SERVICE_URL}/tts/synthesize",
+            json={"text": text, "language": language},
+        )
+        response.raise_for_status()
+        data = response.json()
+        audio_url = data.get("audio_url")
+        if not audio_url:
+            raise RuntimeError("Voice-Service lieferte keine audio_url")
+        audio_response = await client.get(f"{VOICE_SERVICE_URL}{audio_url}")
+        audio_response.raise_for_status()
+
+    temp = tempfile.NamedTemporaryFile(prefix="telegram_tts_", suffix=".wav", delete=False)
+    try:
+        temp.write(audio_response.content)
+        temp.flush()
+    finally:
+        temp.close()
+    return Path(temp.name)
+
+
+async def _handle_voice_message(chat_id: int, user_id: int, message: dict) -> None:
+    """Verarbeitet Telegram-Sprachnachrichten und antwortet per Audio."""
+    voice = message.get("voice") or message.get("audio")
+    if not isinstance(voice, dict):
+        await send(chat_id, "❌ Keine gültige Sprachnachricht erkannt.", kb_cancel())
+        return
+
+    file_id = voice.get("file_id")
+    if not isinstance(file_id, str) or not file_id:
+        await send(chat_id, "❌ Telegram hat keine Datei-ID für die Sprachnachricht geliefert.", kb_cancel())
+        return
+
+    pending = await send(
+        chat_id,
+        "🎙️ <b>KeyCodi verarbeitet deine Sprachnachricht…</b>\n\nIch lade das Audio, transkribiere es lokal und antworte dir gleich mit Stimme.",
+    )
+    pending_message_id = _message_id_from(pending)
+    stop_progress = asyncio.Event()
+    progress_task: Optional[asyncio.Task] = None
+    if pending_message_id is not None:
+        progress_task = asyncio.create_task(
+            _progress_reporter(chat_id, pending_message_id, stop_progress)
+        )
+
+    input_path: Optional[Path] = None
+    output_path: Optional[Path] = None
+    try:
+        suffix = ".ogg" if message.get("voice") else ".audio"
+        temp_input = tempfile.NamedTemporaryFile(prefix="telegram_voice_", suffix=suffix, delete=False)
+        input_path = Path(temp_input.name)
+        temp_input.close()
+        await download_file(file_id, input_path)
+
+        transcript = await _transcribe_telegram_audio(input_path)
+        if not transcript:
+            raise RuntimeError("Transkription war leer")
+
+        _append_chat_turn(user_id, "user", transcript)
+        response = await build_keycodi_response_with_context(
+            transcript,
+            context=_chat_context_for(user_id),
+            timeout=90.0,
+        )
+        ai_response = response.content.strip()
+        if not ai_response:
+            raise RuntimeError("KeyCodi hat keine Antwort geliefert")
+
+        _append_chat_turn(user_id, "assistant", ai_response)
+        output_path = await _synthesize_telegram_audio(ai_response)
+
+        stop_progress.set()
+        if progress_task is not None:
+            await progress_task
+        if pending_message_id is not None:
+            await edit_msg(chat_id, pending_message_id, "✅ <b>KeyCodi Voice-Antwort ist bereit.</b>")
+
+        await send(
+            chat_id,
+            "📝 <b>Transkription</b>\n\n"
+            f"{_html(transcript[:1500])}"
+            + ("\n\n<i>... gekürzt</i>" if len(transcript) > 1500 else ""),
+        )
+        await send_audio(
+            chat_id,
+            output_path,
+            caption="🧠 KeyCodi Voice Reply",
+        )
+    except Exception as exc:
+        stop_progress.set()
+        if progress_task is not None:
+            await progress_task
+        if pending_message_id is not None:
+            await edit_msg(
+                chat_id,
+                pending_message_id,
+                "⚠️ <b>Voice-Verarbeitung fehlgeschlagen.</b>\n\nIch falle auf Text zurück.",
+            )
+        log.error("Voice-Fehler: %s", exc)
+        await send(chat_id, f"❌ Voice-Fehler: {_html(exc)}", kb_cancel())
+    finally:
+        for path in (input_path, output_path):
+            if path and path.exists():
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
 
 
 # ─── System-Screen ───────────────────────────────────────────────────────────
@@ -390,8 +653,25 @@ async def _handle_callback(callback_query: dict) -> None:
         text, keyboard = await _screen_system(user_name)
 
     elif data == "m:chat":
+        _chat_mode_by_user[user_id] = "keycodi"
         _user_state[user_id] = {"state": "chatting"}
-        text = "💬 <b>Chat-Modus aktiv.</b>\n\nSchreib einfach los. /new startet eine neue Konversation."
+        text = "💬 <b>KeyCodi ist bereit.</b>\n\nSchreib einfach los. /new startet eine neue Sitzung."
+        keyboard = kb_cancel()
+
+    elif data == "m:copilot":
+        _chat_mode_by_user[user_id] = "copilot"
+        _user_state[user_id] = {"state": "chatting"}
+        text = (
+            "🤝 <b>Copilot ist bereit.</b>\n\n"
+            "Frag direkt zum Repo, zu Code, Tests, Services oder Architektur."
+        )
+        keyboard = kb_cancel()
+
+    elif data == "m:reset_chat":
+        _conversation_by_user.pop(user_id, None)
+        _chat_history_by_user.pop(user_id, None)
+        _user_state[user_id] = {"state": "chatting"}
+        text = "♻️ <b>KeyCodi-Sitzung zurückgesetzt.</b>\n\nSchreib direkt deine nächste Anfrage."
         keyboard = kb_cancel()
 
     elif data == "m:add_task":
@@ -627,19 +907,30 @@ async def _handle_slash(
         await send(chat_id, text, keyboard)
 
     elif command == "chat":
+        _chat_mode_by_user[user_id] = "keycodi"
         _user_state[user_id] = {"state": "chatting"}
         await send(
             chat_id,
-            "💬 <b>Chat-Modus aktiv.</b>\n\nSchreib einfach los. /new startet eine neue Konversation.",
+            "💬 <b>KeyCodi ist bereit.</b>\n\nSchreib einfach los. /new startet eine neue Sitzung.",
+            kb_cancel(),
+        )
+
+    elif command == "copilot":
+        _chat_mode_by_user[user_id] = "copilot"
+        _user_state[user_id] = {"state": "chatting"}
+        await send(
+            chat_id,
+            "🤝 <b>Copilot ist bereit.</b>\n\nFrag direkt zum Repo, zu Code, Tests, Services oder Architektur.",
             kb_cancel(),
         )
 
     elif command in ("new", "reset"):
         _conversation_by_user.pop(user_id, None)
+        _chat_history_by_user.pop(user_id, None)
         _user_state[user_id] = {"state": "chatting"}
         await send(
             chat_id,
-            "✅ <b>Neue KeyCodi-Konversation gestartet.</b>\n\nSchreib einfach los.",
+            "✅ <b>Neue KeyCodi-Sitzung gestartet.</b>\n\nSchreib einfach los.",
             kb_cancel(),
         )
 
@@ -700,6 +991,10 @@ async def _process_update(update: dict) -> None:
 
         if text:
             await _handle_message(chat_id, user_id, text, user_name)
+            return
+
+        if message.get("voice") or message.get("audio"):
+            await _handle_voice_message(chat_id, user_id, message)
 
     except Exception as exc:
         log.error("Update-Verarbeitung fehlgeschlagen: %s", exc, exc_info=True)
@@ -739,7 +1034,7 @@ async def _polling_loop() -> None:
 app = FastAPI(
     title="KeyCodi Telegram Bot",
     version="3.0.0",
-    description="KeyCodi OS — Telegram-Interface für das OpenDisruption-Ökosystem",
+    description="KeyCodi — Telegram-Interface für das OpenDisruption-Ökosystem",
 )
 
 
@@ -806,12 +1101,13 @@ async def startup() -> None:
 
     # Bot-Commands setzen
     await set_commands([
-        {"command": "start",    "description": "Hauptmenü öffnen"},
+        {"command": "start",    "description": "KeyCodi-Menü öffnen"},
         {"command": "status",   "description": "System-Status anzeigen"},
-        {"command": "tasks",    "description": "Tasks anzeigen"},
-        {"command": "add",      "description": "Neuen Task anlegen"},
-        {"command": "chat",     "description": "Mit KeyCodi chatten"},
-        {"command": "new",      "description": "Neue Konversation starten"},
+        {"command": "tasks",    "description": "Aufgaben anzeigen"},
+        {"command": "add",      "description": "Neue Aufgabe anlegen"},
+        {"command": "chat",     "description": "Direkt mit KeyCodi chatten"},
+        {"command": "copilot",  "description": "Direkt mit Copilot im Repo chatten"},
+        {"command": "new",      "description": "Neue KeyCodi-Sitzung starten"},
         {"command": "events",   "description": "Letzte Ereignisse"},
         {"command": "help",     "description": "Hilfe anzeigen"},
     ])

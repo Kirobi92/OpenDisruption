@@ -38,8 +38,8 @@ const API_BASE_URL =
 
 async function transcribeAudio(blob: Blob): Promise<string> {
   const form = new FormData()
-  form.append('audio', blob, 'recording.webm')
-  const res = await fetch(`${VOICE_BASE_URL}/transcribe`, {
+  form.append('audio_file', blob, 'recording.webm')
+  const res = await fetch(`${VOICE_BASE_URL}/stt/transcribe`, {
     method: 'POST',
     body: form,
   })
@@ -62,7 +62,7 @@ async function askAssistant(
 }
 
 async function synthesizeSpeech(text: string): Promise<string | null> {
-  const res = await fetch(`${VOICE_BASE_URL}/synthesize`, {
+  const res = await fetch(`${VOICE_BASE_URL}/tts/synthesize`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
