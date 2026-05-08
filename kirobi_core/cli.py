@@ -32,6 +32,7 @@ from .backlog import generate_backlog, prioritize
 from .config import ConfigStore
 from .doctor import render, run_doctor, summarize
 from .interview import run_and_save
+from .ingest_manifest import build_manifest, render_manifest, write_manifest_output
 from .keycodi import plan_mission, render_text as render_keycodi
 from .registry import AgentRegistry
 from .scanner import scan_repository
@@ -85,6 +86,31 @@ def _cmd_backlog(args: argparse.Namespace) -> int:
     tasks = prioritize(generate_backlog(scan), limit=args.limit)
     payload = [t.to_dict() for t in tasks]
     print(json.dumps(payload, indent=2, ensure_ascii=False))
+    return 0
+
+
+def _cmd_ingest_manifest(args: argparse.Namespace) -> int:
+    manifest = build_manifest(args.repo_root, args.paths)
+    output_format = args.format
+    if output_format == "auto" and args.output:
+        output_format = "jsonl" if str(args.output).lower().endswith(".jsonl") else "json"
+    elif output_format == "auto":
+        output_format = "json"
+
+    try:
+        if args.output:
+            written = write_manifest_output(
+                args.repo_root,
+                manifest,
+                args.output,
+                output_format=output_format,
+            )
+            print(f"Manifest written to: {written}")
+        else:
+            print(render_manifest(manifest, output_format))
+    except (PermissionError, ValueError) as exc:
+        print(f"ingest-manifest blocked: {exc}", file=sys.stderr)
+        return 2
     return 0
 
 
@@ -187,6 +213,28 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(p)
     p.add_argument("--limit", type=int, default=20)
     p.set_defaults(func=_cmd_backlog)
+
+    p = sub.add_parser(
+        "ingest-manifest",
+        help="Create a metadata-only, zone-gated ingest preparation manifest.",
+    )
+    _add_common(p)
+    p.add_argument(
+        "paths",
+        nargs="+",
+        help="Repository-relative files or folders to include without reading contents.",
+    )
+    p.add_argument(
+        "--output",
+        help="Optional repository-local PUBLIC/WORKSPACE output path for the manifest.",
+    )
+    p.add_argument(
+        "--format",
+        choices=("auto", "json", "jsonl"),
+        default="auto",
+        help="Output format; auto uses .jsonl extension for JSON Lines, otherwise JSON.",
+    )
+    p.set_defaults(func=_cmd_ingest_manifest)
 
     p = sub.add_parser("registry", help="Print the agent registry.")
     _add_common(p)

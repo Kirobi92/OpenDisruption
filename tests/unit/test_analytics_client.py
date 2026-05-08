@@ -177,9 +177,10 @@ def test_track_sync_ohne_laufenden_loop():
 
 def test_track_sync_bei_fehler_kein_exception():
     """track_sync() propagiert keine Exception bei Fehler."""
-    with patch("kirobi_core.analytics_client.asyncio") as asyncio_mock:
-        asyncio_mock.get_running_loop.side_effect = RuntimeError("kein Loop")
-        asyncio_mock.run.side_effect = Exception("Netzwerkfehler")
+    async def _raising_track(*_args, **_kwargs):
+        raise Exception("Netzwerkfehler")
+
+    with patch("kirobi_core.analytics_client.track", _raising_track):
 
         # Darf keine Exception werfen
         track_sync("fehler_event")

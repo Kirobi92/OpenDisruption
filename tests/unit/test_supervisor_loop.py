@@ -73,21 +73,24 @@ def _make_task(
     priority: TaskPriority = TaskPriority.MEDIUM,
     status: TaskStatus = TaskStatus.PENDING,
     retry_count: int = 0,
+    description: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+    assigned_agent: Optional[str] = None,
 ) -> Task:
     now = datetime.now()
     return Task(
         id=f"task_{name}",
         name=name,
-        description=f"Description for {name}",
+        description=description or f"Description for {name}",
         priority=priority,
         status=status,
         created_at=now,
         updated_at=now,
         retry_count=retry_count,
         last_error=None,
-        assigned_agent=None,
+        assigned_agent=assigned_agent,
         completed_at=None,
-        metadata={},
+        metadata=metadata or {},
         dependencies=[],
     )
 
@@ -298,6 +301,47 @@ class TestRetryLogic:
         assert task not in sup.task_queue
         assert sup.stats["tasks_completed"] == 1
 
+    def test_blocked_routing_does_not_complete_task(self):
+        sup = _make_supervisor()
+        task = _make_task("blocked-task")
+        sup.task_queue = [task]
+        sup.log_event = AsyncMock()
+
+        async def blocked_route(t: Task) -> Any:
+            return {"status": "deferred", "reason": "Human gate required"}
+
+        sup.route_to_agent = blocked_route  # type: ignore[method-assign]
+
+        _run(sup.execute_task(task))
+
+        assert task.status == TaskStatus.BLOCKED
+        assert task.last_error == "Human gate required"
+        assert task.retry_count == 0
+        assert sup.stats["tasks_completed"] == 0
+        assert task in sup.task_queue
+        sup.log_event.assert_called_once()
+
+    def test_error_routing_retries_instead_of_completing(self):
+        sup = _make_supervisor()
+        task = _make_task("route-error-task")
+        sup.task_queue = [task]
+
+        async def error_route(t: Task) -> Any:
+            return {"status": "error", "error": "API unavailable"}
+
+        sup.route_to_agent = error_route  # type: ignore[method-assign]
+
+        async def run():
+            with patch("services.orchestrator.supervisor.asyncio.sleep", new_callable=AsyncMock):
+                await sup.execute_task(task)
+
+        _run(run())
+
+        assert task.status == TaskStatus.PENDING
+        assert task.last_error == "API unavailable"
+        assert task.retry_count == 1
+        assert sup.stats["tasks_completed"] == 0
+
 
 # ---------------------------------------------------------------------------
 # Tests: Heartbeat
@@ -346,3 +390,133 @@ class TestTaskStatusEnum:
         assert "failed" in values
         assert "pending" in values
         assert "completed" in values
+
+
+# ---------------------------------------------------------------------------
+# Tests: Deterministisches Agent-Routing
+# ---------------------------------------------------------------------------
+
+class TestDeterministicRouting:
+    """route_to_agent soll ohne LLM/API sicher und deterministisch routen."""
+
+    def test_code_task_routes_to_coder(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Implement route_to_agent",
+            description="Write Python unit tests and refactor code",
+            metadata={"zone": "WORKSPACE", "paths": ["services/orchestrator/supervisor.py"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is True
+        assert decision["agent"] == "kirobi-coder"
+
+    def test_architecture_task_routes_to_architect(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Create service graph ADR",
+            description="Architecture blueprint for the orchestrator API contract",
+            metadata={"zone": "WORKSPACE", "paths": ["docs/agent/architecture.md"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is True
+        assert decision["agent"] == "kirobi-architect"
+
+    def test_infra_task_routes_to_ops(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Fix Docker compose healthcheck",
+            description="Update infra shell script for deployment checks",
+            metadata={"zone": "WORKSPACE", "paths": ["infra/scripts/healthcheck.sh"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is True
+        assert decision["agent"] == "kirobi-ops"
+
+    def test_frontend_task_routes_to_frontend(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Build React PWA settings UI",
+            description="Next.js component with Tailwind styles",
+            metadata={"zone": "WORKSPACE", "paths": ["apps/web/app/settings/page.tsx"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is True
+        assert decision["agent"] == "kirobi-frontend"
+
+    def test_docs_task_routes_to_docs(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Refresh README documentation",
+            description="Update the developer runbook markdown",
+            metadata={"zone": "PUBLIC", "paths": ["README.md"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is True
+        assert decision["agent"] == "kirobi-docs"
+
+    def test_unknown_task_falls_back_to_core_deferred_handler(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Triage vague backlog item",
+            description="Needs human-readable classification",
+            metadata={"zone": "WORKSPACE"},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is True
+        assert decision["agent"] == "kirobi-core"
+
+    @pytest.mark.parametrize("zone", ["SACRED", "FAMILY_PRIVATE"])
+    def test_sensitive_zones_defer_to_human_gate(self, zone: str):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Refactor protected file",
+            description="Code change request in protected zone",
+            metadata={"zone": zone},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is False
+        assert decision["status"] == "deferred"
+        assert decision["agent"] == "kirobi-core"
+        assert zone in decision["reason"]
+
+    def test_quarantine_zone_defers(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Inspect inbox upload",
+            description="Process untrusted source",
+            metadata={"zone": "QUARANTINE", "paths": ["sources/inbox/upload.txt"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is False
+        assert decision["status"] == "deferred"
+        assert decision["agent"] == "kirobi-core"
+        assert decision["zone"] == "QUARANTINE"
+
+    def test_path_zone_overrides_workspace_metadata(self):
+        sup = _make_supervisor()
+        task = _make_task(
+            "Implement forbidden code change",
+            description="Python refactor",
+            metadata={"zone": "WORKSPACE", "paths": ["sacred/handoff-only.py"]},
+        )
+
+        decision = sup._deterministic_route_decision(task)
+
+        assert decision["allowed"] is False
+        assert decision["zone"] == "SACRED"

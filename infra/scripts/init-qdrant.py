@@ -22,7 +22,14 @@ import urllib.request
 import urllib.error
 import json
 import argparse
+from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from kirobi_core.qdrant_collections import VECTOR_SIZE, collection_descriptions  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Konfiguration
@@ -31,20 +38,8 @@ from typing import Any
 QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", "6333"))
 
-# Vektor-Dimension für nomic-embed-text
-VECTOR_SIZE: int = 768
-
 # Collections: Name → Beschreibung
-# 7 Collections insgesamt (PUBLIC 1 + WORKSPACE 4 + FAMILY_PRIVATE 1 + SACRED 1)
-COLLECTIONS: dict[str, str] = {
-    "kirobi_public_documents":         "Öffentliche Dokumente (PUBLIC-Zone)",
-    "kirobi_workspace_documents":      "Workspace-Dokumente (WORKSPACE-Zone)",
-    "kirobi_workspace_code":           "Code-Artefakte (WORKSPACE-Zone)",
-    "kirobi_workspace_notes":          "Notizen und Learnings (WORKSPACE-Zone)",
-    "kirobi_workspace_research":       "Recherche-Ergebnisse (WORKSPACE-Zone)",
-    "kirobi_family_private_documents": "Familien-Dokumente (FAMILY_PRIVATE-Zone)",
-    "kirobi_sacred_documents":         "Vertrauliche Dokumente (SACRED-Zone)",
-}
+COLLECTIONS: dict[str, str] = collection_descriptions()
 
 
 # ---------------------------------------------------------------------------

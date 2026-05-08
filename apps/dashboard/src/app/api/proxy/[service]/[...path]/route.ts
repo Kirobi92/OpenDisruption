@@ -59,7 +59,7 @@ export async function GET(
     );
   }
 
-  const upstreamUrl = `http://${BIND_HOST}:${port}${upstreamPath}`;
+  const upstreamUrl = `http://${BIND_HOST}:${port}${upstreamPath}${request.nextUrl.search}`;
 
   try {
     const controller = new AbortController();

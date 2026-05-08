@@ -38,8 +38,12 @@ export default function LoginPage() {
 
       // Redirect to chat
       router.push('/chat');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login fehlgeschlagen. Bitte versuche es erneut.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.detail ?? 'Login fehlgeschlagen. Bitte versuche es erneut.');
+      } else {
+        setError('Login fehlgeschlagen. Bitte versuche es erneut.');
+      }
     } finally {
       setLoading(false);
     }

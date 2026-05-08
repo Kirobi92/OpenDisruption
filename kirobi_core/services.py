@@ -1,8 +1,7 @@
 """Stdlib-only probes & clients for the Kirobi service stack.
 
 Speaks directly with the running services defined in
-``docker-compose.yml`` (Ollama, Qdrant, Postgres, voice-processing,
-auth, api, supervisor). All probes are **timeout-bounded**, **read-only**
+``docker-compose.yml`` and ``AGENTS.md``. All probes are **timeout-bounded**, **read-only**
 and **fail soft** — when a service is unreachable they return a
 :class:`ServiceStatus` with ``ok=False`` instead of raising.
 
@@ -93,6 +92,20 @@ class StackConfig:
     api_url: str
     openwebui_url: str
     flowise_url: str
+    telegram_url: str
+    embeddings_url: str
+    retrieval_url: str
+    ingest_url: str
+    model_routing_url: str
+    analytics_url: str
+    image_generation_url: str
+    media_processing_url: str
+    music_generation_url: str
+    video_generation_url: str
+    web_url: str
+    dashboard_url: str
+    voice_app_url: str
+    caddy_url: str
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "StackConfig":
@@ -108,6 +121,20 @@ class StackConfig:
             api_url=e.get("API_SERVICE_URL", f"http://{host}:{e.get('API_PORT', '8003')}"),
             openwebui_url=e.get("OPENWEBUI_URL", f"http://{host}:{e.get('OPENWEBUI_PORT', '3000')}"),
             flowise_url=e.get("FLOWISE_URL", f"http://{host}:{e.get('FLOWISE_PORT', '3001')}"),
+            telegram_url=e.get("TELEGRAM_SERVICE_URL", f"http://{host}:{e.get('TELEGRAM_SERVICE_PORT', '8005')}"),
+            embeddings_url=e.get("EMBEDDINGS_SERVICE_URL", f"http://{host}:{e.get('EMBEDDINGS_PORT', '8004')}"),
+            retrieval_url=e.get("RETRIEVAL_SERVICE_URL", f"http://{host}:{e.get('RETRIEVAL_PORT', '8006')}"),
+            ingest_url=e.get("INGEST_SERVICE_URL", f"http://{host}:{e.get('INGEST_PORT', '8007')}"),
+            model_routing_url=e.get("MODEL_ROUTING_SERVICE_URL", f"http://{host}:{e.get('MODEL_ROUTING_PORT', '8009')}"),
+            analytics_url=e.get("ANALYTICS_SERVICE_URL", f"http://{host}:{e.get('ANALYTICS_PORT', '8010')}"),
+            image_generation_url=e.get("IMAGE_GENERATION_SERVICE_URL", f"http://{host}:{e.get('IMAGE_GENERATION_PORT', '8011')}"),
+            media_processing_url=e.get("MEDIA_PROCESSING_SERVICE_URL", f"http://{host}:{e.get('MEDIA_PROCESSING_PORT', '8012')}"),
+            music_generation_url=e.get("MUSIC_GENERATION_SERVICE_URL", f"http://{host}:{e.get('MUSIC_GENERATION_PORT', '8013')}"),
+            video_generation_url=e.get("VIDEO_GENERATION_SERVICE_URL", f"http://{host}:{e.get('VIDEO_GENERATION_PORT', '8014')}"),
+            web_url=e.get("WEB_URL", f"http://{host}:{e.get('WEB_PORT', '3002')}"),
+            dashboard_url=e.get("DASHBOARD_URL", f"http://{host}:{e.get('DASHBOARD_PORT', '3003')}"),
+            voice_app_url=e.get("VOICE_APP_URL", f"http://{host}:{e.get('VOICE_APP_PORT', '3004')}"),
+            caddy_url=e.get("CADDY_URL", f"http://{host}:{e.get('CADDY_HTTP_PORT', '80')}"),
         )
 
 
@@ -210,17 +237,36 @@ def probe_health_endpoint(name: str, url: str, *, timeout: float = DEFAULT_TIMEO
 # ----------------------------------------------------------- aggregation
 def probe_all(config: StackConfig | None = None,
               *, timeout: float = DEFAULT_TIMEOUT) -> list[ServiceStatus]:
-    """Probe every known service and return the results in display order."""
+    """Probe every HTTP/port-probbable active Compose service from AGENTS.md.
+
+    ``supervisor`` has no host port in the active compose stack, so it is not
+    probed here. ``caddy`` is included via its HTTP entrypoint; HTTPS is skipped
+    because local certificates are deployment-specific.
+    """
     cfg = config or StackConfig.from_env()
     return [
         probe_ollama(cfg.ollama_url, timeout=timeout),
+        probe_http("open-webui", cfg.openwebui_url, timeout=timeout),
         probe_qdrant(cfg.qdrant_url, timeout=timeout),
         probe_postgres(cfg.postgres_host, cfg.postgres_port, timeout=timeout),
+        probe_http("flowise", cfg.flowise_url, timeout=timeout),
         probe_health_endpoint("voice", cfg.voice_url, timeout=timeout),
         probe_health_endpoint("auth", cfg.auth_url, timeout=timeout),
         probe_health_endpoint("api", cfg.api_url, timeout=timeout),
-        probe_http("open-webui", cfg.openwebui_url, timeout=timeout),
-        probe_http("flowise", cfg.flowise_url, timeout=timeout),
+        probe_health_endpoint("telegram", cfg.telegram_url, timeout=timeout),
+        probe_health_endpoint("embeddings", cfg.embeddings_url, timeout=timeout),
+        probe_health_endpoint("ingest", cfg.ingest_url, timeout=timeout),
+        probe_health_endpoint("retrieval", cfg.retrieval_url, timeout=timeout),
+        probe_health_endpoint("model-routing", cfg.model_routing_url, timeout=timeout),
+        probe_health_endpoint("analytics", cfg.analytics_url, timeout=timeout),
+        probe_health_endpoint("image-generation", cfg.image_generation_url, timeout=timeout),
+        probe_health_endpoint("media-processing", cfg.media_processing_url, timeout=timeout),
+        probe_health_endpoint("music-generation", cfg.music_generation_url, timeout=timeout),
+        probe_health_endpoint("video-generation", cfg.video_generation_url, timeout=timeout),
+        probe_http("web", cfg.web_url, timeout=timeout),
+        probe_http("dashboard", cfg.dashboard_url, timeout=timeout),
+        probe_http("voice-app", cfg.voice_app_url, timeout=timeout),
+        probe_http("caddy", cfg.caddy_url, timeout=timeout),
     ]
 
 

@@ -138,11 +138,103 @@ def test_probe_all_returns_one_per_service(monkeypatch):
         api_url=f"http://127.0.0.1:{port}",
         openwebui_url=f"http://127.0.0.1:{port}",
         flowise_url=f"http://127.0.0.1:{port}",
+        telegram_url=f"http://127.0.0.1:{port}",
+        embeddings_url=f"http://127.0.0.1:{port}",
+        retrieval_url=f"http://127.0.0.1:{port}",
+        ingest_url=f"http://127.0.0.1:{port}",
+        model_routing_url=f"http://127.0.0.1:{port}",
+        analytics_url=f"http://127.0.0.1:{port}",
+        image_generation_url=f"http://127.0.0.1:{port}",
+        media_processing_url=f"http://127.0.0.1:{port}",
+        music_generation_url=f"http://127.0.0.1:{port}",
+        video_generation_url=f"http://127.0.0.1:{port}",
+        web_url=f"http://127.0.0.1:{port}",
+        dashboard_url=f"http://127.0.0.1:{port}",
+        voice_app_url=f"http://127.0.0.1:{port}",
+        caddy_url=f"http://127.0.0.1:{port}",
     )
     statuses = services.probe_all(closed_cfg, timeout=0.3)
     names = [s.name for s in statuses]
-    assert names == ["ollama", "qdrant", "postgres", "voice", "auth", "api", "open-webui", "flowise"]
+    assert names == [
+        "ollama",
+        "open-webui",
+        "qdrant",
+        "postgres",
+        "flowise",
+        "voice",
+        "auth",
+        "api",
+        "telegram",
+        "embeddings",
+        "ingest",
+        "retrieval",
+        "model-routing",
+        "analytics",
+        "image-generation",
+        "media-processing",
+        "music-generation",
+        "video-generation",
+        "web",
+        "dashboard",
+        "voice-app",
+        "caddy",
+    ]
     assert all(not s.ok for s in statuses)
+
+
+def test_stack_config_from_env_covers_active_compose_ports():
+    cfg = services.StackConfig.from_env({"KIROBI_HOST": "127.0.0.1"})
+    ports_by_name = {
+        "ollama": "11434",
+        "open-webui": "3000",
+        "qdrant": "6333",
+        "postgres": "5432",
+        "flowise": "3001",
+        "voice": "8001",
+        "auth": "8002",
+        "api": "8003",
+        "telegram": "8005",
+        "embeddings": "8004",
+        "ingest": "8007",
+        "retrieval": "8006",
+        "model-routing": "8009",
+        "analytics": "8010",
+        "image-generation": "8011",
+        "media-processing": "8012",
+        "music-generation": "8013",
+        "video-generation": "8014",
+        "web": "3002",
+        "dashboard": "3003",
+        "voice-app": "3004",
+        "caddy": "80",
+    }
+    urls_by_name = {
+        "ollama": cfg.ollama_url,
+        "open-webui": cfg.openwebui_url,
+        "qdrant": cfg.qdrant_url,
+        "postgres": f"tcp://{cfg.postgres_host}:{cfg.postgres_port}",
+        "flowise": cfg.flowise_url,
+        "voice": cfg.voice_url,
+        "auth": cfg.auth_url,
+        "api": cfg.api_url,
+        "telegram": cfg.telegram_url,
+        "embeddings": cfg.embeddings_url,
+        "ingest": cfg.ingest_url,
+        "retrieval": cfg.retrieval_url,
+        "model-routing": cfg.model_routing_url,
+        "analytics": cfg.analytics_url,
+        "image-generation": cfg.image_generation_url,
+        "media-processing": cfg.media_processing_url,
+        "music-generation": cfg.music_generation_url,
+        "video-generation": cfg.video_generation_url,
+        "web": cfg.web_url,
+        "dashboard": cfg.dashboard_url,
+        "voice-app": cfg.voice_app_url,
+        "caddy": cfg.caddy_url,
+    }
+    assert urls_by_name.keys() == ports_by_name.keys()
+    for name, port in ports_by_name.items():
+        assert urls_by_name[name].endswith(f":{port}")
 
 
 def test_new_python_entrypoints_compile():
@@ -152,6 +244,8 @@ def test_new_python_entrypoints_compile():
         REPO_ROOT / "infra" / "scripts" / "init-qdrant.py",
         REPO_ROOT / "services" / "telegram" / "main.py",
         REPO_ROOT / "kirobi_core" / "keycodi.py",
+        REPO_ROOT / "kirobi_core" / "services.py",
+        REPO_ROOT / "kirobi_core" / "qdrant_collections.py",
     ):
         py_compile.compile(str(path), doraise=True)
 
@@ -172,7 +266,9 @@ def test_qdrant_init_dry_run_without_live_qdrant():
     )
     assert result.returncode == 0
     assert "DRY-RUN" in result.stdout
-    assert "Alle 7 Collections verarbeitet" in result.stdout
+    assert "Alle 10 Collections verarbeitet" in result.stdout
+    assert "kirobi_workspace" in result.stdout
+    assert "kirobi_workspace_document" not in result.stdout
 
 
 def test_telegram_service_escapes_html_replies():

@@ -20,6 +20,7 @@ Jeder Unterordner entspricht einer Route der Anwendung.
 | `globals.css` | Globale CSS-Stile (TailwindCSS-Basis) |
 | `chat/` | Chat-Interface für Kirobi-Konversationen |
 | `health/` | Health-Check-Endpunkt `/health` |
+| `knowledge-graph/` | Synthetische, dependency-freie KIDI-Wissensgraph-Demo (`/knowledge-graph`) |
 | `status/` | System-Status-Seite `/status` |
 
 ## Konvention

@@ -7,11 +7,13 @@ import {
   CloudArrowUpIcon,
   MagnifyingGlassIcon,
   Cog6ToothIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
   { href: '/chat', label: 'Chat', icon: ChatBubbleLeftRightIcon },
   { href: '/search', label: 'Suche', icon: MagnifyingGlassIcon },
+  { href: '/knowledge-graph', label: 'Graph', icon: SparklesIcon },
   { href: '/upload', label: 'Upload', icon: CloudArrowUpIcon },
   { href: '/settings', label: 'Einstellungen', icon: Cog6ToothIcon },
 ];

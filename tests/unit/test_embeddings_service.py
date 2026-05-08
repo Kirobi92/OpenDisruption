@@ -224,7 +224,7 @@ def test_store_returns_201_with_valid_data(client):
     data = resp.json()
     assert "id" in data
     assert data["zone"] == "WORKSPACE"
-    assert data["collection"] == "kirobi_workspace_document"
+    assert data["collection"] == "kirobi_workspace"
     assert data["dimensions"] == 768
 
 
@@ -264,8 +264,8 @@ def test_store_uses_provided_doc_id(client):
     assert resp.json()["id"] == custom_id
 
 
-def test_store_all_valid_zones(client):
-    """POST /store muss alle gültigen Zonen akzeptieren."""
+def test_store_allows_autonomous_store_zones(client):
+    """POST /store muss PUBLIC und WORKSPACE autonom akzeptieren."""
     c, mock_http, mock_qdrant = client
 
     fake_embedding = [0.1] * 768
@@ -274,9 +274,20 @@ def test_store_all_valid_zones(client):
     mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
     mock_http.post = AsyncMock(return_value=mock_response)
 
-    for zone in ["PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"]:
+    for zone in ["PUBLIC", "WORKSPACE"]:
         resp = c.post("/store", json={"text": "Test", "zone": zone})
         assert resp.status_code == 201, f"Zone {zone} sollte akzeptiert werden"
+
+
+@pytest.mark.parametrize("zone", ["FAMILY_PRIVATE", "QUARANTINE", "SACRED"])
+def test_store_blocks_sensitive_zones(client, zone: str):
+    """POST /store muss sensible/beschränkte Zonen mit 403 blockieren."""
+    c, mock_http, mock_qdrant = client
+
+    resp = c.post("/store", json={"text": "Test", "zone": zone})
+    assert resp.status_code == 403
+    mock_http.post.assert_not_called()
+    mock_qdrant.upsert.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -284,12 +295,13 @@ def test_store_all_valid_zones(client):
 # ---------------------------------------------------------------------------
 
 def test_collection_name_format():
-    """_collection_name muss korrekt formatiert sein."""
+    """_collection_name muss die kanonischen Collection-Namen verwenden."""
     import services.embeddings.main as emb
 
-    assert emb._collection_name("WORKSPACE", "document") == "kirobi_workspace_document"
-    assert emb._collection_name("FAMILY_PRIVATE", "note") == "kirobi_family_private_note"
-    assert emb._collection_name("PUBLIC", "DOCUMENT") == "kirobi_public_document"
+    assert emb._collection_name("WORKSPACE", "document") == "kirobi_workspace"
+    assert emb._collection_name("WORKSPACE", "code") == "kirobi_code"
+    assert emb._collection_name("FAMILY_PRIVATE", "note") == "kirobi_family"
+    assert emb._collection_name("PUBLIC", "DOCUMENT") == "kirobi_public"
 
 
 def test_validate_zone_raises_for_invalid():
@@ -308,6 +320,16 @@ def test_validate_zone_passes_for_valid():
 
     for zone in ["PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"]:
         emb._validate_zone(zone)  # Kein Exception erwartet
+
+
+def test_validate_autonomous_store_zone_blocks_sensitive():
+    """_validate_autonomous_store_zone muss valide sensible Zonen mit 403 blockieren."""
+    import services.embeddings.main as emb
+    from fastapi import HTTPException
+
+    with pytest.raises(HTTPException) as exc_info:
+        emb._validate_autonomous_store_zone("SACRED")
+    assert exc_info.value.status_code == 403
 
 
 # ---------------------------------------------------------------------------

@@ -16,6 +16,23 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+try:
+    from kirobi_core.qdrant_collections import ZONE_COLLECTIONS as _CANONICAL_ZONE_COLLECTIONS
+except Exception:  # noqa: BLE001
+    _CANONICAL_ZONE_COLLECTIONS = {
+        "PUBLIC": ("kirobi_public",),
+        "WORKSPACE": (
+            "kirobi_workspace",
+            "kirobi_code",
+            "kirobi_canon",
+            "kirobi_experiences",
+            "kirobi_research",
+            "kirobi_conversations",
+            "kirobi_metadata",
+        ),
+        "FAMILY_PRIVATE": ("kirobi_family",),
+    }
+
 EMBEDDINGS_URL = os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:8006")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
@@ -28,11 +45,12 @@ ALLOWED_ORIGINS: list[str] = [
 ]
 
 # Erlaubte Collections pro Zone (Zone-Enforcement)
-ZONE_COLLECTIONS = {
-    "PUBLIC": ["kirobi_workspace", "kirobi_canon", "kirobi_research"],
-    "WORKSPACE": ["kirobi_workspace", "kirobi_canon", "kirobi_experiences", "kirobi_research", "kirobi_conversations", "kirobi_metadata"],
-    "FAMILY_PRIVATE": ["kirobi_family"],
-}
+ZONE_COLLECTIONS = {zone: list(collections) for zone, collections in _CANONICAL_ZONE_COLLECTIONS.items()}
+
+
+def _zone_filter(zone: str) -> dict:
+    """Erzeugt einen Qdrant-Filter, der Treffer strikt auf die angeforderte Zone begrenzt."""
+    return {"must": [{"key": "zone", "match": {"value": zone}}]}
 
 
 class SearchRequest(BaseModel):
@@ -149,6 +167,7 @@ async def search(request: SearchRequest) -> SearchResponse:
                 "vector": query_embedding,
                 "limit": request.limit,
                 "score_threshold": request.score_threshold,
+                "filter": _zone_filter(request.zone),
                 "with_payload": True,
             },
         )
@@ -240,6 +259,7 @@ async def rag_query(request: RagRequest) -> RagResponse:
                         "vector": embedding,
                         "limit": request.limit,
                         "score_threshold": request.score_threshold,
+                        "filter": _zone_filter(request.zone),
                         "with_payload": True,
                     },
                 )
