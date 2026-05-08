@@ -501,6 +501,28 @@ services:
     networks:
       - kirobi-net
 
+  voice:
+    build:
+      context: ./apps/voice
+      dockerfile: Dockerfile
+    container_name: kirobi-voice
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:${VOICE_APP_PORT:-3004}:3004"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - auth
+      - api
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3004/', r => process.exit(r.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   telegram:
     build:
       context: ./services/telegram

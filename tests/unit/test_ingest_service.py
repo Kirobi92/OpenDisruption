@@ -9,6 +9,7 @@ Kein laufender Service erforderlich.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -157,6 +158,19 @@ def test_ingest_text_validates_zone(client):
     assert resp.status_code == 422
 
 
+@pytest.mark.parametrize("zone", ["FAMILY_PRIVATE", "QUARANTINE", "SACRED"])
+def test_ingest_text_blocks_sensitive_zones(client, zone: str):
+    """POST /ingest/text muss sensible/beschränkte Zonen mit 403 blockieren."""
+    c, mock_conn = client
+    mock_conn.execute.reset_mock()
+    resp = c.post(
+        "/ingest/text",
+        json={"text": "Synthetischer Testinhalt", "zone": zone},
+    )
+    assert resp.status_code == 403
+    mock_conn.execute.assert_not_called()
+
+
 def test_ingest_text_validates_missing_zone(client):
     """POST /ingest/text ohne 'zone'-Feld muss 422 zurückgeben."""
     c, _ = client
@@ -165,6 +179,23 @@ def test_ingest_text_validates_missing_zone(client):
         json={"text": "Gültiger Inhalt"},
     )
     assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# POST /ingest/file — Zonen-Gate vor Datei-Read
+# ---------------------------------------------------------------------------
+
+def test_ingest_file_blocks_sacred_zone_before_file_read(client):
+    """POST /ingest/file muss SACRED mit 403 vor DB-/Write-Pfad blockieren."""
+    c, mock_conn = client
+    mock_conn.execute.reset_mock()
+    resp = c.post(
+        "/ingest/file",
+        data={"zone": "SACRED"},
+        files={"file": ("synthetic.txt", b"synthetic content", "text/plain")},
+    )
+    assert resp.status_code == 403
+    mock_conn.execute.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -195,3 +226,37 @@ def test_status_returns_job_when_found(client):
     assert data["job_id"] == job_id
     assert "status" in data
     assert "zone" in data
+
+
+def test_send_to_embeddings_uses_store_with_doc_id():
+    """_send_to_embeddings muss /store mit doc_id=job_id ansprechen."""
+    import services.ingest.main as ingest
+
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_client = AsyncMock()
+    mock_client.post = AsyncMock(return_value=mock_response)
+
+    with patch("services.ingest.main.httpx.AsyncClient") as mock_client_cls:
+        mock_client_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client_cls.return_value.__aexit__ = AsyncMock(return_value=None)
+
+        asyncio.run(
+            ingest._send_to_embeddings(
+                "job-123",
+                "Synthetischer Testinhalt",
+                "WORKSPACE",
+                {"title": "Test"},
+            )
+        )
+
+    mock_client.post.assert_awaited_once_with(
+        f"{ingest.EMBEDDINGS_SERVICE_URL}/store",
+        json={
+            "doc_id": "job-123",
+            "text": "Synthetischer Testinhalt",
+            "zone": "WORKSPACE",
+            "doc_type": "document",
+            "metadata": {"title": "Test"},
+        },
+    )

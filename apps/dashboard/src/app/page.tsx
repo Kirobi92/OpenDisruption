@@ -56,13 +56,13 @@ type NavSection = 'services' | 'analytics' | 'users' | 'system';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SERVICES: Pick<ServiceHealth, 'name' | 'label' | 'endpoint'>[] = [
-  { name: 'api',            label: 'API Service',       endpoint: '/api/health' },
-  { name: 'auth',           label: 'Auth Service',      endpoint: '/api/auth/health' },
-  { name: 'embeddings',     label: 'Embeddings',        endpoint: '/api/embeddings/health' },
-  { name: 'ingest',         label: 'Ingest',            endpoint: '/api/ingest/health' },
-  { name: 'retrieval',      label: 'Retrieval',         endpoint: '/api/retrieval/health' },
-  { name: 'model-routing',  label: 'Model Routing',     endpoint: '/api/model-routing/health' },
-  { name: 'analytics',      label: 'Analytics',         endpoint: '/api/analytics/health' },
+  { name: 'api',            label: 'API Service',       endpoint: '/api/proxy/api/health' },
+  { name: 'auth',           label: 'Auth Service',      endpoint: '/api/proxy/auth/health' },
+  { name: 'embeddings',     label: 'Embeddings',        endpoint: '/api/proxy/embeddings/health' },
+  { name: 'ingest',         label: 'Ingest',            endpoint: '/api/proxy/ingest/health' },
+  { name: 'retrieval',      label: 'Retrieval',         endpoint: '/api/proxy/retrieval/health' },
+  { name: 'model-routing',  label: 'Model Routing',     endpoint: '/api/proxy/model-routing/health' },
+  { name: 'analytics',      label: 'Analytics',         endpoint: '/api/proxy/analytics/health' },
 ];
 
 const AUTO_REFRESH_INTERVAL_MS = 30_000;
@@ -416,8 +416,8 @@ export default function DashboardPage() {
     setAnalyticsLoading(true);
     try {
       const [statsRes, convsRes] = await Promise.allSettled([
-        axios.get('/api/analytics/stats', { timeout: 5000 }),
-        axios.get('/api/conversations?limit=1', { timeout: 5000 }),
+        axios.get('/api/proxy/analytics/stats', { timeout: 5000 }),
+        axios.get('/api/proxy/api/conversations?limit=1', { timeout: 5000 }),
       ]);
 
       const stats: AnalyticsStats = {
@@ -457,9 +457,9 @@ export default function DashboardPage() {
     setSystemLoading(true);
     try {
       const [ollamaRes, dbRes, qdrantRes] = await Promise.allSettled([
-        axios.get('/api/ollama/api/tags', { timeout: 5000 }),
-        axios.get('/api/health/db', { timeout: 5000 }),
-        axios.get('/api/health/qdrant', { timeout: 5000 }),
+        axios.get('/api/proxy/ollama/api/tags', { timeout: 5000 }),
+        axios.get('/api/proxy/api/health/db', { timeout: 5000 }),
+        axios.get('/api/proxy/api/health/qdrant', { timeout: 5000 }),
       ]);
 
       const ollamaModels: OllamaModel[] =

@@ -29,9 +29,148 @@ try:  # pragma: no cover - exercised in integration runs
     from kirobi_core.backlog import generate_backlog, prioritize  # type: ignore
     from kirobi_core.bridge import backlog_for_supervisor  # type: ignore
     from kirobi_core.scanner import scan_repository  # type: ignore
+    from kirobi_core.zones import Zone, classify  # type: ignore
     KIROBI_CORE_AVAILABLE = True
 except Exception:  # noqa: BLE001 - any failure means feature off
     KIROBI_CORE_AVAILABLE = False
+
+    class Zone(str, Enum):  # type: ignore[no-redef]
+        """Fallback zone enum when ``kirobi_core`` is unavailable."""
+
+        PUBLIC = "PUBLIC"
+        WORKSPACE = "WORKSPACE"
+        FAMILY_PRIVATE = "FAMILY_PRIVATE"
+        QUARANTINE = "QUARANTINE"
+        SACRED = "SACRED"
+
+    def classify(rel_path: str | Path) -> Zone:  # type: ignore[no-redef]
+        """Fail-closed path classifier used as fallback in slim containers."""
+        return Zone.SACRED
+
+
+_KIROBI_AGENTS = {
+    "kirobi-coder",
+    "kirobi-architect",
+    "kirobi-ops",
+    "kirobi-reviewer",
+    "kirobi-frontend",
+    "kirobi-docs",
+}
+_LOCAL_AGENT_HANDLERS = frozenset({"family-interviewer", "kirobi-core"})
+
+_ROUTING_SUCCESS_STATUSES = frozenset({
+    "success",
+    "routed",
+    "interview_started",
+    "queued",
+    "voice_task_queued",
+})
+_ROUTING_BLOCKED_STATUSES = frozenset({"blocked", "deferred", "rejected"})
+
+_AUTONOMOUS_AGENT_ALLOW_ZONES = frozenset({Zone.PUBLIC.value, Zone.WORKSPACE.value})
+_SENSITIVE_ZONES = frozenset({Zone.FAMILY_PRIVATE.value, Zone.SACRED.value})
+
+_ZONE_RANK = {
+    Zone.PUBLIC.value: 0,
+    Zone.WORKSPACE.value: 1,
+    Zone.FAMILY_PRIVATE.value: 2,
+    Zone.QUARANTINE.value: 3,
+    Zone.SACRED.value: 4,
+}
+
+_ROUTING_KEYWORDS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        "kirobi-ops",
+        (
+            "backup",
+            "bash",
+            "caddy",
+            "ci",
+            "compose",
+            "container",
+            "deploy",
+            "devops",
+            "docker",
+            "env",
+            "healthcheck",
+            "infra",
+            "install",
+            "script",
+            "shell",
+        ),
+    ),
+    (
+        "kirobi-frontend",
+        (
+            "app router",
+            "component",
+            "css",
+            "frontend",
+            "next.js",
+            "nextjs",
+            "pwa",
+            "react",
+            "tailwind",
+            "tsx",
+            "ui",
+            "ux",
+        ),
+    ),
+    (
+        "kirobi-architect",
+        (
+            "adr",
+            "api contract",
+            "architecture",
+            "architektur",
+            "blueprint",
+            "design",
+            "schema",
+            "service graph",
+            "system-design",
+        ),
+    ),
+    (
+        "kirobi-docs",
+        (
+            "changelog",
+            "docs",
+            "documentation",
+            "document",
+            "handbuch",
+            "markdown",
+            "readme",
+            "runbook",
+        ),
+    ),
+    (
+        "kirobi-reviewer",
+        (
+            "audit",
+            "review",
+            "security",
+            "threat",
+            "vulnerability",
+            "vulnerabilities",
+        ),
+    ),
+    (
+        "kirobi-coder",
+        (
+            "bug",
+            "code",
+            "fix",
+            "implement",
+            "implementation",
+            "python",
+            "refactor",
+            "test",
+            "tests",
+            "typescript",
+            "unit",
+        ),
+    ),
+)
 
 
 def _resolve_log_path() -> str:
@@ -435,6 +574,32 @@ class KirobiSupervisor:
 
         try:
             result = await self.route_to_agent(task)
+            route_status = result.get("status") if isinstance(result, dict) else "success"
+
+            if route_status in _ROUTING_BLOCKED_STATUSES:
+                task.status = TaskStatus.BLOCKED
+                task.updated_at = datetime.now()
+                reason = result.get("reason", "Routing blocked by policy") if isinstance(result, dict) else "Routing blocked"
+                task.last_error = reason
+                async with self.db_pool.acquire() as conn:
+                    await conn.execute(
+                        '''UPDATE supervisor_tasks
+                           SET status = $1, updated_at = $2, last_error = $3, assigned_agent = $4
+                           WHERE id = $5''',
+                        task.status.value, task.updated_at, task.last_error, task.assigned_agent, task.id,
+                    )
+                del self.active_tasks[task.id]
+                logger.info(f"Task blocked by routing policy: {task.id}")
+                await self.log_event(
+                    'task_blocked', 'warning',
+                    f"Task {task.id} blocked by routing policy",
+                    {'task_id': task.id, 'status': route_status, 'reason': reason},
+                )
+                return
+
+            if route_status not in _ROUTING_SUCCESS_STATUSES:
+                reason = result.get("error") or result.get("reason") if isinstance(result, dict) else None
+                raise RuntimeError(reason or f"Routing returned non-success status: {route_status}")
 
             # Mark complete
             task.status = TaskStatus.COMPLETED
@@ -442,8 +607,10 @@ class KirobiSupervisor:
             task.updated_at = datetime.now()
             async with self.db_pool.acquire() as conn:
                 await conn.execute(
-                    'UPDATE supervisor_tasks SET status = $1, completed_at = $2, updated_at = $3 WHERE id = $4',
-                    task.status.value, task.completed_at, task.updated_at, task.id,
+                    '''UPDATE supervisor_tasks
+                       SET status = $1, completed_at = $2, updated_at = $3, assigned_agent = $4
+                       WHERE id = $5''',
+                    task.status.value, task.completed_at, task.updated_at, task.assigned_agent, task.id,
                 )
 
             del self.active_tasks[task.id]
@@ -495,35 +662,121 @@ class KirobiSupervisor:
                 await asyncio.sleep(backoff)
 
     async def route_to_agent(self, task: Task) -> Any:
-        """Route task to the appropriate agent handler.
+        """Route a task with deterministic, local-only safety gates.
 
-        Dispatches based on ``task.assigned_agent``:
-
-        - Known kirobi agents → Kirobi API conversation endpoint
-        - ``"voice-agent"``   → Voice TTS service
-        - ``None`` / unknown  → LLM-based auto-routing via Ollama
-
-        Never raises — errors are caught, logged, and returned as a
-        structured dict so the supervisor loop stays stable.
+        The routing decision uses task metadata, paths and keywords only;
+        no external LLM/API is consulted for auto-routing. Sensitive zones
+        fail closed before delegation: ``SACRED`` and ``FAMILY_PRIVATE`` are
+        deferred to a human/core gate, while ``QUARANTINE`` is deferred unless
+        an explicit safe extractor/ops role exists in this supervisor.
         """
         logger.info(f"Routing task '{task.name}' to agent: {task.assigned_agent or 'auto'}")
 
-        _KIROBI_AGENTS = {
-            "kirobi-coder",
-            "kirobi-architect",
-            "kirobi-ops",
-            "kirobi-reviewer",
-            "kirobi-frontend",
-            "kirobi-docs",
-        }
+        decision = self._deterministic_route_decision(task)
+        if not decision["allowed"]:
+            return decision
 
-        agent = task.assigned_agent
+        agent = decision["agent"]
+        task.assigned_agent = agent
         if agent in _KIROBI_AGENTS:
             return await self._route_to_kirobi_api(task)
         elif agent == "voice-agent":
             return await self._route_to_voice(task)
+        elif agent in _LOCAL_AGENT_HANDLERS:
+            handler = self._AGENT_HANDLERS.get(agent)
+            if handler:
+                return await handler(task)
+            return {
+                "status": "deferred",
+                "agent": agent,
+                "reason": "No local handler registered for routed agent",
+                "task_id": task.id,
+            }
         else:
-            return await self._route_auto(task)
+            return {
+                "status": "deferred",
+                "agent": agent or "kirobi-core",
+                "reason": "No executable autonomous handler for routed agent",
+                "task_id": task.id,
+            }
+
+    def _deterministic_route_decision(self, task: Task) -> Dict[str, Any]:
+        """Return the local fail-closed routing decision for *task*."""
+        zone = self._task_zone(task)
+        explicit_agent = (
+            task.assigned_agent
+            if task.assigned_agent in (_KIROBI_AGENTS | _LOCAL_AGENT_HANDLERS | {"voice-agent"})
+            else None
+        )
+
+        if zone in _SENSITIVE_ZONES:
+            return {
+                "status": "deferred",
+                "allowed": False,
+                "agent": "kirobi-core",
+                "zone": zone,
+                "reason": f"{zone} requires human gate; autonomous coding agents are not allowed",
+                "task_id": task.id,
+            }
+
+        if zone == Zone.QUARANTINE.value:
+            return {
+                "status": "deferred",
+                "allowed": False,
+                "agent": "kirobi-core",
+                "zone": zone,
+                "reason": "QUARANTINE tasks require reviewed extraction before autonomous routing",
+                "task_id": task.id,
+            }
+
+        if zone not in _AUTONOMOUS_AGENT_ALLOW_ZONES:
+            return {
+                "status": "deferred",
+                "allowed": False,
+                "agent": "kirobi-core",
+                "zone": zone,
+                "reason": f"Unknown or unsupported zone {zone!r}; routing failed closed",
+                "task_id": task.id,
+            }
+
+        agent = explicit_agent or self._infer_agent(task)
+        if agent not in (_KIROBI_AGENTS | _LOCAL_AGENT_HANDLERS | {"voice-agent"}):
+            agent = "kirobi-core"
+
+        return {
+            "status": "routed",
+            "allowed": True,
+            "agent": agent,
+            "zone": zone,
+            "reason": "Deterministic keyword and zone-policy routing",
+            "task_id": task.id,
+        }
+
+    def _task_zone(self, task: Task) -> str:
+        """Infer the highest task zone from metadata and referenced paths."""
+        candidates: list[str] = []
+        metadata = task.metadata or {}
+
+        raw_zone = metadata.get("zone") or metadata.get("input_zone") or metadata.get("output_zone")
+        if isinstance(raw_zone, str):
+            candidates.append(raw_zone.upper())
+
+        raw_paths = metadata.get("paths") or metadata.get("path") or []
+        if isinstance(raw_paths, (str, Path)):
+            paths = [raw_paths]
+        elif isinstance(raw_paths, list):
+            paths = raw_paths
+        else:
+            paths = []
+
+        for path in paths:
+            if isinstance(path, (str, Path)):
+                candidates.append(classify(path).value)
+
+        if not candidates:
+            return Zone.WORKSPACE.value
+
+        return max(candidates, key=lambda item: _ZONE_RANK.get(item, _ZONE_RANK[Zone.SACRED.value]))
 
     async def _get_api_token(self) -> Optional[str]:
         """Return a Bearer token for the Kirobi API.
@@ -601,55 +854,14 @@ class KirobiSupervisor:
             return {"status": "error", "error": str(exc)}
 
     async def _route_auto(self, task: Task) -> Any:
-        """Use Ollama to determine the best agent, then delegate to Kirobi API.
-
-        Sends a short prompt to Ollama asking which agent fits the task.
-        Parses the response for a known agent name, sets
-        ``task.assigned_agent``, and calls ``_route_to_kirobi_api``.
-        Falls back to ``{"status": "skipped"}`` on any error.
-        """
-        ollama_host = SupervisorConfig.OLLAMA_HOST
-        model = SupervisorConfig.SUPERVISOR_MODEL
-        prompt = (
-            f"Task: {task.name}\n"
-            f"Description: {task.description}\n"
-            "Which agent? (kirobi-coder/kirobi-architect/kirobi-ops/"
-            "kirobi-reviewer/kirobi-frontend/kirobi-docs/none)\n"
-            "Answer with just the agent name:"
-        )
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                resp = await client.post(
-                    f"{ollama_host}/api/generate",
-                    json={"model": model, "prompt": prompt, "stream": False},
-                )
-                resp.raise_for_status()
-                raw = resp.json().get("response", "").strip().lower()
-
-            _VALID = {
-                "kirobi-coder", "kirobi-architect", "kirobi-ops",
-                "kirobi-reviewer", "kirobi-frontend", "kirobi-docs",
-            }
-            detected: Optional[str] = None
-            for token in raw.split():
-                candidate = token.strip(".,;:")
-                if candidate in _VALID:
-                    detected = candidate
-                    break
-
-            if detected:
-                task.assigned_agent = detected
-                logger.info(f"Auto-routing task '{task.name}' → {detected}")
-                return await self._route_to_kirobi_api(task)
-
-            logger.info(
-                f"Auto-routing found no suitable agent for '{task.name}' (raw: {raw!r})"
-            )
-            return {"status": "skipped", "reason": "no suitable agent determined"}
-
-        except Exception as exc:
-            logger.warning(f"Auto-routing unavailable for task '{task.name}': {exc}")
-            return {"status": "skipped", "reason": "auto-routing unavailable"}
+        """Route automatically without LLM/API-based agent selection."""
+        decision = self._deterministic_route_decision(task)
+        if not decision["allowed"]:
+            return decision
+        task.assigned_agent = decision["agent"]
+        if task.assigned_agent in _KIROBI_AGENTS:
+            return await self._route_to_kirobi_api(task)
+        return decision
 
     async def _route_to_voice(self, task: Task) -> Any:
         """Send task description to the voice TTS service.
@@ -671,20 +883,23 @@ class KirobiSupervisor:
             return {"status": "skipped", "reason": "voice service unavailable"}
 
     def _infer_agent(self, task: Task) -> str:
-        """Leitet den passenden Agenten aus Task-Name und -Beschreibung ab."""
-        text = f"{task.name} {task.description}".lower()
-        if any(kw in text for kw in ("code", "implement", "bug", "test", "refactor")):
-            return "kirobi-coder"
-        if any(kw in text for kw in ("architecture", "design", "schema", "adr")):
-            return "kirobi-architect"
-        if any(kw in text for kw in ("docker", "deploy", "infra", "compose", "script")):
-            return "kirobi-ops"
-        if any(kw in text for kw in ("frontend", "ui", "pwa", "react", "next")):
-            return "kirobi-frontend"
-        if any(kw in text for kw in ("interview", "family", "onboarding")):
-            return "family-interviewer"
+        """Leitet den passenden Agenten deterministisch aus Task-Daten ab."""
+        metadata = task.metadata or {}
+        parts = [task.name, task.description, str(metadata.get("kind", "")), task.priority.value]
+        paths = metadata.get("paths") or []
+        if isinstance(paths, str):
+            parts.append(paths)
+        elif isinstance(paths, list):
+            parts.extend(str(path) for path in paths)
+
+        text = " ".join(parts).lower()
+        for agent, keywords in _ROUTING_KEYWORDS:
+            if any(keyword in text for keyword in keywords):
+                return agent
         if any(kw in text for kw in ("voice", "speech", "audio")):
             return "voice-agent"
+        if any(kw in text for kw in ("interview", "family", "onboarding")):
+            return "family-interviewer"
         return "kirobi-core"
 
     # Agent-Handler-Registry

@@ -12,6 +12,7 @@ Public submodules:
 * :mod:`kirobi_core.audit`         — append-only event logger
 * :mod:`kirobi_core.registry`      — agent registry loader
 * :mod:`kirobi_core.scanner`       — repository structural scan
+* :mod:`kirobi_core.ingest_manifest` — safe metadata-only ingest planning
 * :mod:`kirobi_core.backlog`       — task backlog generator
 * :mod:`kirobi_core.orchestrator`  — minimal task router / supervisor
 * :mod:`kirobi_core.keycodi`       — KeyCodi coding mission planner

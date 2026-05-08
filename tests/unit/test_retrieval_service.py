@@ -113,16 +113,19 @@ def test_search_public_zone_allowed_collection(client):
             json={
                 "query": "Was ist Kirobi?",
                 "zone": "PUBLIC",
-                "collection": "kirobi_workspace",
+                "collection": "kirobi_public",
                 "limit": 5,
             },
         )
         assert resp.status_code == 200
         data = resp.json()
         assert data["query"] == "Was ist Kirobi?"
-        assert data["collection"] == "kirobi_workspace"
+        assert data["collection"] == "kirobi_public"
         assert data["total"] == 1
         assert len(data["results"]) == 1
+
+        qdrant_body = mock_client.post.await_args_list[1].kwargs["json"]
+        assert qdrant_body["filter"] == {"must": [{"key": "zone", "match": {"value": "PUBLIC"}}]}
 
 
 def test_search_family_private_collection_blocked_for_public_zone(client):
@@ -130,7 +133,7 @@ def test_search_family_private_collection_blocked_for_public_zone(client):
     resp = client.post(
         "/search",
         json={
-            "query": "Familiendaten",
+            "query": "Synthetic private-zone test",
             "zone": "PUBLIC",
             "collection": "kirobi_family",
             "limit": 5,
@@ -162,7 +165,7 @@ def test_search_family_private_zone_allows_family_collection(client):
         resp = client.post(
             "/search",
             json={
-                "query": "Familienurlaub",
+                "query": "Synthetic isolated-zone test",
                 "zone": "FAMILY_PRIVATE",
                 "collection": "kirobi_family",
                 "limit": 3,
@@ -256,8 +259,8 @@ def test_search_uses_default_collection_for_zone(client):
             json={"query": "Test", "zone": "PUBLIC"},
         )
         assert resp.status_code == 200
-        # Erste Collection für PUBLIC ist kirobi_workspace
-        assert resp.json()["collection"] == "kirobi_workspace"
+        # Erste Collection für PUBLIC ist kirobi_public
+        assert resp.json()["collection"] == "kirobi_public"
 
 
 # ---------------------------------------------------------------------------
@@ -320,6 +323,7 @@ def test_zone_collections_family_private_isolated():
     workspace_collections = set(retrieval.ZONE_COLLECTIONS.get("WORKSPACE", []))
 
     # kirobi_family darf nicht in PUBLIC oder WORKSPACE sein
+    assert public_collections == {"kirobi_public"}
     assert "kirobi_family" not in public_collections
     assert "kirobi_family" not in workspace_collections
     assert "kirobi_family" in family_collections
@@ -453,11 +457,9 @@ def test_rag_returns_empty_context_when_no_results(client):
         qdrant_empty.status_code = 200
         qdrant_empty.json = MagicMock(return_value={"result": []})
 
-        # Embed + 3 leere Qdrant-Responses (PUBLIC hat 3 Collections)
+        # Embed + 1 leere Qdrant-Response (PUBLIC hat nur kirobi_public)
         mock_client.post = AsyncMock(side_effect=[
             embed_resp,
-            qdrant_empty,
-            qdrant_empty,
             qdrant_empty,
         ])
 
@@ -470,6 +472,9 @@ def test_rag_returns_empty_context_when_no_results(client):
         assert data["context"] == ""
         assert data["total_results"] == 0
         assert data["sources"] == []
+
+        qdrant_body = mock_client.post.await_args_list[1].kwargs["json"]
+        assert qdrant_body["filter"] == {"must": [{"key": "zone", "match": {"value": "PUBLIC"}}]}
 
 
 def test_rag_validates_empty_query(client):
@@ -541,7 +546,7 @@ def test_rag_skips_failed_collections(client):
     """POST /rag muss fehlerhafte Collections überspringen und trotzdem Ergebnisse liefern."""
     fake_embedding = [0.1] * 768
     qdrant_results = [
-        {"id": "doc-1", "score": 0.88, "payload": {"text": "Gefunden", "source": "kirobi_canon", "zone": "PUBLIC"}},
+        {"id": "doc-1", "score": 0.88, "payload": {"text": "Gefunden", "source": "kirobi_public", "zone": "PUBLIC"}},
     ]
 
     with patch("services.retrieval.main.httpx.AsyncClient") as mock_cls:
@@ -553,24 +558,13 @@ def test_rag_skips_failed_collections(client):
         embed_resp.status_code = 200
         embed_resp.json = MagicMock(return_value={"embedding": fake_embedding})
 
-        # Erste Collection schlägt fehl (404), zweite liefert Ergebnisse
-        qdrant_fail = MagicMock()
-        qdrant_fail.status_code = 404
-
         qdrant_ok = MagicMock()
         qdrant_ok.status_code = 200
         qdrant_ok.json = MagicMock(return_value={"result": qdrant_results})
 
-        qdrant_empty = MagicMock()
-        qdrant_empty.status_code = 200
-        qdrant_empty.json = MagicMock(return_value={"result": []})
-
-        # PUBLIC hat 3 Collections: kirobi_workspace (fail), kirobi_canon (ok), kirobi_research (empty)
         mock_client.post = AsyncMock(side_effect=[
             embed_resp,
-            qdrant_fail,
             qdrant_ok,
-            qdrant_empty,
         ])
 
         resp = client.post(

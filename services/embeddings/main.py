@@ -23,9 +23,13 @@ load_dotenv()
 
 try:
     from kirobi_core.analytics_client import track as _analytics_track
+    from kirobi_core.qdrant_collections import collection_for_document
 except Exception:  # noqa: BLE001
     async def _analytics_track(*_args, **_kwargs) -> None:  # type: ignore[misc]
         pass
+
+    def collection_for_document(zone: str, doc_type: str = "document") -> str:  # type: ignore[misc]
+        return f"kirobi_{zone.lower()}_{doc_type.lower()}"
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -52,9 +56,10 @@ ALLOWED_ORIGINS: list[str] = [
 ]
 
 # Gültige Zonen gemäß Fünf-Zonen-Sicherheitsmodell
-VALID_ZONES: frozenset[str] = frozenset(
+KNOWN_ZONES: frozenset[str] = frozenset(
     {"PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"}
 )
+AUTONOMOUS_STORE_ZONES: frozenset[str] = frozenset({"PUBLIC", "WORKSPACE"})
 
 # ---------------------------------------------------------------------------
 # Globale Clients
@@ -158,16 +163,29 @@ class HealthResponse(BaseModel):
 # Hilfsfunktionen
 # ---------------------------------------------------------------------------
 def _collection_name(zone: str, doc_type: str) -> str:
-    """Gibt den Qdrant-Collection-Namen zurück: kirobi_{zone}_{type}."""
-    return f"kirobi_{zone.lower()}_{doc_type.lower()}"
+    """Gibt den kanonischen Qdrant-Collection-Namen zurück."""
+    return collection_for_document(zone, doc_type)
 
 
 def _validate_zone(zone: str) -> None:
     """Wirft HTTPException wenn die Zone ungültig ist."""
-    if zone not in VALID_ZONES:
+    if zone not in KNOWN_ZONES:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"Ungültige Zone '{zone}'. Erlaubt: {sorted(VALID_ZONES)}",
+            detail=f"Ungültige Zone '{zone}'. Bekannt: {sorted(KNOWN_ZONES)}",
+        )
+
+
+def _validate_autonomous_store_zone(zone: str) -> None:
+    """Wirft HTTPException wenn /store für die Zone autonom nicht erlaubt ist."""
+    _validate_zone(zone)
+    if zone not in AUTONOMOUS_STORE_ZONES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                f"Autonomes Speichern ist für Zone '{zone}' nicht erlaubt. "
+                f"Erlaubt: {sorted(AUTONOMOUS_STORE_ZONES)}"
+            ),
         )
 
 
@@ -337,14 +355,14 @@ async def store_embedding(request: StoreRequest) -> StoreResponse:
     Berechnet das Embedding für einen Text und speichert es in Qdrant.
 
     - **text**: Der zu speichernde Text
-    - **zone**: Sicherheitszone (PUBLIC, WORKSPACE, FAMILY_PRIVATE, QUARANTINE, SACRED)
+    - **zone**: Sicherheitszone (autonom erlaubt: PUBLIC, WORKSPACE)
     - **doc_type**: Dokumenttyp (Standard: document)
     - **metadata**: Optionale Metadaten (werden als Payload gespeichert)
     - **doc_id**: Optionale UUID; wird automatisch generiert wenn nicht angegeben
     """
     assert qdrant_client is not None
 
-    _validate_zone(request.zone)
+    _validate_autonomous_store_zone(request.zone)
 
     doc_id = request.doc_id or str(uuid.uuid4())
     collection = _collection_name(request.zone, request.doc_type)

@@ -59,7 +59,8 @@ EMBEDDINGS_SERVICE_URL = os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:
 INGEST_DIR = Path(os.getenv("INGEST_DIR", "/data/ingest"))
 MAX_FILE_SIZE_BYTES = int(os.getenv("MAX_FILE_SIZE_MB", "50")) * 1024 * 1024
 
-ALLOWED_ZONES = {"PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"}
+KNOWN_ZONES = {"PUBLIC", "WORKSPACE", "FAMILY_PRIVATE", "QUARANTINE", "SACRED"}
+AUTONOMOUS_INGEST_ZONES = {"PUBLIC", "WORKSPACE"}
 ALLOWED_MIME_TYPES = {
     "text/plain",
     "text/markdown",
@@ -269,10 +270,18 @@ class IngestJobResponse(BaseModel):
 
 
 def _validate_zone(zone: str) -> None:
-    if zone not in ALLOWED_ZONES:
+    if zone not in KNOWN_ZONES:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"Invalid zone '{zone}'. Allowed: {sorted(ALLOWED_ZONES)}",
+            detail=f"Invalid zone '{zone}'. Known zones: {sorted(KNOWN_ZONES)}",
+        )
+    if zone not in AUTONOMOUS_INGEST_ZONES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                f"Autonomous ingestion is not allowed for zone '{zone}'. "
+                f"Allowed zones: {sorted(AUTONOMOUS_INGEST_ZONES)}"
+            ),
         )
 
 
@@ -325,16 +334,17 @@ async def _send_to_embeddings(
     zone: str,
     metadata: dict,
 ) -> None:
-    """Forward extracted text to the embeddings service (fire-and-forget style)."""
+    """Forward extracted text to the embeddings service for vector storage."""
     payload = {
-        "job_id": job_id,
+        "doc_id": job_id,
         "text": text,
         "zone": zone,
+        "doc_type": "document",
         "metadata": metadata,
     }
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(
-            f"{EMBEDDINGS_SERVICE_URL}/embed",
+            f"{EMBEDDINGS_SERVICE_URL}/store",
             json=payload,
         )
         resp.raise_for_status()

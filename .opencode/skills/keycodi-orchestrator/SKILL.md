@@ -85,23 +85,29 @@ KeyCodi kommandiert 6 Coding-Spezialisten via OpenCode-Subagenten:
 
 ---
 
-## Kritische Lücken im System (Prioritätenliste)
+## Kritische Lücken im System (aktuelle Prioritäten)
 
-### P0 — Blockiert MVP
-1. `route_to_agent()` in `services/orchestrator/supervisor.py` ist Platzhalter → echtes LLM-Routing implementieren
-2. Qdrant-Collections nicht initialisiert → `infra/scripts/init-qdrant.py` ausführen
-3. Keine Ingestion-Pipeline → `services/ingest/` implementieren
+### Erledigt — nicht mehr als P0 behandeln
+- `route_to_agent()` in `services/orchestrator/supervisor.py` ist implementiert.
+- Qdrant-Collections existieren lokal; das Problem ist jetzt der gemeinsame Contract.
+- `services/ingest/`, `services/embeddings/`, `services/retrieval/` und `services/analytics-service/` existieren.
+- FastAPI-Service-Tests sind vorhanden; die lokale Baseline läuft grün.
+- `apps/dashboard/` ist implementiert.
+
+### P0 — Aktueller Engpass
+1. **Qdrant/RAG Collection Contract konsolidieren** — `metadata/COLLECTION-MAPPING.md`, `infra/scripts/init-qdrant.py`, `services/embeddings/main.py` und `services/retrieval/main.py` müssen dieselben Collection-Namen, Zonen, Dimensionen und Zugriffspfade verwenden.
+2. **Phase 4 KIDI + KEYBRODI implementieren** — deterministisches Routing, Synthesis, Zone-Preservation und Handoff-Fähigkeit gemäß `keycodi/MILESTONES.md`/`keycodi/ROADMAP.md`.
+3. **Health-/Status-Wahrheit vereinheitlichen** — Runtime-Status (`python3 -m kirobi_core status --json`), Roadmap/Milestones und Healthcheck-Scripts dürfen keine widersprüchlichen Prioritäten erzeugen.
 
 ### P1 — Wichtig
-4. `services/embeddings/` — Embedding-Service (Ollama nomic-embed-text)
-5. `services/retrieval/` — RAG-Retrieval-Service
-6. Test-Coverage für FastAPI-Services = 0%
-7. Flowise-Flows nicht eingecheckt
+4. Flowise-Flows versionieren, sobald KEYBRODI deterministisch routet.
+5. UI-Shells vereinheitlichen: Dashboard-Navigation zentralisieren, mobile Layouts härten, Web-PWA Upload/Chat weiter verfeinern.
+6. JS-Toolchain für reproduzierbare UI-Checks dokumentieren oder im lokalen Dev-Setup bereitstellen.
 
 ### P2 — Zukunft
-8. `apps/dashboard/`, `apps/mobile/` — implementieren
-9. M365-Integration aktivieren
-10. Analytics-Service
+7. `apps/mobile/` nach eigener Spec ausbauen.
+8. M365-Integration nur mit explizitem WORKSPACE-Approval aktivieren.
+9. Erweiterte kreative Medienfunktionen in Web/Dashboard sichtbar machen.
 
 ---
 

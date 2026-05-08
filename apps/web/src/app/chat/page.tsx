@@ -146,7 +146,7 @@ export default function ChatPage() {
     setMessages([...messages, tempUserMessage]);
 
     try {
-      const response = await axiosInstance.post(
+      await axiosInstance.post(
         `/conversations/${activeConversation.id}/messages`,
         { content: userMessage }
       );
@@ -173,7 +173,7 @@ export default function ChatPage() {
     formData.append('zone', 'FAMILY_PRIVATE');
 
     try {
-      const response = await axiosInstance.post('/upload', formData, {
+      await axiosInstance.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

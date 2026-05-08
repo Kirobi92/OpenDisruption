@@ -42,6 +42,7 @@ from .config import (
     WEBHOOK_PATH,
 )
 from . import db, cron
+from .responder import build_keycodi_response
 from .tg import answer_cb, edit_msg, send, set_commands
 from .menus import (
     kb_cancel,
@@ -184,12 +185,23 @@ async def _ensure_conversation(
     return conversation_id, None
 
 
-# ─── Chat mit Kirobi-API ─────────────────────────────────────────────────────
+# ─── Chat mit lokalem KeyCodi / Kirobi-API-Fallback ──────────────────────────
 
 async def _send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
-    """Leitet eine Nachricht an die Kirobi-API weiter und sendet die Antwort."""
+    """Beantwortet Telegram-Chats zuerst ueber den lokalen KeyCodi-Pfad."""
     log.info("Chat-Nachricht von user_id=%s, Länge=%s", user_id, len(text))
     await send(chat_id, "⌛ KeyCodi denkt nach...")
+
+    try:
+        local_response = await build_keycodi_response(text)
+        ai_response = local_response.content
+        if len(ai_response) > 3800:
+            ai_response = ai_response[:3800] + "\n\n<i>... (Antwort gekürzt)</i>"
+        from .menus import kb_back
+        await send(chat_id, f"🤖 <b>KeyCodi:</b>\n\n{_html(ai_response)}", kb_back())
+        return
+    except Exception as exc:
+        log.warning("Lokaler KeyCodi-Antwortpfad nicht verfügbar: %s", type(exc).__name__)
 
     if not await _get_api_token():
         await send(

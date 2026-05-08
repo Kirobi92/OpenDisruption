@@ -8,7 +8,6 @@ import {
   DocumentTextIcon,
   PhotoIcon,
   DocumentIcon,
-  TrashIcon,
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 
@@ -25,6 +24,7 @@ interface UploadedFile {
 }
 
 interface UploadProgress {
+  id: string;
   filename: string;
   progress: number;
   status: 'uploading' | 'done' | 'error';
@@ -94,7 +94,9 @@ export default function UploadPage() {
   };
 
   const uploadFile = async (file: File) => {
+    const uploadId = `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`;
     const progressEntry: UploadProgress = {
+      id: uploadId,
       filename: file.name,
       progress: 0,
       status: 'uploading',
@@ -114,7 +116,7 @@ export default function UploadPage() {
             : 0;
           setUploads((prev) =>
             prev.map((u) =>
-              u.filename === file.name ? { ...u, progress: percent } : u
+              u.id === uploadId ? { ...u, progress: percent } : u
             )
           );
         },
@@ -122,7 +124,7 @@ export default function UploadPage() {
 
       setUploads((prev) =>
         prev.map((u) =>
-          u.filename === file.name ? { ...u, progress: 100, status: 'done' } : u
+          u.id === uploadId ? { ...u, progress: 100, status: 'done' } : u
         )
       );
       await loadFiles();
@@ -133,7 +135,7 @@ export default function UploadPage() {
           : 'Unbekannter Fehler';
       setUploads((prev) =>
         prev.map((u) =>
-          u.filename === file.name ? { ...u, status: 'error', error: msg } : u
+          u.id === uploadId ? { ...u, status: 'error', error: msg } : u
         )
       );
     }
@@ -249,8 +251,8 @@ export default function UploadPage() {
               </button>
             </div>
             <div className="space-y-3">
-              {uploads.map((upload, idx) => (
-                <div key={idx} className="space-y-1">
+              {uploads.map((upload) => (
+                <div key={upload.id} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
                     <span className="truncate text-gray-300 max-w-[70%]">{upload.filename}</span>
                     <span
