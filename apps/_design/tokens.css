@@ -1,26 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* =============================================================================
- * Kirobi Design Tokens — synced from apps/_design/tokens.css
- * App: kirobi-dashboard
+ * Kirobi Design Tokens — Source of Truth
+ * Zone: WORKSPACE
+ * Sync into: apps/{web,dashboard,voice}/src/app/globals.css (token block)
  * ============================================================================= */
 
 :root {
+  /* Surfaces */
   --bg-void: #040614;
   --bg-deep: #080b1f;
   --bg-rise: #0d1230;
   --bg-glass: rgba(15, 20, 50, 0.55);
 
+  /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-soft: rgba(255, 255, 255, 0.1);
   --border-glow: rgba(120, 220, 255, 0.22);
 
+  /* Text */
   --text-primary: #f4f6ff;
   --text-secondary: #9aa3c7;
   --text-muted: #5a627e;
 
+  /* Accents */
   --accent-cyan: #5eead4;
   --accent-cyan-soft: #67e8f9;
   --accent-cyan-glow: rgba(94, 234, 212, 0.45);
@@ -29,33 +30,38 @@
   --accent-violet: #a78bfa;
   --accent-gold: #fbbf24;
 
+  /* Motion */
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-glide: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-fast: 150ms;
   --dur-base: 280ms;
   --dur-slow: 520ms;
 
+  /* Shadows */
   --shadow-glow-cyan: 0 0 24px var(--accent-cyan-glow), 0 0 48px var(--accent-cyan-glow);
   --shadow-glow-magenta: 0 0 24px var(--accent-magenta-glow);
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -8px rgba(0, 0, 0, 0.6);
   --shadow-float: 0 24px 48px -12px rgba(6, 8, 30, 0.8), 0 0 0 1px var(--border-subtle) inset;
 }
 
-html { background-color: var(--bg-void); color-scheme: dark; }
+/* ---------- Base reset & typography --------------------------------------- */
 
-@layer base {
-  body {
-    background-color: var(--bg-void);
-    color: var(--text-primary);
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.005em;
-    min-height: 100dvh;
-  }
+html {
+  background-color: var(--bg-void);
+  color-scheme: dark;
 }
 
-/* Ambient background layer */
+body {
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
+}
+
+/* ---------- Ambient background layer (one element, paint-only) ----------- */
+
 .ambient-field {
   pointer-events: none;
   position: fixed;
@@ -78,6 +84,8 @@ html { background-color: var(--bg-void); color-scheme: dark; }
   mix-blend-mode: overlay;
 }
 
+/* ---------- Glass surface utility ---------------------------------------- */
+
 .glass {
   background: var(--bg-glass);
   border: 1px solid var(--border-soft);
@@ -94,6 +102,8 @@ html { background-color: var(--bg-void); color-scheme: dark; }
   box-shadow: var(--shadow-float);
 }
 
+/* ---------- Glow utilities ----------------------------------------------- */
+
 .glow-cyan { box-shadow: var(--shadow-glow-cyan); }
 .glow-magenta { box-shadow: var(--shadow-glow-magenta); }
 
@@ -105,13 +115,49 @@ html { background-color: var(--bg-void); color-scheme: dark; }
   -webkit-text-fill-color: transparent;
 }
 
+/* ---------- Animations --------------------------------------------------- */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes orbit-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  50% { transform: scale(1.32); opacity: 0; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
 .skeleton-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(120, 220, 255, 0.12) 50%, rgba(255,255,255,0.04) 100%);
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(120, 220, 255, 0.12) 50%,
+    rgba(255,255,255,0.04) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
 }
 
-/* Scrollbar */
+.animate-pulse-ring { animation: pulse-ring 1.5s ease-out infinite; }
+.animate-breathe { animation: breathe 4s ease-in-out infinite; }
+.animate-orbit-slow { animation: orbit-slow 24s linear infinite; }
+.animate-float-y { animation: float-y 5s ease-in-out infinite; }
+
+/* ---------- Scrollbar ---------------------------------------------------- */
+
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -125,7 +171,14 @@ html { background-color: var(--bg-void); color-scheme: dark; }
   background-clip: padding-box;
 }
 
-::selection { background: rgba(94, 234, 212, 0.3); color: var(--text-primary); }
+/* ---------- Selection ---------------------------------------------------- */
+
+::selection {
+  background: rgba(94, 234, 212, 0.3);
+  color: var(--text-primary);
+}
+
+/* ---------- Focus ring --------------------------------------------------- */
 
 :where(button, a, input, textarea, select, [tabindex]):focus-visible {
   outline: 2px solid var(--accent-cyan);
@@ -133,59 +186,12 @@ html { background-color: var(--bg-void); color-scheme: dark; }
   border-radius: 6px;
 }
 
-/* App-specific component classes (preserved from prior dashboard styling) */
-@layer components {
-  .status-dot-green {
-    @apply w-2.5 h-2.5 rounded-full bg-emerald-400;
-    box-shadow: 0 0 10px rgba(52, 211, 153, 0.7);
-  }
-  .status-dot-red {
-    @apply w-2.5 h-2.5 rounded-full bg-red-500;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
-  }
-  .status-dot-yellow {
-    @apply w-2.5 h-2.5 rounded-full bg-amber-400;
-    box-shadow: 0 0 10px rgba(251, 191, 36, 0.7);
-  }
-  .card {
-    @apply relative rounded-2xl p-5 transition-all duration-300;
-    background: linear-gradient(180deg, rgba(20, 26, 60, 0.6), rgba(8, 11, 31, 0.6));
-    border: 1px solid var(--border-soft);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: var(--shadow-card);
-  }
-  .card:hover {
-    border-color: var(--border-glow);
-    box-shadow: var(--shadow-card), 0 0 32px rgba(94, 234, 212, 0.1);
-  }
-  .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium cursor-pointer;
-    transition: all var(--dur-base) var(--ease-spring);
-  }
-  .nav-item-active {
-    background: linear-gradient(110deg, rgba(94, 234, 212, 0.18), rgba(167, 139, 250, 0.12));
-    color: var(--accent-cyan);
-    border: 1px solid rgba(94, 234, 212, 0.25);
-    box-shadow: 0 0 20px rgba(94, 234, 212, 0.15);
-  }
-  .nav-item-inactive {
-    color: var(--text-secondary);
-    border: 1px solid transparent;
-  }
-  .nav-item-inactive:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-subtle);
-  }
-}
-
-@layer utilities {
-  .text-balance { text-wrap: balance; }
-}
+/* ---------- Reduced motion ----------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -193,3 +199,8 @@ html { background-color: var(--bg-void); color-scheme: dark; }
   }
   .ambient-field::after { display: none; }
 }
+
+/* ---------- Utilities ---------------------------------------------------- */
+
+.text-balance { text-wrap: balance; }
+.text-pretty { text-wrap: pretty; }

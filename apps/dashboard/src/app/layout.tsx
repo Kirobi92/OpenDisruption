@@ -20,8 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" className="dark">
-      <body className={`${inter.className} bg-gray-900 text-gray-100`}>
-        {children}
+      <body className={`${inter.className} relative`}>
+        <div className="ambient-field" aria-hidden="true" />
+        <div className="relative z-10">{children}</div>
       </body>
     </html>
   )

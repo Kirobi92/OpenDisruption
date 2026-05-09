@@ -1,12 +1,9 @@
-import type { Config } from 'tailwindcss';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const animate = require('tailwindcss-animate');
-
 /**
- * Tailwind config for kirobi-voice.
+ * Tailwind config for kirobi-dashboard.
  * Shared theme is mirrored from apps/_design/tailwind-theme.js — keep in sync.
  */
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -47,7 +44,7 @@ const config: Config = {
       },
       animation: {
         'pulse-ring': 'pulse-ring 1.5s ease-out infinite',
-        'pulse_ring': 'pulse-ring 1.5s ease-out infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'breathe': 'breathe 4s ease-in-out infinite',
         'orbit-slow': 'orbit-slow 24s linear infinite',
         'float-y': 'float-y 5s ease-in-out infinite',
@@ -68,7 +65,5 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate],
+  plugins: [require('tailwindcss-animate')],
 };
-
-export default config;
