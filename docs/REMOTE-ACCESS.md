@@ -125,3 +125,18 @@ For Telegram URL buttons, set `KIROBI_TELEGRAM_WEB_BASE_URL` explicitly to the M
 - Use strong first-run values for `JWT_SECRET_KEY`, `OPENWEBUI_SECRET_KEY`, `FLOWISE_PASSWORD`, `POSTGRES_PASSWORD`.
 - `KIROBI_PUBLIC_ORIGINS` may remain empty: auth/api now allow localhost, `.local`, RFC1918 LAN IPs and Tailscale `100.64.0.0/10` by safe regex instead of wildcard CORS.
 - Treat `/open-webui/`, `/flowise/` and `/qdrant/dashboard` as admin/workbench routes: reachable over Tailscale, but not for public sharing.
+
+---
+
+## External Agent Track (Phase 4.5)
+
+Wenn Profile `external-agents` aktiv ist (`make external-up`), gelten die gleichen Regeln:
+
+- **Hermes Dashboard:** `https://kirobi.local/hermes/` — gated durch `@not_edge_private`. Zugriff nur aus LAN (RFC1918) oder Tailscale (`100.64.0.0/10`).
+- **OpenClaw Gateway:** `https://kirobi.local/openclaw/` — gleiche Schutzklasse.
+- **AionUi Cockpit:** läuft host-seitig auf `127.0.0.1:25808`. **Nicht** über Caddy exponiert. Zugriff nur via SSH-Tunnel oder lokaler Browser auf dem Host:
+  ```bash
+  ssh -L 25808:127.0.0.1:25808 sven@kirobi.local
+  ```
+
+Der Caddy-Matcher `@not_edge_private` lebt in `infra/caddy/Caddyfile`. Wenn ein neues Tailscale-CIDR oder Cloud-VPN dazukommt, hier ergänzen — und nur dort.

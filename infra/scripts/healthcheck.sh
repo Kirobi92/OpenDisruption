@@ -54,6 +54,7 @@ echo ""
 echo "→ Datenbank-Services:"
 check_tcp "PostgreSQL" "localhost" "$POSTGRES_PORT"
 check_http "Qdrant REST" "http://localhost:$QDRANT_PORT/collections"
+check_http "Qdrant Health" "http://localhost:$QDRANT_PORT/healthz"
 
 echo ""
 echo "→ KI-Services:"
@@ -63,6 +64,21 @@ echo ""
 echo "→ Interface-Services:"
 check_http "Open WebUI" "http://localhost:$OPENWEBUI_PORT"
 check_http "Flowise" "http://localhost:$FLOWISE_PORT"
+
+echo ""
+echo "→ External-Agents (optional, Profile external-agents):"
+HERMES_RUNTIME_PORT="${HERMES_RUNTIME_PORT:-9119}"
+OPENCLAW_GATEWAY_PORT="${OPENCLAW_GATEWAY_PORT:-18789}"
+if timeout 1 bash -c "echo >/dev/tcp/localhost/$HERMES_RUNTIME_PORT" 2>/dev/null; then
+  check_http "Hermes Dashboard" "http://localhost:$HERMES_RUNTIME_PORT/"
+else
+  echo "  ⏭️  Hermes Runtime (Port $HERMES_RUNTIME_PORT nicht offen — Profile external-agents nicht aktiv?)"
+fi
+if timeout 1 bash -c "echo >/dev/tcp/localhost/$OPENCLAW_GATEWAY_PORT" 2>/dev/null; then
+  check_http "OpenClaw Health" "http://localhost:$OPENCLAW_GATEWAY_PORT/healthz"
+else
+  echo "  ⏭️  OpenClaw Gateway (Port $OPENCLAW_GATEWAY_PORT nicht offen — Profile external-agents nicht aktiv?)"
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

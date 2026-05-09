@@ -412,3 +412,27 @@ agent-obsidian:
 		from agents._base.agent import Task; \
 		t=json.loads(os.environ.get('TASK','{}')) if os.environ.get('TASK') else {'task_type':'vault_read','payload':{'path':'README.md'}}; \
 		r=ObsidianAgent().run(Task(**t)); print(json.dumps({'success':r.success,'payload':r.payload,'error':r.error},ensure_ascii=False,indent=2))"
+
+# ─── External Agent Track (Phase 4.5) ───────────────────────────────────────
+
+## External-Agents-Profile starten (hermes-runtime + openclaw-gateway)
+external-up:
+	@git submodule update --init --recursive external/hermes-agent external/openclaw
+	@docker compose --profile external-agents up -d
+
+## External-Agents-Profile stoppen
+external-down:
+	@docker compose --profile external-agents down
+
+## Logs der External-Agents
+external-logs:
+	@docker compose --profile external-agents logs -f --tail=200
+
+## AionUi-Installer (host-side .deb) — default --dry-run
+aionui-install:
+	@bash infra/scripts/install-aionui.sh $(if $(APPLY),--apply,--dry-run)
+
+## Submodules updaten (hermes + openclaw auf neueste Refs)
+external-update-submodules:
+	@git submodule update --remote external/hermes-agent external/openclaw
+	@echo "Submodules aktualisiert. Image-Rebuild mit: docker compose --profile external-agents build"

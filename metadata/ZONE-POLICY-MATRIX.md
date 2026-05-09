@@ -39,9 +39,10 @@
 | obsidian | ✅ | ✅ | ✅ (lokal, kein Egress) | ❌ | ❌ |
 | kidi | ✅ | ✅ | ❌ (nur via obsidian-Brücke, lokal) | ❌ | ❌ |
 | keybrodi | ✅ | ✅ | ❌ | ❌ | ❌ |
+| hermes-runtime | ✅ | ✅ | ❌ | ❌ | ❌ |
+| openclaw-gateway | ✅ | ✅ | ❌ | ❌ | ❌ |
+| aionui-cockpit | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Sven (Mensch) | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-*kirobi-core und samira-heart können SACRED lesen mit expliziter Freigabe von Sven; SACRED-Inhalte bleiben für alle übrigen Agenten tabu.
 
 > **Telegram-Boundary (siehe `docs/agent/TELEGRAM-INTEGRATION.md`):** Selbst wenn ein Agent oben FAMILY_PRIVATE lesen darf, ist die Weitergabe an Telegram (oder jeden anderen externen Dienst) hart untersagt. Der Telegram-Zonen-Gate akzeptiert ausschließlich PUBLIC und WORKSPACE.
 
@@ -70,6 +71,9 @@
 | obsidian | ✅ | ✅ | ✅ (lokaler Vault, Human-Approval) | ❌ | ❌ |
 | kidi | ✅ | ✅ | ❌ | ❌ | ❌ |
 | keybrodi | ✅ (Metriken) | ✅ (Metriken/Events) | ❌ | ❌ | ❌ |
+| hermes-runtime | ✅ | ✅ | ❌ | ❌ | ❌ |
+| openclaw-gateway | ✅ | ✅ | ❌ | ❌ | ❌ |
+| aionui-cockpit | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Sven (Mensch) | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---

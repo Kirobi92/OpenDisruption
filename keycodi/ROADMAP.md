@@ -164,6 +164,35 @@ Dieses Dokument ist nicht nur Richtung, sondern Backlog-Struktur.
 
 ---
 
+## Phase 4.5 — External Agent Track (PARALLEL, Sven-Override 2026-05-09)
+
+**Status:** Sven-Override für parallelen Track erteilt. Kein Blocker für Phase 4 oder 5; läuft additiv.
+
+**Quelle:** `keycodi/decisions/0004-external-agent-integration.md`.
+
+**Lieferumfang**
+- Submodules unter `external/hermes-agent/` und `external/openclaw/` (Pin auf konkrete Refs vor Merge).
+- Compose-Profile `external-agents` mit Services `hermes-runtime` und `openclaw-gateway`.
+- Caddy-Routes `/hermes/*` und `/openclaw/*` hinter `@not_edge_private`.
+- `infra/scripts/install-aionui.sh` für host-seitige `.deb`-Installation des AionUi-Cockpits.
+- AGENTREGISTRY-Einträge 21–23, ZONE-POLICY-MATRIX um drei Zeilen erweitert.
+- Doku unter `docs/agent/EXTERNAL-AGENT-INTEGRATION.md`.
+
+**Exit-Kriterien**
+1. `make integration-test` bleibt grün.
+2. `docker compose --profile external-agents config` validiert.
+3. Caddyfile validiert (`caddy validate`).
+4. Beide externe Container starten und Healthchecks werden grün.
+5. AionUi-Installer bleibt im `--dry-run` Default — Apply nur explizit.
+
+**Hart ausgeschlossen**
+- Cloud-Provider in Hermes (alle deaktiviert ausser `custom`/Ollama).
+- FAMILY_PRIVATE/SACRED-Mounts in beide Container.
+- Hermes API-Server ohne `API_SERVER_KEY`.
+- AionUi in Docker (statt host-side `.deb`).
+
+---
+
 ## Phase 5 — Telegram-Integration (GATED)
 
 **Voraussetzung:** Sven hat Option A aus `docs/agent/TELEGRAM-INTEGRATION.md` §2 gewählt. Phase 5 bleibt trotzdem gated bis Phasen 1–4 abgeschlossen und die lokale `.env` vollständig vorhanden ist.
@@ -231,6 +260,7 @@ Phase 1: 🟢 DONE
 Phase 2: 🟢 DONE
 Phase 3: 🟡 IN PROGRESS
 Phase 4: ⚪ PENDING
+Phase 4.5: 🟡 IN-PROGRESS (Sven-Override 2026-05-09, parallel)
 Phase 5: ⚪ PENDING (Option A gewählt, gated)
 Phase 6: ⚪ PENDING
 ```

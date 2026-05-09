@@ -404,3 +404,37 @@ Das Kirobi-Ökosystem umfasst 14 spezialisierte Agenten, die als Flowise-Flows i
 - **Zone-Zugriff:** Routing-Metadaten in WORKSPACE; **keine** Inhalte aus FAMILY_PRIVATE/SACRED.
 - **Hart ausgeschlossen:** Selbst-modifizierender RL-Loop, prädiktive Orchestrierung ohne Human-PR.
 - **Quelle (geplant):** `kidi/keybrodi/`.
+
+---
+
+## External Agent Track (Phase 4.5)
+
+ADR: `keycodi/decisions/0004-external-agent-integration.md`. Aktivierung:
+`docker compose --profile external-agents up -d` (oder `make external-up`).
+
+### 21. hermes-runtime
+
+- **Upstream:** [`NousResearch/hermes-agent`](https://github.com/NousResearch/hermes-agent) (Submodule `external/hermes-agent`)
+- **Rolle:** Skill-Hub + Reasoning-Frontend mit Ollama-Backend, MCP-Server, lokales Dashboard.
+- **Zone-Zugriff:** Lesen/Schreiben PUBLIC, WORKSPACE. Kein FAMILY_PRIVATE/SACRED.
+- **Hart ausgeschlossen:** Cloud-Provider-Plugins (alle deaktiviert ausser `custom`/Ollama). API-Server bleibt off.
+- **Container:** `kirobi-hermes-runtime`, Profile `external-agents`, Port `9119` (localhost).
+- **Quelle:** `services/hermes-runtime/`.
+
+### 22. openclaw-gateway
+
+- **Upstream:** [`openclaw/openclaw`](https://github.com/openclaw/openclaw) (Submodule `external/openclaw`)
+- **Rolle:** Multi-Channel-Messaging-Bridge (Signal, WhatsApp, Discord, iMessage, Slack, Matrix, Teams, Google Chat usw.). Parallel zum bestehenden `telegram` Service.
+- **Zone-Zugriff:** Lesen/Schreiben PUBLIC, WORKSPACE. Kein FAMILY_PRIVATE/SACRED — gleiche Telegram-Boundary.
+- **Hart ausgeschlossen:** FAMILY_PRIVATE/SACRED-Pfade werden nicht gemountet. Sandbox-Isolation off (würde docker.sock-Mount erfordern).
+- **Container:** `kirobi-openclaw-gateway`, Profile `external-agents`, Ports `18789`/`18790` (localhost).
+- **Quelle:** `services/openclaw-gateway/`.
+
+### 23. aionui-cockpit
+
+- **Upstream:** [`iOfficeAI/AionUi`](https://github.com/iOfficeAI/AionUi)
+- **Rolle:** Browser-Cockpit auf Sven's Host für CLI-Agents (Claude Code, Codex, Hermes, OpenClaw etc.).
+- **Zone-Zugriff:** WORKSPACE Admin (LAN-only, JWT). Liest, was die delegierten CLI-Agents lesen dürfen.
+- **Hart ausgeschlossen:** **Nicht** in Docker — host-side `.deb`. Container-Mount auf Repo-Pfade explizit nicht vorgesehen.
+- **Installation:** `infra/scripts/install-aionui.sh --apply` (default `--dry-run`). Standard-Port `25808`.
+- **Quelle:** `infra/scripts/install-aionui.sh`.

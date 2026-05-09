@@ -1,0 +1,6 @@
+[submodule "external/hermes-agent"]
+	path = external/hermes-agent
+	url = https://github.com/NousResearch/hermes-agent.git
+[submodule "external/openclaw"]
+	path = external/openclaw
+	url = https://github.com/openclaw/openclaw.git

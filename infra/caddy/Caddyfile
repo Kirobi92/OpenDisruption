@@ -70,6 +70,26 @@
 		}
 	}
 
+	redir /hermes /hermes/ 308
+	handle /hermes/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /hermes
+		reverse_proxy hermes-runtime:9119 {
+			header_up X-Forwarded-Prefix /hermes
+			header_up Host {host}
+		}
+	}
+
+	redir /openclaw /openclaw/ 308
+	handle /openclaw/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /openclaw
+		reverse_proxy openclaw-gateway:18789 {
+			header_up X-Forwarded-Prefix /openclaw
+			header_up Host {host}
+		}
+	}
+
 	# Dashboard: /dashboard* -> http://dashboard:3003
 	redir /dashboard /dashboard/ 308
 	handle /dashboard/* {
@@ -285,6 +305,26 @@
 		uri strip_prefix /qdrant
 		reverse_proxy qdrant:6333 {
 			header_up X-Forwarded-Prefix /qdrant
+			header_up Host {host}
+		}
+	}
+
+	redir /hermes /hermes/ 308
+	handle /hermes/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /hermes
+		reverse_proxy hermes-runtime:9119 {
+			header_up X-Forwarded-Prefix /hermes
+			header_up Host {host}
+		}
+	}
+
+	redir /openclaw /openclaw/ 308
+	handle /openclaw/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /openclaw
+		reverse_proxy openclaw-gateway:18789 {
+			header_up X-Forwarded-Prefix /openclaw
 			header_up Host {host}
 		}
 	}

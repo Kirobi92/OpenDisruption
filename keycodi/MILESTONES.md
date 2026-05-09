@@ -75,6 +75,28 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 - [ ] CI grün
 - [ ] Handoff-Bereitschafts-Check (`HANDOFF-TO-KEYBRODI.md`)
 
+## Phase 4.5 — External Agent Track (Sven-Override 2026-05-09)
+
+ADR: `keycodi/decisions/0004-external-agent-integration.md`. Doku: `docs/agent/EXTERNAL-AGENT-INTEGRATION.md`.
+
+- [x] ADR `0004-external-agent-integration.md`
+- [x] Submodules `external/hermes-agent`, `external/openclaw`
+- [x] `services/hermes-runtime/` (Wrapper-Dockerfile + `config/cli-config.yaml`)
+- [x] `services/openclaw-gateway/` (README; Build via Submodule)
+- [x] Compose-Profile `external-agents` mit beiden Services + Volumes
+- [x] Caddy-Routes `/hermes/*`, `/openclaw/*` (HTTP + HTTPS) hinter `@not_edge_private`
+- [x] Flowise-Healthcheck in `docker-compose.yml`
+- [x] `infra/scripts/install-aionui.sh` mit `--dry-run` Default
+- [x] `infra/scripts/healthcheck.sh` um Qdrant `/healthz`, Hermes, OpenClaw erweitert
+- [x] `.env.example` Sektion "EXTERNAL AGENT TRACK"
+- [x] Makefile-Targets `external-up`, `external-down`, `external-logs`, `aionui-install`, `external-update-submodules`
+- [x] AGENTREGISTRY-Einträge 21–23
+- [x] ZONE-POLICY-MATRIX um drei Zeilen erweitert
+- [x] `docs/agent/EXTERNAL-AGENT-INTEGRATION.md`
+- [ ] Submodule-Pin auf konkretes Tag (vor Merge)
+- [ ] Live-Smoke-Test `make external-up` + Healthchecks grün
+- [ ] `make integration-test` grün
+
 ## Phase 5 — Telegram (gated)
 
 > Sperre: Option A ist bestätigt; Phase 5 startet trotzdem erst nach grünem Abschluss von Phase 4 und vorhandener lokaler `.env`-Konfiguration.
@@ -106,6 +128,7 @@ Phase 1: 🟢 DONE
 Phase 2: 🟢 DONE
 Phase 3: 🟢 DONE  — 6/7 Items, CI ausstehend
 Phase 4: ⚪ PENDING
+Phase 4.5: 🟡 IN PROGRESS — Code/Docs done, Live-Smoke + Pin offen
 Phase 5: ⚪ PENDING (Option A gewählt, gated)
 Phase 6: ⚪ PENDING
 ```
