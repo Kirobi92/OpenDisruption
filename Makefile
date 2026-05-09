@@ -6,9 +6,9 @@ COMPOSE = docker compose
 COMPOSE_FILE = docker-compose.yml
 ENV_FILE = .env
 
-.PHONY: help up down restart logs pull-models init status backup clean build \
+.PHONY: help up down restart logs pull-models init status stack-status backup clean build \
         bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
-        pwa-up webui-up webui-url tailscale-url keycodi reset-default-password \
+        pwa-up webui-up webui-url tailscale-url tailscale-doctor tailscale-connect tailscale-services keycodi reset-default-password \
         test-kidi kidi-up kidi-down \
         test-agents agent-opencode agent-openclaw agent-hermes agent-obsidian agents-build \
         obsidian-daily obsidian-moc
@@ -23,6 +23,7 @@ help:
 	@echo "  make down            – Alle Services stoppen"
 	@echo "  make restart         – Alle Services neu starten"
 	@echo "  make status          – Status aller Services anzeigen"
+	@echo "  make stack-status    – Docker Compose Status + Healthcheck anzeigen"
 	@echo "  make logs            – Logs aller Services (follow)"
 	@echo "  make pull-models     – Ollama-Modelle herunterladen"
 	@echo ""
@@ -44,6 +45,9 @@ help:
 	@echo "  make webui-up         – Zentrales Web UI über Caddy starten (LAN/Tailscale)"
 	@echo "  make webui-url        – LAN/Tailscale URLs für das Web UI anzeigen"
 	@echo "  make tailscale-url    – Tailscale-URL anzeigen (falls tailscale CLI vorhanden)"
+	@echo "  make tailscale-doctor – Host-Tailscale prüfen und nächste Schritte zeigen"
+	@echo "  make tailscale-connect – Sicheren tailscale up Dry-Run aus lokaler .env erzeugen"
+	@echo "  make tailscale-services – Alle via Tailscale sinnvollen OpenDisruption-URLs zeigen"
 	@echo "  make reset-default-password – Bootstrap-Passwort im Auth-Service auf .env-Default setzen"
 	@echo ""
 	@echo "  make backup          – Backup erstellen"
@@ -109,8 +113,8 @@ pull-models:
 	@bash infra/scripts/pull-models.sh
 	@echo "  ✓ Modelle heruntergeladen"
 
-## System-Status anzeigen
-status:
+## Docker-Compose-Status + Healthcheck anzeigen
+stack-status:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "  Kirobi / Disruptive OS – System Status"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -282,6 +286,18 @@ webui-url:
 tailscale-url:
 	@bash infra/scripts/tailscale-url.sh
 
+## Host-Tailscale prüfen und nächste Schritte zeigen
+tailscale-doctor:
+	@bash infra/scripts/tailscale-doctor.sh
+
+## Sicheren tailscale up Dry-Run aus lokaler .env erzeugen
+tailscale-connect:
+	@bash infra/scripts/tailscale-connect.sh
+
+## Alle relevanten OpenDisruption-Dienste via Tailscale auflisten
+tailscale-services:
+	@bash infra/scripts/tailscale-services.sh
+
 ## mDNS / Avahi für kirobi.local einrichten (benötigt sudo)
 pwa-mdns:
 	@bash infra/scripts/setup-mdns.sh
@@ -304,6 +320,12 @@ integration-test:
 	@bash -n infra/scripts/setup-mdns.sh && echo "  ✓ setup-mdns.sh OK"
 	@echo "→ tailscale-url.sh syntax"
 	@bash -n infra/scripts/tailscale-url.sh && echo "  ✓ tailscale-url.sh OK"
+	@echo "→ tailscale-doctor.sh syntax"
+	@bash -n infra/scripts/tailscale-doctor.sh && echo "  ✓ tailscale-doctor.sh OK"
+	@echo "→ tailscale-connect.sh syntax"
+	@bash -n infra/scripts/tailscale-connect.sh && echo "  ✓ tailscale-connect.sh OK"
+	@echo "→ tailscale-services.sh syntax"
+	@bash -n infra/scripts/tailscale-services.sh && echo "  ✓ tailscale-services.sh OK"
 	@echo "→ Caddyfile vorhanden"
 	@test -f infra/caddy/Caddyfile && echo "  ✓ Caddyfile present"
 	@echo "→ services/auth/main.py + services/api/main.py kompilieren"

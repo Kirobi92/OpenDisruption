@@ -155,6 +155,39 @@ def test_track_event_missing_type_returns_422(client):
     assert resp.status_code == 422
 
 
+def test_dashboard_stats_returns_dashboard_shape(client):
+    """GET /stats liefert das vom Dashboard erwartete Aggregat."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=_make_summary_row(total_events=7, active_users=3))
+    mock_conn.fetch = AsyncMock(return_value=[_make_zone_row(zone="WORKSPACE", count=5)])
+    mock_conn.fetchval = AsyncMock(side_effect=[True, True, 11, 42])
+
+    resp = c.get("/stats")
+
+    assert resp.status_code == 200
+    assert resp.json() == {
+        "eventsToday": 7,
+        "activeUsers": 3,
+        "zoneUsage": {"WORKSPACE": 5},
+        "totalConversations": 11,
+        "totalMessages": 42,
+    }
+
+
+def test_dashboard_stats_handles_missing_conversation_tables(client):
+    """GET /stats fällt auf Nullwerte zurück, wenn API-Tabellen fehlen."""
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=_make_summary_row(total_events=2, active_users=1))
+    mock_conn.fetch = AsyncMock(return_value=[])
+    mock_conn.fetchval = AsyncMock(side_effect=[False, False])
+
+    resp = c.get("/stats")
+
+    assert resp.status_code == 200
+    assert resp.json()["totalConversations"] == 0
+    assert resp.json()["totalMessages"] == 0
+
+
 # ---------------------------------------------------------------------------
 # GET /stats/daily
 # ---------------------------------------------------------------------------

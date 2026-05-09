@@ -10,7 +10,7 @@
 
 - Phase 4 ist `🟢 done`. KEYBRODI routet stabil.
 - Sven hat **Option A** (Restricted Bridge) bestätigt.
-- Sven hat Token-Storage-Verfahren bestätigt: **Docker Secrets / `*_FILE`**.
+- Sven hat Token-Storage-Verfahren bestätigt: **lokale `.env`**.
 - Mindestens ein erfolgreicher Test-Lauf des Zone-Filters in einer Sandbox liegt vor.
 
 Wenn auch nur **eine** Bedingung offen ist: Phase 5 startet nicht. KeyCodi springt zu Phase 6.
@@ -42,7 +42,7 @@ Sechs Container, jeder eigenes Service in `docker-compose.yml`, hinter Profile `
 Jeder Container:
 
 - Läuft mit `KIROBI_EGRESS_ALLOWED=true` (auf separater Network-Policy).
-  - Nutzt seinen eigenen Token ausschließlich aus `${KIROBI_TELEGRAM_*_TOKEN_FILE}`.
+  - Nutzt seine Telegram-Konfiguration ausschließlich aus der lokalen `.env`.
 - Verbindet sich zu Redis mit dediziertem ACL-User (siehe Schritt 3).
 
 ### 3. Redis-ACL
@@ -66,18 +66,15 @@ Skript `infra/scripts/daily-team-meeting.sh`:
 
 ### 5. Env
 
-`.env.example` (nur `*_FILE`-Platzhalter):
+`.env.example` (nur leere Platzhalter, keine echten Werte):
 
 ```
 KIROBI_TELEGRAM_ENABLED=false
-KIROBI_TELEGRAM_TOKEN_SOURCE=docker_secret
-KIROBI_TELEGRAM_KEYBRODI_TOKEN_FILE=/run/secrets/telegram_keybrodi_token
-KIROBI_TELEGRAM_OPENCODE_TOKEN_FILE=/run/secrets/telegram_opencode_token
-KIROBI_TELEGRAM_OPENCLAW_TOKEN_FILE=/run/secrets/telegram_openclaw_token
-KIROBI_TELEGRAM_HERMES_TOKEN_FILE=/run/secrets/telegram_hermes_token
-KIROBI_TELEGRAM_OBSIDIAN_TOKEN_FILE=/run/secrets/telegram_obsidian_token
-KIROBI_TELEGRAM_KIDI_TOKEN_FILE=/run/secrets/telegram_kidi_token
-KIROBI_TELEGRAM_CHANNEL_ID_FILE=/run/secrets/telegram_channel_id
+KIROBI_TELEGRAM_TOKEN_SOURCE=env
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_ALLOWED_USER_IDS=
+TELEGRAM_NOTIFY_CHANNEL_ID=
+HERMES_TELEGRAM_BOT_TOKEN=
 ```
 
 `.gitignore`: `.env` ist bereits ausgeschlossen — verifizieren.
@@ -87,7 +84,7 @@ KIROBI_TELEGRAM_CHANNEL_ID_FILE=/run/secrets/telegram_channel_id
 - Pro Bot mindestens ein Smoke-Test (mocked).
 - Refusal-Tests pro Zone.
 - ACL-Tests (mocked / dokumentiert).
-- Token-Leak-Test: Tracked files dürfen nur `*_FILE`-Pfade und `CHANGEME`-freie Platzhalter enthalten, keine Bot-Token-Werte.
+- Token-Leak-Test: Tracked files dürfen nur leere Platzhalter enthalten, keine Bot-Token-Werte.
 
 ### 7. Sicherheits-Review
 
@@ -97,7 +94,7 @@ KIROBI_TELEGRAM_CHANNEL_ID_FILE=/run/secrets/telegram_channel_id
 
 ## Definition of Done
 
-`KIROBI_TELEGRAM_ENABLED=false` ist Default. Jeder Reject-Pfad ist getestet. Kein Token im Repo. Docker Secrets werden vor Start validiert. Keine Cron-Installation by default.
+`KIROBI_TELEGRAM_ENABLED=false` ist Default. Jeder Reject-Pfad ist getestet. Kein Token im Repo. Die benötigten `.env`-Werte werden lokal vor Start validiert. Keine Cron-Installation by default.
 
 ## Mögliche Stolpersteine
 

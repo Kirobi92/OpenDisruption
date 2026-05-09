@@ -15,7 +15,7 @@ export default function LoginPage() {
     // Check if already logged in
     const token = localStorage.getItem('access_token');
     if (token) {
-      router.push('/chat');
+      router.push('/control-center');
     }
   }, [router]);
 
@@ -36,8 +36,8 @@ export default function LoginPage() {
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
 
-      // Redirect to chat
-      router.push('/chat');
+      // Redirect to control center
+      router.push('/control-center');
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.detail ?? 'Login fehlgeschlagen. Bitte versuche es erneut.');

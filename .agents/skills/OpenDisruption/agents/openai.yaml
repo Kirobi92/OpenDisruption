@@ -1,6 +1,6 @@
 interface:
   display_name: "OpenDisruption"
-  short_description: "Repo-specific patterns and workflows for OpenDisruption"
-  default_prompt: "Use the OpenDisruption repo skill to follow existing architecture, testing, and workflow conventions."
+  short_description: "Verified OpenDisruption repo rules mirrored from the canonical OpenCode skill"
+  default_prompt: "Use the OpenDisruption compatibility skill, follow CLAUDE.md and AGENTS.md first, and prefer the canonical skill at .opencode/skills/keycodi-orchestrator/SKILL.md."
 policy:
   allow_implicit_invocation: true

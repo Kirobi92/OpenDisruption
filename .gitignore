@@ -8,6 +8,7 @@
 .env
 .env.local
 .env.*.local
+.local-certs/
 *.key
 *.pem
 *.p12
@@ -59,6 +60,8 @@ downloads/
 eggs/
 .eggs/
 lib/
+!apps/web/src/lib/
+!apps/web/src/lib/**/*.ts
 lib64/
 parts/
 sdist/
@@ -124,7 +127,8 @@ flowise_data/
 # -----------------------------------------------------------------------------
 *.log
 logs/
-!kirobi-core/core-events.log
+# Laufzeit-Audit-Log bleibt lokal erhalten, aber nicht im Git-Index.
+kirobi-core/core-events.log
 
 # -----------------------------------------------------------------------------
 # IDE & EDITOR

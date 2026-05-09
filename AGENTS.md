@@ -11,10 +11,13 @@ version: 1.1
 
 ## Instruction Sources
 - Read `CLAUDE.md` before touching files; it is the mandatory privacy, zone, and approval policy.
+- GitHub Copilot entrypoint: `.github/copilot-instructions.md` compresses the repo rules for autonomous coding agents and links back to the canonical sources below.
 - Use `AGENT-DECISION-MATRIX.md` for act/log/ask/refuse decisions; `AGENT-SYSTEM-PROMPT.md` is the compact self-contained version for new agents.
 - Use `PROJECT-ARCHITECTURE.md` for the service graph and `DEVELOPER-RUNBOOK.md` for CLI workflows.
-- Treat `.agents/skills/OpenDisruption/SKILL.md` as stale/generated unless re-verified; it claims TypeScript-only conventions and an unknown test framework despite the current `pytest` suite.
+- `.agents/skills/OpenDisruption/SKILL.md` und `.claude/skills/OpenDisruption/SKILL.md` sind gepflegte Kompatibilitäts-Mirrors für externe Laufzeiten; die repo-spezifische kanonische Quelle bleibt `.opencode/skills/keycodi-orchestrator/SKILL.md`.
 - The canonical, verified Skill für OpenCode/KeyCodi ist `.opencode/skills/keycodi-orchestrator/SKILL.md` — dieses ist aktuell und korrekt.
+- Generische Lifecycle-Skills aus `addyosmani/agent-skills` liegen ebenfalls unter `.opencode/skills/`; Einstiegspunkt ist `using-agent-skills`.
+- Gemeinsame Referenzen für den importierten Skill-Pack liegen unter `.opencode/references/`.
 - OpenCode-Konfiguration: `opencode.json` (Projekt-Root), Agents: `.opencode/agents/`, Commands: `.opencode/commands/`.
 
 ## Safety

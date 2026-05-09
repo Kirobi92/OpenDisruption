@@ -10,6 +10,9 @@ from datetime import datetime
 from typing import Optional
 
 import asyncpg
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 from .config import DATABASE_URL
 
@@ -286,7 +289,8 @@ async def event_log(event_type: str, message: str, severity: str = "info", metad
     try:
         async with pool.acquire() as conn:
             await conn.execute(
-                "INSERT INTO supervisor_events (event_type, severity, message, metadata) VALUES ($1,$2,$3,$4::jsonb)",
+                "INSERT INTO supervisor_events (timestamp, event_type, severity, message, metadata) "
+                "VALUES (NOW(), $1, $2, $3, $4::jsonb)",
                 event_type,
                 severity,
                 message,

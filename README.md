@@ -4,7 +4,7 @@
 
 > 🚧 **KIDI/KEYBRODI Multi-Agent-Rollout (Phase 0):** Architektur, Roadmap und Vault-Topologie liegen in [`keycodi/`](./keycodi/README.md) und [`obsidian/`](./obsidian/README.md). Der lokale OpenCode-Agent ("KeyCodi") arbeitet die Phasen 0–6 aus [`keycodi/ROADMAP.md`](./keycodi/ROADMAP.md) sequentiell ab, bis KEYBRODI die Orchestrierung übernehmen kann.
 
-> 🌐 **LAN/Tailscale Web UI:** Der sichere Komfort-Zugriff läuft über genau einen Caddy-Edge. Starte mit `make webui-up` und öffne `/status`; Details in [`docs/REMOTE-ACCESS.md`](./docs/REMOTE-ACCESS.md).
+> 🌐 **LAN/Tailscale Web UI:** Der sichere Komfort-Zugriff läuft über genau einen Caddy-Edge. Starte mit `make webui-up`, prüfe den Host mit `make tailscale-doctor` und liste erreichbare Dienste mit `make tailscale-services`; Details in [`docs/REMOTE-ACCESS.md`](./docs/REMOTE-ACCESS.md).
 
 ---
 
@@ -67,10 +67,11 @@ make status               # Health prüfen
 
 ### Erste Schritte nach dem Start
 
-1. **Open WebUI** unter `http://localhost:3000` aufrufen
-2. **Flowise** für Workflows unter `http://localhost:3001`
-3. **Qdrant Dashboard** unter `http://localhost:6333/dashboard`
-4. System-Gesundheit prüfen: `make status`
+1. **Family PWA** unter `http://localhost:3002` oder via Caddy unter `http://kirobi.local/`
+2. **Admin-Dashboard** unter `http://localhost:3003`
+3. **Voice-UI** unter `http://localhost:3004`
+4. **Open WebUI** (`http://localhost:3000`) und **Flowise** (`http://localhost:3001`) nur als Zusatzoberflächen öffnen
+5. System-Gesundheit prüfen: `make status`
 
 ### Local-First Kickstart (kein Docker nötig)
 
@@ -82,7 +83,7 @@ make bootstrap         # .env anlegen + Doctor + Repo-Scan
 make interview         # geführtes Onboarding (CLI, lokal)
 make autonomous-once   # eine sichere Dry-Run-Iteration des Autonomy-Loops
 make backlog LIMIT=5   # priorisierten Backlog ansehen
-make test              # 58 Unit-Tests (stdlib only)
+make test              # stdlib-first Baseline; frisch geklont grün
 ```
 
 ### Stack-Integration (Docker + kirobi_core)
@@ -92,9 +93,14 @@ sich der lokale Core automatisch an sie an:
 
 ```bash
 make status            # Live-Probes für Ollama / Qdrant / Postgres / API / …
-make integration-test  # End-to-end Check (Tests + compose validate + Skripte)
+make integration-test  # Repo-Gate (Unit-Tests + compose/scripts/PWA-Checks)
 python -m kirobi_core doctor --live   # Doctor inkl. Service-Probes
 ```
+
+Aktuelle verifizierte Repo-Baseline:
+
+- `python3 -m pytest tests/unit -q` → **369 Tests grün**
+- `make integration-test` → grün
 
 Der Supervisor (`services/orchestrator/supervisor.py`) erkennt
 `kirobi_core` automatisch und kann seine Task-Queue aus dem Backlog
@@ -129,6 +135,19 @@ einen Admin-User an (Standard `sven` / Passwort aus
 `KIROBI_DEFAULT_PASSWORD`). Danach sofort über die PWA ändern.
 
 Details: siehe `DEVELOPER-RUNBOOK.md` und `infra/caddy/README.md`.
+
+### Unterstützte Oberflächen
+
+| Surface | Pfad / Port | Status |
+|---|---|---|
+| Family PWA | `apps/web` / `3002` / `kirobi.local` | Unterstützt, produktionswürdig |
+| Admin-Dashboard | `apps/dashboard` / `3003` | Unterstützt |
+| Voice-UI | `apps/voice` / `3004` | Unterstützt |
+| Open WebUI | Compose-Service / `3000` | Zusatzoberfläche, nicht kanonische Familien-UI |
+| Flowise | Compose-Service / `3001` | Workflow-/Builder-Oberfläche |
+| Desktop | `apps/desktop` | Scaffold |
+| Mobile | `apps/mobile` | Scaffold |
+| Installer-App | `apps/installer` | Docs-only |
 
 ---
 
@@ -209,6 +228,7 @@ Details: siehe `DEVELOPER-RUNBOOK.md` und `infra/caddy/README.md`.
 ## Key Docs
 
 - 📋 [Project Charter](PROJECT-CHARTER.md) - Vision & Prinzipien
+- 🤖 [Copilot / Agent Instructions](.github/copilot-instructions.md) - Kompakter Startpunkt für autonome Coding-Agenten
 - 🗺️ [Roadmap](ROADMAP.md) - Phasen & Meilensteine
 - 🤝 [Contributing](CONTRIBUTING.md) - Beitragen & Mitarbeiten
 - 🔒 [Security](metadata/SECURITY-CLASSIFICATION.md) - Sicherheitsklassifizierung

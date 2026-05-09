@@ -1,24 +1,21 @@
 # apps/installer – Setup-Wizard
 
 **Verantwortlich:** installer-agent  
-**Status:** Aktiv
+**Status:** Docs-only / kein fertiger Installer-Client im Repo
 
 ## Zweck
-Interaktiver Setup-Wizard für die Erstinstallation von Kirobi. Geführte Einrichtung für neue Nutzer.
+Reservierter Platz für eine spätere Installer-Oberfläche. Der produktive Setup-Pfad läuft aktuell **nicht** über diese App, sondern über Shell-/Make-Workflows.
 
-## Funktionen
+## Aktueller Stand
 
-1. **Voraussetzungs-Check**: Docker, NVIDIA-Treiber, Festplattenspeicher
-2. **Konfiguration**: .env-Datei ausfüllen
-3. **Service-Start**: Docker-Compose starten
-4. **Modell-Download**: Gewünschte Modelle herunterladen
-5. **Test**: Alle Services testen
-6. **Onboarding**: Erste Schritte zeigen
+- keine lauffähige UI-App
+- kein eigener Build- oder Dev-Entry
+- README/Planungsfläche für spätere Installer-Arbeit
 
 ## Verwendung
 
 ```bash
+bash install.sh --dry-run --no-clone --auto --skip-checks --no-pull --no-models --no-start --profile=cpu
 make init
-# oder direkt:
-bash infra/scripts/bootstrap.sh
+make bootstrap
 ```

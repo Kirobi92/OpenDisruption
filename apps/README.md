@@ -3,15 +3,23 @@
 **Zone:** WORKSPACE | **Verantwortlich:** kirobi-coder
 
 ## Zweck
-Alle Frontend-Anwendungen, Clients und Benutzeroberflächen für das Kirobi-Ökosystem.
+Alle Frontend-Anwendungen und UI-Surfaces des Kirobi-Stacks.
 
 ## Anwendungen
 
 | Verzeichnis | App | Status |
 |-------------|-----|--------|
-| `web/` | Kirobi Web-App (Next.js) | Geplant |
-| `mobile/` | Android Voice-Client | Geplant |
-| `desktop/` | Desktop-Client (Electron) | Konzept |
-| `voice/` | Voice-Interface | Konzept |
-| `dashboard/` | Admin-Dashboard | Geplant |
-| `installer/` | Setup-Wizard | Aktiv |
+| `web/` | Family PWA (Next.js 15) | **Unterstützt** – zentrale Web-Oberfläche, produktionswürdig |
+| `dashboard/` | Admin-/Ops-Dashboard (Next.js 15) | **Unterstützt** – Admin-/Status-Oberfläche |
+| `voice/` | Voice-Interface (Next.js 15) | **Unterstützt** – Sprach-UI für `voice-processing` |
+| `desktop/` | Tauri + React Desktop-Client | **Scaffold** – Grundgerüst, nicht supportet |
+| `mobile/` | Expo / React Native Mobile-Client | **Scaffold** – Grundgerüst, nicht supportet |
+| `installer/` | Installer-App | **Docs-only** – kein fertiger UI-Wizard im Repo |
+
+## Kanonische Einstiege
+
+- Familie: `apps/web/` hinter Caddy (`kirobi.local`) oder direkt auf Port `3002`
+- Admin/Ops: `apps/dashboard/` auf Port `3003`
+- Sprache: `apps/voice/` auf Port `3004`
+
+Open WebUI (`3000`) und Flowise (`3001`) gehören zur Compose-Stack-Oberfläche, aber nicht zu `apps/`.

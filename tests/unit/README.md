@@ -14,58 +14,33 @@ Schnelle, isolierte Tests für einzelne Funktionen und Module des Kirobi-Systems
 
 Unit-Tests sind die erste Verteidigungslinie. Sie prüfen einzelne Funktionen in Isolation und geben innerhalb von Sekunden Feedback. Sie sind die Grundlage des CI-Checks (`make integration-test`).
 
-## Enthaltene Test-Dateien
+## Abgedeckte Bereiche
 
-| Datei | Was wird getestet |
-|-------|------------------|
-| `test_zones.py` | Zonen-Klassifizierung, `can_write()`, `classify()` |
-| `test_audit.py` | Audit-Log-Integrität, Append-Only-Verhalten |
-| `test_auth_service.py` | Authentifizierungs-Service, JWT-Validierung |
-| `test_api_service.py` | FastAPI-Endpunkte, Request/Response-Schemas |
-| `test_autonomous.py` | Autonomer Supervisor, Task-Ausführung |
-| `test_backlog.py` | Backlog-Verwaltung, Task-Priorisierung |
-| `test_bridge.py` | Interne Service-Bridge-Kommunikation |
-| `test_cli.py` | `kirobi_core`-CLI-Befehle |
-| `test_doctor.py` | System-Health-Check (`kirobi_core doctor`) |
-| `test_embeddings_service.py` | Embedding-Generierung (gemockt) |
-| `test_ingest_service.py` | Ingestion-Pipeline, Dokument-Verarbeitung |
-| `test_interview.py` | Family-Interviewer-Logik |
-| `test_keycodi.py` | KeyCodi-Orchestrator-Funktionen |
-| `test_model_routing_service.py` | Modell-Routing, Fallback-Logik |
-| `test_notify.py` | Benachrichtigungs-Service |
-| `test_orchestrator.py` | Agent-Orchestrierung |
-| `test_pwa.py` | PWA-Manifest und Icon-Validierung |
-| `test_registry.py` | Agent-Registry |
-| `test_retrieval_service.py` | Retrieval-Service (Qdrant gemockt) |
-| `test_scanner.py` | Datei-Scanner, Zonen-Erkennung |
-| `test_services.py` | Service-Grundfunktionen |
-| `test_telegram_service.py` | Telegram-Bot-Integration |
+- `kirobi_core`: CLI, Doctor, Scanner, Backlog, Zonen, Audit, Autonomie
+- Agenten: Smoke-/Zone-Checks unter `tests/unit/agents/`
+- KIDI: ContextDB- und Serve-Tests unter `tests/unit/kidi/`
+- optionale Service-Contract-Tests für `auth`, `api`, `retrieval`, `embeddings`, `ingest`, `model-routing`, Media-Services, Telegram
+- PWA-/Manifest- und Compose-adjacent Repo-Checks
 
 ## Ausführen
 
 ```bash
-# Alle Unit-Tests
-python -m pytest tests/unit/ -q
+python3 -m pytest tests/unit -q
 
-# Einzelne Datei
-python -m pytest tests/unit/test_zones.py -v
+# fokussiert
+python3 -m pytest tests/unit/test_zones.py -q
 
-# Nach Stichwort filtern
-python -m pytest tests/unit/ -k "zones or routing" -v
-
-# Mit Coverage
-python -m pytest tests/unit/ --cov=kirobi_core --cov-report=term-missing
+# nach Muster
+python3 -m pytest tests/unit -k "zones or routing" -q
 ```
 
 ## Konventionen
 
 - Jeder Test ist **offline** ausführbar – keine echten HTTP-Calls, keine laufenden Services
-- Externe Abhängigkeiten werden mit `unittest.mock` oder `pytest-mock` gemockt
+- Externe Abhängigkeiten werden mit `unittest.mock` gemockt
 - Test-Dateien folgen dem Schema `test_[modul].py`
-- Docstrings erklären **warum** ein Verhalten getestet wird, nicht nur was
+- `tests/conftest.py` hält die Fresh-Clone-Baseline stabil: optionale Service-Tests werden ohne FastAPI/httpx/asyncpg nicht gesammelt, und Bindestrich-Services werden für Imports registriert
 
-## Verwandte Verzeichnisse
+## Aktuelle Baseline
 
-- `tests/integration/` – Tests mit laufenden Services
-- `tests/security/` – Sicherheits- und Zonen-Tests
-- `kirobi_core/` – Getestete Python-Bibliothek
+`python3 -m pytest tests/unit -q` ist in diesem Repo-Stand grün mit **369** Tests.

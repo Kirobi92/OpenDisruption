@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Ingest Service
 Zone: WORKSPACE
@@ -21,6 +23,10 @@ import aiofiles
 import asyncpg
 import httpx
 from dotenv import load_dotenv
+from urllib.parse import urlparse, urlunparse
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 try:
     from kirobi_core.analytics_client import track as _analytics_track
@@ -47,6 +53,22 @@ load_dotenv()
 # Configuration
 # ---------------------------------------------------------------------------
 
+_INTERNAL_SERVICE_PORTS = {
+    "auth": 8000,
+    "embeddings": 8000,
+}
+
+
+def _service_url(value: str) -> str:
+    parsed = urlparse(value)
+    host = parsed.hostname or ""
+    target_port = _INTERNAL_SERVICE_PORTS.get(host)
+    if not target_port or parsed.port in (None, target_port):
+        return value.rstrip("/")
+    netloc = f"{host}:{target_port}"
+    return urlunparse(parsed._replace(netloc=netloc)).rstrip("/")
+
+
 DATABASE_URL = (
     f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:"
     f"{os.getenv('POSTGRES_PASSWORD', 'changeme')}@"
@@ -54,8 +76,8 @@ DATABASE_URL = (
     f"{os.getenv('POSTGRES_PORT', '5432')}/"
     f"{os.getenv('POSTGRES_DB', 'kirobi')}"
 )
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth:8000")
-EMBEDDINGS_SERVICE_URL = os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:8004")
+AUTH_SERVICE_URL = _service_url(os.getenv("AUTH_SERVICE_URL", "http://auth:8000"))
+EMBEDDINGS_SERVICE_URL = _service_url(os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:8004"))
 INGEST_DIR = Path(os.getenv("INGEST_DIR", "/data/ingest"))
 MAX_FILE_SIZE_BYTES = int(os.getenv("MAX_FILE_SIZE_MB", "50")) * 1024 * 1024
 
@@ -249,6 +271,15 @@ class TextIngestRequest(BaseModel):
     zone: str = Field(..., description="Zone classification (e.g. WORKSPACE)")
     title: Optional[str] = Field(None, max_length=500)
     source: Optional[str] = Field(None, max_length=500, description="Origin URL or path")
+    human_approved: bool = Field(
+        default=False,
+        description="Explicit human approval required for FAMILY_PRIVATE ingest",
+    )
+    approval_note: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Reason / confirmation note for protected-zone ingest",
+    )
     metadata: dict = Field(default_factory=dict)
 
 
@@ -269,20 +300,65 @@ class IngestJobResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _validate_zone(zone: str) -> None:
+def _truthy_form_value(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _zone_ingest_metadata(
+    zone: str,
+    *,
+    human_approved: bool = False,
+    approval_note: Optional[str] = None,
+) -> dict:
     if zone not in KNOWN_ZONES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Invalid zone '{zone}'. Known zones: {sorted(KNOWN_ZONES)}",
         )
-    if zone not in AUTONOMOUS_INGEST_ZONES:
+    clean_note = (approval_note or "").strip() or None
+    metadata = {
+        "zone_policy": zone,
+        "storage_mode": "local-first-file-backed",
+        "local_only": True,
+        "approval_required": zone == "FAMILY_PRIVATE",
+        "human_approved": False,
+        "approval_note": clean_note,
+        "refusal_semantics": "zone-aware",
+    }
+    if zone in AUTONOMOUS_INGEST_ZONES:
+        return metadata
+    if zone == "FAMILY_PRIVATE":
+        if not human_approved or not clean_note:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "FAMILY_PRIVATE ingest requires explicit local human approval "
+                    "and a non-empty approval_note."
+                ),
+            )
+        metadata["human_approved"] = True
+        metadata["refusal_semantics"] = "family-private-requires-human-approval"
+        return metadata
+    if zone == "QUARANTINE":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"Autonomous ingestion is not allowed for zone '{zone}'. "
-                f"Allowed zones: {sorted(AUTONOMOUS_INGEST_ZONES)}"
-            ),
+            detail="QUARANTINE content must be reviewed before it can be ingested or embedded.",
         )
+    if zone == "SACRED":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="SACRED ingest is refused by this service.",
+        )
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Ingest is not allowed for zone '{zone}'.")
+
+
+def _validate_zone(zone: str) -> None:
+    """Compatibility wrapper for autonomous ingest contract tests."""
+    _zone_ingest_metadata(zone)
 
 
 async def _create_job(
@@ -341,6 +417,8 @@ async def _send_to_embeddings(
         "zone": zone,
         "doc_type": "document",
         "metadata": metadata,
+        "family_private_approved": bool(metadata.get("human_approved")),
+        "approval_note": metadata.get("approval_note"),
     }
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(
@@ -367,7 +445,7 @@ def _extract_text_from_pdf(raw: bytes) -> str:
         return "\n".join(pages).strip()
 
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         detail="PDF ingestion is not available: no PDF library installed (pdfplumber or PyPDF2).",
     )
 
@@ -411,11 +489,16 @@ async def ingest_text(
     embeddings service asynchronously.  A job record is created in
     PostgreSQL so callers can poll /ingest/status/{job_id}.
     """
-    _validate_zone(request.zone)
+    zone_meta = _zone_ingest_metadata(
+        request.zone,
+        human_approved=request.human_approved,
+        approval_note=request.approval_note,
+    )
 
     job_id = str(uuid.uuid4())
     meta = {
         **request.metadata,
+        **zone_meta,
         "title": request.title,
         "source": request.source,
         "user_id": current_user.id,
@@ -423,7 +506,7 @@ async def ingest_text(
     }
 
     # Persist text to filesystem (system of record)
-    dest = INGEST_DIR / request.zone.lower() / f"{job_id}.txt"
+    dest = INGEST_DIR / request.zone.lower() / current_user.username / f"{job_id}.txt"
     dest.parent.mkdir(parents=True, exist_ok=True)
     async with aiofiles.open(dest, "w", encoding="utf-8") as fh:
         await fh.write(request.text)
@@ -455,6 +538,8 @@ async def ingest_file(
     zone: str = Form(...),
     title: Optional[str] = Form(None),
     source: Optional[str] = Form(None),
+    human_approved: Optional[str] = Form(None),
+    approval_note: Optional[str] = Form(None),
     current_user: UserInfo = Depends(get_current_user),
 ) -> IngestJobResponse:
     """
@@ -463,13 +548,17 @@ async def ingest_file(
     The file is saved to INGEST_DIR, text is extracted, and forwarded to
     the embeddings service.
     """
-    _validate_zone(zone)
+    zone_meta = _zone_ingest_metadata(
+        zone,
+        human_approved=_truthy_form_value(human_approved),
+        approval_note=approval_note,
+    )
 
     # Validate extension
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in ALLOWED_EXTENSIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Unsupported file type '{suffix}'. Allowed: {sorted(ALLOWED_EXTENSIONS)}",
         )
 
@@ -482,13 +571,14 @@ async def ingest_file(
 
     job_id = str(uuid.uuid4())
     safe_name = f"{job_id}{suffix}"
-    dest = INGEST_DIR / zone.lower() / safe_name
+    dest = INGEST_DIR / zone.lower() / current_user.username / safe_name
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     async with aiofiles.open(dest, "wb") as fh:
         await fh.write(raw)
 
     meta = {
+        **zone_meta,
         "original_filename": file.filename,
         "file_size": len(raw),
         "title": title,

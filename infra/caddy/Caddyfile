@@ -279,6 +279,7 @@
 	}
 
 	redir /qdrant /qdrant/dashboard 308
+	redir /qdrant/ /qdrant/dashboard/ 308
 	handle /qdrant/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /qdrant
@@ -416,4 +417,22 @@
 		format console
 		level INFO
 	}
+}
+
+# --- Dedicated HTTPS service roots --------------------------------------------
+# Prefix proxies are fine for simple services, but Open WebUI/Flowise/Qdrant
+# ship absolute root assets and APIs. Dedicated HTTPS ports keep them stable.
+{$KIROBI_HOSTNAME:kirobi.local}:8441 {
+	tls internal
+	reverse_proxy open-webui:8080
+}
+
+{$KIROBI_HOSTNAME:kirobi.local}:8442 {
+	tls internal
+	reverse_proxy flowise:3000
+}
+
+{$KIROBI_HOSTNAME:kirobi.local}:8443 {
+	tls internal
+	reverse_proxy qdrant:6333
 }

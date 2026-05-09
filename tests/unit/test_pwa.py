@@ -250,6 +250,36 @@ def test_next_config_pwa_setup_is_resilient():
     assert "process.env.AUTH_SERVICE_URL" in src
 
 
+def test_ui_route_contracts_point_at_supported_backend_routes():
+    search_src = (REPO_ROOT / "apps" / "web" / "src" / "app" / "search" / "page.tsx").read_text()
+    upload_src = (REPO_ROOT / "apps" / "web" / "src" / "app" / "upload" / "page.tsx").read_text()
+    settings_src = (REPO_ROOT / "apps" / "web" / "src" / "app" / "settings" / "page.tsx").read_text()
+    dashboard_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "app" / "page.tsx").read_text()
+    proxy_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "app" / "api" / "proxy" / "[service]" / "[...path]" / "route.ts").read_text()
+    tasks_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "app" / "tasks" / "page.tsx").read_text()
+    api_src = (REPO_ROOT / "services" / "api" / "main.py").read_text()
+    analytics_src = (REPO_ROOT / "services" / "analytics-service" / "main.py").read_text()
+    auth_src = (REPO_ROOT / "services" / "auth" / "main.py").read_text()
+
+    assert "/rag/search" in search_src
+    assert '@app.post("/rag/search"' in api_src
+    assert "/uploads/text" in upload_src
+    assert '@app.post("/uploads/text"' in api_src
+    assert '/api/uploads/${file.id}/download' in upload_src
+    assert '@app.get("/uploads/{file_id}/download")' in api_src
+    assert "/auth/change-password" in settings_src
+    assert '@app.post("/change-password")' in auth_src
+    assert "/api/proxy/analytics/stats" in dashboard_src
+    assert "/api/proxy/api/control/status" in dashboard_src
+    assert "/api/proxy/api/dashboard/activity" in dashboard_src
+    assert "'/dashboard'" in proxy_src
+    assert "/api/proxy/api/conversations" not in dashboard_src
+    assert "/api/proxy/api/tasks" in tasks_src
+    assert '@app.get("/tasks"' in api_src
+    assert '@app.get("/control/status"' in api_src
+    assert '@app.get("/stats"' in analytics_src
+
+
 # --- Icon generator ---------------------------------------------------------
 def test_icon_generator_runs(tmp_path):
     pytest.importorskip("PIL")

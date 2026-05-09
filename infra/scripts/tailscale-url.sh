@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 if ! command -v tailscale >/dev/null 2>&1; then
   echo "    (tailscale CLI nicht gefunden; nutze deine Tailscale-IP oder MagicDNS manuell)"

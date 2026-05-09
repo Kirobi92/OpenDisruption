@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Authentication Service
 Zone: WORKSPACE
@@ -19,6 +21,9 @@ import bcrypt as _bcrypt
 from pydantic import BaseModel, EmailStr, Field
 import asyncpg
 from dotenv import load_dotenv
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 load_dotenv()
 
@@ -77,6 +82,11 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=8)
 
 
 class ZonePermission(BaseModel):
@@ -268,19 +278,31 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
+    issued_at = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = issued_at + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire, "type": "access"})
+        expire = issued_at + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({
+        "exp": expire,
+        "iat": issued_at,
+        "jti": str(uuid.uuid4()),
+        "type": "access",
+    })
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
 def create_refresh_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode.update({"exp": expire, "type": "refresh"})
+    issued_at = datetime.now(timezone.utc)
+    expire = issued_at + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({
+        "exp": expire,
+        "iat": issued_at,
+        "jti": str(uuid.uuid4()),
+        "type": "refresh",
+    })
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -316,7 +338,7 @@ async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
     return user
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+def _decode_access_token(token: str) -> TokenData:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -330,13 +352,37 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         if user_id is None or token_type != "access":
             raise credentials_exception
 
-        token_data = TokenData(user_id=user_id)
+        return TokenData(user_id=user_id)
     except JWTError:
         raise credentials_exception
 
-    user = await get_user_by_id(user_id)
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    token_data = _decode_access_token(token)
+
+    async with db_pool.acquire() as conn:
+        active_session = await conn.fetchval(
+            """
+            SELECT 1 FROM user_sessions
+            WHERE user_id = $1 AND session_token = $2 AND expires_at > NOW()
+            """,
+            token_data.user_id,
+            token,
+        )
+    if not active_session:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session is no longer valid",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = await get_user_by_id(token_data.user_id)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -473,6 +519,62 @@ async def read_user_permissions(current_user: User = Depends(get_current_user)):
         username=current_user.username,
         zones=permissions
     )
+
+
+@app.post("/change-password")
+async def change_password(
+    password_data: PasswordChangeRequest,
+    token: str = Depends(oauth2_scheme),
+    request: Request = None,
+):
+    """Rotate the current user's password and invalidate older sessions."""
+    token_data = _decode_access_token(token)
+    current_user = await get_user_by_id(token_data.user_id)
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user_record = await get_user_by_username(current_user.username)
+    if not user_record or not verify_password(password_data.current_password, user_record.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+
+    if password_data.current_password == password_data.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from current password",
+        )
+
+    new_hash = get_password_hash(password_data.new_password)
+    async with db_pool.acquire() as conn:
+        current_session = await conn.fetchval(
+            "SELECT 1 FROM user_sessions WHERE user_id = $1 AND session_token = $2",
+            current_user.id,
+            token,
+        )
+        if not current_session:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Current session is no longer valid",
+            )
+        await conn.execute(
+            "UPDATE users SET password_hash = $1 WHERE id = $2",
+            new_hash,
+            current_user.id,
+        )
+        await conn.execute(
+            "DELETE FROM user_sessions WHERE user_id = $1 AND session_token <> $2",
+            current_user.id,
+            token,
+        )
+
+    await log_audit_event(current_user.id, "change_password", "user", {}, request)
+    return {"message": "Password changed successfully"}
 
 
 @app.post("/logout")

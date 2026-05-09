@@ -279,12 +279,43 @@ def test_store_allows_autonomous_store_zones(client):
         assert resp.status_code == 201, f"Zone {zone} sollte akzeptiert werden"
 
 
-@pytest.mark.parametrize("zone", ["FAMILY_PRIVATE", "QUARANTINE", "SACRED"])
+def test_store_allows_family_private_with_approval(client):
+    c, mock_http, _mock_qdrant = client
+
+    fake_embedding = [0.1] * 768
+    mock_response = MagicMock()
+    mock_response.raise_for_status = MagicMock(return_value=None)
+    mock_response.json = MagicMock(return_value={"embedding": fake_embedding})
+    mock_http.post = AsyncMock(return_value=mock_response)
+
+    resp = c.post(
+        "/store",
+        json={
+            "text": "Test",
+            "zone": "FAMILY_PRIVATE",
+            "family_private_approved": True,
+            "approval_note": "Lokale Familiennotiz",
+        },
+    )
+    assert resp.status_code == 201
+    assert resp.json()["zone"] == "FAMILY_PRIVATE"
+
+
+@pytest.mark.parametrize("zone", ["QUARANTINE", "SACRED"])
 def test_store_blocks_sensitive_zones(client, zone: str):
     """POST /store muss sensible/beschränkte Zonen mit 403 blockieren."""
     c, mock_http, mock_qdrant = client
 
     resp = c.post("/store", json={"text": "Test", "zone": zone})
+    assert resp.status_code == 403
+    mock_http.post.assert_not_called()
+    mock_qdrant.upsert.assert_not_called()
+
+
+def test_store_blocks_family_private_without_approval(client):
+    c, mock_http, mock_qdrant = client
+
+    resp = c.post("/store", json={"text": "Test", "zone": "FAMILY_PRIVATE"})
     assert resp.status_code == 403
     mock_http.post.assert_not_called()
     mock_qdrant.upsert.assert_not_called()

@@ -8,9 +8,10 @@ version: "1.0"
 
 # .claude/skills/OpenDisruption
 
-Skill-Definition für das OpenDisruption-Ökosystem im Claude-Format.
-Wird von Claude Code geladen, um kontextspezifische Anweisungen, Zonen-Policy und Architektur-Wissen bereitzustellen.
+Kompatibilitäts-Skill für das OpenDisruption-Ökosystem im Claude-Format.
+Wird von Claude-kompatiblen Laufzeiten geladen und spiegelt die verifizierten Regeln aus
+dem kanonischen OpenCode-Skill wider.
 
 ## Wichtige Dateien
 
-- `SKILL.md` — Skill-Anweisungen im Claude-Format (Hinweis: kanonische Version liegt unter `.opencode/skills/keycodi-orchestrator/SKILL.md`)
+- `SKILL.md` — Kompatibilitäts-Mirror des kanonischen Skills unter `.opencode/skills/keycodi-orchestrator/SKILL.md`

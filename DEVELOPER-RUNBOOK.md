@@ -45,8 +45,8 @@ The same commands are exposed via `make`:
 | `make autonomous-once`   | One safe iteration; report under `.kirobi/reports/`          |
 | `make autonomous-loop`   | Loop with `INTERVAL=`, `ITERATIONS=`, `QUIET_HOURS=`         |
 | `make status`            | Live stack probes (Ollama / Qdrant / Postgres / API …)       |
-| `make integration-test`  | End-to-end check (tests + compose validate + scripts)        |
-| `make test`              | Run `pytest tests/unit` (58 tests, stdlib only)              |
+| `make integration-test`  | Repo-Gate: unit tests + compose/scripts/PWA checks           |
+| `make test`              | Run the stdlib-first `pytest tests/unit` baseline; optional service tests auto-skip without service deps |
 
 ### Stack integration
 
@@ -79,8 +79,9 @@ The same commands are exposed via `make`:
 * **Sandboxed**: `kirobi_core.zones.is_inside_repo` makes sure no
   autonomous file operation can escape the repository root.
 * **Audit log**: every routing decision and loop iteration is appended
-  as JSON-Lines to `kirobi-core/core-events.log` (the only log file
-  preserved by `.gitignore`). Secrets are redacted automatically.
+  as JSON-Lines to `kirobi-core/core-events.log`. The file is kept
+  locally and ignored by Git so runtime writes do not keep the worktree
+  dirty. Secrets are redacted automatically.
 * **Quiet hours**: `--quiet-hours "22:00-07:00"` skips iterations
   inside the configured window, including midnight wrap-around.
 * **Sensitive interview answers** are written to a separate file
@@ -90,11 +91,13 @@ The same commands are exposed via `make`:
 ### Tests
 
 ```bash
-make test         # 45+ unit tests, all stdlib
+make test         # stdlib-first baseline; service-contract tests skip without FastAPI/httpx/asyncpg extras
 ```
 
-Tests live under `tests/unit/` and rely only on `pytest`. Add
-`pytest -k <name>` for focused runs.
+Tests live under `tests/unit/`. The fresh-clone baseline only needs
+`pytest`; service-contract tests are collected automatically once the
+optional service-stack dependencies are installed. Add `pytest -k <name>`
+for focused runs.
 
 ---
 
@@ -114,7 +117,7 @@ Tests live under `tests/unit/` and rely only on `pytest`. Add
 # Optional
 - Make
 - Python 3.10+ (for scripts)
-- Node.js 18+ (for Flowise customization)
+- Node.js 18+ (nur für Arbeit an `apps/web`, `apps/dashboard` oder `apps/voice`)
 ```
 
 ### Initial Setup
@@ -137,6 +140,12 @@ nano .env              # Update passwords and settings
 
 # 5. Start services
 make up                # Starts all Docker containers
+
+# optional: nur die kanonische Family-PWA
+make pwa-up
+
+# optional: zentrales UI-Bundle inkl. Open WebUI/Flowise
+make webui-up
 
 # 6. Pull models
 make pull-models       # Downloads Ollama models (takes time!)
@@ -198,7 +207,18 @@ make reset  # ⚠️ WARNING: Deletes everything!
 ### Accessing Services
 
 ```bash
-# Open WebUI (primary interface)
+# Family PWA (canonical product surface)
+open http://localhost:3002
+# or via Caddy/mDNS
+open http://kirobi.local/
+
+# Admin dashboard
+open http://localhost:3003
+
+# Voice UI
+open http://localhost:3004
+
+# Open WebUI (auxiliary)
 open http://localhost:3000
 
 # Flowise (workflow builder)
@@ -349,6 +369,9 @@ docker compose up -d --force-recreate flowise
 docker compose logs [service-name]
 
 # Check if port is already in use
+sudo lsof -i :3002  # Family PWA
+sudo lsof -i :3003  # Dashboard
+sudo lsof -i :3004  # Voice UI
 sudo lsof -i :3000  # Open WebUI
 sudo lsof -i :11434 # Ollama
 sudo lsof -i :6333  # Qdrant
@@ -783,24 +806,29 @@ echo "[$(date)] SECURITY_POLICY_UPDATE: Updated ZONE-POLICY-MATRIX.md" \
 ### Manual Testing
 
 ```bash
-# Health check
+# repo gate
+python3 -m pytest tests/unit -q
+make integration-test
+
+# stack health
 make status
 
-# Test Open WebUI
-# 1. Open http://localhost:3000
-# 2. Send message: "Hello, who are you?"
-# 3. Verify response from kirobi-core
+# Test Family PWA
+# 1. Open http://localhost:3002 or http://kirobi.local/
+# 2. Login with bootstrap user from .env
+# 3. Verify /chat, /search, /upload, /settings, /status
 
-# Test Qdrant
-curl http://localhost:6333/collections | jq
+# Test Dashboard
+# 1. Open http://localhost:3003
+# 2. Verify service cards and task feed load
 
-# Test PostgreSQL
-make db-shell
-\dt  # List tables
-\q
+# Test Voice UI
+# 1. Open http://localhost:3004
+# 2. Verify microphone permission and API reachability
 
-# Test Ollama
-curl http://localhost:11434/api/tags | jq
+# Optional auxiliary UIs
+open http://localhost:3000   # Open WebUI
+open http://localhost:3001   # Flowise
 ```
 
 ### Smoke Tests (Future)

@@ -25,6 +25,9 @@ opencode laedt diese Dateien beim Start und stellt die definierten Agenten als a
 | `kirobi-frontend.md` | kirobi-frontend | Next.js, React, TailwindCSS, PWA |
 | `kirobi-ops.md` | kirobi-ops | Docker Compose, Shell-Scripts, CI/CD, Infrastruktur |
 | `kirobi-reviewer.md` | kirobi-reviewer | Security-Audit, Code-Review, Qualitaetssicherung |
+| `code-reviewer.md` | code-reviewer | Generischer Staff-Engineer-Reviewer aus dem Agent-Skills-Pack |
+| `test-engineer.md` | test-engineer | Generische QA-/Teststrategie-Persona aus dem Agent-Skills-Pack |
+| `security-auditor.md` | security-auditor | Generische Security-Audit-Persona aus dem Agent-Skills-Pack |
 
 ## Dateiformat
 
@@ -36,3 +39,9 @@ Jede Agent-Datei enthaelt YAML-Frontmatter mit:
 - `permission` — Erlaubte Tools (edit, bash, read, glob, grep, task, webfetch, skill)
 
 Gefolgt von einem optionalen Markdown-System-Prompt.
+
+## Hinweis zu den zusaetzlichen Personas
+
+Die drei generischen Personas (`code-reviewer`, `test-engineer`, `security-auditor`) wurden
+aus dem MIT-lizenzierten Projekt `addyosmani/agent-skills` in das lokale OpenCode-Format
+ueberfuehrt. Sie ergaenzen die repo-spezifischen Kirobi-Agenten, ersetzen sie aber nicht.

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Music Generation Service
 Zone: WORKSPACE
@@ -20,6 +22,9 @@ from pydantic import BaseModel, Field
 import asyncpg
 import httpx
 from dotenv import load_dotenv
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 load_dotenv()
 
