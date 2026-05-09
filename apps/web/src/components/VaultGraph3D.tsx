@@ -4,7 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import * as THREE from 'three';
 
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+// react-force-graph-3d's NodeAccessor types don't accept extended interfaces
+// directly; cast to a permissive component type to keep our strict VaultNode.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false }) as any;
 
 interface VaultNode {
   id: string;
@@ -14,10 +17,12 @@ interface VaultNode {
   agent?: string;
   tags?: string[];
   size: number;
+  [key: string]: unknown;
 }
 interface VaultLink {
   source: string;
   target: string;
+  [key: string]: unknown;
 }
 interface VaultGraph {
   nodes: VaultNode[];
@@ -88,20 +93,20 @@ export default function VaultGraph3D() {
             width={size.w}
             height={size.h}
             backgroundColor="rgba(4,6,20,0)"
-            nodeLabel={(n: VaultNode) => `<div style="font-family:Inter;color:#5eead4;background:#040614;padding:6px 10px;border:1px solid #5eead4;border-radius:8px"><b>${n.label}</b><br><span style="opacity:0.7;font-size:11px">${n.zone} · ${n.group}</span></div>`}
+            nodeLabel={((n: VaultNode) => `<div style="font-family:Inter;color:#5eead4;background:#040614;padding:6px 10px;border:1px solid #5eead4;border-radius:8px"><b>${n.label}</b><br><span style="opacity:0.7;font-size:11px">${n.zone} · ${n.group}</span></div>`) as never}
             nodeRelSize={4}
-            nodeVal={(n: VaultNode) => Math.min(20, 1 + n.size * 1.4)}
-            nodeColor={(n: VaultNode) => colorFor(n)}
+            nodeVal={((n: VaultNode) => Math.min(20, 1 + n.size * 1.4)) as never}
+            nodeColor={((n: VaultNode) => colorFor(n)) as never}
             nodeOpacity={0.92}
             nodeResolution={16}
-            linkColor={() => 'rgba(167,139,250,0.35)'}
+            linkColor={(() => 'rgba(167,139,250,0.35)') as never}
             linkOpacity={0.5}
             linkWidth={0.6}
             linkDirectionalParticles={2}
             linkDirectionalParticleSpeed={0.005}
             linkDirectionalParticleWidth={1.4}
-            linkDirectionalParticleColor={() => '#e879f9'}
-            onNodeHover={(n: VaultNode | null) => setHover(n)}
+            linkDirectionalParticleColor={(() => '#e879f9') as never}
+            onNodeHover={((n: VaultNode | null) => setHover(n)) as never}
             enableNodeDrag
             warmupTicks={40}
             cooldownTicks={140}
@@ -112,7 +117,7 @@ export default function VaultGraph3D() {
               /* settled */
             }}
             // Custom three object: glowing emissive sphere per node
-            nodeThreeObject={(n: VaultNode) => {
+            nodeThreeObject={((n: VaultNode) => {
               const color = new THREE.Color(colorFor(n));
               const radius = 0.6 + Math.log2(1 + n.size) * 0.5;
               const geo = new THREE.SphereGeometry(radius, 18, 18);
@@ -134,7 +139,7 @@ export default function VaultGraph3D() {
               });
               mesh.add(new THREE.Mesh(haloGeo, haloMat));
               return mesh;
-            }}
+            }) as never}
           />
         )}
       </div>
