@@ -258,6 +258,10 @@ status:
 pwa-icons:
 	@$(PY) infra/scripts/build-pwa-icons.py --out apps/web/public
 
+## Vault-Wissensgraph als JSON für /knowledge-graph regenerieren
+vault-graph:
+	@$(PY) infra/scripts/build-vault-graph.py
+
 ## Family-PWA samt Reverse-Proxy hochfahren (kirobi.local + LAN-IP)
 pwa-up:
 	@docker compose up -d caddy web auth api postgres

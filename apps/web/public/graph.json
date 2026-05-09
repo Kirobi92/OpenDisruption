@@ -1,0 +1,594 @@
+{
+  "nodes": [
+    {
+      "id": "../../shared-opendisruption/30-Decisions/0001-redis-as-contextdb",
+      "label": "0001-redis-as-contextdb",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "AGENT-DECISION-MATRIX",
+      "label": "AGENT-DECISION-MATRIX",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "CLAUDE",
+      "label": "CLAUDE",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "README",
+      "label": "README",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 8
+    },
+    {
+      "id": "agents/keycodi/00-Index",
+      "label": "00-Index",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "keycodi/ROADMAP",
+      "label": "ROADMAP",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 9
+    },
+    {
+      "id": "metadata/ZONE-POLICY-MATRIX",
+      "label": "ZONE-POLICY-MATRIX",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "note-name",
+      "label": "note-name",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/README",
+      "label": "README",
+      "group": "README.md",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/hermes/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/hermes/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/keybrodi/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/keybrodi/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/keycodi/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/keycodi/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/kidi/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/kidi/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/obsidian-agent/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/obsidian-agent/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/openclaw/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/openclaw/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/opencode/00-Index",
+      "label": "00-Index",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/agents/opencode/README",
+      "label": "README",
+      "group": "agents",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "obsidian/shared-opendisruption/00-Index/MOC",
+      "label": "MOC",
+      "group": "shared-opendisruption",
+      "zone": "WORKSPACE",
+      "agent": "shared",
+      "tags": [
+        "moc",
+        "index"
+      ],
+      "size": 15
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/hermes",
+      "label": "hermes",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/keybrodi",
+      "label": "keybrodi",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/keycodi",
+      "label": "keycodi",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/kidi",
+      "label": "kidi",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/obsidian-agent",
+      "label": "obsidian-agent",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/openclaw",
+      "label": "openclaw",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/10-Agents/opencode",
+      "label": "opencode",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-0",
+      "label": "phase-0",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-1",
+      "label": "phase-1",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-2",
+      "label": "phase-2",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-3",
+      "label": "phase-3",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-4",
+      "label": "phase-4",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-5",
+      "label": "phase-5",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/20-Phases/phase-6",
+      "label": "phase-6",
+      "group": "ghost",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "obsidian/shared-opendisruption/99-Inbox/2026-05-07-daily",
+      "label": "2026-05-07-daily",
+      "group": "shared-opendisruption",
+      "zone": "WORKSPACE",
+      "agent": "obsidian",
+      "tags": [
+        "daily",
+        "inbox"
+      ],
+      "size": 1
+    },
+    {
+      "id": "obsidian/shared-opendisruption/README",
+      "label": "README",
+      "group": "shared-opendisruption",
+      "zone": "WORKSPACE",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    }
+  ],
+  "links": [
+    {
+      "source": "obsidian/README",
+      "target": "../../shared-opendisruption/30-Decisions/0001-redis-as-contextdb"
+    },
+    {
+      "source": "obsidian/README",
+      "target": "note-name"
+    },
+    {
+      "source": "obsidian/agents/hermes/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/hermes/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/hermes/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/hermes/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/keybrodi/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/keybrodi/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/keybrodi/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/keybrodi/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/keycodi/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/keycodi/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/keycodi/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/keycodi/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/kidi/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/kidi/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/kidi/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/kidi/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/obsidian-agent/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/obsidian-agent/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/obsidian-agent/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/obsidian-agent/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/openclaw/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/openclaw/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/openclaw/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/openclaw/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/opencode/00-Index",
+      "target": "README"
+    },
+    {
+      "source": "obsidian/agents/opencode/00-Index",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/agents/opencode/00-Index",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/agents/opencode/README",
+      "target": "obsidian/shared-opendisruption/00-Index/MOC"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-0"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-1"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-2"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-3"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-4"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-5"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/20-Phases/phase-6"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/keycodi"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/keybrodi"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/opencode"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/openclaw"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/hermes"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/obsidian-agent"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "obsidian/shared-opendisruption/10-Agents/kidi"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "CLAUDE"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "metadata/ZONE-POLICY-MATRIX"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "AGENT-DECISION-MATRIX"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/00-Index/MOC",
+      "target": "keycodi/ROADMAP"
+    },
+    {
+      "source": "obsidian/shared-opendisruption/README",
+      "target": "agents/keycodi/00-Index"
+    }
+  ],
+  "meta": {
+    "generated_at": "2026-05-09T19:25:01.739102+00:00",
+    "node_count": 40,
+    "link_count": 49
+  }
+}

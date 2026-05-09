@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import axios from 'axios';
+
+const KidiOrb = dynamic(() => import('@/components/KidiOrb'), { ssr: false });
 
 const SPRING = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
 
@@ -45,22 +48,16 @@ export default function LoginPage() {
     <main className="relative min-h-screen overflow-hidden bg-void">
       <div className="ambient-field" aria-hidden="true" />
 
-      {/* Aurora orbit (decorative, paint-only) */}
+      {/* KIDI living heart orb (decorative, GPU 3D) */}
       <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
         <motion.div
           aria-hidden
-          initial={reduced ? false : { opacity: 0, scale: 0.6 }}
+          initial={reduced ? false : { opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative h-[640px] w-[640px] max-w-[90vw] max-h-[90vw]"
+          transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+          className="relative h-[640px] w-[640px] max-w-[90vw] max-h-[90vw] opacity-70"
         >
-          <div className="absolute inset-0 rounded-full blur-3xl opacity-50"
-               style={{ background: 'radial-gradient(circle, rgba(94,234,212,0.35), transparent 60%)' }} />
-          <div className="absolute inset-12 rounded-full blur-2xl opacity-40"
-               style={{ background: 'radial-gradient(circle, rgba(232,121,249,0.28), transparent 65%)' }} />
-          {!reduced && (
-            <div className="absolute inset-24 rounded-full border border-aurora-cyan/20 animate-orbit-slow" />
-          )}
+          <KidiOrb intensity={0.6} />
         </motion.div>
       </div>
 

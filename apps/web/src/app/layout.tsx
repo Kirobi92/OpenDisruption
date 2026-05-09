@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/AppShell'
+import ClientBackground from '@/components/ClientBackground'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -59,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="de" className="dark">
       <body className={inter.className}>
+        <ClientBackground />
         <AppShell>{children}</AppShell>
       </body>
     </html>

@@ -6,7 +6,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Bars3Icon, BoltIcon, ChatBubbleLeftRightIcon, CircleStackIcon, CodeBracketSquareIcon,
-  Cog6ToothIcon, CommandLineIcon, CpuChipIcon, MagnifyingGlassIcon, ShieldCheckIcon,
+  Cog6ToothIcon, CommandLineIcon, CpuChipIcon, MagnifyingGlassIcon, ShareIcon, ShieldCheckIcon,
   SparklesIcon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 
@@ -16,6 +16,7 @@ interface ShellProbe { label: string; path: string; status: ServiceStatus; }
 const PRIMARY_NAV = [
   { href: '/control-center', label: 'Control Center', icon: BoltIcon },
   { href: '/knowledge-base', label: 'Knowledge Base', icon: CircleStackIcon },
+  { href: '/knowledge-graph', label: 'Vault Graph', icon: ShareIcon },
   { href: '/agents-hub', label: 'Agents', icon: CpuChipIcon },
   { href: '/workbench', label: 'Workbench', icon: SparklesIcon },
   { href: '/developer-studio', label: 'Developer Studio', icon: CodeBracketSquareIcon },
@@ -32,6 +33,7 @@ const SECONDARY_NAV = [
 const TITLES: Record<string, { title: string; subtitle: string }> = {
   '/control-center': { title: 'Agentic Control Center', subtitle: 'Zentrale Oberfläche für Status, Wissen, Agenten und Workbenches.' },
   '/knowledge-base': { title: 'Knowledge Base', subtitle: 'Wissensdatenbank, Uploads, Suche und Graph-Einstieg.' },
+  '/knowledge-graph': { title: 'Vault Cortex · 3D', subtitle: 'Live-3D-Karte des Obsidian-Vaults — GPU-beschleunigt.' },
   '/agents-hub': { title: 'Agents Hub', subtitle: 'Hermes, Opencode, KeyCodi und Orchestrierungsstatus.' },
   '/workbench': { title: 'Workbench', subtitle: 'Eingebettete Admin- und Modelloberflächen.' },
   '/developer-studio': { title: 'Developer Studio', subtitle: 'Lokale Entwicklungswege, VS Code und Repo-Shortcuts.' },
