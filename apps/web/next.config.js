@@ -79,9 +79,9 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   poweredByHeader: false,
-  // The PWA is consumed under multiple origins (kirobi.local, LAN IP,
-  // localhost). Letting Next inject CSP-unfriendly absolute URLs would
-  // break the Service Worker on those origins, so we keep paths relative.
+  // Three.js examples/jsm sind ESM-Module — transpilePackages stellt sicher,
+  // dass webpack diese korrekt durch Babel/SWC bundelt.
+  transpilePackages: ['three'],
   async rewrites() {
     return buildRewrites();
   },

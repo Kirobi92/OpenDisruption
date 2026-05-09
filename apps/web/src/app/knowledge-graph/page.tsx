@@ -32,9 +32,20 @@ export default function KnowledgeGraphPage() {
         <div className="font-mono text-[11px] uppercase tracking-[0.45em] text-aurora-cyan/70">
           KIDI · Vault Cortex
         </div>
-        <h1 className="mt-2 bg-gradient-to-br from-white via-aurora-cyan to-aurora-violet bg-clip-text text-3xl font-semibold text-transparent sm:text-4xl">
-          3D Wissensgraph
-        </h1>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <h1 className="bg-gradient-to-br from-white via-aurora-cyan to-aurora-violet bg-clip-text text-3xl font-semibold text-transparent sm:text-4xl">
+            3D Wissensgraph
+          </h1>
+          {/* 3D HIGH-END Upgrade-Button */}
+          <a
+            href="/knowledge-graph-3d"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-aurora-violet/20 to-aurora-cyan/20 border border-aurora-violet/40 px-4 py-2 text-sm font-semibold text-aurora-violet hover:from-aurora-violet/30 hover:to-aurora-cyan/30 hover:border-aurora-violet/60 transition-all shadow-glow-violet"
+          >
+            <span>⚡</span>
+            <span>3D HIGH-END</span>
+            <span className="font-mono text-[10px] text-aurora-cyan/80">RTX</span>
+          </a>
+        </div>
         <p className="mt-2 max-w-2xl text-sm text-white/60">
           Lebende Karte deines Obsidian-Vaults. Knoten sind Notes, Kanten sind{' '}
           <code className="rounded bg-void-800/60 px-1.5 py-0.5 text-aurora-cyan">[[wikilinks]]</code>.
@@ -80,7 +91,7 @@ export default function KnowledgeGraphPage() {
           <p className="mt-2 text-sm text-white/70">
             Graph wird via{' '}
             <code className="rounded bg-void-800/60 px-1 text-aurora-cyan">
-              python infra/scripts/build-vault-graph.py
+              python infra/scripts/build-repo-graph.py
             </code>{' '}
             generiert (Build-Hook oder cron).
           </p>
