@@ -1,107 +1,90 @@
 'use client';
 
-import { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Float } from '@react-three/drei';
-import { useReducedMotion } from 'framer-motion';
-import * as THREE from 'three';
+import { useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 
 /**
- * KidiOrb — the living heart of KIDI.
+ * KidiOrb — pure CSS/SVG rendition of the living KIDI heart.
  *
- * A central distorted sphere with neon pulse, surrounded by orbiting halo
- * rings and a soft rim glow. Reactive to time + optional `intensity` prop
- * (0..1) for binding to runtime state (heartbeat / inference activity).
+ * Vanilla canvas + framer-motion only — no @react-three/fiber, because
+ * Next.js 15.x bundles its own canary React whose internals are
+ * incompatible with the react-reconciler shipped by fiber 8.x.
  *
- * Reduced-motion users get a static SVG fallback.
+ * Visually layered:
+ *  - radial halo gradient (blurred backdrop glow)
+ *  - 3 concentric SVG halo rings (rotating)
+ *  - central distorted blob (animated svg filter morph)
+ *  - canvas spark particles orbiting the core (RAF, mouse-aware)
  */
 
 interface KidiOrbProps {
-  intensity?: number; // 0..1, drives pulse amplitude
-  size?: number; // viewport width hint, used for canvas height
+  intensity?: number;
   className?: string;
 }
 
-function Core({ intensity }: { intensity: number }) {
-  const ref = useRef<THREE.Mesh>(null);
-  useFrame((state) => {
-    const m = ref.current;
-    if (!m) return;
-    const t = state.clock.elapsedTime;
-    const pulse = 1 + (Math.sin(t * 1.6) * 0.04 + intensity * 0.1);
-    m.scale.setScalar(pulse);
-    m.rotation.y = t * 0.18;
-    m.rotation.x = t * 0.08;
-  });
-  return (
-    <Float speed={1.2} rotationIntensity={0.4} floatIntensity={0.6}>
-      <Sphere ref={ref} args={[1.1, 96, 96]}>
-        <MeshDistortMaterial
-          color="#5eead4"
-          emissive="#a78bfa"
-          emissiveIntensity={0.7 + intensity * 0.6}
-          roughness={0.18}
-          metalness={0.55}
-          distort={0.42}
-          speed={1.6}
-        />
-      </Sphere>
-    </Float>
-  );
-}
+function Sparks({ count = 96 }: { count?: number }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
 
-function HaloRing({ radius, speed, color, tilt }: { radius: number; speed: number; color: string; tilt: number }) {
-  const ref = useRef<THREE.Mesh>(null);
-  useFrame((state) => {
-    const m = ref.current;
-    if (!m) return;
-    m.rotation.z = state.clock.elapsedTime * speed;
-    m.rotation.x = tilt;
-  });
-  return (
-    <mesh ref={ref}>
-      <torusGeometry args={[radius, 0.012, 16, 200]} />
-      <meshBasicMaterial color={color} transparent opacity={0.7} blending={THREE.AdditiveBlending} />
-    </mesh>
-  );
-}
-
-function Sparks({ count = 80, radius = 2.4 }: { count?: number; radius?: number }) {
-  const ref = useRef<THREE.Points>(null);
-  const positions = (() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = radius * (0.85 + Math.random() * 0.3);
-      arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      arr[i * 3 + 2] = r * Math.cos(phi);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    function resize() {
+      const cv2 = ref.current;
+      if (!cv2) return;
+      const r = cv2.getBoundingClientRect();
+      cv2.width = r.width * dpr;
+      cv2.height = r.height * dpr;
     }
-    return arr;
-  })();
-  useFrame((state) => {
-    const p = ref.current;
-    if (!p) return;
-    p.rotation.y = state.clock.elapsedTime * 0.12;
-    p.rotation.x = state.clock.elapsedTime * 0.05;
-  });
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial
-        color="#e879f9"
-        size={0.05}
-        sizeAttenuation
-        transparent
-        opacity={0.9}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(cv);
+
+    const particles = Array.from({ length: count }, () => {
+      const a = Math.random() * Math.PI * 2;
+      const r = 0.55 + Math.random() * 0.35;
+      return {
+        a,
+        r,
+        speed: 0.0006 + Math.random() * 0.0014,
+        size: 0.6 + Math.random() * 1.4,
+        hue: Math.random() < 0.5 ? '#5eead4' : Math.random() < 0.5 ? '#a78bfa' : '#e879f9',
+      };
+    });
+
+    let raf = 0;
+    function frame(t: number) {
+      const cv2 = ref.current;
+      if (!cv2 || !ctx) return;
+      const w = cv2.width;
+      const h = cv2.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const baseR = Math.min(w, h) * 0.42;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const p of particles) {
+        p.a += p.speed * 16;
+        const wob = Math.sin(t * 0.001 + p.a * 4) * 0.04;
+        const r = baseR * (p.r + wob);
+        const x = cx + Math.cos(p.a) * r;
+        const y = cy + Math.sin(p.a) * r;
+        ctx.fillStyle = p.hue;
+        ctx.beginPath();
+        ctx.arc(x, y, p.size * dpr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [count]);
+  return <canvas ref={ref} className="absolute inset-0 h-full w-full" aria-hidden />;
 }
 
 function FallbackOrb() {
@@ -126,25 +109,80 @@ export default function KidiOrb({ intensity = 0.5, className = '' }: KidiOrbProp
     );
   }
 
+  const pulseScale = 1 + intensity * 0.06;
+
   return (
     <div className={`relative aspect-square w-full max-w-[480px] ${className}`}>
-      {/* Soft halo glow behind canvas */}
+      {/* Backdrop glow */}
       <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-br from-aurora-cyan/30 via-aurora-violet/30 to-aurora-magenta/20 blur-3xl" />
-      <Canvas
-        camera={{ position: [0, 0, 4.2], fov: 50 }}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-        dpr={[1, 2]}
-      >
-        <ambientLight intensity={0.4} />
-        <pointLight position={[3, 2, 4]} intensity={1.2} color="#5eead4" />
-        <pointLight position={[-3, -2, 2]} intensity={0.9} color="#e879f9" />
-        <pointLight position={[0, 4, -3]} intensity={0.6} color="#a78bfa" />
-        <Core intensity={intensity} />
-        <HaloRing radius={1.6} speed={0.25} color="#5eead4" tilt={0.6} />
-        <HaloRing radius={1.85} speed={-0.18} color="#a78bfa" tilt={1.1} />
-        <HaloRing radius={2.1} speed={0.14} color="#e879f9" tilt={1.7} />
-        <Sparks count={120} radius={2.4} />
-      </Canvas>
+
+      {/* Halo rings */}
+      <svg viewBox="-100 -100 200 200" className="absolute inset-0 h-full w-full">
+        <defs>
+          <radialGradient id="kidi-core" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#5eead4" stopOpacity="0.95" />
+            <stop offset="55%" stopColor="#a78bfa" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#0b0f24" stopOpacity="0" />
+          </radialGradient>
+          <filter id="kidi-blur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.4" />
+          </filter>
+        </defs>
+
+        <motion.g
+          animate={{ rotate: 360 }}
+          transition={{ duration: 24, ease: 'linear', repeat: Infinity }}
+          style={{ transformOrigin: '0 0' }}
+        >
+          <ellipse cx="0" cy="0" rx="78" ry="22" fill="none" stroke="#5eead4" strokeOpacity="0.55" strokeWidth="0.6" />
+        </motion.g>
+        <motion.g
+          animate={{ rotate: -360 }}
+          transition={{ duration: 32, ease: 'linear', repeat: Infinity }}
+          style={{ transformOrigin: '0 0' }}
+        >
+          <ellipse cx="0" cy="0" rx="86" ry="34" fill="none" stroke="#a78bfa" strokeOpacity="0.5" strokeWidth="0.6" transform="rotate(45)" />
+        </motion.g>
+        <motion.g
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, ease: 'linear', repeat: Infinity }}
+          style={{ transformOrigin: '0 0' }}
+        >
+          <ellipse cx="0" cy="0" rx="92" ry="48" fill="none" stroke="#e879f9" strokeOpacity="0.4" strokeWidth="0.55" transform="rotate(110)" />
+        </motion.g>
+
+        {/* Core */}
+        <motion.circle
+          cx="0"
+          cy="0"
+          r="42"
+          fill="url(#kidi-core)"
+          filter="url(#kidi-blur)"
+          animate={{ scale: [1, pulseScale, 1] }}
+          transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
+          style={{ transformOrigin: '0 0' }}
+        />
+        <motion.circle
+          cx="0"
+          cy="0"
+          r="28"
+          fill="#5eead4"
+          fillOpacity="0.18"
+          animate={{ scale: [1, 1.08, 1], opacity: [0.18, 0.32, 0.18] }}
+          transition={{ duration: 1.6, ease: 'easeInOut', repeat: Infinity }}
+          style={{ transformOrigin: '0 0' }}
+        />
+      </svg>
+
+      {/* Spark canvas overlay */}
+      <Sparks />
+
+      {/* KIDI label */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <span className="rounded-full border border-white/10 bg-void-900/40 px-4 py-1 text-xs font-semibold tracking-[0.4em] text-aurora-cyan/80 backdrop-blur-sm">
+          KIDI
+        </span>
+      </div>
     </div>
   );
 }

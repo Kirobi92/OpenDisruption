@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import * as THREE from 'three';
 
-// react-force-graph-3d's NodeAccessor types don't accept extended interfaces
-// directly; cast to a permissive component type to keep our strict VaultNode.
+// 2D canvas-only graph — sidesteps the @react-three/fiber + Next.js 15
+// reconciler incompatibility. Still beautiful: glowing nodes, animated
+// directional particles, zone-coloured.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false }) as any;
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false }) as any;
 
 interface VaultNode {
   id: string;
@@ -17,6 +17,8 @@ interface VaultNode {
   agent?: string;
   tags?: string[];
   size: number;
+  x?: number;
+  y?: number;
   [key: string]: unknown;
 }
 interface VaultLink {
@@ -88,23 +90,19 @@ export default function VaultGraph3D() {
     <div className="relative h-[78vh] w-full overflow-hidden rounded-3xl border border-white/10 bg-void-950/60 backdrop-blur-xl">
       <div ref={containerRef} className="absolute inset-0">
         {graph && (
-          <ForceGraph3D
+          <ForceGraph2D
             graphData={data}
             width={size.w}
             height={size.h}
             backgroundColor="rgba(4,6,20,0)"
-            nodeLabel={((n: VaultNode) => `<div style="font-family:Inter;color:#5eead4;background:#040614;padding:6px 10px;border:1px solid #5eead4;border-radius:8px"><b>${n.label}</b><br><span style="opacity:0.7;font-size:11px">${n.zone} · ${n.group}</span></div>`) as never}
             nodeRelSize={4}
             nodeVal={((n: VaultNode) => Math.min(20, 1 + n.size * 1.4)) as never}
             nodeColor={((n: VaultNode) => colorFor(n)) as never}
-            nodeOpacity={0.92}
-            nodeResolution={16}
-            linkColor={(() => 'rgba(167,139,250,0.35)') as never}
-            linkOpacity={0.5}
+            linkColor={(() => 'rgba(167,139,250,0.32)') as never}
             linkWidth={0.6}
             linkDirectionalParticles={2}
             linkDirectionalParticleSpeed={0.005}
-            linkDirectionalParticleWidth={1.4}
+            linkDirectionalParticleWidth={1.6}
             linkDirectionalParticleColor={(() => '#e879f9') as never}
             onNodeHover={((n: VaultNode | null) => setHover(n)) as never}
             enableNodeDrag
@@ -112,34 +110,37 @@ export default function VaultGraph3D() {
             cooldownTicks={140}
             d3AlphaDecay={0.025}
             d3VelocityDecay={0.28}
-            rendererConfig={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-            onEngineStop={() => {
-              /* settled */
-            }}
-            // Custom three object: glowing emissive sphere per node
-            nodeThreeObject={((n: VaultNode) => {
-              const color = new THREE.Color(colorFor(n));
-              const radius = 0.6 + Math.log2(1 + n.size) * 0.5;
-              const geo = new THREE.SphereGeometry(radius, 18, 18);
-              const mat = new THREE.MeshStandardMaterial({
-                color,
-                emissive: color,
-                emissiveIntensity: 0.85,
-                roughness: 0.25,
-                metalness: 0.4,
-              });
-              const mesh = new THREE.Mesh(geo, mat);
-              const haloGeo = new THREE.SphereGeometry(radius * 1.6, 16, 16);
-              const haloMat = new THREE.MeshBasicMaterial({
-                color,
-                transparent: true,
-                opacity: 0.18,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false,
-              });
-              mesh.add(new THREE.Mesh(haloGeo, haloMat));
-              return mesh;
+            nodeCanvasObject={((node: VaultNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
+              const r = (1 + Math.log2(1 + node.size) * 1.6) / Math.max(globalScale, 0.6);
+              const color = colorFor(node);
+              const x = node.x ?? 0;
+              const y = node.y ?? 0;
+              // halo
+              const halo = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
+              halo.addColorStop(0, color);
+              halo.addColorStop(0.4, color + '55');
+              halo.addColorStop(1, 'transparent');
+              ctx.fillStyle = halo;
+              ctx.globalAlpha = 0.55;
+              ctx.beginPath();
+              ctx.arc(x, y, r * 4, 0, Math.PI * 2);
+              ctx.fill();
+              // core
+              ctx.globalAlpha = 1;
+              ctx.fillStyle = color;
+              ctx.beginPath();
+              ctx.arc(x, y, r, 0, Math.PI * 2);
+              ctx.fill();
+              if (globalScale > 1.5) {
+                ctx.globalAlpha = 0.85;
+                ctx.fillStyle = '#e7eefc';
+                ctx.font = `${10 / globalScale}px Inter, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(node.label, x, y + r + 8 / globalScale);
+              }
+              ctx.globalAlpha = 1;
             }) as never}
+            nodeCanvasObjectMode={() => 'replace'}
           />
         )}
       </div>
