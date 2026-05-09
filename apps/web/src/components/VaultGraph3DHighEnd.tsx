@@ -103,9 +103,8 @@ function getNodeColor(node: RepoNode, mode: ColorMode): string {
 // ─── GLSL Shaders (Inline-Strings, kein .glsl-Import) ────────────────────────
 
 // Knoten-Vertex: instanceMatrix + instanceColor + Puls-Animation + Hover-Highlight
+// Three.js injiziert instanceMatrix und instanceColor automatisch – nicht neu deklarieren!
 const NODE_VERT = /* glsl */`
-  attribute mat4  instanceMatrix;
-  attribute vec3  instanceColor;
   attribute float aPhase;
   attribute float aHighlight;
 
@@ -162,9 +161,8 @@ const NODE_FRAG = /* glsl */`
 `;
 
 // Halo-Vertex: größere Sphäre, stärkerer Puls
+// Three.js injiziert instanceMatrix und instanceColor automatisch – nicht neu deklarieren!
 const HALO_VERT = /* glsl */`
-  attribute mat4  instanceMatrix;
-  attribute vec3  instanceColor;
   attribute float aPhase;
   attribute float aHighlight;
 
@@ -213,15 +211,16 @@ const HALO_FRAG = /* glsl */`
 `;
 
 // Kanten-Vertex: Farbe + aLineT weitergeben
+// 'color' ist Three.js-Built-in → umbenennen auf 'aEdgeColor'
 const EDGE_VERT = /* glsl */`
-  attribute vec3  color;
+  attribute vec3  aEdgeColor;
   attribute float aLineT;
 
   varying vec3  vColor;
   varying float vLineT;
 
   void main() {
-    vColor  = color;
+    vColor  = aEdgeColor;
     vLineT  = aLineT;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
@@ -564,7 +563,7 @@ export default function VaultGraph3DHighEnd({
 
       const edgeGeo = new THREE.BufferGeometry();
       edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgePosArr, 3));
-      edgeGeo.setAttribute('color',    new THREE.BufferAttribute(edgeColArr, 3));
+      edgeGeo.setAttribute('aEdgeColor', new THREE.BufferAttribute(edgeColArr, 3));
       edgeGeo.setAttribute('aLineT',   new THREE.BufferAttribute(lineTArr, 1));
       (edgeGeo.attributes.position as THREE.BufferAttribute).setUsage(THREE.DynamicDrawUsage);
 
