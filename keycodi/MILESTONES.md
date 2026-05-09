@@ -23,7 +23,7 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 - [x] `.github/ISSUE_TEMPLATE/` Backlog-Templates
 - [ ] Sven nickt Architektur ab
 - [x] Telegram-Option entschieden: **A — Restricted Bridge**
-- [x] Token-Storage entschieden: **Docker Secrets / `*_FILE`**
+- [x] Token-Storage entschieden: **lokale `.env`**
 - [x] `install.sh`-Distribution entschieden: **repo-lokal, `--dry-run` Default**
 - [x] Tailscale/LAN Web UI Entscheidung dokumentiert: **Caddy-only edge, Backends auf `127.0.0.1`**
 
@@ -77,7 +77,7 @@ Legende: `[ ]` offen · `[x]` erledigt · `[!]` blockiert (Verweis auf Issue)
 
 ## Phase 5 — Telegram (gated)
 
-> Sperre: Option A ist bestätigt; Phase 5 startet trotzdem erst nach grünem Abschluss von Phase 4 und vorhandenen lokalen Docker Secrets.
+> Sperre: Option A ist bestätigt; Phase 5 startet trotzdem erst nach grünem Abschluss von Phase 4 und vorhandener lokaler `.env`-Konfiguration.
 
 - [ ] `agents/_telegram/zone_filter.py`
 - [ ] Sechs Bot-Handler unter Profile `telegram`

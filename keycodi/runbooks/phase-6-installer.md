@@ -40,7 +40,7 @@ Repo-lokales Skript (`./install.sh`), das `infra/scripts/bootstrap.sh` umhüllt.
 - Prüft `.env` Existenz; wenn fehlend, kopiert `.env.example` und warnt zu Token-Befüllung.
 - Prüft `KIROBI_BIND_HOST`; wenn `0.0.0.0`, fragt explizit nach.
 - Prüft `KIROBI_PROXY_BIND_HOST`; wenn nicht `0.0.0.0` und `KIROBI_ACCESS_MODE=lan-tailscale`, warnt es, dass LAN/Tailscale nicht erreichbar ist.
-- Prüft bei `--profile telegram`, dass alle `KIROBI_TELEGRAM_*_TOKEN_FILE`- und `KIROBI_TELEGRAM_CHANNEL_ID_FILE`-Pfade existieren.
+- Prüft bei `--profile telegram`, dass die erforderlichen Telegram-Werte in der lokalen `.env` gesetzt sind.
 - Schreibt eine Pre-Install-Snapshot der wichtigsten Dirs (`canon/`, `experiences/`) gemäß bestehender Backup-Konvention.
 
 ### 4. Docs

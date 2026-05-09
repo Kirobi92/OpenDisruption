@@ -15,6 +15,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from urllib.parse import urlparse, urlunparse
 
 try:
     from kirobi_core.qdrant_collections import ZONE_COLLECTIONS as _CANONICAL_ZONE_COLLECTIONS
@@ -33,10 +34,25 @@ except Exception:  # noqa: BLE001
         "FAMILY_PRIVATE": ("kirobi_family",),
     }
 
-EMBEDDINGS_URL = os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:8006")
+_INTERNAL_SERVICE_PORTS = {
+    "embeddings": 8000,
+}
+
+
+def _service_url(value: str) -> str:
+    parsed = urlparse(value)
+    host = parsed.hostname or ""
+    target_port = _INTERNAL_SERVICE_PORTS.get(host)
+    if not target_port or parsed.port in (None, target_port):
+        return value.rstrip("/")
+    netloc = f"{host}:{target_port}"
+    return urlunparse(parsed._replace(netloc=netloc)).rstrip("/")
+
+
+EMBEDDINGS_URL = _service_url(os.getenv("EMBEDDINGS_SERVICE_URL", "http://embeddings:8004"))
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
-PORT = int(os.getenv("RETRIEVAL_SERVICE_PORT", "8000"))
+PORT = int(os.getenv("RETRIEVAL_SERVICE_PORT", "8006"))
 
 ALLOWED_ORIGINS: list[str] = [
     origin.strip()
@@ -55,10 +71,11 @@ def _zone_filter(zone: str) -> dict:
 
 class SearchRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000)
-    zone: str = Field(default="WORKSPACE", pattern="^(PUBLIC|WORKSPACE|FAMILY_PRIVATE)$")
+    zone: str = Field(default="WORKSPACE", pattern="^(PUBLIC|WORKSPACE|FAMILY_PRIVATE|QUARANTINE|SACRED)$")
     collection: Optional[str] = None
     limit: int = Field(default=5, ge=1, le=50)
     score_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    family_private_approved: bool = False
 
 
 class SearchResult(BaseModel):
@@ -72,9 +89,14 @@ class SearchResult(BaseModel):
 
 class SearchResponse(BaseModel):
     query: str
+    zone: str
     results: List[SearchResult]
     collection: str
     total: int
+    local_only: bool
+    approval_required: bool
+    family_private_approved: bool
+    refusal_semantics: str
 
 
 class HealthResponse(BaseModel):
@@ -97,7 +119,7 @@ app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_credenti
 async def _get_embedding(text: str) -> List[float]:
     """Holt Embedding vom Embeddings-Service."""
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(
+        resp = await client.get(
             f"{EMBEDDINGS_URL}/embed/single",
             params={"text": text},
         )
@@ -107,6 +129,37 @@ async def _get_embedding(text: str) -> List[float]:
                 detail="Embeddings-Service nicht erreichbar",
             )
         return resp.json()["embedding"]
+
+
+def _query_policy(zone: str, family_private_approved: bool = False) -> dict:
+    if zone == "FAMILY_PRIVATE":
+        if not family_private_approved:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="FAMILY_PRIVATE retrieval requires explicit local human approval.",
+            )
+        return {
+            "local_only": True,
+            "approval_required": True,
+            "family_private_approved": True,
+            "refusal_semantics": "family-private-requires-human-approval",
+        }
+    if zone == "QUARANTINE":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="QUARANTINE search is refused until content has been reviewed.",
+        )
+    if zone == "SACRED":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="SACRED zone is not accessible via retrieval.",
+        )
+    return {
+        "local_only": True,
+        "approval_required": False,
+        "family_private_approved": False,
+        "refusal_semantics": "zone-aware",
+    }
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -147,6 +200,8 @@ async def search(request: SearchRequest) -> SearchResponse:
     Zone-Enforcement: Nur Collections der angeforderten Zone sind zugänglich.
     FAMILY_PRIVATE-Daten sind von PUBLIC/WORKSPACE-Anfragen isoliert.
     """
+    policy = _query_policy(request.zone, request.family_private_approved)
+
     # Zone-Enforcement: Collection validieren
     allowed = ZONE_COLLECTIONS.get(request.zone, [])
     collection = request.collection or (allowed[0] if allowed else "kirobi_workspace")
@@ -192,10 +247,18 @@ async def search(request: SearchRequest) -> SearchResponse:
 
     return SearchResponse(
         query=request.query,
+        zone=request.zone,
         results=results,
         collection=collection,
         total=len(results),
+        **policy,
     )
+
+
+@app.post("/rag/search", response_model=SearchResponse)
+async def rag_search(request: SearchRequest) -> SearchResponse:
+    """Compatibility alias for older clients expecting /rag/search."""
+    return await search(request)
 
 
 @app.get("/collections")
@@ -218,16 +281,22 @@ async def list_collections() -> dict:
 
 class RagRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000)
-    zone: str = Field(default="WORKSPACE", pattern="^(PUBLIC|WORKSPACE|FAMILY_PRIVATE)$")
+    zone: str = Field(default="WORKSPACE", pattern="^(PUBLIC|WORKSPACE|FAMILY_PRIVATE|QUARANTINE|SACRED)$")
     limit: int = Field(default=3, ge=1, le=10)
     score_threshold: float = Field(default=0.6, ge=0.0, le=1.0)
+    family_private_approved: bool = False
 
 
 class RagResponse(BaseModel):
     query: str
+    zone: str
     context: str  # Zusammengebauter Kontext für LLM-Prompt
     sources: List[dict]
     total_results: int
+    local_only: bool
+    approval_required: bool
+    family_private_approved: bool
+    refusal_semantics: str
 
 
 @app.post("/rag", response_model=RagResponse)
@@ -239,9 +308,7 @@ async def rag_query(request: RagRequest) -> RagResponse:
     Durchsucht alle Collections der angeforderten Zone und baut einen
     Kontext-String für den LLM-Prompt zusammen.
     """
-    # SACRED immer 403 (zusätzliche Sicherheit, auch wenn Pattern es schon blockiert)
-    if request.zone == "SACRED":
-        raise HTTPException(status_code=403, detail="SACRED zone ist nicht zugänglich")
+    policy = _query_policy(request.zone, request.family_private_approved)
 
     # Embedding holen
     embedding = await _get_embedding(request.query)
@@ -285,9 +352,11 @@ async def rag_query(request: RagRequest) -> RagResponse:
 
     return RagResponse(
         query=request.query,
+        zone=request.zone,
         context=context,
         sources=top,
         total_results=len(top),
+        **policy,
     )
 
 

@@ -158,7 +158,7 @@ def test_ingest_text_validates_zone(client):
     assert resp.status_code == 422
 
 
-@pytest.mark.parametrize("zone", ["FAMILY_PRIVATE", "QUARANTINE", "SACRED"])
+@pytest.mark.parametrize("zone", ["QUARANTINE", "SACRED"])
 def test_ingest_text_blocks_sensitive_zones(client, zone: str):
     """POST /ingest/text muss sensible/beschränkte Zonen mit 403 blockieren."""
     c, mock_conn = client
@@ -169,6 +169,33 @@ def test_ingest_text_blocks_sensitive_zones(client, zone: str):
     )
     assert resp.status_code == 403
     mock_conn.execute.assert_not_called()
+
+
+def test_ingest_text_requires_explicit_family_private_approval(client):
+    c, mock_conn = client
+    mock_conn.execute.reset_mock()
+    resp = c.post(
+        "/ingest/text",
+        json={"text": "Synthetischer Testinhalt", "zone": "FAMILY_PRIVATE"},
+    )
+    assert resp.status_code == 403
+    mock_conn.execute.assert_not_called()
+
+
+def test_ingest_text_allows_family_private_with_approval(client):
+    c, mock_conn = client
+    mock_conn.fetchrow = AsyncMock(return_value=_make_job_row(zone="FAMILY_PRIVATE"))
+    resp = c.post(
+        "/ingest/text",
+        json={
+            "text": "Synthetischer Testinhalt",
+            "zone": "FAMILY_PRIVATE",
+            "human_approved": True,
+            "approval_note": "Lokale Familiennotiz",
+        },
+    )
+    assert resp.status_code == 202
+    assert resp.json()["zone"] == "FAMILY_PRIVATE"
 
 
 def test_ingest_text_validates_missing_zone(client):
@@ -192,6 +219,18 @@ def test_ingest_file_blocks_sacred_zone_before_file_read(client):
     resp = c.post(
         "/ingest/file",
         data={"zone": "SACRED"},
+        files={"file": ("synthetic.txt", b"synthetic content", "text/plain")},
+    )
+    assert resp.status_code == 403
+    mock_conn.execute.assert_not_called()
+
+
+def test_ingest_file_requires_family_private_approval(client):
+    c, mock_conn = client
+    mock_conn.execute.reset_mock()
+    resp = c.post(
+        "/ingest/file",
+        data={"zone": "FAMILY_PRIVATE"},
         files={"file": ("synthetic.txt", b"synthetic content", "text/plain")},
     )
     assert resp.status_code == 403
@@ -258,5 +297,7 @@ def test_send_to_embeddings_uses_store_with_doc_id():
             "zone": "WORKSPACE",
             "doc_type": "document",
             "metadata": {"title": "Test"},
+            "family_private_approved": False,
+            "approval_note": None,
         },
     )

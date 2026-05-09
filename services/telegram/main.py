@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Telegram-Bot Service -- v2
 Zone: WORKSPACE
@@ -18,6 +20,9 @@ import httpx
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 load_dotenv()
 

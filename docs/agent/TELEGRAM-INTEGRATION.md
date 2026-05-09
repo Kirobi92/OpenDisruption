@@ -67,23 +67,20 @@ ctx:WORKSPACE:*
 
 This is defense in depth: even if the application-level zone gate is bypassed by a bug, the Redis ACL prevents the bot from seeing FAMILY_PRIVATE/SACRED keys at all.
 
-### 3.4 Token storage — chosen safest option: Docker Secrets
+### 3.4 Token storage — chosen local standard: `.env`
 
-Bot tokens live in Docker Secrets (or an equivalent host-local secret manager in production). `.env.example` ships only `*_FILE` placeholders pointing to `/run/secrets/...` and never contains token values:
+Bot tokens and IDs live host-local in `.env`. `.env.example` contains only empty placeholders and never token values:
 
 ```
 KIROBI_TELEGRAM_ENABLED=false
-KIROBI_TELEGRAM_TOKEN_SOURCE=docker_secret
-KIROBI_TELEGRAM_KEYBRODI_TOKEN_FILE=/run/secrets/telegram_keybrodi_token
-KIROBI_TELEGRAM_OPENCODE_TOKEN_FILE=/run/secrets/telegram_opencode_token
-KIROBI_TELEGRAM_OPENCLAW_TOKEN_FILE=/run/secrets/telegram_openclaw_token
-KIROBI_TELEGRAM_HERMES_TOKEN_FILE=/run/secrets/telegram_hermes_token
-KIROBI_TELEGRAM_OBSIDIAN_TOKEN_FILE=/run/secrets/telegram_obsidian_token
-KIROBI_TELEGRAM_KIDI_TOKEN_FILE=/run/secrets/telegram_kidi_token
-KIROBI_TELEGRAM_CHANNEL_ID_FILE=/run/secrets/telegram_channel_id
+KIROBI_TELEGRAM_TOKEN_SOURCE=env
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_ALLOWED_USER_IDS=
+TELEGRAM_NOTIFY_CHANNEL_ID=
+HERMES_TELEGRAM_BOT_TOKEN=
 ```
 
-`install.sh` (Phase 6) **does not** prompt for tokens interactively. It validates that required secret files exist before allowing the `telegram` profile to start.
+`install.sh` (Phase 6) **does not** prompt for tokens interactively. Telegram stays opt-in and starts only when the required `.env` values are present locally.
 
 ### 3.5 Network egress
 
@@ -129,7 +126,8 @@ Per-bot menus follow the structure in the original problem statement, with one c
 
 ```
 0.1  2026-05-06  Initial draft. No option chosen yet.
-0.2  2026-05-07  Sven chose Option A. Safest token storage set to Docker Secrets / *_FILE placeholders.
+0.2  2026-05-07  Sven chose Option A. Token storage was initially planned via Docker Secrets / `*_FILE` placeholders.
+0.3  2026-05-09  Local runtime standardized on `.env`; docs and examples updated to match actual service behavior.
 ```
 
 ---

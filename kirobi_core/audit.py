@@ -1,9 +1,10 @@
 """Append-only audit logger for autonomous actions.
 
-Writes JSON-Lines events to ``kirobi-core/core-events.log`` (the only
-log file explicitly preserved by ``.gitignore``). The logger never
-records secrets or full SACRED file contents — callers should pass only
-short summaries via the ``data`` argument.
+Writes JSON-Lines events to ``kirobi-core/core-events.log``. The runtime
+log is intentionally ignored by Git so append-only audit evidence can
+accumulate locally without keeping the worktree permanently dirty. The
+logger never records secrets or full SACRED file contents — callers
+should pass only short summaries via the ``data`` argument.
 """
 
 from __future__ import annotations

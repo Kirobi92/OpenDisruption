@@ -200,6 +200,17 @@ def test_me_with_valid_token_returns_user(client):
     assert data["username"] == "testuser"
 
 
+def test_me_rejects_revoked_session(client):
+    """GET /me lehnt JWTs ohne aktiven Session-Record ab."""
+    c, mock_conn = client
+    mock_conn.fetchval = AsyncMock(return_value=0)
+
+    token = _make_valid_token(user_id="user-1")
+    resp = c.get("/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 401
+    assert resp.json()["detail"] == "Session is no longer valid"
+
+
 # ---------------------------------------------------------------------------
 # GET /verify — Token-Validierung
 # ---------------------------------------------------------------------------
@@ -286,6 +297,71 @@ def test_logout_without_token_returns_401(client):
     assert resp.status_code == 401
 
 
+def test_change_password_updates_hash_and_revokes_old_sessions(client):
+    """POST /change-password rotiert das Passwort und löscht alte Sessions."""
+    c, mock_conn = client
+    import services.auth.main as auth
+
+    user_row = _make_user_row()
+    user_row["password_hash"] = auth.get_password_hash("altes-passwort")
+    mock_conn.fetchrow = AsyncMock(side_effect=[user_row, user_row])
+
+    token = _make_valid_token(user_id="user-1")
+    resp = c.post(
+        "/change-password",
+        json={"current_password": "altes-passwort", "new_password": "neues-passwort-123"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 200
+    assert resp.json()["message"] == "Password changed successfully"
+    executed = "\n".join(call.args[0] for call in mock_conn.execute.await_args_list)
+    assert "UPDATE users SET password_hash" in executed
+    assert "DELETE FROM user_sessions" in executed
+    assert "INSERT INTO audit_log" in executed
+
+
+def test_change_password_rejects_wrong_current_password(client):
+    """POST /change-password validiert das aktuelle Passwort."""
+    c, mock_conn = client
+    import services.auth.main as auth
+
+    user_row = _make_user_row()
+    user_row["password_hash"] = auth.get_password_hash("altes-passwort")
+    mock_conn.fetchrow = AsyncMock(side_effect=[user_row, user_row])
+
+    token = _make_valid_token(user_id="user-1")
+    resp = c.post(
+        "/change-password",
+        json={"current_password": "falsch", "new_password": "neues-passwort-123"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 400
+    assert "Current password is incorrect" in resp.json()["detail"]
+
+
+def test_change_password_rejects_missing_session(client):
+    """POST /change-password lehnt verwaiste JWTs ohne Session-Record ab."""
+    c, mock_conn = client
+    import services.auth.main as auth
+
+    user_row = _make_user_row()
+    user_row["password_hash"] = auth.get_password_hash("altes-passwort")
+    mock_conn.fetchrow = AsyncMock(side_effect=[user_row, user_row])
+    mock_conn.fetchval = AsyncMock(return_value=0)
+
+    token = _make_valid_token(user_id="user-1")
+    resp = c.post(
+        "/change-password",
+        json={"current_password": "altes-passwort", "new_password": "neues-passwort-123"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 401
+    assert "Current session is no longer valid" in resp.json()["detail"]
+
+
 # ---------------------------------------------------------------------------
 # Helper-Funktionen
 # ---------------------------------------------------------------------------
@@ -309,6 +385,21 @@ def test_create_refresh_token_type():
     token = auth.create_refresh_token(data={"sub": "user-123"})
     payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
     assert payload["type"] == "refresh"
+
+
+def test_create_access_token_is_unique_per_login():
+    """create_access_token muss pro Aufruf einen eindeutigen jti setzen."""
+    import services.auth.main as auth
+    from jose import jwt
+
+    token_a = auth.create_access_token(data={"sub": "user-123"})
+    token_b = auth.create_access_token(data={"sub": "user-123"})
+
+    payload_a = jwt.decode(token_a, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
+    payload_b = jwt.decode(token_b, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
+
+    assert token_a != token_b
+    assert payload_a["jti"] != payload_b["jti"]
 
 
 def test_verify_password_correct():

@@ -21,10 +21,18 @@ from datetime import datetime
 from typing import Optional
 
 from . import db
+from .config import KIROBI_TELEGRAM_WEB_BASE_URL
 from .llm import available_models, is_available, loaded_models, provider
 
 
 # ─── Keyboards ───────────────────────────────────────────────────────────────
+
+
+def _surface_url(path: str) -> str:
+    base = KIROBI_TELEGRAM_WEB_BASE_URL or "http://kirobi.local"
+    if not path.startswith("/"):
+        path = f"/{path}"
+    return f"{base}{path}"
 
 def kb_main() -> dict:
     return {
@@ -38,19 +46,63 @@ def kb_main() -> dict:
                 {"text": "📋 Aufgaben",     "callback_data": "m:tasks"},
             ],
             [
+                {"text": "🌐 Oberflächen",  "callback_data": "m:surfaces"},
                 {"text": "❓ Entscheidungen", "callback_data": "m:decisions"},
+            ],
+            [
                 {"text": "📡 Ereignisse",   "callback_data": "m:events"},
-            ],
-            [
                 {"text": "📚 Vault",        "callback_data": "m:vault"},
+            ],
+            [
                 {"text": "🤖 Agenten",      "callback_data": "m:agents"},
-            ],
-            [
                 {"text": "⚙️ Hardware",     "callback_data": "m:hardware"},
-                {"text": "🔧 System",       "callback_data": "m:system"},
             ],
             [
+                {"text": "🔧 System",       "callback_data": "m:system"},
                 {"text": "♻️ Neuer Chat",    "callback_data": "m:reset_chat"},
+            ],
+        ]
+    }
+
+
+def kb_surfaces() -> dict:
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "💬 Chat", "url": _surface_url("/chat?zone=WORKSPACE")},
+                {"text": "🔎 Suche", "url": _surface_url("/search?zone=WORKSPACE")},
+            ],
+            [
+                {"text": "📤 Upload", "url": _surface_url("/upload?zone=WORKSPACE")},
+                {"text": "⚙️ Settings", "url": _surface_url("/settings?section=permissions")},
+            ],
+            [
+                {"text": "🛡 Dashboard", "url": _surface_url("/dashboard/?section=control")},
+                {"text": "📋 Admin Tasks", "url": _surface_url("/dashboard/tasks?filter=blocked")},
+            ],
+            [
+                {"text": "🧩 Services", "url": _surface_url("/dashboard/?section=services")},
+                {"text": "🧪 Workbench", "callback_data": "m:workbench"},
+            ],
+            [{"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"}],
+        ]
+    }
+
+
+def kb_workbench() -> dict:
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "🧠 Open WebUI", "url": _surface_url("/open-webui/")},
+                {"text": "🔀 Flowise", "url": _surface_url("/flowise/")},
+            ],
+            [
+                {"text": "🗂 Qdrant", "url": _surface_url("/qdrant/dashboard")},
+                {"text": "📊 Services", "url": _surface_url("/dashboard/services")},
+            ],
+            [
+                {"text": "◀️ Oberflächen", "callback_data": "m:surfaces"},
+                {"text": "🏠 KeyCodi-Menü", "callback_data": "m:home"},
             ],
         ]
     }
@@ -220,6 +272,28 @@ async def screen_status() -> tuple[str, dict]:
         + (f"  🚨 <b>SOFORT: {counts.get('sofort', 0)}</b>\n" if counts.get('sofort') else "")
     )
     return text, kb_back()
+
+
+async def screen_surfaces() -> tuple[str, dict]:
+    text = (
+        "🌐 <b>OpenDisruption Oberflächen</b>\n\n"
+        "Direkter Zugriff auf die MVP-Flächen über genau einen sicheren Edge.\n\n"
+        f"Basis: <code>{_e(KIROBI_TELEGRAM_WEB_BASE_URL or 'http://kirobi.local')}</code>\n\n"
+        "• Chat, Suche, Upload und Settings für den täglichen MVP-Fluss\n"
+        "• Dashboard, Tasks und Services für Operator-Steuerung\n"
+        "• Workbench nur über LAN/Tailscale"
+    )
+    return text, kb_surfaces()
+
+
+async def screen_workbench() -> tuple[str, dict]:
+    text = (
+        "🧪 <b>Workbench</b>\n\n"
+        "Diese Flächen bleiben hinter Caddy und sind nur über LAN/Tailscale gedacht:\n"
+        "Open WebUI, Flowise und Qdrant.\n\n"
+        "Nutze sie für Admin-/Diagnose-Aufgaben, nicht als öffentliche Produktfläche."
+    )
+    return text, kb_workbench()
 
 
 async def screen_tasks() -> tuple[str, dict]:

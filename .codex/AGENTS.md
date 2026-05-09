@@ -4,8 +4,10 @@ This supplements the root `AGENTS.md` with a repo-local ECC baseline.
 
 ## Repo Skill
 
-- Repo-generated Codex skill: `.agents/skills/OpenDisruption/SKILL.md`
-- Claude-facing companion skill: `.claude/skills/OpenDisruption/SKILL.md`
+- Codex compatibility skill: `.agents/skills/OpenDisruption/SKILL.md`
+- Claude compatibility skill: `.claude/skills/OpenDisruption/SKILL.md`
+- Canonical verified source: `.opencode/skills/keycodi-orchestrator/SKILL.md`
+- Generic lifecycle pack: `.opencode/skills/using-agent-skills/` plus the imported Agent-Skills directories under `.opencode/skills/`
 - Keep user-specific credentials and private MCPs in `~/.codex/config.toml`, not in this repo.
 
 ## MCP Baseline

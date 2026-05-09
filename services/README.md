@@ -3,22 +3,29 @@
 **Zone:** WORKSPACE | **Verantwortlich:** kirobi-coder, kirobi-ops
 
 ## Zweck
-Alle Backend-Services des Kirobi-Ökosystems. Jeder Service hat klar definierte Verantwortlichkeiten.
+Laufende Anwendungs-Services unter `services/`. Compose-Infrastruktur wie `ollama`, `postgres`, `qdrant`, `open-webui` und `flowise` lebt im Root-Compose, aber nicht in diesem Verzeichnis.
 
 ## Service-Übersicht
 
 | Service | Beschreibung | Status |
 |---------|-------------|--------|
-| `core-api/` | Kirobi Core REST-API | Geplant |
-| `agent-runtime/` | Agent-Ausführungs-Engine | Geplant |
-| `knowledge-service/` | Wissens-Management-Service | Geplant |
-| `ingestion-service/` | Dokument-Ingestion-Pipeline | Geplant |
-| `embedding-service/` | Embedding-Generierung | Geplant |
-| `routing-service/` | Agent-Routing-Service | Geplant |
-| `event-service/` | Event-Streaming und -Logging | Geplant |
-| `notification-service/` | Benachrichtigungs-Service | Konzept |
-| `backup-service/` | Backup-Automatisierung | Geplant |
-| `auth-service/` | Authentifizierung | Konzept |
-| `media-service/` | Medien-Verarbeitung | Konzept |
-| `search-service/` | Volltext- und Vektor-Suche | Geplant |
-| `analytics-service/` | Metriken und Analytics | Konzept |
+| `auth/` | JWT-Login, User-/Permissions-Bootstrap, Passwortwechsel | Aktiv |
+| `api/` | UI-/client-stabiles REST-Backend für Chat, Uploads, Suche, Dashboard-Tasks | Aktiv |
+| `voice-processing/` | STT/TTS und Voice-Session-Endpoints | Aktiv |
+| `retrieval/` | Semantische Suche mit Zonen-Enforcement | Aktiv |
+| `ingest/` | Ingestion-Pipeline für Inbox/Uploads | Aktiv |
+| `embeddings/` | Embedding-Generierung und Store-Endpunkte | Aktiv |
+| `model-routing/` | Modellwahl für lokale LLM-Aufgaben | Aktiv |
+| `analytics-service/` | Event- und Nutzungsmetriken | Aktiv |
+| `image-generation/` | Bildgenerierung | Optionaler Produktpfad |
+| `media-processing/` | Medien-Metadaten / Pillow-/mutagen-Workflows | Optionaler Produktpfad |
+| `music-generation/` | Musikgenerierung | Optionaler Produktpfad |
+| `video-generation/` | Videogenerierung | Optionaler Produktpfad |
+| `telegram/` | Externe Telegram-Bot-Schnittstelle | Optional / extern |
+| `orchestrator/` | Supervisor- / Backlog-Orchestrierung | Intern |
+
+## Für die unterstützten UI-Surfaces relevant
+
+- `apps/web` hängt primär an `auth` + `api`
+- `apps/voice` hängt an `voice-processing` + `api`
+- `apps/dashboard` liest Health- und Task-Daten über `api`-Proxies

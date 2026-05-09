@@ -537,6 +537,9 @@ services:
       - TELEGRAM_NOTIFY_CHANNEL_ID=${TELEGRAM_NOTIFY_CHANNEL_ID:-}
       - TELEGRAM_NOTIFY_ON_START=${TELEGRAM_NOTIFY_ON_START:-false}
       - TELEGRAM_WEBHOOK_HOST=${TELEGRAM_WEBHOOK_HOST:-}
+      - KIROBI_TELEGRAM_WEB_BASE_URL=${KIROBI_TELEGRAM_WEB_BASE_URL:-}
+      - KIROBI_TAILSCALE_HOST=${KIROBI_TAILSCALE_HOST:-}
+      - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-}
       - TELEGRAM_SERVICE_PORT=8005
       - AUTH_SERVICE_URL=http://auth:8000
       - KIROBI_AUTH_URL=http://auth:8000
@@ -565,6 +568,11 @@ services:
         condition: service_started
     networks:
       - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/ready')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   telegram-hermes:
     build:
@@ -580,6 +588,9 @@ services:
       - TELEGRAM_NOTIFY_CHANNEL_ID=${TELEGRAM_NOTIFY_CHANNEL_ID:-}
       - TELEGRAM_NOTIFY_ON_START=${HERMES_TELEGRAM_NOTIFY_ON_START:-true}
       - TELEGRAM_WEBHOOK_HOST=${HERMES_TELEGRAM_WEBHOOK_HOST:-}
+      - KIROBI_TELEGRAM_WEB_BASE_URL=${KIROBI_TELEGRAM_WEB_BASE_URL:-}
+      - KIROBI_TAILSCALE_HOST=${KIROBI_TAILSCALE_HOST:-}
+      - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-}
       - TELEGRAM_SERVICE_PORT=8005
       - AUTH_SERVICE_URL=http://auth:8000
       - KIROBI_AUTH_URL=http://auth:8000
@@ -608,6 +619,11 @@ services:
         condition: service_started
     networks:
       - kirobi-net
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/ready')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   model-routing:
     build:
@@ -668,6 +684,9 @@ services:
     ports:
       - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTP_PORT:-80}:80"
       - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_HTTPS_PORT:-443}:443"
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_OPENWEBUI_HTTPS_PORT:-8441}:8441"
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_FLOWISE_HTTPS_PORT:-8442}:8442"
+      - "${KIROBI_PROXY_BIND_HOST:-0.0.0.0}:${CADDY_QDRANT_HTTPS_PORT:-8443}:8443"
     environment:
       - KIROBI_HOSTNAME=${KIROBI_HOSTNAME:-kirobi.local}
     volumes:

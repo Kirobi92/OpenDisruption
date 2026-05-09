@@ -25,12 +25,14 @@ Integrationstests stellen sicher, dass Services korrekt miteinander kommuniziere
 ## Ausführen
 
 ```bash
-# Alle Integrationstests
-python -m pytest tests/integration/ -v
+# Echte Live-Service-Integrationstests
+python3 -m pytest tests/integration -v
 
-# CI-äquivalenter Check (inkl. Unit-Tests)
+# Statischer Repo-Gate (kein Ersatz für tests/integration)
 make integration-test
 ```
+
+`make integration-test` validiert aktuell die Fresh-Clone-Baseline, Compose-Konfiguration, Shell-Skripte, FastAPI-Kompilierbarkeit und PWA-Assets. Der Targetname ist historisch; er führt **nicht** automatisch die Tests aus diesem Verzeichnis aus.
 
 ## Voraussetzungen
 

@@ -106,7 +106,8 @@ def test_search_public_zone_allowed_collection(client):
         qdrant_resp.status_code = 200
         qdrant_resp.json = MagicMock(return_value={"result": qdrant_results})
 
-        mock_client.post = AsyncMock(side_effect=[embed_resp, qdrant_resp])
+        mock_client.get = AsyncMock(return_value=embed_resp)
+        mock_client.post = AsyncMock(return_value=qdrant_resp)
 
         resp = client.post(
             "/search",
@@ -124,7 +125,7 @@ def test_search_public_zone_allowed_collection(client):
         assert data["total"] == 1
         assert len(data["results"]) == 1
 
-        qdrant_body = mock_client.post.await_args_list[1].kwargs["json"]
+        qdrant_body = mock_client.post.await_args.kwargs["json"]
         assert qdrant_body["filter"] == {"must": [{"key": "zone", "match": {"value": "PUBLIC"}}]}
 
 
@@ -160,7 +161,8 @@ def test_search_family_private_zone_allows_family_collection(client):
         qdrant_resp.status_code = 200
         qdrant_resp.json = MagicMock(return_value={"result": []})
 
-        mock_client.post = AsyncMock(side_effect=[embed_resp, qdrant_resp])
+        mock_client.get = AsyncMock(return_value=embed_resp)
+        mock_client.post = AsyncMock(return_value=qdrant_resp)
 
         resp = client.post(
             "/search",
@@ -168,10 +170,12 @@ def test_search_family_private_zone_allows_family_collection(client):
                 "query": "Synthetic isolated-zone test",
                 "zone": "FAMILY_PRIVATE",
                 "collection": "kirobi_family",
+                "family_private_approved": True,
                 "limit": 3,
             },
         )
         assert resp.status_code == 200
+        assert resp.json()["family_private_approved"] is True
 
 
 def test_search_workspace_zone_blocks_family_collection(client):
@@ -187,16 +191,10 @@ def test_search_workspace_zone_blocks_family_collection(client):
     assert resp.status_code == 403
 
 
-def test_search_invalid_zone_returns_422(client):
-    """POST /search mit ungültiger Zone muss 422 zurückgeben."""
-    resp = client.post(
-        "/search",
-        json={
-            "query": "Test",
-            "zone": "SACRED",  # Nicht in Pattern erlaubt
-        },
-    )
-    assert resp.status_code == 422
+def test_search_sacred_zone_returns_403(client):
+    """POST /search muss SACRED explizit verweigern."""
+    resp = client.post("/search", json={"query": "Test", "zone": "SACRED"})
+    assert resp.status_code == 403
 
 
 def test_search_validates_empty_query(client):
@@ -226,7 +224,7 @@ def test_search_returns_502_when_embeddings_fail(client):
 
         embed_resp = MagicMock()
         embed_resp.status_code = 503
-        mock_client.post = AsyncMock(return_value=embed_resp)
+        mock_client.get = AsyncMock(return_value=embed_resp)
 
         resp = client.post(
             "/search",
@@ -252,7 +250,8 @@ def test_search_uses_default_collection_for_zone(client):
         qdrant_resp.status_code = 200
         qdrant_resp.json = MagicMock(return_value={"result": []})
 
-        mock_client.post = AsyncMock(side_effect=[embed_resp, qdrant_resp])
+        mock_client.get = AsyncMock(return_value=embed_resp)
+        mock_client.post = AsyncMock(return_value=qdrant_resp)
 
         resp = client.post(
             "/search",
@@ -261,6 +260,43 @@ def test_search_uses_default_collection_for_zone(client):
         assert resp.status_code == 200
         # Erste Collection für PUBLIC ist kirobi_public
         assert resp.json()["collection"] == "kirobi_public"
+
+
+def test_search_family_private_requires_explicit_approval(client):
+    resp = client.post(
+        "/search",
+        json={"query": "Test", "zone": "FAMILY_PRIVATE", "collection": "kirobi_family"},
+    )
+    assert resp.status_code == 403
+
+
+def test_rag_search_alias_matches_search_contract(client):
+    """POST /rag/search bleibt als Alias zu /search kompatibel."""
+    fake_embedding = [0.1] * 768
+
+    with patch("services.retrieval.main.httpx.AsyncClient") as mock_cls:
+        mock_client = AsyncMock()
+        mock_cls.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_cls.return_value.__aexit__ = AsyncMock(return_value=None)
+
+        embed_resp = MagicMock()
+        embed_resp.status_code = 200
+        embed_resp.json = MagicMock(return_value={"embedding": fake_embedding})
+
+        qdrant_resp = MagicMock()
+        qdrant_resp.status_code = 200
+        qdrant_resp.json = MagicMock(return_value={"result": []})
+
+        mock_client.get = AsyncMock(return_value=embed_resp)
+        mock_client.post = AsyncMock(return_value=qdrant_resp)
+
+        resp = client.post(
+            "/rag/search",
+            json={"query": "Test", "zone": "WORKSPACE"},
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["collection"] == "kirobi_workspace"
 
 
 # ---------------------------------------------------------------------------
@@ -368,8 +404,8 @@ def test_rag_returns_context_and_sources(client):
         qdrant_resp_empty.status_code = 200
         qdrant_resp_empty.json = MagicMock(return_value={"result": []})
 
+        mock_client.get = AsyncMock(return_value=embed_resp)
         mock_client.post = AsyncMock(side_effect=[
-            embed_resp,
             qdrant_resp_with_results,  # kirobi_workspace
             qdrant_resp_empty,          # kirobi_canon
             qdrant_resp_empty,          # kirobi_experiences
@@ -420,8 +456,8 @@ def test_rag_context_contains_source_prefix(client):
         qdrant_empty.status_code = 200
         qdrant_empty.json = MagicMock(return_value={"result": []})
 
+        mock_client.get = AsyncMock(return_value=embed_resp)
         mock_client.post = AsyncMock(side_effect=[
-            embed_resp,
             qdrant_resp,    # kirobi_workspace
             qdrant_empty,   # kirobi_canon
             qdrant_empty,   # kirobi_experiences
@@ -458,10 +494,8 @@ def test_rag_returns_empty_context_when_no_results(client):
         qdrant_empty.json = MagicMock(return_value={"result": []})
 
         # Embed + 1 leere Qdrant-Response (PUBLIC hat nur kirobi_public)
-        mock_client.post = AsyncMock(side_effect=[
-            embed_resp,
-            qdrant_empty,
-        ])
+        mock_client.get = AsyncMock(return_value=embed_resp)
+        mock_client.post = AsyncMock(side_effect=[qdrant_empty])
 
         resp = client.post(
             "/rag",
@@ -473,7 +507,7 @@ def test_rag_returns_empty_context_when_no_results(client):
         assert data["total_results"] == 0
         assert data["sources"] == []
 
-        qdrant_body = mock_client.post.await_args_list[1].kwargs["json"]
+        qdrant_body = mock_client.post.await_args.kwargs["json"]
         assert qdrant_body["filter"] == {"must": [{"key": "zone", "match": {"value": "PUBLIC"}}]}
 
 
@@ -483,10 +517,10 @@ def test_rag_validates_empty_query(client):
     assert resp.status_code == 422
 
 
-def test_rag_validates_invalid_zone(client):
-    """POST /rag mit SACRED-Zone muss 422 zurückgeben (Pattern-Validierung)."""
+def test_rag_refuses_sacred_zone(client):
+    """POST /rag mit SACRED-Zone muss 403 zurückgeben."""
     resp = client.post("/rag", json={"query": "Test", "zone": "SACRED"})
-    assert resp.status_code == 422
+    assert resp.status_code == 403
 
 
 def test_rag_validates_limit_bounds(client):
@@ -522,8 +556,8 @@ def test_rag_sorts_results_by_score(client):
         qdrant_empty.status_code = 200
         qdrant_empty.json = MagicMock(return_value={"result": []})
 
+        mock_client.get = AsyncMock(return_value=embed_resp)
         mock_client.post = AsyncMock(side_effect=[
-            embed_resp,
             qdrant_resp,    # kirobi_workspace
             qdrant_empty,   # kirobi_canon
             qdrant_empty,   # kirobi_experiences
@@ -562,10 +596,8 @@ def test_rag_skips_failed_collections(client):
         qdrant_ok.status_code = 200
         qdrant_ok.json = MagicMock(return_value={"result": qdrant_results})
 
-        mock_client.post = AsyncMock(side_effect=[
-            embed_resp,
-            qdrant_ok,
-        ])
+        mock_client.get = AsyncMock(return_value=embed_resp)
+        mock_client.post = AsyncMock(side_effect=[qdrant_ok])
 
         resp = client.post(
             "/rag",

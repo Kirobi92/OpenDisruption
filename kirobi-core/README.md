@@ -11,7 +11,7 @@ Das Kern-Verzeichnis des Kirobi-Agenten. Hier leben die Identität, Prompts, Rou
 | `core-context.md` | Kontext-Management-Regeln |
 | `core-routing.md` | Routing-Logik für Modelle und Agenten |
 | `core-policies.md` | Operative Kern-Policies |
-| `core-events.log` | Event-Log Template |
+| `core-events.log` | Append-only Laufzeit-Event-Log (wird lokal erzeugt, Git-ignoriert) |
 | `core-onboarding.md` | Onboarding für neue Nutzer |
 | `core-personality.md` | Persönlichkeitsmerkmale |
 | `core-capabilities.md` | Fähigkeiten-Liste |

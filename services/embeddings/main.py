@@ -143,6 +143,8 @@ class StoreRequest(BaseModel):
     doc_type: str = Field(default="document", description="Dokumenttyp (z.B. document, note)")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Zusätzliche Metadaten")
     doc_id: str | None = Field(default=None, description="Optionale Dokument-ID (UUID)")
+    family_private_approved: bool = Field(default=False)
+    approval_note: str | None = Field(default=None, max_length=500)
 
 
 class StoreResponse(BaseModel):
@@ -171,22 +173,60 @@ def _validate_zone(zone: str) -> None:
     """Wirft HTTPException wenn die Zone ungültig ist."""
     if zone not in KNOWN_ZONES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Ungültige Zone '{zone}'. Bekannt: {sorted(KNOWN_ZONES)}",
         )
 
 
-def _validate_autonomous_store_zone(zone: str) -> None:
-    """Wirft HTTPException wenn /store für die Zone autonom nicht erlaubt ist."""
+def _store_policy(
+    zone: str,
+    *,
+    family_private_approved: bool = False,
+    approval_note: str | None = None,
+) -> dict[str, Any]:
+    """Ermittelt die Speicherrichtlinie oder verweigert die Zone explizit."""
     _validate_zone(zone)
-    if zone not in AUTONOMOUS_STORE_ZONES:
+    clean_note = (approval_note or "").strip() or None
+    if zone in AUTONOMOUS_STORE_ZONES:
+        return {
+            "local_only": True,
+            "approval_required": False,
+            "family_private_approved": False,
+            "approval_note": clean_note,
+            "refusal_semantics": "zone-aware",
+        }
+    if zone == "FAMILY_PRIVATE":
+        if not family_private_approved or not clean_note:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "FAMILY_PRIVATE storage requires explicit local human approval "
+                    "and a non-empty approval_note."
+                ),
+            )
+        return {
+            "local_only": True,
+            "approval_required": True,
+            "family_private_approved": True,
+            "approval_note": clean_note,
+            "refusal_semantics": "family-private-requires-human-approval",
+        }
+    if zone == "QUARANTINE":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"Autonomes Speichern ist für Zone '{zone}' nicht erlaubt. "
-                f"Erlaubt: {sorted(AUTONOMOUS_STORE_ZONES)}"
-            ),
+            detail="QUARANTINE content cannot be embedded before human review.",
         )
+    if zone == "SACRED":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="SACRED storage is refused by this service.",
+        )
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Storage is not allowed for zone '{zone}'.")
+
+
+def _validate_autonomous_store_zone(zone: str) -> None:
+    """Compatibility wrapper for older tests/callers."""
+    _store_policy(zone)
 
 
 async def _get_embedding(text: str) -> list[float]:
@@ -332,7 +372,7 @@ async def embed_batch(request: BatchEmbedRequest) -> BatchEmbedResponse:
     for idx, text in enumerate(request.texts):
         if not text.strip():
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Text an Position {idx} ist leer.",
             )
         vec = await _get_embedding(text)
@@ -362,7 +402,11 @@ async def store_embedding(request: StoreRequest) -> StoreResponse:
     """
     assert qdrant_client is not None
 
-    _validate_autonomous_store_zone(request.zone)
+    store_policy = _store_policy(
+        request.zone,
+        family_private_approved=request.family_private_approved,
+        approval_note=request.approval_note,
+    )
 
     doc_id = request.doc_id or str(uuid.uuid4())
     collection = _collection_name(request.zone, request.doc_type)
@@ -382,10 +426,13 @@ async def store_embedding(request: StoreRequest) -> StoreResponse:
 
     # Payload zusammenstellen — kein f-String mit User-Input in Queries
     payload: dict[str, Any] = {
+        **request.metadata,
         "text": request.text,
         "zone": request.zone,
         "doc_type": request.doc_type,
-        **{k: v for k, v in request.metadata.items()},
+        "storage_mode": "local-first-file-backed",
+        "zone_policy": request.zone,
+        **store_policy,
     }
 
     # In Qdrant speichern

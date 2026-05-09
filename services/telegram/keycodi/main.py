@@ -48,7 +48,16 @@ from .config import (
 )
 from . import db, cron
 from .responder import build_keycodi_response_with_context
-from .tg import answer_cb, download_file, edit_msg, send, send_audio, set_commands
+from .tg import (
+    answer_cb,
+    download_file,
+    edit_msg,
+    send,
+    send_audio,
+    set_chat_menu_commands,
+    set_commands,
+    set_descriptions,
+)
 from .menus import (
     kb_cancel,
     screen_agents,
@@ -58,9 +67,11 @@ from .menus import (
     screen_hardware,
     screen_home,
     screen_status,
+    screen_surfaces,
     screen_task_detail,
     screen_tasks,
     screen_vault,
+    screen_workbench,
 )
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
@@ -69,6 +80,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 log = logging.getLogger("keycodi.main")
 
 # ─── Laufzeit-State ──────────────────────────────────────────────────────────
@@ -634,6 +647,12 @@ async def _handle_callback(callback_query: dict) -> None:
     elif data == "m:tasks":
         text, keyboard = await screen_tasks()
 
+    elif data == "m:surfaces":
+        text, keyboard = await screen_surfaces()
+
+    elif data == "m:workbench":
+        text, keyboard = await screen_workbench()
+
     elif data == "m:agents":
         text, keyboard = await screen_agents()
 
@@ -898,6 +917,10 @@ async def _handle_slash(
         text, keyboard = await screen_status()
         await send(chat_id, text, keyboard)
 
+    elif command == "surfaces":
+        text, keyboard = await screen_surfaces()
+        await send(chat_id, text, keyboard)
+
     elif command == "tasks":
         text, keyboard = await screen_tasks()
         await send(chat_id, text, keyboard)
@@ -1103,6 +1126,7 @@ async def startup() -> None:
     await set_commands([
         {"command": "start",    "description": "KeyCodi-Menü öffnen"},
         {"command": "status",   "description": "System-Status anzeigen"},
+        {"command": "surfaces", "description": "Weboberflächen öffnen"},
         {"command": "tasks",    "description": "Aufgaben anzeigen"},
         {"command": "add",      "description": "Neue Aufgabe anlegen"},
         {"command": "chat",     "description": "Direkt mit KeyCodi chatten"},
@@ -1111,6 +1135,11 @@ async def startup() -> None:
         {"command": "events",   "description": "Letzte Ereignisse"},
         {"command": "help",     "description": "Hilfe anzeigen"},
     ])
+    await set_descriptions(
+        "KeyCodi steuert OpenDisruption lokal-first: Chat, Suche, Upload, Operator-Dashboard und Telegram-Menüs.",
+        "OpenDisruption unterwegs bedienen",
+    )
+    await set_chat_menu_commands()
 
     # API-Token vorab holen
     await _get_api_token()

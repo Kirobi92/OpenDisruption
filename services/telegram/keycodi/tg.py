@@ -91,6 +91,32 @@ async def set_commands(commands: list[dict]) -> None:
     log.info("Bot-Commands gesetzt: %s", result.get("ok"))
 
 
+async def set_descriptions(description: str, short_description: str | None = None) -> None:
+    result = await tg("setMyDescription", description=description)
+    log.info("Bot-Beschreibung gesetzt: %s", result.get("ok"))
+    if short_description:
+        short_result = await tg("setMyShortDescription", short_description=short_description)
+        log.info("Bot-Kurzbeschreibung gesetzt: %s", short_result.get("ok"))
+
+
+async def set_chat_menu_commands() -> None:
+    result = await tg("setChatMenuButton", menu_button={"type": "commands"})
+    log.info("Chat-Menü auf Commands gesetzt: %s", result.get("ok"))
+
+
+async def set_descriptions(description: str, short_description: str | None = None) -> None:
+    result = await tg("setMyDescription", description=description)
+    log.info("Bot-Beschreibung gesetzt: %s", result.get("ok"))
+    if short_description:
+        short_result = await tg("setMyShortDescription", short_description=short_description)
+        log.info("Bot-Kurzbeschreibung gesetzt: %s", short_result.get("ok"))
+
+
+async def set_chat_menu_commands() -> None:
+    result = await tg("setChatMenuButton", menu_button={"type": "commands"})
+    log.info("Chat-Menü auf Commands gesetzt: %s", result.get("ok"))
+
+
 async def download_file(file_id: str, target_path: str | Path) -> Path:
     """Laedt eine Telegram-Datei anhand ihrer file_id herunter."""
     meta = await tg("getFile", file_id=file_id)

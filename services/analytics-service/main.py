@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Analytics Service
 Zone: WORKSPACE
@@ -16,6 +18,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import asyncpg
 from dotenv import load_dotenv
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 load_dotenv()
 
@@ -102,6 +107,14 @@ class DailyStats(BaseModel):
     active_users: int
     events_by_type: List[EventTypeCount]
     zones: List[dict]
+
+
+class DashboardStats(BaseModel):
+    eventsToday: int
+    activeUsers: int
+    zoneUsage: dict[str, int]
+    totalConversations: int
+    totalMessages: int
 
 
 # ---------------------------------------------------------------------------
@@ -260,6 +273,69 @@ async def list_events(
         rows = await conn.fetch(query, *params)
 
     return [_event_from_row(row) for row in rows]
+
+
+@app.get("/stats", response_model=DashboardStats)
+async def dashboard_stats():
+    """Dashboard summary shaped for the Next.js admin UI."""
+    today = date.today()
+
+    async with db_pool.acquire() as conn:
+        summary = await conn.fetchrow(
+            """
+            SELECT
+                COUNT(*) AS total_events,
+                COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS active_users
+            FROM analytics_events
+            WHERE created_at::date = $1
+            """,
+            today,
+        )
+        zone_rows = await conn.fetch(
+            """
+            SELECT zone, COUNT(*) AS count
+            FROM analytics_events
+            WHERE created_at::date = $1 AND zone IS NOT NULL
+            GROUP BY zone
+            ORDER BY count DESC
+            """,
+            today,
+        )
+        conversations_exists = await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'conversations'
+            )
+            """
+        )
+        messages_exists = await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'messages'
+            )
+            """
+        )
+
+        total_conversations = (
+            await conn.fetchval("SELECT COUNT(*) FROM conversations")
+            if conversations_exists
+            else 0
+        )
+        total_messages = (
+            await conn.fetchval("SELECT COUNT(*) FROM messages")
+            if messages_exists
+            else 0
+        )
+
+    return DashboardStats(
+        eventsToday=summary["total_events"] if summary else 0,
+        activeUsers=summary["active_users"] if summary else 0,
+        zoneUsage={row["zone"]: row["count"] for row in zone_rows},
+        totalConversations=total_conversations,
+        totalMessages=total_messages,
+    )
 
 
 @app.get("/stats/daily", response_model=DailyStats)

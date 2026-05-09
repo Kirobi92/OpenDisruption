@@ -48,7 +48,7 @@ http://<tailscale-magicdns>/status
 http://<tailscale-ip>/status
 ```
 
-`make webui-url` prints the detected URLs. `make tailscale-url` prints Tailscale URLs when the `tailscale` CLI is installed on the host.
+`make webui-url` prints the detected URLs. `make tailscale-url` prints the status URL, `make tailscale-doctor` checks whether this host is cleanly joined to the Tailnet, and `make tailscale-services` prints the useful OpenDisruption surfaces behind the Caddy edge.
 
 ---
 
@@ -57,6 +57,8 @@ http://<tailscale-ip>/status
 | Route | Backend | Guard |
 |---|---|---|
 | `/` / `/chat` / `/status` | `web:3000` | PWA login / JWT |
+| `/search` / `/upload` / `/settings` | `web:3000` | MVP knowledge and account flows |
+| `/dashboard/` / `/dashboard/tasks` / `/dashboard/services` | `dashboard:3003` | Operator/admin surfaces |
 | `/api/auth/*` | `auth:8000` | Auth service |
 | `/api/*` | `api:8000` | JWT for protected endpoints |
 | `/voice/*` | `voice-processing:8001` | Edge-only route |
@@ -73,10 +75,17 @@ Caddy rejects admin/workbench routes for clients outside private LAN ranges and 
 On the host that runs Docker:
 
 ```bash
-sudo tailscale up --ssh
+make tailscale-doctor
+make tailscale-connect
+# danach bewusst anwenden:
+sudo --preserve-env=TAILSCALE_AUTH_KEY,TAILSCALE_HOSTNAME,TAILSCALE_SSH,TAILSCALE_ACCEPT_DNS,TAILSCALE_ADVERTISE_TAGS \
+  bash infra/scripts/tailscale-connect.sh --apply
 # optional, if available in your plan:
 sudo tailscale set --auto-update
+make tailscale-services
 ```
+
+The helper reads a fresh `TAILSCALE_AUTH_KEY` only from the local `.env`. Never commit that value and never paste a live key into repository files.
 
 Recommended Tailnet settings:
 
@@ -84,6 +93,7 @@ Recommended Tailnet settings:
 - Do **not** enable Funnel for OpenDisruption.
 - Restrict device access via Tailscale ACLs to Sven/family devices.
 - Prefer Tailscale SSH over opening SSH on the LAN.
+- Keep `KIROBI_BIND_HOST=127.0.0.1`; only Caddy should remain reachable over the Tailnet.
 
 ---
 
@@ -96,9 +106,15 @@ KIROBI_ACCESS_MODE=lan-tailscale
 KIROBI_TAILSCALE_HOST=
 KIROBI_BIND_HOST=127.0.0.1
 KIROBI_PROXY_BIND_HOST=0.0.0.0
+TAILSCALE_AUTH_KEY=
+TAILSCALE_HOSTNAME=
+TAILSCALE_SSH=true
+TAILSCALE_ACCEPT_DNS=false
+KIROBI_TELEGRAM_WEB_BASE_URL=
 ```
 
 Keep `KIROBI_BIND_HOST=127.0.0.1` for the safest default. Only Caddy should be reachable from LAN/Tailscale.
+For Telegram URL buttons, set `KIROBI_TELEGRAM_WEB_BASE_URL` explicitly to the MagicDNS URL you actually want to open from mobile devices.
 
 ---
 
@@ -108,3 +124,4 @@ Keep `KIROBI_BIND_HOST=127.0.0.1` for the safest default. Only Caddy should be r
 - Do not use Tailscale Funnel for FAMILY_PRIVATE/SACRED workflows.
 - Use strong first-run values for `JWT_SECRET_KEY`, `OPENWEBUI_SECRET_KEY`, `FLOWISE_PASSWORD`, `POSTGRES_PASSWORD`.
 - `KIROBI_PUBLIC_ORIGINS` may remain empty: auth/api now allow localhost, `.local`, RFC1918 LAN IPs and Tailscale `100.64.0.0/10` by safe regex instead of wildcard CORS.
+- Treat `/open-webui/`, `/flowise/` and `/qdrant/dashboard` as admin/workbench routes: reachable over Tailscale, but not for public sharing.

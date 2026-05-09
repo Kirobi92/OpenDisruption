@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Core Supervisor
 Autonomous 24/7 orchestration and self-development system
@@ -20,6 +22,9 @@ from typing import Dict, List, Optional, Any
 import asyncpg
 import httpx
 from pydantic import BaseModel
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 # Optional integration with the local-first kirobi_core package. We
 # import lazily so the supervisor still runs on environments where the
@@ -462,6 +467,8 @@ class KirobiSupervisor:
                     async with session.get(f"{self.config.OLLAMA_HOST}/api/tags") as resp:
                         if resp.status == 200:
                             health_status['ollama'] = 'healthy'
+                        else:
+                            health_status['ollama'] = 'unhealthy'
             except Exception as e:
                 logger.warning(f"Ollama health check failed: {e}")
                 health_status['ollama'] = 'unhealthy'
@@ -473,16 +480,34 @@ class KirobiSupervisor:
                     async with session.get(f"{self.config.VOICE_SERVICE_URL}/health") as resp:
                         if resp.status == 200:
                             health_status['voice'] = 'healthy'
+                        else:
+                            health_status['voice'] = 'unhealthy'
             except Exception as e:
                 logger.warning(f"Voice service health check failed: {e}")
                 health_status['voice'] = 'unhealthy'
+
+            # Check Qdrant
+            try:
+                import aiohttp
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(
+                        f"http://{self.config.QDRANT_HOST}:{self.config.QDRANT_PORT}/collections"
+                    ) as resp:
+                        if resp.status == 200:
+                            health_status['qdrant'] = 'healthy'
+                        else:
+                            health_status['qdrant'] = 'unhealthy'
+            except Exception as e:
+                logger.warning(f"Qdrant health check failed: {e}")
+                health_status['qdrant'] = 'unhealthy'
 
             self.stats['last_health_check'] = datetime.now()
 
             await self.log_event(
                 'health_check',
                 'info',
-                f"Health check completed: {health_status}"
+                f"Health check completed: {health_status}",
+                metadata=health_status,
             )
 
             return health_status

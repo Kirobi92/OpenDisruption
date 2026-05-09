@@ -28,6 +28,8 @@ const ALLOWED_PATH_PREFIXES = [
   '/health',
   '/api/health',
   '/api/tags',   // Ollama model list
+  '/control',
+  '/dashboard',
   '/tasks',
   '/stats',
 ];

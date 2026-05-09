@@ -29,7 +29,7 @@ Nach Analyse aller laufenden Sessions, des Backlogs und des aktuellen Repo-Zusta
 | Phase 2 | 🟢 DONE | CI-Merge ausstehend |
 | Phase 3 | 🟢 DONE | CI-Merge ausstehend; `obsidian/agents/*/00-Index.md` MOCs generiert |
 | Phase 4 | ⚪ PENDING | **Alle 6 Deliverables offen** — das ist der kritische Pfad |
-| Phase 5 | ⚪ GATED | Wartet auf Phase 4 + Docker Secrets |
+| Phase 5 | ⚪ GATED | Wartet auf Phase 4 + lokale `.env` |
 | Phase 6 | ⚪ PENDING | Wartet auf Phase 5 |
 
 **Test-Baseline:** 477 passed, 27 skipped (Stand 2026-05-08) — stabil.
@@ -113,7 +113,7 @@ Begründung: Die Reihenfolge-Garantie aus `ROADMAP.md` ist nicht verhandelbar. P
 
 1. **Sven-Sign-off Phase 0:** Muss formal erfolgen (Issue-Kommentar oder Label `keycodi:approved`) bevor Phase 4 startet
 2. **Desktop/Mobile Scope:** Was soll `apps/desktop/` können? Tauri-Shell um die PWA? Native Features? → Spec für Phase 7 nötig
-3. **Docker Secrets für Phase 5:** Sind `KIROBI_TELEGRAM_TOKEN_FILE` etc. lokal vorhanden?
+3. **Lokale `.env` für Phase 5:** Sind Telegram-Token, IDs und Opt-in-Werte lokal gesetzt?
 4. **Default Vault-Pfad (Phase 3 Hard-Blocker):** `obsidian/` in-Repo vs. `~/kidi-vault/` — Sven entscheidet
 
 ---

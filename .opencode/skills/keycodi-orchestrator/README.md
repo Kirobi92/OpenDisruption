@@ -13,4 +13,4 @@ Enthält vollständiges Workflow-Wissen: Architektur, Zonen-Policy, Agent-Regist
 
 ## Wichtige Dateien
 
-- `SKILL.md` — Vollständige, verifizierte Skill-Anweisungen (dies ist die kanonische Version; `.agents/skills/OpenDisruption/SKILL.md` gilt als veraltet)
+- `SKILL.md` — Vollständige, verifizierte Skill-Anweisungen (dies ist die repo-spezifische kanonische Version; `.agents/skills/OpenDisruption/SKILL.md` und `.claude/skills/OpenDisruption/SKILL.md` sind kompatible Mirrors für andere Laufzeiten)

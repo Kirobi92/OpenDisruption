@@ -19,6 +19,41 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 ---
 
+## GitHub-Abarbeitungsmodell
+
+Dieses Dokument ist nicht nur Richtung, sondern Backlog-Struktur.
+
+### Epics / Milestones
+
+- **Ein GitHub-Milestone pro Phase**
+- **Ein Epic-Issue pro Phase**
+- **Mehrere Unter-Issues pro Lieferumfang / Exit-Kriterium**
+
+### Pflicht-Labels
+
+- `phase:0` bis `phase:6`
+- `area:*` je betroffener Domäne
+- `type:feature|fix|docs|test|infra|security`
+- `gate:blocker|ready|passed`
+
+### Reihenfolge für GitHub-Issues
+
+1. Zuerst Blocker-/Gate-Issues
+2. Dann Vertrags-/Test-Issues
+3. Dann Implementierungs-Issues
+4. Dann Doku-/Polish-Issues
+
+### Minimaler Issue-Aufbau
+
+1. Ziel
+2. Scope in / out
+3. Betroffene Dateien / Services
+4. Verifikationsbefehl
+5. Definition of done
+6. Rollback / Revert-Hinweis
+
+---
+
 ## Phase 0 — Architektur-Sign-off (LAUFEND)
 
 **Ziel:** Architekturentscheidungen festschreiben, KeyCodi-HQ und Obsidian-Vault-Topologie bereitstellen — kein Runtime-Code.
@@ -35,13 +70,13 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 1. Sven hat Architektur abgenickt (Kommentar im PR oder Issue mit Label `keycodi:approved`).
 2. Drei offene Entscheidungen sind beantwortet:
    - Telegram: **Option A — Restricted Bridge**.
-   - Token-Storage: **Docker Secrets / `*_FILE`**.
+   - Token-Storage: **lokale `.env`**.
    - Installer: **repo-lokales `install.sh`, `--dry-run` als sicherer Default**.
 3. CI grün.
 4. README verlinkt auf `keycodi/` und `obsidian/`.
 
 **Hard-Blocker**
-- Telegram-Policy ist entschieden (Option A), aber Phase 5 bleibt gated bis Phase 4 grün ist und die Docker-Secret-Dateien lokal existieren.
+- Telegram-Policy ist entschieden (Option A), aber Phase 5 bleibt gated bis Phase 4 grün ist und die lokale `.env` vollständig vorhanden ist.
 
 ---
 
@@ -131,7 +166,7 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 ## Phase 5 — Telegram-Integration (GATED)
 
-**Voraussetzung:** Sven hat Option A aus `docs/agent/TELEGRAM-INTEGRATION.md` §2 gewählt. Phase 5 bleibt trotzdem gated bis Phasen 1–4 abgeschlossen und Docker Secrets lokal vorhanden sind.
+**Voraussetzung:** Sven hat Option A aus `docs/agent/TELEGRAM-INTEGRATION.md` §2 gewählt. Phase 5 bleibt trotzdem gated bis Phasen 1–4 abgeschlossen und die lokale `.env` vollständig vorhanden ist.
 
 **Lieferumfang (nur bei Option A)**
 - Sechs Bot-Handler in eigenen Containern, jeweils unter Profile `telegram`.
@@ -166,7 +201,25 @@ Detaillierte Tracking-Liste: `MILESTONES.md`. Phasen-Runbooks: `runbooks/phase-N
 
 Phasen sind **strikt linear**: 0 → 1 → 2 → 3 → 4 → (5) → 6.
 
-Phase 5 ist gewählt (Option A), bleibt aber durch Zone-Filter, Docker Secrets und explizites Opt-in geschützt. Alle Phasen müssen abgeschlossen sein, bevor die nächste startet.
+Phase 5 ist gewählt (Option A), bleibt aber durch Zone-Filter, lokale `.env`-Konfiguration und explizites Opt-in geschützt. Alle Phasen müssen abgeschlossen sein, bevor die nächste startet.
+
+---
+
+## Nächste GitHub-Arbeitspakete ab jetzt
+
+1. **Phase-0-Cleanup abschließen**
+   - Architektur-Sign-off dokumentieren
+   - Milestones/Status angleichen
+   - Root- und Bereichs-Instruktionen pflegen
+2. **Phase 4 vorbereiten**
+   - Epic für `KIDI + KEYBRODI` anlegen
+   - Unter-Issues für `collective_intelligence.py`, `orchestrator.py`, Routing-Tabelle, Metriken, Tests
+3. **Phase 5 weiter gated halten**
+   - Telegram nur Break/Fix und sichere `.env`-Konfiguration
+   - Keine Scope-Ausweitung vor grünem Phase-4-Gate
+4. **Phase 6 als Abschluss-Milestone**
+   - Installer-Polish
+   - README/Handbuch/Quick-Reference/Changelog angleichen
 
 ---
 

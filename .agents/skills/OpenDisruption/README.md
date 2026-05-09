@@ -8,10 +8,11 @@ version: "1.0"
 
 # .agents/skills/OpenDisruption
 
-Skill-Definitionen für das OpenDisruption-Ökosystem im `.agents`-Format (z.B. für Claude Code / OpenCode).
-Enthält die Skill-Beschreibung sowie Agent-Konfigurationen für externe KI-Laufzeiten.
+Kompatibilitäts-Skill für das OpenDisruption-Ökosystem im `.agents`-Format.
+Gedacht für Laufzeiten, die keine `.opencode/skills/` direkt laden, aber dennoch die
+verifizierten Repo-Konventionen und Sicherheitsregeln benötigen.
 
 ## Wichtige Dateien
 
-- `SKILL.md` — Skill-Beschreibung und Anweisungen (als veraltet markiert; kanonische Version liegt unter `.opencode/skills/`)
+- `SKILL.md` — Kompatibilitäts-Mirror des kanonischen Skills unter `.opencode/skills/keycodi-orchestrator/SKILL.md`
 - `agents/openai.yaml` — Agent-Konfiguration für OpenAI-kompatible Laufzeiten

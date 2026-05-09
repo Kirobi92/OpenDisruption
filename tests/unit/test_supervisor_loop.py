@@ -25,9 +25,17 @@ import pytest
 import sys
 import types
 
-for _mod in ("asyncpg", "httpx"):
-    if _mod not in sys.modules:
-        sys.modules[_mod] = types.ModuleType(_mod)
+if "asyncpg" not in sys.modules:
+    sys.modules["asyncpg"] = types.ModuleType("asyncpg")
+
+if "httpx" not in sys.modules:
+    _httpx = types.ModuleType("httpx")
+
+    class _AsyncClient:  # pragma: no cover - Test-Dummy für spätere patch()-Aufrufe
+        pass
+
+    _httpx.AsyncClient = _AsyncClient  # type: ignore[attr-defined]
+    sys.modules["httpx"] = _httpx
 
 # pydantic stub — provide a minimal BaseModel
 if "pydantic" not in sys.modules:

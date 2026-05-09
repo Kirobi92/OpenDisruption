@@ -1,11 +1,13 @@
-"""Pytest configuration: make the repository root importable.
+"""Pytest bootstrap for fresh-clone, stdlib-first test runs.
 
-This avoids needing an installed package or ``PYTHONPATH`` tweaks when
-running ``pytest`` from a fresh clone.
+The baseline unit suite should stay runnable from a fresh clone with only
+``pytest`` installed. Service-contract tests remain available when the
+optional FastAPI/service-stack dependencies are present.
 """
 
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import sys
 from pathlib import Path
@@ -15,8 +17,44 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 
+_OPTIONAL_SERVICE_STACK_MODULES = (
+    "asyncpg",
+    "dotenv",
+    "email_validator",
+    "fastapi",
+    "httpx",
+    "jose",
+    "multipart",
+    "passlib",
+    "qdrant_client",
+    "uvicorn",
+)
+_MISSING_OPTIONAL_SERVICE_STACK_MODULES = tuple(
+    module
+    for module in _OPTIONAL_SERVICE_STACK_MODULES
+    if importlib.util.find_spec(module) is None
+)
+
+_OPTIONAL_SERVICE_TESTS = {
+    "tests/unit/test_analytics_service.py",
+    "tests/unit/test_api_service.py",
+    "tests/unit/test_auth_service.py",
+    "tests/unit/test_embeddings_service.py",
+    "tests/unit/test_image_generation_service.py",
+    "tests/unit/test_ingest_service.py",
+    "tests/unit/test_keycodi_telegram_responder.py",
+    "tests/unit/test_media_processing_service.py",
+    "tests/unit/test_model_routing_service.py",
+    "tests/unit/test_music_generation_service.py",
+    "tests/unit/test_personal_memory_pipeline_contract.py",
+    "tests/unit/test_retrieval_service.py",
+    "tests/unit/test_telegram_service.py",
+    "tests/unit/test_video_generation_service.py",
+}
+
+
 def _register_hyphenated_service(dir_name: str, module_name: str) -> None:
-    """Registriert einen Service mit Bindestrich im Verzeichnisnamen als importierbares Modul.
+    """Registriert einen Service mit Bindestrich als importierbares Namespace-Paket.
 
     Beispiel: services/model-routing/main.py → services.model_routing.main
     """
@@ -34,30 +72,28 @@ def _register_hyphenated_service(dir_name: str, module_name: str) -> None:
         pkg.__package__ = pkg_name
         sys.modules[pkg_name] = pkg
 
-    # main.py des Service laden
-    main_name = f"{pkg_name}.main"
-    if main_name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(main_name, service_dir / "main.py")
-        if spec and spec.loader:
-            mod = importlib.util.module_from_spec(spec)
-            mod.__package__ = pkg_name
-            sys.modules[main_name] = mod
-            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    # main.py wird absichtlich NICHT eager geladen, damit pytest auf einem
+    # frischen Clone nicht an optionalen Service-Dependencies scheitert.
 
 
-# services/model-routing → services.model_routing
-_register_hyphenated_service("model-routing", "model_routing")
-# services/image-generation → services.image_generation
-_register_hyphenated_service("image-generation", "image_generation")
-# services/media-processing → services.media_processing
-_register_hyphenated_service("media-processing", "media_processing")
-# services/music-generation → services.music_generation
-_register_hyphenated_service("music-generation", "music_generation")
-# services/video-generation → services.video_generation
-_register_hyphenated_service("video-generation", "video_generation")
-# services/analytics-service → services.analytics_service
-_register_hyphenated_service("analytics-service", "analytics_service")
-# services/music-generation → services.music_generation
-_register_hyphenated_service("music-generation", "music_generation")
-# services/video-generation → services.video_generation
-_register_hyphenated_service("video-generation", "video_generation")
+for _dir_name, _module_name in (
+    ("model-routing", "model_routing"),
+    ("image-generation", "image_generation"),
+    ("media-processing", "media_processing"),
+    ("music-generation", "music_generation"),
+    ("video-generation", "video_generation"),
+    ("analytics-service", "analytics_service"),
+):
+    _register_hyphenated_service(_dir_name, _module_name)
+
+
+def pytest_ignore_collect(collection_path, path=None, config=None):  # type: ignore[no-untyped-def]
+    """Skip optional service tests when the service stack deps are absent."""
+    if not _MISSING_OPTIONAL_SERVICE_STACK_MODULES:
+        return False
+
+    try:
+        relative = Path(str(collection_path)).resolve().relative_to(_ROOT).as_posix()
+    except ValueError:
+        return False
+    return relative in _OPTIONAL_SERVICE_TESTS

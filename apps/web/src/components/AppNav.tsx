@@ -3,17 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  BoltIcon,
   ChatBubbleLeftRightIcon,
   CloudArrowUpIcon,
   MagnifyingGlassIcon,
   Cog6ToothIcon,
-  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
+  { href: '/control-center', label: 'Hub', icon: BoltIcon },
   { href: '/chat', label: 'Chat', icon: ChatBubbleLeftRightIcon },
   { href: '/search', label: 'Suche', icon: MagnifyingGlassIcon },
-  { href: '/knowledge-graph', label: 'Graph', icon: SparklesIcon },
   { href: '/upload', label: 'Upload', icon: CloudArrowUpIcon },
   { href: '/settings', label: 'Einstellungen', icon: Cog6ToothIcon },
 ];
@@ -32,7 +32,7 @@ export default function AppNav() {
     <>
       {/* Desktop Top-Bar */}
       <nav className="hidden md:flex items-center justify-between bg-gray-800 border-b border-gray-700 px-6 py-3">
-        <Link href="/chat" className="text-lg font-bold text-white hover:text-kirobi-400 transition-colors">
+        <Link href="/control-center" className="text-lg font-bold text-white hover:text-kirobi-400 transition-colors">
           Kirobi
         </Link>
         <div className="flex items-center space-x-1">

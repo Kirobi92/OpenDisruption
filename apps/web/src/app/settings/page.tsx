@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -13,6 +14,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { useClientSearchParams } from '@/lib/use-client-search-params';
 
 interface User {
   id: string;
@@ -27,14 +29,37 @@ interface Permission {
   can_write: boolean;
 }
 
+interface PermissionsResponse {
+  user_id: string;
+  username: string;
+  zones: Permission[];
+}
+
 type Theme = 'dark' | 'light';
+type SettingsSection = 'profile' | 'appearance' | 'password' | 'permissions' | 'runtime' | 'session';
+
+interface RuntimeProbe {
+  id: string;
+  label: string;
+  path: string;
+  status: 'online' | 'offline' | 'unknown';
+  detail: string;
+}
 
 export default function SettingsPage() {
   const router = useRouter();
+  const searchParams = useClientSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [theme, setTheme] = useState<Theme>('dark');
   const [loadingUser, setLoadingUser] = useState(true);
+  const [activeSection, setActiveSection] = useState<SettingsSection>('profile');
+  const [runtime, setRuntime] = useState<RuntimeProbe[]>([
+    { id: 'auth', label: 'Auth', path: '/api/auth/health', status: 'unknown', detail: 'wird geprüft' },
+    { id: 'api', label: 'API', path: '/api/health', status: 'unknown', detail: 'wird geprüft' },
+    { id: 'telegram', label: 'Telegram', path: '/telegram/health', status: 'unknown', detail: 'wird geprüft' },
+    { id: 'voice', label: 'Voice', path: '/voice/health', status: 'unknown', detail: 'wird geprüft' },
+  ]);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -67,6 +92,41 @@ export default function SettingsPage() {
     loadPermissions();
   }, []);
 
+  useEffect(() => {
+    const sectionParam = searchParams.get('section');
+    if (
+      sectionParam === 'profile' ||
+      sectionParam === 'appearance' ||
+      sectionParam === 'password' ||
+      sectionParam === 'permissions' ||
+      sectionParam === 'runtime' ||
+      sectionParam === 'session'
+    ) {
+      setActiveSection(sectionParam);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    void Promise.all(
+      runtime.map(async (entry) => {
+        try {
+          const response = await fetch(entry.path, { cache: 'no-store' });
+          return {
+            ...entry,
+            status: response.ok ? 'online' as const : 'offline' as const,
+            detail: `HTTP ${response.status}`,
+          };
+        } catch (error: unknown) {
+          return {
+            ...entry,
+            status: 'offline' as const,
+            detail: error instanceof Error ? error.message : 'unreachable',
+          };
+        }
+      })
+    ).then((entries) => setRuntime(entries));
+  }, []);
+
   const applyTheme = (t: Theme) => {
     if (t === 'light') {
       document.documentElement.classList.remove('dark');
@@ -95,8 +155,8 @@ export default function SettingsPage() {
 
   const loadPermissions = async () => {
     try {
-      const response = await getAxios().get<Permission[]>('/auth/me/permissions');
-      setPermissions(response.data);
+      const response = await getAxios().get<PermissionsResponse>('/auth/me/permissions');
+      setPermissions(response.data.zones ?? []);
     } catch {
       // Permissions endpoint may not exist yet — silently ignore
     }
@@ -174,7 +234,7 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => router.push('/chat')}
+              onClick={() => router.push('/control-center')}
               className="text-gray-400 hover:text-white transition-colors text-sm"
             >
               ← Zurück
@@ -192,7 +252,33 @@ export default function SettingsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <section className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="flex flex-wrap gap-2">
+            {[
+              ['profile', 'Profil'],
+              ['appearance', 'Design'],
+              ['password', 'Passwort'],
+              ['permissions', 'Zonen'],
+              ['runtime', 'Runtime'],
+              ['session', 'Sitzung'],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setActiveSection(id as SettingsSection)}
+                className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                  activeSection === id
+                    ? 'border-kirobi-500/30 bg-kirobi-500/10 text-kirobi-100'
+                    : 'border-gray-600 bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* User Info */}
+        {activeSection === 'profile' && (
         <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <div className="flex items-center space-x-4">
             <UserCircleIcon className="w-16 h-16 text-kirobi-500 flex-shrink-0" />
@@ -205,8 +291,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Theme Toggle */}
+        {activeSection === 'appearance' && (
         <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <div className="flex items-center space-x-3 mb-4">
             {theme === 'dark' ? (
@@ -236,8 +324,10 @@ export default function SettingsPage() {
             </button>
           </div>
         </section>
+        )}
 
         {/* Change Password */}
+        {activeSection === 'password' && (
         <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <div className="flex items-center space-x-3 mb-4">
             <KeyIcon className="w-5 h-5 text-kirobi-400" />
@@ -307,12 +397,19 @@ export default function SettingsPage() {
             </button>
           </form>
         </section>
+        )}
 
         {/* Zone Permissions */}
+        {activeSection === 'permissions' && (
         <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <div className="flex items-center space-x-3 mb-4">
             <ShieldCheckIcon className="w-5 h-5 text-kirobi-400" />
             <h2 className="text-lg font-semibold">Zonen-Berechtigungen</h2>
+          </div>
+
+          <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-200">
+            SACRED und QUARANTINE bleiben im MVP bewusst geschützt und tauchen nur dann auf,
+            wenn dein Konto dafür explizit lokale Rechte hat.
           </div>
 
           {permissions.length === 0 ? (
@@ -344,8 +441,72 @@ export default function SettingsPage() {
             </div>
           )}
         </section>
+        )}
+
+        {activeSection === 'runtime' && (
+        <section className="space-y-6">
+          <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold">Verknüpfte Laufzeit</h2>
+              <p className="mt-1 text-sm text-gray-400">
+                Diese Karten zeigen echte, angebundene Runtime-Signale statt statischer Deko.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {runtime.map((entry) => (
+                <div key={entry.id} className="rounded-xl border border-gray-600 bg-gray-900/60 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{entry.label}</p>
+                      <p className="mt-1 text-xs text-gray-500">{entry.path}</p>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      entry.status === 'online'
+                        ? 'bg-emerald-500/10 text-emerald-300'
+                        : entry.status === 'offline'
+                        ? 'bg-red-500/10 text-red-300'
+                        : 'bg-amber-500/10 text-amber-200'
+                    }`}>
+                      {entry.status}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-gray-400">{entry.detail}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold">Direkte Kontrollpfade</h2>
+              <p className="mt-1 text-sm text-gray-400">
+                Einstellungen bleiben mit echten Oberflächen verbunden: Ops, Workbench und Remote-Zugriff.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Link href="/control-center" className="rounded-xl border border-gray-600 bg-gray-900/60 p-4 transition-colors hover:border-kirobi-500/40">
+                <p className="text-sm font-semibold text-white">Control Center</p>
+                <p className="mt-1 text-sm text-gray-400">Agentische Empfehlungen, Signale und zentrale Oberflächen.</p>
+              </Link>
+              <Link href="/dashboard/services" className="rounded-xl border border-gray-600 bg-gray-900/60 p-4 transition-colors hover:border-kirobi-500/40">
+                <p className="text-sm font-semibold text-white">Service Matrix</p>
+                <p className="mt-1 text-sm text-gray-400">Live-Status, Ports und Health-Probes aller Dienste.</p>
+              </Link>
+              <Link href="/workbench?surface=open-webui" className="rounded-xl border border-gray-600 bg-gray-900/60 p-4 transition-colors hover:border-kirobi-500/40">
+                <p className="text-sm font-semibold text-white">Embedded Workbench</p>
+                <p className="mt-1 text-sm text-gray-400">Open WebUI, Flowise und Qdrant innerhalb der Shell öffnen.</p>
+              </Link>
+              <Link href="/status" className="rounded-xl border border-gray-600 bg-gray-900/60 p-4 transition-colors hover:border-kirobi-500/40">
+                <p className="text-sm font-semibold text-white">Remote / Edge Status</p>
+                <p className="mt-1 text-sm text-gray-400">Caddy-, LAN- und Tailscale-nahe Einstiegspfade im Überblick.</p>
+              </Link>
+            </div>
+          </section>
+        </section>
+        )}
 
         {/* Logout */}
+        {activeSection === 'session' && (
         <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <button
             onClick={handleLogout}
@@ -355,6 +516,7 @@ export default function SettingsPage() {
             <span>Abmelden</span>
           </button>
         </section>
+        )}
       </main>
     </div>
   );

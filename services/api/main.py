@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Kirobi Main API Service
 Zone: WORKSPACE
@@ -14,6 +16,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 import asyncpg
@@ -21,6 +24,10 @@ import httpx
 from dotenv import load_dotenv
 import aiofiles
 from pathlib import Path
+from urllib.parse import urlparse, urlunparse
+from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
+
+asyncpg = ensure_asyncpg_compat(asyncpg)
 
 try:
     from kirobi_core.analytics_client import track as _analytics_track
@@ -30,15 +37,42 @@ except Exception:  # noqa: BLE001
 
 load_dotenv()
 
+# Docker-internal services listen on container port 8000 even when the host port
+# differs. Normalize env-provided URLs so service-to-service calls stay reachable.
+_INTERNAL_SERVICE_PORTS = {
+    "api": 8000,
+    "auth": 8000,
+    "analytics": 8000,
+    "embeddings": 8000,
+    "ingest": 8000,
+    "model-routing": 8000,
+    "retrieval": 8000,
+}
+
+
+def _service_url(value: str) -> str:
+    parsed = urlparse(value)
+    host = parsed.hostname or ""
+    target_port = _INTERNAL_SERVICE_PORTS.get(host)
+    if not target_port or parsed.port in (None, target_port):
+        return value.rstrip("/")
+    netloc = f"{host}:{target_port}"
+    return urlunparse(parsed._replace(netloc=netloc)).rstrip("/")
+
+
 # Configuration
 DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{os.getenv('POSTGRES_PASSWORD', 'changeme')}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth:8000")
+AUTH_SERVICE_URL = _service_url(os.getenv("AUTH_SERVICE_URL", "http://auth:8000"))
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
-RETRIEVAL_SERVICE_URL = os.getenv("RETRIEVAL_SERVICE_URL", "http://retrieval:8006")
+RETRIEVAL_SERVICE_URL = _service_url(os.getenv("RETRIEVAL_SERVICE_URL", "http://retrieval:8006"))
+MODEL_ROUTING_SERVICE_URL = _service_url(os.getenv("MODEL_ROUTING_SERVICE_URL", "http://model-routing:8009"))
+VOICE_SERVICE_URL = _service_url(os.getenv("VOICE_SERVICE_URL", "http://voice-processing:8001"))
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "/data/uploads"))
 OLLAMA_FALLBACK_MODEL = "llama3.1:8b"
+MVP_ALLOWED_ZONES = ("PUBLIC", "WORKSPACE", "FAMILY_PRIVATE")
+MVP_REFUSED_ZONES = {"SACRED", "QUARANTINE"}
 # Verzeichnis wird lazy beim ersten Upload erstellt, nicht beim Import
 
 # Security
@@ -132,6 +166,13 @@ class Conversation(BaseModel):
 class MessageCreate(BaseModel):
     content: str
     attachments: Optional[List[str]] = []
+    model: Optional[str] = None
+    agent: Optional[str] = None
+    reasoning_mode: str = "normal"
+    source_modes: List[str] = Field(default_factory=lambda: ["local"])
+    web_search: bool = False
+    deep_research: bool = False
+    show_reasoning: bool = True
 
 
 class ChatMessage(BaseModel):
@@ -175,11 +216,131 @@ class Message(BaseModel):
 class FileUploadResponse(BaseModel):
     id: str
     filename: str
+    original_filename: str
     file_path: str
     file_size: int
     mime_type: Optional[str]
     zone: str
+    processed: bool = False
+    metadata: dict = Field(default_factory=dict)
     created_at: datetime
+
+
+class DashboardTask(BaseModel):
+    id: str
+    title: str
+    description: Optional[str] = None
+    status: str
+    priority: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    agent: Optional[str] = None
+    zone: str = "WORKSPACE"
+    last_error: Optional[str] = None
+    operator_hint: str = ""
+
+
+class DashboardTasksResponse(BaseModel):
+    tasks: List[DashboardTask]
+
+
+class ControlEvent(BaseModel):
+    timestamp: datetime
+    event_type: str
+    severity: str
+    message: str
+
+
+class ControlActionItem(BaseModel):
+    id: str
+    title: str
+    status: str
+    priority: str
+    agent: Optional[str] = None
+    zone: str = "WORKSPACE"
+    last_error: Optional[str] = None
+    operator_hint: str
+
+
+class OperatorControlStatus(BaseModel):
+    supervisorAvailable: bool
+    autonomousMode: str
+    humanGateZones: List[str] = Field(default_factory=list)
+    queueDepth: int
+    pendingTasks: int
+    activeTasks: int
+    completedTasks: int
+    blockedTasks: int
+    deadLetterTasks: int
+    attentionRequired: int
+    lastEventAt: Optional[datetime] = None
+    lastHealthCheckAt: Optional[datetime] = None
+    health: dict[str, str] = Field(default_factory=dict)
+    recentEvents: List[ControlEvent] = Field(default_factory=list)
+    attentionTasks: List[ControlActionItem] = Field(default_factory=list)
+    operatorGuidance: List[str] = Field(default_factory=list)
+
+
+class UISearchRequest(BaseModel):
+    query: str = Field(..., min_length=1, max_length=2000)
+    zone: Optional[str] = Field(default=None, max_length=32)
+    limit: int = Field(default=10, ge=1, le=50)
+    score_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    family_private_approved: bool = False
+
+
+class UISearchResult(BaseModel):
+    id: str
+    score: float
+    source: str
+    zone: str
+    snippet: str
+    title: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+
+class UISearchResponse(BaseModel):
+    query: str
+    zone: str
+    total: int
+    collection: str
+    local_only: bool = True
+    approval_required: bool = False
+    family_private_approved: bool = False
+    refusal_semantics: str = "zone-aware"
+    results: List[UISearchResult]
+
+
+class TextUploadCreate(BaseModel):
+    content: str = Field(..., min_length=1, max_length=50000)
+    title: Optional[str] = Field(default=None, max_length=200)
+    zone: str = Field(default="WORKSPACE", max_length=32)
+    human_approved: bool = False
+    approval_note: Optional[str] = Field(default=None, max_length=500)
+
+
+class ChatRuntimeOptions(BaseModel):
+    available_models: List[str]
+    default_model: str
+    current_defaults: dict = Field(default_factory=dict)
+    agent_options: List[dict] = Field(default_factory=list)
+    reasoning_modes: List[dict] = Field(default_factory=list)
+    source_modes: List[dict] = Field(default_factory=list)
+    voice: dict = Field(default_factory=dict)
+
+
+class DashboardActivityItem(BaseModel):
+    id: str
+    surface: str
+    kind: str
+    actor: str
+    summary: str
+    zone: Optional[str] = None
+    created_at: datetime
+
+
+class DashboardActivityResponse(BaseModel):
+    items: List[DashboardActivityItem]
 
 
 def _json_field(value, fallback):
@@ -203,13 +364,388 @@ def _message_from_row(row: asyncpg.Record) -> Message:
     return Message(**data)
 
 
+def _upload_from_row(row: asyncpg.Record) -> "FileUploadResponse":
+    data = dict(row)
+    data["metadata"] = _json_field(data.get("metadata"), {})
+    return FileUploadResponse(**data)
+
+
+def _upload_policy_metadata(
+    zone: str,
+    *,
+    human_approved: bool = False,
+    approval_note: Optional[str] = None,
+) -> dict:
+    clean_note = (approval_note or "").strip() or None
+    metadata = {
+        "zone_policy": zone,
+        "storage_mode": "local-first-file-backed",
+        "local_only": True,
+        "approval_required": zone == "FAMILY_PRIVATE",
+        "human_approved": False,
+        "approval_note": clean_note,
+        "refusal_semantics": "zone-aware",
+    }
+    if zone in {"PUBLIC", "WORKSPACE"}:
+        return metadata
+    if zone == "FAMILY_PRIVATE":
+        if not human_approved or not clean_note:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "FAMILY_PRIVATE uploads require explicit local human approval "
+                    "and a non-empty approval_note."
+                ),
+            )
+        metadata["human_approved"] = True
+        metadata["refusal_semantics"] = "family-private-requires-human-approval"
+        return metadata
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"{zone} is protected and not available in the MVP surface")
+
+
+def _safe_upload_path(path_value: str) -> Path:
+    path = Path(path_value).resolve()
+    upload_root = UPLOAD_DIR.resolve()
+    if path != upload_root and upload_root not in path.parents:
+        raise HTTPException(status_code=403, detail="Upload path outside configured upload directory")
+    return path
+
+
+def _search_title(source: str) -> str:
+    name = Path(source).name
+    return name or source
+
+
+def _reasoning_mode_label(mode: str) -> str:
+    return {
+        "off": "Denken aus",
+        "weak": "schwach",
+        "normal": "normal",
+        "deep": "tiefgründig",
+        "ultra-deep": "ULTRA-DEEP",
+    }.get(mode, mode)
+
+
+def _agent_prompt(agent: Optional[str]) -> str:
+    normalized = (agent or "kirobi").strip().lower()
+    prompts = {
+        "kirobi": "Du bist Kirobi, der lokale Hauptassistent.",
+        "hermes": "Du agierst im Stil von Hermes: analytisch, planend und strukturierend.",
+        "opencode": "Du agierst im Stil von Opencode: coding-orientiert, präzise, umsetzungsnah.",
+        "researcher": "Du agierst wie ein lokaler Research-Agent: quellenbewusst, syntheseorientiert.",
+        "strategist": "Du agierst wie ein Strategist-Agent: priorisiert, abwägend, fokussiert auf Entscheidungen.",
+    }
+    return prompts.get(normalized, prompts["kirobi"])
+
+
+async def _chat_runtime_options_payload() -> ChatRuntimeOptions:
+    models = [OLLAMA_FALLBACK_MODEL]
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"{MODEL_ROUTING_SERVICE_URL}/models")
+            if response.status_code == 200:
+                payload = response.json()
+                models = payload.get("models") or models
+    except Exception:
+        pass
+
+    voice_payload = {"available": False}
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"{VOICE_SERVICE_URL}/models/info")
+            if response.status_code == 200:
+                voice_payload = {"available": True, **response.json()}
+    except Exception:
+        pass
+
+    return ChatRuntimeOptions(
+        available_models=models,
+        default_model=models[0] if models else OLLAMA_FALLBACK_MODEL,
+        current_defaults={
+            "chat": "llama3.1:8b",
+            "admin_chat": "llama3.1:70b",
+            "reasoning": "deepseek-r1:7b",
+            "code": "qwen2.5-coder:7b",
+        },
+        agent_options=[
+            {"id": "kirobi", "label": "Kirobi", "description": "Allround lokaler Hauptassistent"},
+            {"id": "hermes", "label": "Hermes", "description": "Analyse, Struktur, Schlussfolgerung"},
+            {"id": "opencode", "label": "Opencode", "description": "Coding- und Implementierungsstil"},
+            {"id": "researcher", "label": "Researcher", "description": "Quellen- und Synthese-Fokus"},
+            {"id": "strategist", "label": "Strategist", "description": "Planung, Priorisierung, Entscheidungen"},
+        ],
+        reasoning_modes=[
+            {"id": "off", "label": "aus"},
+            {"id": "weak", "label": "schwach"},
+            {"id": "normal", "label": "normal"},
+            {"id": "deep", "label": "tiefgründig"},
+            {"id": "ultra-deep", "label": "ULTRA-DEEP"},
+        ],
+        source_modes=[
+            {"id": "local", "label": "Local RAG", "active": True},
+            {"id": "websearch", "label": "Websearch intent", "active": False},
+            {"id": "deep-research", "label": "Deep Research intent", "active": False},
+        ],
+        voice=voice_payload,
+    )
+
+
+async def _select_chat_model(requested_model: Optional[str], *, reasoning_mode: str, deep_research: bool, agent: Optional[str]) -> tuple[str, str]:
+    if requested_model:
+        return requested_model, "manuell gewählt"
+
+    task_type = "reasoning" if reasoning_mode in {"deep", "ultra-deep"} or deep_research or (agent or "").lower() in {"hermes", "researcher", "strategist"} else "chat"
+    prefer_fast = reasoning_mode in {"off", "weak"}
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                f"{MODEL_ROUTING_SERVICE_URL}/route",
+                json={
+                    "task_type": task_type,
+                    "context_length": 0,
+                    "prefer_fast": prefer_fast,
+                    "agent": agent,
+                },
+            )
+            if response.status_code == 200:
+                payload = response.json()
+                return payload.get("model", OLLAMA_FALLBACK_MODEL), payload.get("reason", "routing")
+    except Exception:
+        pass
+
+    return OLLAMA_FALLBACK_MODEL, "Fallback auf lokales Chat-Modell"
+
+
+def _build_visible_reasoning_summary(
+    *,
+    agent: Optional[str],
+    reasoning_mode: str,
+    source_modes: List[str],
+    web_search: bool,
+    deep_research: bool,
+    used_rag_context: bool,
+    selected_model_reason: str,
+    show_reasoning: bool,
+) -> dict:
+    source_trace = ["local-rag" if used_rag_context else "local-no-rag"]
+    if web_search:
+        source_trace.append("websearch-requested-not-yet-executed")
+    if deep_research:
+        source_trace.append("deep-research-requested-not-yet-executed")
+
+    return {
+        "agent": (agent or "kirobi").lower(),
+        "reasoning_mode": reasoning_mode,
+        "reasoning_label": _reasoning_mode_label(reasoning_mode),
+        "show_reasoning": show_reasoning,
+        "visible_reasoning_summary": [
+            f"Agent-Persona: {(agent or 'kirobi').lower()}",
+            f"Denkmodus: {_reasoning_mode_label(reasoning_mode)}",
+            f"Quellenmodus: {', '.join(source_modes) if source_modes else 'local'}",
+            f"Routing: {selected_model_reason}",
+            "Hinweis: Es wird nur eine sichtbare Kurzspur gezeigt, keine rohe versteckte Chain-of-Thought.",
+        ],
+        "source_trace": source_trace,
+    }
+
+
+def _task_zone(metadata_value) -> str:
+    metadata = _json_field(metadata_value, {})
+    for key in ("zone", "input_zone", "output_zone"):
+        value = metadata.get(key)
+        if isinstance(value, str) and value:
+            return value.upper()
+    return "WORKSPACE"
+
+
+def _operator_hint(status_value: str, last_error: Optional[str] = None) -> str:
+    status = (status_value or "").lower()
+    if status == "blocked":
+        return last_error or "Human gate erforderlich: bitte Zone, Pfad oder Freigabe prüfen."
+    if status == "dead_letter":
+        return last_error or "Retry-Limit erreicht: Fehler triagieren und Task manuell neu einplanen."
+    if status == "in_progress":
+        return "Läuft lokal im Supervisor."
+    if status == "completed":
+        return "Lokal erfolgreich abgeschlossen."
+    if status == "failed":
+        return last_error or "Fehlgeschlagen: Ursache prüfen."
+    return "Wartet auf lokale Supervisor-Ausführung."
+
+
+def _upstream_detail(response: httpx.Response, fallback: str) -> str:
+    try:
+        data = response.json()
+    except ValueError:
+        return fallback
+    return data.get("detail") or data.get("error") or fallback
+
+
+def _normalize_zone(zone: Optional[str], *, default: Optional[str] = None) -> Optional[str]:
+    normalized = (zone or default or "").strip().upper() or None
+    if normalized is None:
+        return None
+    if normalized in MVP_REFUSED_ZONES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{normalized} is protected and not available in the MVP surface",
+        )
+    if normalized not in MVP_ALLOWED_ZONES:
+        raise HTTPException(status_code=400, detail=f"Unsupported zone: {normalized}")
+    return normalized
+
+
+async def _resolve_zones_for_user(user_id: str, zone: Optional[str], permission_type: str = "read") -> List[str]:
+    requested_zone = _normalize_zone(zone)
+    async with db_pool.acquire() as conn:
+        if requested_zone:
+            row = await conn.fetchrow(
+                "SELECT can_read, can_write FROM zone_permissions WHERE user_id = $1 AND zone = $2",
+                user_id,
+                requested_zone,
+            )
+            allowed = bool(row and row["can_read" if permission_type == "read" else "can_write"])
+            if not allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"No {permission_type} permission for zone {requested_zone}",
+                )
+            return [requested_zone]
+
+        rows = await conn.fetch(
+            "SELECT zone, can_read, can_write FROM zone_permissions WHERE user_id = $1",
+            user_id,
+        )
+
+    column = "can_read" if permission_type == "read" else "can_write"
+    allowed_zones = [
+        row["zone"]
+        for row in rows
+        if row["zone"] in MVP_ALLOWED_ZONES and row[column]
+    ]
+    return allowed_zones or ["WORKSPACE"]
+
+
+def _extract_text_payload(content: bytes, filename: str, mime_type: Optional[str]) -> tuple[Optional[str], str]:
+    suffix = Path(filename).suffix.lower()
+    is_text_like = (
+        (mime_type or "").startswith("text/")
+        or suffix in {".txt", ".md", ".markdown", ".json", ".csv", ".yaml", ".yml"}
+    )
+    if not is_text_like:
+        return None, "metadata-only"
+
+    text_content = content.decode("utf-8", errors="ignore").strip()
+    if not text_content:
+        return None, "metadata-only"
+    return text_content[:20000], "local-search-ready"
+
+
+def _upload_metadata(
+    *,
+    kind: str,
+    original_filename: str,
+    content_text: Optional[str],
+    status_label: str,
+    extra: Optional[dict] = None,
+) -> dict:
+    preview = (content_text or "").strip().replace("\n", " ")[:220]
+    metadata = {
+        "kind": kind,
+        "ingest_status": status_label,
+        "searchable": bool(content_text),
+        "preview": preview,
+        "title": original_filename,
+    }
+    if content_text:
+        metadata["text_content"] = content_text
+        metadata["char_count"] = len(content_text)
+    if extra:
+        metadata.update(extra)
+    return metadata
+
+
+async def _search_local_uploads(query: str, user_id: str, zones: List[str], limit: int) -> List[UISearchResult]:
+    if not zones:
+        return []
+
+    pattern = f"%{query.strip()}%"
+    async with db_pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, original_filename, file_path, zone, created_at, metadata
+            FROM file_uploads
+            WHERE user_id = $1
+              AND zone = ANY($2::text[])
+              AND (
+                    original_filename ILIKE $3
+                 OR COALESCE(metadata->>'title', '') ILIKE $3
+                 OR COALESCE(metadata->>'preview', '') ILIKE $3
+                 OR COALESCE(metadata->>'text_content', '') ILIKE $3
+              )
+            ORDER BY created_at DESC
+            LIMIT $4
+            """,
+            user_id,
+            zones,
+            pattern,
+            limit,
+        )
+
+    results: List[UISearchResult] = []
+    lowered = query.lower()
+    for row in rows:
+        metadata = _json_field(row.get("metadata"), {})
+        text_blob = " ".join(
+            [
+                row.get("original_filename", ""),
+                metadata.get("title", ""),
+                metadata.get("preview", ""),
+                metadata.get("text_content", ""),
+            ]
+        ).lower()
+        score = 0.65
+        if lowered and lowered in text_blob:
+            score = 0.82
+        snippet = metadata.get("preview") or metadata.get("text_content") or row["original_filename"]
+        results.append(
+            UISearchResult(
+                id=f"upload:{row['id']}",
+                score=score,
+                source=row["file_path"],
+                zone=row["zone"],
+                snippet=snippet[:280],
+                title=metadata.get("title") or row["original_filename"],
+                created_at=row["created_at"],
+            )
+        )
+    return results
+
+
+def _merge_search_results(*result_sets: List[UISearchResult], limit: int) -> List[UISearchResult]:
+    merged: dict[str, UISearchResult] = {}
+    for result_set in result_sets:
+        for item in result_set:
+            key = f"{item.zone}:{item.source}:{item.id}"
+            current = merged.get(key)
+            if current is None or item.score > current.score:
+                merged[key] = item
+    return sorted(merged.values(), key=lambda item: item.score, reverse=True)[:limit]
+
+
+def _is_mock_pool(pool: object) -> bool:
+    return bool(getattr(pool, "_is_mock_object", False))
+
+
 # Lifespan context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
-    await _ensure_schema()
+    if not _is_mock_pool(db_pool):
+        await _ensure_schema()
     yield
     # Shutdown
     await db_pool.close()
@@ -290,20 +826,43 @@ async def check_zone_permission(user_id: str, zone: str, permission_type: str = 
         return bool(result and result[column])
 
 
-async def _get_rag_context(query: str, zone: str = "WORKSPACE") -> str:
-    """Holt RAG-Kontext vom Retrieval-Service. Gibt leeren String bei Fehler zurück."""
+async def _get_rag_context(
+    query: str,
+    user_id: str,
+    zone: str = "WORKSPACE",
+    *,
+    family_private_approved: bool = False,
+) -> str:
+    """Holt Retrieval-Kontext und ergänzt lokales Upload-Wissen als Fallback."""
+    parts: List[str] = []
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.post(
                 f"{RETRIEVAL_SERVICE_URL}/rag",
-                json={"query": query, "zone": zone, "limit": 3},
+                json={
+                    "query": query,
+                    "zone": zone,
+                    "limit": 3,
+                    "family_private_approved": family_private_approved,
+                },
             )
             if resp.status_code == 200:
                 data = resp.json()
-                return data.get("context", "")
+                context = data.get("context", "")
+                if context:
+                    parts.append(context)
     except Exception:
         pass
-    return ""
+
+    local_results = await _search_local_uploads(query, user_id, [zone], limit=3)
+    if local_results:
+        local_context = "\n".join(
+            f"- {item.title or item.source} [{item.zone}]: {item.snippet}"
+            for item in local_results
+        )
+        parts.append(f"Lokale Upload-Treffer:\n{local_context}")
+
+    return "\n\n".join(part for part in parts if part)
 
 
 async def call_ollama(prompt: str, model: str = "llama3.1:8b", system_prompt: Optional[str] = None) -> str:
@@ -362,6 +921,119 @@ async def health_check():
         return {"status": "unhealthy", "error": str(e)}
 
 
+@app.get("/health/db")
+async def health_db():
+    """Dedicated DB health endpoint for dashboard/system probes."""
+    try:
+        async with db_pool.acquire() as conn:
+            await conn.fetchval("SELECT 1")
+        return {"status": "healthy", "service": "db"}
+    except Exception as exc:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "service": "db", "error": str(exc)},
+        )
+
+
+@app.get("/health/qdrant")
+async def health_qdrant():
+    """Dedicated Qdrant health endpoint for dashboard/system probes."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(f"http://{QDRANT_HOST}:{QDRANT_PORT}/collections")
+        if response.status_code == 200:
+            return {"status": "healthy", "service": "qdrant"}
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "service": "qdrant",
+                "error": f"HTTP {response.status_code}",
+            },
+        )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "service": "qdrant", "error": str(exc)},
+        )
+
+
+@app.post("/rag/search", response_model=UISearchResponse)
+async def rag_search(
+    request: UISearchRequest,
+    current_user: User = Depends(get_current_user),
+) -> UISearchResponse:
+    """Compatibility search endpoint for the PWA search page."""
+    requested_zone = _normalize_zone(request.zone)
+    if requested_zone == "FAMILY_PRIVATE" and not request.family_private_approved:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="FAMILY_PRIVATE search requires explicit local human approval.",
+        )
+    zones = await _resolve_zones_for_user(current_user.id, request.zone, permission_type="read")
+    if requested_zone is None:
+        zones = [zone for zone in zones if zone != "FAMILY_PRIVATE"]
+    retrieval_results: List[UISearchResult] = []
+    retrieval_collection = "local-uploads"
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            for zone in zones:
+                response = await client.post(
+                    f"{RETRIEVAL_SERVICE_URL}/search",
+                    json={
+                        "query": request.query,
+                        "zone": zone,
+                        "limit": request.limit,
+                        "score_threshold": request.score_threshold,
+                        "family_private_approved": request.family_private_approved if zone == "FAMILY_PRIVATE" else False,
+                    },
+                )
+                if response.status_code != 200:
+                    if response.status_code < 500 and request.zone:
+                        detail = _upstream_detail(response, "Search failed")
+                        raise HTTPException(status_code=response.status_code, detail=detail)
+                    continue
+
+                payload = response.json()
+                retrieval_collection = payload.get("collection", retrieval_collection)
+                retrieval_results.extend(
+                    UISearchResult(
+                        id=str(item["id"]),
+                        score=item["score"],
+                        source=item.get("source") or "unknown",
+                        zone=item.get("zone") or zone,
+                        snippet=item.get("text", ""),
+                        title=_search_title(item.get("source") or "unknown"),
+                    )
+                    for item in payload.get("results", [])
+                )
+    except HTTPException:
+        raise
+    except Exception:
+        pass
+
+    local_results = await _search_local_uploads(request.query, current_user.id, zones, request.limit)
+    merged = _merge_search_results(retrieval_results, local_results, limit=request.limit)
+    response_zone = requested_zone or ("MULTI" if len(zones) > 1 else (zones[0] if zones else "WORKSPACE"))
+    collection = "multi-zone" if len(zones) > 1 else retrieval_collection
+    return UISearchResponse(
+        query=request.query,
+        zone=response_zone,
+        total=len(merged),
+        collection=collection,
+        local_only=True,
+        approval_required=response_zone == "FAMILY_PRIVATE",
+        family_private_approved=request.family_private_approved,
+        refusal_semantics=(
+            "family-private-requires-human-approval"
+            if response_zone == "FAMILY_PRIVATE"
+            else "zone-aware"
+        ),
+        results=merged,
+    )
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat_compat(request: ChatRequest):
     """Lightweight WORKSPACE chat endpoint for Voice/Desktop clients.
@@ -388,10 +1060,18 @@ SACRED Inhalte zu und erfinde keine privaten Details."""
     )
 
 
+@app.get("/chat/runtime/options", response_model=ChatRuntimeOptions)
+async def chat_runtime_options(
+    _current_user: User = Depends(get_current_user),
+) -> ChatRuntimeOptions:
+    return await _chat_runtime_options_payload()
+
+
 @app.get("/conversations", response_model=List[Conversation])
 async def list_conversations(
     current_user: User = Depends(get_current_user),
-    archived: bool = False
+    archived: bool = False,
+    limit: int = 100
 ):
     """List all conversations for current user"""
     async with db_pool.acquire() as conn:
@@ -401,9 +1081,11 @@ async def list_conversations(
             FROM conversations
             WHERE user_id = $1 AND archived = $2
             ORDER BY updated_at DESC
+            LIMIT $3
             """,
             current_user.id,
-            archived
+            archived,
+            limit,
         )
         return [Conversation(**dict(row)) for row in rows]
 
@@ -414,6 +1096,7 @@ async def create_conversation(
     current_user: User = Depends(get_current_user)
 ):
     """Create a new conversation"""
+    conversation_data.zone = _normalize_zone(conversation_data.zone, default="FAMILY_PRIVATE")
     # Check zone permission
     if not await check_zone_permission(current_user.id, conversation_data.zone, "write"):
         raise HTTPException(
@@ -502,18 +1185,43 @@ async def create_message(
     # Save user message
     message_id = str(uuid.uuid4())
     async with db_pool.acquire() as conn:
-        await conn.execute(
-            """
-            INSERT INTO messages (id, conversation_id, user_id, role, content, attachments)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            """,
-            message_id,
-            conversation_id,
-            current_user.id,
-            "user",
-            message_data.content,
-            json.dumps(message_data.attachments or [])
-        )
+        user_message_metadata = {
+            "agent": (message_data.agent or "kirobi").lower(),
+            "reasoning_mode": message_data.reasoning_mode,
+            "source_modes": message_data.source_modes,
+            "web_search": message_data.web_search,
+            "deep_research": message_data.deep_research,
+            "show_reasoning": message_data.show_reasoning,
+        }
+        serialized_metadata = json.dumps(user_message_metadata)
+        serialized_attachments = json.dumps(message_data.attachments or [])
+        if message_data.attachments:
+            await conn.execute(
+                """
+                INSERT INTO messages (id, conversation_id, user_id, role, content, attachments, metadata)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                """,
+                message_id,
+                conversation_id,
+                current_user.id,
+                "user",
+                message_data.content,
+                serialized_attachments,
+                serialized_metadata,
+            )
+        else:
+            await conn.execute(
+                """
+                INSERT INTO messages (id, conversation_id, user_id, role, content, metadata)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                """,
+                message_id,
+                conversation_id,
+                current_user.id,
+                "user",
+                message_data.content,
+                serialized_metadata,
+            )
 
         # Get conversation history for context
         history = await conn.fetch(
@@ -535,33 +1243,56 @@ Zone: {conversation.zone}
 
 Sei persönlich, hilfsbereit und respektiere die Privatsphäre der Familie.
 Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
+    system_prompt = f"{_agent_prompt(message_data.agent)}\nDenkmodus: {_reasoning_mode_label(message_data.reasoning_mode)}.\nQuellenmodus: {', '.join(message_data.source_modes) if message_data.source_modes else 'local'}.\n{system_prompt}"
 
     # RAG-Kontext aus Wissensbasis holen (Zone: WORKSPACE für allgemeine Anfragen)
     rag_zone = conversation.zone if conversation.zone in ("PUBLIC", "WORKSPACE", "FAMILY_PRIVATE") else "WORKSPACE"
-    rag_context = await _get_rag_context(message_data.content, zone=rag_zone)
+    rag_context = await _get_rag_context(
+        message_data.content,
+        current_user.id,
+        zone=rag_zone,
+        family_private_approved=conversation.zone == "FAMILY_PRIVATE",
+    )
     if rag_context:
         system_prompt = f"Relevanter Kontext aus der Wissensbasis:\n{rag_context}\n\n{system_prompt}"
 
     # Call Ollama for response
-    model = "llama3.1:8b"
-    if current_user.role == "admin":
-        model = "llama3.1:70b"
+    default_model = "llama3.1:70b" if current_user.role == "admin" else "llama3.1:8b"
+    model, model_reason = await _select_chat_model(
+        message_data.model,
+        reasoning_mode=message_data.reasoning_mode,
+        deep_research=message_data.deep_research,
+        agent=message_data.agent,
+    )
+    if not model:
+        model = default_model
 
     ai_response = await call_ollama(message_data.content, model=model, system_prompt=system_prompt)
+    assistant_metadata = _build_visible_reasoning_summary(
+        agent=message_data.agent,
+        reasoning_mode=message_data.reasoning_mode,
+        source_modes=message_data.source_modes,
+        web_search=message_data.web_search,
+        deep_research=message_data.deep_research,
+        used_rag_context=bool(rag_context),
+        selected_model_reason=model_reason,
+        show_reasoning=message_data.show_reasoning,
+    )
 
     # Save AI response
     ai_message_id = str(uuid.uuid4())
     async with db_pool.acquire() as conn:
         await conn.execute(
             """
-            INSERT INTO messages (id, conversation_id, role, content, model_used)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO messages (id, conversation_id, role, content, model_used, metadata)
+            VALUES ($1, $2, $3, $4, $5, $6)
             """,
             ai_message_id,
             conversation_id,
             "assistant",
             ai_response,
-            model
+            model,
+            json.dumps(assistant_metadata),
         )
         asyncio.create_task(_analytics_track("conversation", zone=conversation.zone, model=model))
 
@@ -586,15 +1317,23 @@ Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
 async def upload_file(
     file: UploadFile = File(...),
     zone: str = Form("FAMILY_PRIVATE"),
+    human_approved: bool = Form(False),
+    approval_note: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user)
 ):
     """Upload a file (image, document, etc.)"""
+    zone = _normalize_zone(zone, default="FAMILY_PRIVATE")
     # Check zone permission
     if not await check_zone_permission(current_user.id, zone, "write"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"No write permission for zone {zone}"
         )
+    trust_metadata = _upload_policy_metadata(
+        zone,
+        human_approved=human_approved,
+        approval_note=approval_note,
+    )
 
     # Create user-specific upload directory
     user_upload_dir = UPLOAD_DIR / current_user.username / zone.lower()
@@ -612,14 +1351,25 @@ async def upload_file(
             await f.write(content)
 
         file_size = len(content)
+        text_content, ingest_status = _extract_text_payload(content, file.filename, file.content_type)
+        metadata = _upload_metadata(
+            kind="file",
+            original_filename=file.filename,
+            content_text=text_content,
+            status_label=ingest_status,
+            extra={
+                "mime_type": file.content_type or "application/octet-stream",
+                **trust_metadata,
+            },
+        )
 
         # Save to database
         file_id = str(uuid.uuid4())
         async with db_pool.acquire() as conn:
             await conn.execute(
                 """
-                INSERT INTO file_uploads (id, user_id, filename, original_filename, file_path, file_size, mime_type, zone)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                INSERT INTO file_uploads (id, user_id, filename, original_filename, file_path, file_size, mime_type, zone, processed, metadata)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 """,
                 file_id,
                 current_user.id,
@@ -628,18 +1378,84 @@ async def upload_file(
                 str(file_path),
                 file_size,
                 file.content_type,
-                zone
+                zone,
+                bool(text_content),
+                json.dumps(metadata),
             )
 
             row = await conn.fetchrow(
-                "SELECT id, filename, file_path, file_size, mime_type, zone, created_at FROM file_uploads WHERE id = $1",
+                "SELECT id, filename, original_filename, file_path, file_size, mime_type, zone, processed, metadata, created_at FROM file_uploads WHERE id = $1",
                 file_id
             )
 
-        return FileUploadResponse(**dict(row))
+        asyncio.create_task(_analytics_track("upload", zone=zone, model="local-file"))
+        return _upload_from_row(row)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
+
+
+@app.post("/uploads/text", response_model=FileUploadResponse, status_code=status.HTTP_201_CREATED)
+async def upload_text(
+    payload: TextUploadCreate,
+    current_user: User = Depends(get_current_user),
+):
+    """Persist a text snippet as a local-first knowledge upload."""
+    zone = _normalize_zone(payload.zone, default="WORKSPACE")
+    if not await check_zone_permission(current_user.id, zone, "write"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"No write permission for zone {zone}",
+        )
+    trust_metadata = _upload_policy_metadata(
+        zone,
+        human_approved=payload.human_approved,
+        approval_note=payload.approval_note,
+    )
+
+    user_upload_dir = UPLOAD_DIR / current_user.username / zone.lower()
+    user_upload_dir.mkdir(parents=True, exist_ok=True)
+
+    slug = (payload.title or "notiz").strip().replace("/", "-")[:40] or "notiz"
+    unique_filename = f"{uuid.uuid4()}-{slug}.txt"
+    file_path = user_upload_dir / unique_filename
+    content = payload.content.strip()
+    metadata = _upload_metadata(
+        kind="text",
+        original_filename=payload.title or "Schnellnotiz",
+        content_text=content[:20000],
+        status_label="local-search-ready",
+        extra={"source": "pwa-text-upload", **trust_metadata},
+    )
+
+    async with aiofiles.open(file_path, "w", encoding="utf-8") as handle:
+        await handle.write(content)
+
+    file_id = str(uuid.uuid4())
+    async with db_pool.acquire() as conn:
+        await conn.execute(
+            """
+            INSERT INTO file_uploads (id, user_id, filename, original_filename, file_path, file_size, mime_type, zone, processed, metadata)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            """,
+            file_id,
+            current_user.id,
+            unique_filename,
+            payload.title or "Schnellnotiz",
+            str(file_path),
+            len(content.encode("utf-8")),
+            "text/plain",
+            zone,
+            True,
+            json.dumps(metadata),
+        )
+        row = await conn.fetchrow(
+            "SELECT id, filename, original_filename, file_path, file_size, mime_type, zone, processed, metadata, created_at FROM file_uploads WHERE id = $1",
+            file_id,
+        )
+
+    asyncio.create_task(_analytics_track("text_upload", zone=zone, model="local-text"))
+    return _upload_from_row(row)
 
 
 @app.get("/uploads", response_model=List[FileUploadResponse])
@@ -648,11 +1464,17 @@ async def list_uploads(
     current_user: User = Depends(get_current_user)
 ):
     """List uploaded files for current user"""
+    zone = _normalize_zone(zone) if zone else None
+    if zone and not await check_zone_permission(current_user.id, zone, "read"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"No read permission for zone {zone}",
+        )
     async with db_pool.acquire() as conn:
         if zone:
             rows = await conn.fetch(
                 """
-                SELECT id, filename, file_path, file_size, mime_type, zone, created_at
+                SELECT id, filename, original_filename, file_path, file_size, mime_type, zone, processed, metadata, created_at
                 FROM file_uploads
                 WHERE user_id = $1 AND zone = $2
                 ORDER BY created_at DESC
@@ -663,7 +1485,7 @@ async def list_uploads(
         else:
             rows = await conn.fetch(
                 """
-                SELECT id, filename, file_path, file_size, mime_type, zone, created_at
+                SELECT id, filename, original_filename, file_path, file_size, mime_type, zone, processed, metadata, created_at
                 FROM file_uploads
                 WHERE user_id = $1
                 ORDER BY created_at DESC
@@ -671,7 +1493,350 @@ async def list_uploads(
                 current_user.id
             )
 
-        return [FileUploadResponse(**dict(row)) for row in rows]
+        return [_upload_from_row(row) for row in rows]
+
+
+@app.get("/uploads/{file_id}/download")
+async def download_upload(
+    file_id: str,
+    current_user: User = Depends(get_current_user),
+):
+    """Download a previously uploaded file owned by the current user."""
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT id, filename, original_filename, file_path, file_size, mime_type, zone, created_at
+            FROM file_uploads
+            WHERE id = $1 AND user_id = $2
+            """,
+            file_id,
+            current_user.id,
+        )
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    if not await check_zone_permission(current_user.id, row["zone"], "read"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"No read permission for zone {row['zone']}",
+        )
+
+    file_path = _safe_upload_path(row["file_path"])
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Stored file not found")
+
+    return FileResponse(
+        path=file_path,
+        filename=row["original_filename"],
+        media_type=row["mime_type"] or "application/octet-stream",
+    )
+
+
+@app.get("/tasks", response_model=DashboardTasksResponse)
+async def list_dashboard_tasks(limit: int = 50) -> DashboardTasksResponse:
+    """Read-only dashboard task feed backed by supervisor_tasks."""
+    async with db_pool.acquire() as conn:
+        table_exists = await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'supervisor_tasks'
+            )
+            """
+        )
+        if not table_exists:
+            return DashboardTasksResponse(tasks=[])
+
+        try:
+            rows = await conn.fetch(
+                """
+                SELECT id, name, description, status, priority, assigned_agent, created_at, updated_at, metadata, last_error
+                FROM supervisor_tasks
+                ORDER BY created_at DESC
+                LIMIT $1
+                """,
+                limit,
+            )
+        except asyncpg.exceptions.UndefinedColumnError:
+            rows = await conn.fetch(
+                """
+                SELECT id, name, description, status, priority, assigned_agent, created_at, updated_at, metadata, NULL::text AS last_error
+                FROM supervisor_tasks
+                ORDER BY created_at DESC
+                LIMIT $1
+                """,
+                limit,
+            )
+
+    return DashboardTasksResponse(
+        tasks=[
+            DashboardTask(
+                id=row["id"],
+                title=row["name"],
+                description=row["description"],
+                status=row["status"],
+                priority=row["priority"],
+                created_at=row["created_at"],
+                updated_at=row["updated_at"],
+                agent=row["assigned_agent"],
+                zone=_task_zone(row["metadata"]),
+                last_error=row["last_error"],
+                operator_hint=_operator_hint(row["status"], row["last_error"]),
+            )
+            for row in rows
+        ]
+    )
+
+
+@app.get("/dashboard/activity", response_model=DashboardActivityResponse)
+async def dashboard_activity(limit: int = 12) -> DashboardActivityResponse:
+    """Summarise recent auth + knowledge activity for the admin dashboard."""
+    try:
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT * FROM (
+                    SELECT
+                        'auth:' || id::text AS id,
+                        created_at,
+                        'auth' AS surface,
+                        action AS kind,
+                        COALESCE(details->>'username', user_id, 'system') AS actor,
+                        CASE
+                            WHEN action = 'login' THEN 'Lokaler Login'
+                            WHEN action = 'logout' THEN 'Abmeldung'
+                            WHEN action = 'change_password' THEN 'Passwort geändert'
+                            WHEN action = 'register' THEN 'Benutzer angelegt'
+                            ELSE action
+                        END AS summary,
+                        NULL::text AS zone
+                    FROM audit_log
+                    UNION ALL
+                    SELECT
+                        'upload:' || f.id AS id,
+                        f.created_at,
+                        'knowledge' AS surface,
+                        CASE WHEN f.processed THEN 'indexed_upload' ELSE 'upload' END AS kind,
+                        COALESCE(u.display_name, u.username, f.user_id) AS actor,
+                        'Upload: ' || f.original_filename AS summary,
+                        f.zone
+                    FROM file_uploads f
+                    LEFT JOIN users u ON u.id = f.user_id
+                    UNION ALL
+                    SELECT
+                        'conversation:' || c.id AS id,
+                        c.updated_at AS created_at,
+                        'chat' AS surface,
+                        'conversation' AS kind,
+                        COALESCE(u.display_name, u.username, c.user_id) AS actor,
+                        'Gespräch aktiv: ' || COALESCE(NULLIF(c.title, ''), 'Neues Gespräch') AS summary,
+                        c.zone
+                    FROM conversations c
+                    LEFT JOIN users u ON u.id = c.user_id
+                ) activity
+                ORDER BY created_at DESC
+                LIMIT $1
+                """,
+                limit,
+            )
+    except Exception:
+        return DashboardActivityResponse(items=[])
+
+    return DashboardActivityResponse(
+        items=[
+            DashboardActivityItem(
+                id=row["id"],
+                surface=row["surface"],
+                kind=row["kind"],
+                actor=row["actor"],
+                summary=row["summary"],
+                zone=row["zone"],
+                created_at=row["created_at"],
+            )
+            for row in rows
+        ]
+    )
+
+
+@app.get("/control/status", response_model=OperatorControlStatus)
+async def operator_control_status() -> OperatorControlStatus:
+    """Operator-facing local control summary for the dashboard MVP."""
+    default_guidance = [
+        "Autonomie bleibt lokal und deterministisch; keine Cloud-Routing-Entscheidung im Supervisor.",
+        "FAMILY_PRIVATE, QUARANTINE und SACRED bleiben human-gated und werden fail-closed geblockt.",
+        "Das Dashboard-Proxy erlaubt nur read-only Status- und Kontrollpfade.",
+    ]
+
+    async with db_pool.acquire() as conn:
+        tasks_exists = await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'supervisor_tasks'
+            )
+            """
+        )
+        events_exists = await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'supervisor_events'
+            )
+            """
+        )
+
+        if not tasks_exists and not events_exists:
+            return OperatorControlStatus(
+                supervisorAvailable=False,
+                autonomousMode="local-only-deterministic",
+                humanGateZones=["FAMILY_PRIVATE", "QUARANTINE", "SACRED"],
+                queueDepth=0,
+                pendingTasks=0,
+                activeTasks=0,
+                completedTasks=0,
+                blockedTasks=0,
+                deadLetterTasks=0,
+                attentionRequired=0,
+                operatorGuidance=[
+                    "Supervisor noch nicht initialisiert: starte den lokalen Supervisor für Live-Kontrolle.",
+                    *default_guidance,
+                ],
+            )
+
+        counts = {
+            "pending": 0,
+            "in_progress": 0,
+            "completed": 0,
+            "blocked": 0,
+            "dead_letter": 0,
+        }
+        attention_rows = []
+        if tasks_exists:
+            counts_row = await conn.fetchrow(
+                """
+                SELECT
+                    COUNT(*) FILTER (WHERE status = 'pending') AS pending,
+                    COUNT(*) FILTER (WHERE status = 'in_progress') AS in_progress,
+                    COUNT(*) FILTER (WHERE status = 'completed') AS completed,
+                    COUNT(*) FILTER (WHERE status = 'blocked') AS blocked,
+                    COUNT(*) FILTER (WHERE status = 'dead_letter') AS dead_letter
+                FROM supervisor_tasks
+                """
+            )
+            if counts_row:
+                counts.update({key: counts_row[key] or 0 for key in counts})
+            try:
+                attention_rows = await conn.fetch(
+                    """
+                    SELECT id, name, status, priority, assigned_agent, metadata, last_error
+                    FROM supervisor_tasks
+                    WHERE status IN ('blocked', 'dead_letter', 'pending', 'in_progress')
+                    ORDER BY
+                        CASE status
+                            WHEN 'blocked' THEN 0
+                            WHEN 'dead_letter' THEN 1
+                            WHEN 'in_progress' THEN 2
+                            ELSE 3
+                        END,
+                        updated_at DESC,
+                        created_at DESC
+                    LIMIT 5
+                    """
+                )
+            except asyncpg.exceptions.UndefinedColumnError:
+                attention_rows = await conn.fetch(
+                    """
+                    SELECT id, name, status, priority, assigned_agent, metadata, NULL::text AS last_error
+                    FROM supervisor_tasks
+                    WHERE status IN ('blocked', 'dead_letter', 'pending', 'in_progress')
+                    ORDER BY
+                        CASE status
+                            WHEN 'blocked' THEN 0
+                            WHEN 'dead_letter' THEN 1
+                            WHEN 'in_progress' THEN 2
+                            ELSE 3
+                        END,
+                        updated_at DESC,
+                        created_at DESC
+                    LIMIT 5
+                    """
+                )
+
+        recent_rows = []
+        health_row = None
+        if events_exists:
+            recent_rows = await conn.fetch(
+                """
+                SELECT timestamp, event_type, severity, message
+                FROM supervisor_events
+                ORDER BY timestamp DESC
+                LIMIT 6
+                """
+            )
+            health_row = await conn.fetchrow(
+                """
+                SELECT timestamp, metadata
+                FROM supervisor_events
+                WHERE event_type = 'health_check'
+                ORDER BY timestamp DESC
+                LIMIT 1
+                """
+            )
+
+    health = _json_field(health_row["metadata"], {}) if health_row else {}
+    unhealthy = [
+        name
+        for name, value in health.items()
+        if isinstance(value, str) and value not in {"healthy", "unknown"}
+    ]
+
+    guidance = list(default_guidance)
+    if counts["blocked"]:
+        guidance.insert(0, f"{counts['blocked']} Task(s) warten auf Operator-Freigabe oder Policy-Triage.")
+    if counts["dead_letter"]:
+        guidance.insert(0, f"{counts['dead_letter']} Task(s) sind im Dead-Letter und brauchen manuelles Requeue.")
+    if unhealthy:
+        guidance.insert(0, f"Unhealthy Services laut letztem Supervisor-Check: {', '.join(unhealthy)}.")
+
+    return OperatorControlStatus(
+        supervisorAvailable=bool(tasks_exists or events_exists),
+        autonomousMode="local-only-deterministic",
+        humanGateZones=["FAMILY_PRIVATE", "QUARANTINE", "SACRED"],
+        queueDepth=counts["pending"] + counts["in_progress"] + counts["blocked"],
+        pendingTasks=counts["pending"],
+        activeTasks=counts["in_progress"],
+        completedTasks=counts["completed"],
+        blockedTasks=counts["blocked"],
+        deadLetterTasks=counts["dead_letter"],
+        attentionRequired=counts["blocked"] + counts["dead_letter"],
+        lastEventAt=recent_rows[0]["timestamp"] if recent_rows else None,
+        lastHealthCheckAt=health_row["timestamp"] if health_row else None,
+        health=health,
+        recentEvents=[
+            ControlEvent(
+                timestamp=row["timestamp"],
+                event_type=row["event_type"],
+                severity=row["severity"],
+                message=row["message"],
+            )
+            for row in recent_rows
+        ],
+        attentionTasks=[
+            ControlActionItem(
+                id=row["id"],
+                title=row["name"],
+                status=row["status"],
+                priority=row["priority"],
+                agent=row["assigned_agent"],
+                zone=_task_zone(row["metadata"]),
+                last_error=row["last_error"],
+                operator_hint=_operator_hint(row["status"], row["last_error"]),
+            )
+            for row in attention_rows
+        ],
+        operatorGuidance=guidance,
+    )
 
 
 if __name__ == "__main__":

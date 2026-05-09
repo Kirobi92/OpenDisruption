@@ -12,6 +12,8 @@ Admin-Dashboard für das OpenDisruption-Ökosystem — eigenständige Next.js 15
 
 ## Features
 
+- **Operator-Control-Panel** — lokaler Supervisor-Status, Human-Gates, Dead-Letter und letzte Kontroll-Events
+- **Produkt-Aktivität** — jüngste Logins, Uploads und Gesprächsbewegungen für MVP-Operatoren
 - **Services-Panel** — Health-Check aller 7 Backend-Services mit Latenz-Anzeige und Fortschrittsbalken
 - **Analytics-Panel** — Events heute, aktive User, Zonen-Nutzung (WORKSPACE, FAMILY_PRIVATE, PUBLIC, SACRED)
 - **Benutzer-Panel** — Übersicht der Familie Darusi (Sven, Samira, Sineo)

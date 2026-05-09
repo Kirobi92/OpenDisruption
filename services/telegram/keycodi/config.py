@@ -23,6 +23,24 @@ WEBHOOK_PATH: str = "/telegram/webhook"
 PORT: int = int(os.getenv("TELEGRAM_SERVICE_PORT", "8005"))
 TELEGRAM_API: str = f"https://api.telegram.org/bot{BOT_TOKEN}"
 TELEGRAM_FILE_API: str = f"https://api.telegram.org/file/bot{BOT_TOKEN}"
+_telegram_web_base = (
+    os.getenv("KIROBI_TELEGRAM_WEB_BASE_URL", "").strip()
+    or os.getenv("KIROBI_TAILSCALE_HOST", "").strip()
+    or os.getenv("TAILSCALE_HOSTNAME", "").strip()
+    or os.getenv("KIROBI_HOSTNAME", "kirobi.local").strip()
+)
+if _telegram_web_base and not _telegram_web_base.startswith(("http://", "https://")):
+    _telegram_web_base = f"http://{_telegram_web_base}"
+KIROBI_TELEGRAM_WEB_BASE_URL: str = _telegram_web_base.rstrip("/")
+_telegram_web_base = (
+    os.getenv("KIROBI_TELEGRAM_WEB_BASE_URL", "").strip()
+    or os.getenv("KIROBI_TAILSCALE_HOST", "").strip()
+    or os.getenv("TAILSCALE_HOSTNAME", "").strip()
+    or os.getenv("KIROBI_HOSTNAME", "kirobi.local").strip()
+)
+if _telegram_web_base and not _telegram_web_base.startswith(("http://", "https://")):
+    _telegram_web_base = f"http://{_telegram_web_base}"
+KIROBI_TELEGRAM_WEB_BASE_URL: str = _telegram_web_base.rstrip("/")
 
 # ─── Kirobi API / Auth ───────────────────────────────────────────────────────
 KIROBI_API_URL: str = os.getenv("KIROBI_API_URL", "http://api:8000").rstrip("/")

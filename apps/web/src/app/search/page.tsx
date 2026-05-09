@@ -8,6 +8,7 @@ import {
   DocumentTextIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
+import { useClientSearchParams } from '@/lib/use-client-search-params';
 
 type Zone = 'ALL' | 'PUBLIC' | 'WORKSPACE' | 'FAMILY_PRIVATE';
 
@@ -19,6 +20,30 @@ interface SearchResult {
   snippet: string;
   title?: string;
   created_at?: string;
+}
+
+interface SearchResponse {
+  query: string;
+  zone: string;
+  total: number;
+  collection: string;
+  local_only: boolean;
+  approval_required: boolean;
+  family_private_approved: boolean;
+  refusal_semantics: string;
+  results: SearchResult[];
+}
+
+interface Permission {
+  zone: Exclude<Zone, 'ALL'> | 'SACRED' | 'QUARANTINE';
+  can_read: boolean;
+  can_write: boolean;
+}
+
+interface PermissionsResponse {
+  user_id: string;
+  username: string;
+  zones: Permission[];
 }
 
 const ZONE_OPTIONS: { value: Zone; label: string }[] = [
@@ -45,12 +70,17 @@ function ScoreBadge({ score }: { score: number }) {
 
 export default function SearchPage() {
   const router = useRouter();
+  const searchParams = useClientSearchParams();
   const [query, setQuery] = useState('');
   const [zone, setZone] = useState<Zone>('ALL');
+  const [availableZones, setAvailableZones] = useState<Zone[]>(ZONE_OPTIONS.map((opt) => opt.value));
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [searchMeta, setSearchMeta] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState('');
+  const [familyApproval, setFamilyApproval] = useState(false);
+  const [autoSearchDone, setAutoSearchDone] = useState(false);
 
   const getAxios = () =>
     axios.create({
@@ -64,23 +94,56 @@ export default function SearchPage() {
     const token = localStorage.getItem('access_token');
     if (!token) {
       router.push('/');
+      return;
     }
-  }, []);
+    loadPermissions();
+  }, [router]);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  useEffect(() => {
+    const queryParam = searchParams.get('q') ?? '';
+    const zoneParam = searchParams.get('zone');
+    const approvedParam = searchParams.get('approved');
 
+    if (zoneParam === 'PUBLIC' || zoneParam === 'WORKSPACE' || zoneParam === 'FAMILY_PRIVATE') {
+      setZone(zoneParam);
+    }
+    if (approvedParam === '1' || approvedParam === 'true') {
+      setFamilyApproval(true);
+    }
+    if (queryParam) {
+      setQuery(queryParam);
+    }
+  }, [searchParams]);
+
+  const loadPermissions = async () => {
+    try {
+      const response = await getAxios().get<PermissionsResponse>('/auth/me/permissions');
+      const readable = response.data.zones
+        .filter((permission) => permission.can_read && permission.zone !== 'SACRED' && permission.zone !== 'QUARANTINE')
+        .map((permission) => permission.zone as Exclude<Zone, 'ALL'>);
+      setAvailableZones(['ALL', ...readable]);
+      if (zone !== 'ALL' && !readable.includes(zone)) {
+        setZone('ALL');
+      }
+    } catch {
+      // Keep default options.
+    }
+  };
+
+  const runSearch = async (queryValue: string, zoneValue: Zone, approvedValue: boolean) => {
+    if (!queryValue.trim()) return;
     setLoading(true);
     setError('');
     setSearched(true);
 
     try {
-      const payload: { query: string; zone?: string } = { query: query.trim() };
-      if (zone !== 'ALL') payload.zone = zone;
+      const payload: { query: string; zone?: string; family_private_approved?: boolean } = { query: queryValue.trim() };
+      if (zoneValue !== 'ALL') payload.zone = zoneValue;
+      if (zoneValue === 'FAMILY_PRIVATE') payload.family_private_approved = approvedValue;
 
-      const response = await getAxios().post<SearchResult[]>('/rag/search', payload);
-      setResults(response.data);
+      const response = await getAxios().post<SearchResponse>('/rag/search', payload);
+      setResults(response.data.results);
+      setSearchMeta(response.data);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.detail ?? 'Suche fehlgeschlagen.');
@@ -88,9 +151,32 @@ export default function SearchPage() {
         setError('Unbekannter Fehler bei der Suche.');
       }
       setResults([]);
+      setSearchMeta(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const queryParam = searchParams.get('q') ?? '';
+    if (!token || !queryParam || autoSearchDone) {
+      return;
+    }
+    setAutoSearchDone(true);
+    const zoneParam = searchParams.get('zone');
+    const approvedParam = searchParams.get('approved');
+    const requestedZone: Zone =
+      zoneParam === 'PUBLIC' || zoneParam === 'WORKSPACE' || zoneParam === 'FAMILY_PRIVATE'
+        ? zoneParam
+        : 'ALL';
+    const requestedApproval = approvedParam === '1' || approvedParam === 'true';
+    void runSearch(queryParam, requestedZone, requestedApproval);
+  }, [autoSearchDone, searchParams]);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await runSearch(query, zone, familyApproval);
   };
 
   return (
@@ -99,7 +185,7 @@ export default function SearchPage() {
       <header className="bg-gray-800 border-b border-gray-700 px-4 py-4">
         <div className="max-w-3xl mx-auto flex items-center space-x-3">
           <button
-            onClick={() => router.push('/chat')}
+            onClick={() => router.push('/control-center')}
             className="text-gray-400 hover:text-white transition-colors text-sm"
           >
             ← Zurück
@@ -116,7 +202,7 @@ export default function SearchPage() {
             <div className="flex items-center space-x-2">
               <FunnelIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
               <div className="flex flex-wrap gap-2">
-                {ZONE_OPTIONS.map((opt) => (
+                {ZONE_OPTIONS.filter((opt) => availableZones.includes(opt.value)).map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
@@ -134,6 +220,17 @@ export default function SearchPage() {
                 ))}
               </div>
             </div>
+            {zone === 'FAMILY_PRIVATE' && (
+              <label className="flex items-start gap-2 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-sm text-purple-100">
+                <input
+                  type="checkbox"
+                  checked={familyApproval}
+                  onChange={(e) => setFamilyApproval(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>Ich bestätige die lokale FAMILY_PRIVATE-Suche bewusst.</span>
+              </label>
+            )}
 
             {/* Search Input */}
             <div className="flex space-x-2">
@@ -150,7 +247,7 @@ export default function SearchPage() {
               </div>
               <button
                 type="submit"
-                disabled={loading || !query.trim()}
+                disabled={loading || !query.trim() || (zone === 'FAMILY_PRIVATE' && !familyApproval)}
                 className="px-6 py-3 bg-kirobi-600 hover:bg-kirobi-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
                 {loading ? (
@@ -165,6 +262,34 @@ export default function SearchPage() {
             </div>
           </form>
         </section>
+
+        <div className="rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-sm text-gray-300">
+          Suche läuft nur über freigegebene MVP-Zonen. SACRED und QUARANTINE werden ausdrücklich verweigert; FAMILY_PRIVATE braucht eine bewusste lokale Freigabe.
+        </div>
+        {searchParams.get('q') && (
+          <div className="rounded-xl border border-kirobi-500/30 bg-kirobi-500/10 px-4 py-3 text-sm text-kirobi-100">
+            Deeplink aktiv: Suchanfrage wurde aus Telegram oder einem externen Menü vorausgefüllt.
+          </div>
+        )}
+
+        {searchMeta && (
+          <div className="rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-xs text-gray-400">
+            Quelle: {searchMeta.collection} · Zone: {searchMeta.zone} · {searchMeta.total} Treffer
+          </div>
+        )}
+
+        {searchMeta && !error && (
+          <div className="rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-sm text-gray-300">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              <span>Zone: <strong>{searchMeta.zone}</strong></span>
+              <span>Quelle: <strong>{searchMeta.collection}</strong></span>
+              <span>{searchMeta.local_only ? 'lokal-only' : 'extern nutzbar'}</span>
+            </div>
+            <p className="mt-1 text-xs text-gray-400">
+              Vertrauensmodus: {searchMeta.refusal_semantics}
+            </p>
+          </div>
+        )}
 
         {/* Error */}
         {error && (
