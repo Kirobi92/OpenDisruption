@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-void-950: #040614;
+  --color-void-900: #0b0f24;
+  --color-void-800: #141932;
+  --color-aurora-cyan: #5eead4;
+  --color-aurora-violet: #a78bfa;
+  --color-aurora-magenta: #e879f9;
+  --color-aurora-gold: #fbbf24;
+  --color-aurora-rose: #fb7185;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --bg-void: theme(colors.void-950);
+  --bg-deep: theme(colors.void-900);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-soft: rgba(148, 163, 184, 0.1);
+  --accent-cyan: theme(colors.aurora-cyan);
+}
+
+body {
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+.glass-raised {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.text-gradient-aurora {
+  background: linear-gradient(110deg, #5eead4 0%, #a78bfa 50%, #e879f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}

@@ -250,6 +250,14 @@
 		}
 	}
 
+	# SvelteKit 3D Graph: /v2/* -> web-svelte:3007
+	redir /v2 /v2/ 308
+	handle /v2/* {
+		reverse_proxy web-svelte:3007 {
+			header_up Host {host}
+		}
+	}
+
 	# Everything else -> Next.js PWA on port 3000.
 	handle {
 		reverse_proxy web:3000 {
@@ -406,6 +414,14 @@
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /video-generation
 		reverse_proxy video-generation:8014
+	}
+
+	# SvelteKit 3D Graph: /v2/* -> web-svelte:3007
+	redir /v2 /v2/ 308
+	handle /v2/* {
+		reverse_proxy web-svelte:3007 {
+			header_up Host {host}
+		}
 	}
 
 	handle {

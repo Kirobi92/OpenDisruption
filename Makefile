@@ -8,7 +8,7 @@ ENV_FILE = .env
 
 .PHONY: help up down restart logs pull-models init status stack-status backup clean build \
         bootstrap interview autonomous-once autonomous-loop doctor test scan backlog \
-        pwa-up webui-up webui-url tailscale-url tailscale-doctor tailscale-connect tailscale-services keycodi reset-default-password \
+        pwa-up web-svelte-up webui-up webui-url tailscale-url tailscale-doctor tailscale-connect tailscale-services keycodi reset-default-password \
         test-kidi kidi-up kidi-down \
         test-agents agent-opencode agent-openclaw agent-hermes agent-obsidian agents-build \
         obsidian-daily obsidian-moc
@@ -271,6 +271,11 @@ pwa-up:
 	@echo "    https://$${KIROBI_HOSTNAME:-kirobi.local}/   (TLS via Caddy internal CA)"
 	@LAN_IP=$$(hostname -I 2>/dev/null | awk '{print $$1}'); \
 		[ -n "$$LAN_IP" ] && echo "    http://$$LAN_IP/                     (LAN-IP)"
+
+## SvelteKit Graph: Repo-Graph bauen und web-svelte + caddy starten
+web-svelte-up:
+	python3 infra/scripts/build-repo-graph.py --output apps/web-svelte/static/repo-graph.json
+	$(COMPOSE) up -d --build web-svelte caddy
 
 ## Zentrales Web UI für alle OpenDisruption-Teile starten (LAN + Tailscale)
 webui-up:

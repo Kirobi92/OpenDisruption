@@ -685,6 +685,29 @@ services:
       timeout: 10s
       retries: 3
 
+  web-svelte:
+    build:
+      context: ./apps/web-svelte
+      dockerfile: Dockerfile
+    container_name: kirobi-web-svelte
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:3007:3007"
+    environment:
+      - NODE_ENV=production
+      - PORT=3007
+      - HOST=0.0.0.0
+    depends_on:
+      - auth
+      - api
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3007/v2/login', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   caddy:
     image: caddy:2-alpine
     container_name: kirobi-caddy
@@ -707,6 +730,7 @@ services:
       - caddy_config:/config
     depends_on:
       - web
+      - web-svelte
       - dashboard
       - auth
       - api
