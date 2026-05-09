@@ -1,0 +1,4 @@
+# Tailscale-issued Let's Encrypt cert/key — generated locally per node.
+# Recreate via: bash infra/scripts/renew-tailscale-cert.sh
+*.crt
+*.key

@@ -264,13 +264,11 @@
 	}
 }
 
-# --- HTTPS (port 443) with internal CA --------------------------------------
-# Active only when KIROBI_HOSTNAME is set (e.g. kirobi.local). The matching
-# certificate is signed by Caddy's internal root and lives in the caddy_data
-# volume; trust it once on each device for the install prompt.
-{$KIROBI_HOSTNAME:kirobi.local} {
-	tls internal
-
+# --- HTTPS (port 443) -------------------------------------------------------
+# Two site addresses share the same route table via a snippet:
+#   * pop-os.taildd322d.ts.net -> real Let's Encrypt cert from `tailscale cert`
+#   * kirobi.local             -> Caddy's internal CA (trust once per device)
+(kirobi_routes) {
 	encode zstd gzip
 	@health path /healthz
 	respond @health "ok" 200
@@ -329,7 +327,6 @@
 		}
 	}
 
-	# Dashboard: /dashboard* -> http://dashboard:3003
 	redir /dashboard /dashboard/ 308
 	handle /dashboard/* {
 		reverse_proxy dashboard:3003 {
@@ -340,102 +337,71 @@
 	handle_path /api/auth/* {
 		reverse_proxy auth:8000
 	}
-
-	# Analytics API: /api/analytics/* -> http://analytics:8010/*
 	handle_path /api/analytics/* {
 		reverse_proxy analytics:8010
 	}
-
-	# Image-Generation API: /api/image-generation/* -> http://image-generation:8011/*
 	handle_path /api/image-generation/* {
 		reverse_proxy image-generation:8011
 	}
-
-	# Media-Processing API: /api/media-processing/* -> http://media-processing:8012/*
 	handle_path /api/media-processing/* {
 		reverse_proxy media-processing:8012
 	}
-
-	# Music-Generation API: /api/music-generation/* -> http://music-generation:8013/*
 	handle_path /api/music-generation/* {
 		reverse_proxy music-generation:8013
 	}
-
-	# Video-Generation API: /api/video-generation/* -> http://video-generation:8014/*
 	handle_path /api/video-generation/* {
 		reverse_proxy video-generation:8014
 	}
-
 	handle_path /voice/* {
 		reverse_proxy voice-processing:8001
 	}
 	handle_path /api/* {
 		reverse_proxy api:8000
 	}
-
-	# Telegram Webhook: /telegram/* -> http://telegram:8005/*
-	# PUBLIC — Telegram sendet von externen IPs; kein IP-Filter hier.
 	handle_path /telegram/* {
 		reverse_proxy telegram:8005
 	}
 
-	# Embeddings Service: /embeddings/* -> http://embeddings:8000/*
 	handle /embeddings/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /embeddings
 		reverse_proxy embeddings:8000
 	}
-
-	# Ingest Service: /ingest/* -> http://ingest:8000/*
 	handle /ingest/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /ingest
 		reverse_proxy ingest:8000
 	}
-
-	# Retrieval Service: /retrieval/* -> http://retrieval:8000/*
 	handle /retrieval/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /retrieval
 		reverse_proxy retrieval:8000
 	}
-
-	# Model-Routing Service: /model-routing/* -> http://model-routing:8009/*
 	handle /model-routing/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /model-routing
 		reverse_proxy model-routing:8009
 	}
-
-	# Analytics Service: /analytics/* -> http://analytics:8010/*
 	handle /analytics/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /analytics
 		reverse_proxy analytics:8010
 	}
-
-	# Image-Generation Service: /image-generation/* -> http://image-generation:8011/*
 	handle /image-generation/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /image-generation
 		reverse_proxy image-generation:8011
 	}
-
-	# Media-Processing Service: /media-processing/* -> http://media-processing:8012/*
 	handle /media-processing/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /media-processing
 		reverse_proxy media-processing:8012
 	}
-
-	# Music-Generation Service: /music-generation/* -> http://music-generation:8013/*
 	handle /music-generation/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /music-generation
 		reverse_proxy music-generation:8013
 	}
-
-	# Video-Generation Service: /video-generation/* -> http://video-generation:8014/*
 	handle /video-generation/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /video-generation
@@ -458,6 +424,19 @@
 		level INFO
 	}
 }
+
+# Tailscale hostname — real Let's Encrypt cert via `tailscale cert`.
+pop-os.taildd322d.ts.net {
+	tls /etc/caddy/certs/pop-os.taildd322d.ts.net.crt /etc/caddy/certs/pop-os.taildd322d.ts.net.key
+	import kirobi_routes
+}
+
+# kirobi.local — internal Caddy CA (browser must trust once via /data/caddy/pki).
+kirobi.local {
+	tls internal
+	import kirobi_routes
+}
+
 
 # --- Dedicated HTTPS service roots --------------------------------------------
 # Prefix proxies are fine for simple services, but Open WebUI/Flowise/Qdrant
