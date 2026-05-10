@@ -3,7 +3,6 @@ networks:
     driver: bridge
 
 volumes:
-  ollama_data:
   openwebui_data:
   qdrant_data:
   postgres_data:
@@ -19,10 +18,7 @@ volumes:
   hermes_data:
   openclaw_config_data:
   openclaw_workspace_data:
-  hf_cache:
-  hf_cache_image:
-  torch_cache:
-  torch_cache_image:
+  # KI-Modelle → Bind-Mounts nach /Datenspeicher/OpenDisruption_KI_Modelle (kein named volume mehr)
 
 services:
   ollama:
@@ -32,7 +28,7 @@ services:
     ports:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:${OLLAMA_PORT:-11434}:11434"
     volumes:
-      - ollama_data:/root/.ollama
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/ollama:/root/.ollama
     networks:
       - kirobi-net
     environment:
@@ -169,7 +165,8 @@ services:
     volumes:
       - ./data/conversations:/data/conversations
       - ./data/recordings:/data/recordings
-      - ./data/piper-voices:/models/piper
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/piper:/models/piper
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/whisper:/root/.cache/huggingface
     environment:
       - WHISPER_MODEL=${WHISPER_MODEL:-large-v3}
       - WHISPER_DEVICE=${WHISPER_DEVICE:-cuda}
@@ -233,8 +230,8 @@ services:
       - IMAGE_STORAGE_PATH=/data/images
     volumes:
       - images_data:/data/images
-      - hf_cache_image:/data/hf-cache
-      - torch_cache_image:/data/torch-cache
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/huggingface-image:/data/hf-cache
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/torch-image:/data/torch-cache
     depends_on:
       - ollama
       - postgres
@@ -286,10 +283,12 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-kirobi}
       - OLLAMA_HOST=http://ollama:11434
       - MUSIC_STORAGE_PATH=/data/music
+      - HEARTMULA_MODEL_PATH=/data/heartmula
     volumes:
       - music_data:/data/music
-      - hf_cache:/data/hf-cache
-      - torch_cache:/data/torch-cache
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/huggingface:/data/hf-cache
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/torch:/data/torch-cache
+      - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/heartmula:/data/heartmula
     depends_on:
       - postgres
       - ollama
@@ -393,6 +392,7 @@ services:
       - KIROBI_DEFAULT_PASSWORD=${KIROBI_DEFAULT_PASSWORD:-}
       - KIROBI_DEFAULT_DISPLAY_NAME=${KIROBI_DEFAULT_DISPLAY_NAME:-Sven}
       - KIROBI_DEFAULT_ROLE=${KIROBI_DEFAULT_ROLE:-admin}
+      - KIROBI_FAMILY_USERS=${KIROBI_FAMILY_USERS:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -410,6 +410,8 @@ services:
     volumes:
       - uploads_data:/data/uploads
       - ./canon:/canon:ro
+      - ./experiences:/data/experiences:rw
+      - ./extracts/family-private:/data/family-private:rw
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -421,6 +423,8 @@ services:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - KIROBI_PUBLIC_ORIGINS=${KIROBI_PUBLIC_ORIGINS:-}
+      - KIROBI_USERSPACE_ROOT=/data/experiences/users
+      - KIROBI_FAMILY_SPACE_ROOT=/data/experiences/family
     depends_on:
       postgres:
         condition: service_healthy
