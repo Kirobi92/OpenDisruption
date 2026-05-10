@@ -6,3 +6,9 @@ pydantic>=2.7.0
 python-dotenv>=1.0.0
 Pillow>=10.0.0
 aiofiles>=23.2.1
+numpy<2
+huggingface_hub<0.26
+diffusers==0.27.2
+transformers==4.39.3
+accelerate==0.29.3
+safetensors

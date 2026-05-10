@@ -89,8 +89,47 @@ log = logging.getLogger("keycodi.main")
 # user_id → {"state": str, "task_name": str, "decision_id": str}
 _user_state: dict[int, dict] = {}
 
-# user_id → conversation_id (Kirobi-API)
+# user_id → conversation_id (Kirobi-API)  — DEPRECATED, use _conversation_by_user_agent
 _conversation_by_user: dict[int, str] = {}
+
+# (user_id, agent_id) → conversation_id (Kirobi-API) — pro Agent eigene Konversation
+_conversation_by_user_agent: dict[tuple[int, str], str] = {}
+
+# Multi-Agent-Katalog (synchron mit services/api/main.py agent_options)
+AGENT_CATALOG: list[dict[str, str]] = [
+    {"id": "keycodi",          "label": "🧭 KeyCodi",        "desc": "Master-Code-Orchestrator (lokal)"},
+    {"id": "copilot",          "label": "🤝 Copilot",         "desc": "Repo-Q&A mit Kontext"},
+    {"id": "kirobi",           "label": "🌌 Kirobi",          "desc": "Allround-Begleiter"},
+    {"id": "hermes",           "label": "🪶 Hermes",          "desc": "Reasoning & Synthese"},
+    {"id": "opencode",         "label": "🛠️ Opencode",        "desc": "Code-Workbench"},
+    {"id": "researcher",       "label": "🔬 Researcher",      "desc": "Recherche tief & breit"},
+    {"id": "strategist",       "label": "♟️ Strategist",      "desc": "Strategie & Entscheidungen"},
+    {"id": "kirobi-architect", "label": "🏛️ Architect",       "desc": "Architektur & Design"},
+    {"id": "kirobi-coder",     "label": "👨‍💻 Coder",          "desc": "Implementierung"},
+    {"id": "kirobi-frontend",  "label": "🎨 Frontend",        "desc": "UI & UX Code"},
+    {"id": "kirobi-ops",       "label": "⚙️ Ops",             "desc": "Infra & Deployment"},
+    {"id": "kirobi-docs",      "label": "📚 Docs",            "desc": "Dokumentation"},
+    {"id": "kirobi-reviewer",  "label": "🔍 Reviewer",        "desc": "Code-Review"},
+    {"id": "code-reviewer",    "label": "🧪 Code-Reviewer",   "desc": "Strenger PR-Review"},
+    {"id": "security-auditor", "label": "🛡️ Security",        "desc": "Threat-Modeling"},
+    {"id": "test-engineer",    "label": "✅ Test-Engineer",    "desc": "Tests schreiben"},
+]
+AGENT_LOOKUP: dict[str, dict[str, str]] = {a["id"]: a for a in AGENT_CATALOG}
+LOCAL_AGENTS = {"keycodi", "copilot"}  # diese laufen über build_keycodi_response_with_context
+
+
+def _agents_picker_keyboard() -> dict:
+    rows: list[list[dict]] = []
+    row: list[dict] = []
+    for idx, agent in enumerate(AGENT_CATALOG):
+        row.append({"text": agent["label"], "callback_data": f"agentset:{agent['id']}"})
+        if (idx + 1) % 2 == 0:
+            rows.append(row)
+            row = []
+    if row:
+        rows.append(row)
+    rows.append([{"text": "🏠 Hauptmenue", "callback_data": "m:home"}])
+    return {"inline_keyboard": rows}
 
 # user_id → letzte Chat-Turns fuer lokalen KeyCodi-Kontext
 _chat_history_by_user: dict[int, list[tuple[str, str]]] = {}
@@ -258,15 +297,17 @@ async def _api_post(client: httpx.AsyncClient, path: str, payload: dict) -> http
 
 
 async def _ensure_conversation(
-    client: httpx.AsyncClient, user_id: int, title_seed: str
+    client: httpx.AsyncClient, user_id: int, agent_id: str, title_seed: str
 ) -> tuple[Optional[str], Optional[str]]:
-    """Stellt sicher, dass eine API-Sitzung für den User existiert."""
-    if user_id in _conversation_by_user:
-        return _conversation_by_user[user_id], None
+    """Stellt sicher, dass eine API-Sitzung pro (User, Agent) existiert."""
+    key = (user_id, agent_id)
+    if key in _conversation_by_user_agent:
+        return _conversation_by_user_agent[key], None
+    label = AGENT_LOOKUP.get(agent_id, {}).get("label", agent_id)
     response = await _api_post(
         client,
         "/conversations",
-        {"title": f"Telegram: {title_seed[:40]}", "zone": "WORKSPACE"},
+        {"title": f"TG {label}: {title_seed[:30]}", "zone": "WORKSPACE"},
     )
     if response.status_code != 201:
         return None, f"Konversation konnte nicht erstellt werden ({response.status_code})"
@@ -276,16 +317,111 @@ async def _ensure_conversation(
         return None, "Ungültige API-Antwort beim Erstellen der Konversation"
     if not conversation_id:
         return None, "Konversation ohne ID erhalten"
-    _conversation_by_user[user_id] = conversation_id
+    _conversation_by_user_agent[key] = conversation_id
     return conversation_id, None
 
 
 # ─── Chat mit lokalem KeyCodi / Kirobi-API-Fallback ──────────────────────────
 
+async def _send_to_kirobi_api(chat_id: int, user_id: int, agent_id: str, text: str) -> None:
+    """Direkter Multi-Agent-Pfad über Kirobi-API mit agent-Parameter."""
+    meta = AGENT_LOOKUP.get(agent_id, {"label": agent_id, "desc": ""})
+    label = meta["label"]
+    pending = await send(chat_id, f"⌛ <b>{label} denkt nach…</b>\n<i>{meta.get('desc','')}</i>")
+    pending_message_id = _message_id_from(pending)
+    stop_progress = asyncio.Event()
+    progress_task: Optional[asyncio.Task] = None
+    if pending_message_id is not None:
+        progress_task = asyncio.create_task(
+            _progress_reporter(chat_id, pending_message_id, stop_progress)
+        )
+
+    if not await _get_api_token():
+        stop_progress.set()
+        if progress_task is not None:
+            await progress_task
+        await send(
+            chat_id,
+            "❌ <b>API-Login nicht bereit.</b>\n\n"
+            "Setze <code>KIROBI_BOT_PASSWORD</code> oder <code>KIROBI_DEFAULT_PASSWORD</code>.",
+            kb_cancel(),
+        )
+        return
+
+    try:
+        async with httpx.AsyncClient(timeout=180) as client:
+            conversation_id, error = await _ensure_conversation(client, user_id, agent_id, text)
+            if error or not conversation_id:
+                stop_progress.set()
+                if progress_task is not None:
+                    await progress_task
+                await send(chat_id, f"❌ API-Fehler: {_html(error or 'Keine Konversation')}", kb_cancel())
+                return
+
+            response = await _api_post(
+                client,
+                f"/conversations/{conversation_id}/messages",
+                {"content": text, "agent": agent_id},
+            )
+            if response.status_code == 404:
+                _conversation_by_user_agent.pop((user_id, agent_id), None)
+            if response.status_code != 200:
+                stop_progress.set()
+                if progress_task is not None:
+                    await progress_task
+                body = response.text[:200] if response.text else ""
+                await send(chat_id, f"❌ API-Fehler ({response.status_code}) {_html(body)}", kb_cancel())
+                return
+
+            try:
+                payload = response.json()
+            except ValueError:
+                payload = {"content": "(Ungültige API-Antwort)"}
+            ai_response = payload.get("content") or "(Keine Antwort)"
+            model_used = payload.get("model_used") or ""
+
+            stop_progress.set()
+            if progress_task is not None:
+                await progress_task
+            if pending_message_id is not None:
+                await edit_msg(chat_id, pending_message_id, f"✅ <b>{label}</b> hat geantwortet.")
+
+            _append_chat_turn(user_id, "user", text)
+            _append_chat_turn(user_id, "assistant", ai_response)
+
+            from .menus import kb_back
+            chunks = []
+            remaining = ai_response
+            while len(remaining) > 3800:
+                chunks.append(remaining[:3800])
+                remaining = remaining[3800:]
+            chunks.append(remaining)
+            footer = f"\n\n<i>— {label}{' · <code>' + _html(model_used) + '</code>' if model_used else ''}</i>"
+            for idx, chunk in enumerate(chunks):
+                is_last = idx == len(chunks) - 1
+                kb = kb_back() if is_last else None
+                tail = footer if is_last else ""
+                await send(chat_id, f"{_html(chunk)}{tail}", kb)
+    except Exception as exc:
+        log.error("Multi-Agent Chat-Fehler: %s", exc)
+        stop_progress.set()
+        if progress_task is not None:
+            await progress_task
+        await send(chat_id, f"❌ Fehler: {_html(exc)}", kb_cancel())
+
+
 async def _send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
-    """Beantwortet Telegram-Chats zuerst ueber den lokalen KeyCodi-Pfad."""
+    """Beantwortet Telegram-Chats. Lokale Personas (keycodi/copilot) gehen über
+    den lokalen KeyCodi-Pfad; alle anderen Agenten direkt über die Kirobi-API
+    mit Agent-Persona."""
     log.info("Chat-Nachricht von user_id=%s, Länge=%s", user_id, len(text))
     persona = _chat_mode_for(user_id)
+
+    # Externe Agenten (Hermes, Researcher, kirobi-coder, …) → direkt API
+    if persona not in LOCAL_AGENTS:
+        await _send_to_kirobi_api(chat_id, user_id, persona, text)
+        return
+
     start_label = "Copilot" if persona == "copilot" else "KeyCodi"
     start_text = (
         "Ich prüfe deine Anfrage gegen den Repo-Kontext."
@@ -360,7 +496,7 @@ async def _send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
 
     try:
         async with httpx.AsyncClient(timeout=120) as client:
-            conversation_id, error = await _ensure_conversation(client, user_id, text)
+            conversation_id, error = await _ensure_conversation(client, user_id, persona, text)
             if error or not conversation_id:
                 await send(
                     chat_id,
@@ -372,10 +508,10 @@ async def _send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
             response = await _api_post(
                 client,
                 f"/conversations/{conversation_id}/messages",
-                {"content": text},
+                {"content": text, "agent": persona},
             )
             if response.status_code == 404:
-                _conversation_by_user.pop(user_id, None)
+                _conversation_by_user_agent.pop((user_id, persona), None)
             if response.status_code != 200:
                 await send(
                     chat_id,
@@ -687,11 +823,38 @@ async def _handle_callback(callback_query: dict) -> None:
         keyboard = kb_cancel()
 
     elif data == "m:reset_chat":
-        _conversation_by_user.pop(user_id, None)
+        agent = _chat_mode_for(user_id)
+        _conversation_by_user_agent.pop((user_id, agent), None)
         _chat_history_by_user.pop(user_id, None)
         _user_state[user_id] = {"state": "chatting"}
-        text = "♻️ <b>KeyCodi-Sitzung zurückgesetzt.</b>\n\nSchreib direkt deine nächste Anfrage."
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+        text = f"♻️ <b>Konversation mit {label} zurückgesetzt.</b>\n\nSchreib direkt deine nächste Anfrage."
         keyboard = kb_cancel()
+
+    elif data.startswith("agentset:"):
+        agent_id = data[len("agentset:"):]
+        if agent_id not in AGENT_LOOKUP:
+            text = "❌ Unbekannter Agent."
+            keyboard = _agents_picker_keyboard()
+        else:
+            _chat_mode_by_user[user_id] = agent_id
+            _user_state[user_id] = {"state": "chatting"}
+            meta = AGENT_LOOKUP[agent_id]
+            text = (
+                f"✅ Aktiver Agent: <b>{meta['label']}</b>\n<i>{meta['desc']}</i>\n\n"
+                f"Schreib mir jetzt direkt — ich antworte als {meta['label']}.\n"
+                f"/agents = wechseln · /new = neue Konversation."
+            )
+            keyboard = kb_cancel()
+
+    elif data == "m:agents_picker":
+        agent = _chat_mode_for(user_id)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+        text = (
+            f"🤖 <b>Agent waehlen</b>\n\nAktiv: {label}\n\n"
+            "Jeder Agent hat eigene Persona, eigene Konversation und sein passendes Modell."
+        )
+        keyboard = _agents_picker_keyboard()
 
     elif data == "m:add_task":
         _user_state[user_id] = {"state": "awaiting_task_name", "sofort": False}
@@ -948,13 +1111,60 @@ async def _handle_slash(
         )
 
     elif command in ("new", "reset"):
-        _conversation_by_user.pop(user_id, None)
+        agent = _chat_mode_for(user_id)
+        _conversation_by_user_agent.pop((user_id, agent), None)
         _chat_history_by_user.pop(user_id, None)
         _user_state[user_id] = {"state": "chatting"}
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
         await send(
             chat_id,
-            "✅ <b>Neue KeyCodi-Sitzung gestartet.</b>\n\nSchreib einfach los.",
+            f"✅ <b>Neue Konversation mit {label} gestartet.</b>\n\nSchreib einfach los.",
             kb_cancel(),
+        )
+
+    elif command == "agents":
+        agent = _chat_mode_for(user_id)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+        await send(
+            chat_id,
+            f"🤖 <b>Agent waehlen</b>\n\nAktiv: {label}\n\nJeder Agent = eigenes Profil, eigene Konversation, passendes Modell.",
+            _agents_picker_keyboard(),
+        )
+
+    elif command == "agent":
+        target = args.strip().lower().lstrip("@")
+        if not target:
+            agent = _chat_mode_for(user_id)
+            meta = AGENT_LOOKUP.get(agent, {"label": agent, "desc": ""})
+            await send(
+                chat_id,
+                f"🤖 Aktiver Agent: <b>{meta['label']}</b>\n<i>{meta.get('desc','')}</i>\n\n"
+                "Wechseln mit /agents oder <code>/agent &lt;id&gt;</code>.",
+                _agents_picker_keyboard(),
+            )
+        elif target in AGENT_LOOKUP:
+            _chat_mode_by_user[user_id] = target
+            _user_state[user_id] = {"state": "chatting"}
+            meta = AGENT_LOOKUP[target]
+            await send(
+                chat_id,
+                f"✅ Aktiver Agent: <b>{meta['label']}</b>\n<i>{meta['desc']}</i>\n\nSchreib einfach los.",
+                kb_cancel(),
+            )
+        else:
+            verfuegbar = "\n".join(f"• <code>{a['id']}</code> — {a['label']}" for a in AGENT_CATALOG)
+            await send(
+                chat_id,
+                f"❌ Unbekannter Agent <code>{_html(target)}</code>.\n\nVerfuegbar:\n{verfuegbar}",
+                _agents_picker_keyboard(),
+            )
+
+    elif command == "who":
+        agent = _chat_mode_for(user_id)
+        meta = AGENT_LOOKUP.get(agent, {"label": agent, "desc": ""})
+        await send(
+            chat_id,
+            f"🤖 Aktiver Agent: <b>{meta['label']}</b>\n<i>{meta.get('desc','')}</i>\n\n/agents zum Wechseln.",
         )
 
     elif command == "add":
@@ -1085,7 +1295,7 @@ async def ready() -> dict:
         "version": "3.0",
         "config": cfg,
         "db_connected": db_ok,
-        "active_conversations": len(_conversation_by_user),
+        "active_conversations": len(_conversation_by_user_agent),
         "active_user_states": len(_user_state),
     }
 
@@ -1125,13 +1335,16 @@ async def startup() -> None:
     # Bot-Commands setzen
     await set_commands([
         {"command": "start",    "description": "KeyCodi-Menü öffnen"},
+        {"command": "agents",   "description": "Agent waehlen (15 Personas)"},
+        {"command": "agent",    "description": "Agent setzen: /agent hermes"},
+        {"command": "who",      "description": "Aktiven Agent zeigen"},
         {"command": "status",   "description": "System-Status anzeigen"},
         {"command": "surfaces", "description": "Weboberflächen öffnen"},
         {"command": "tasks",    "description": "Aufgaben anzeigen"},
         {"command": "add",      "description": "Neue Aufgabe anlegen"},
         {"command": "chat",     "description": "Direkt mit KeyCodi chatten"},
         {"command": "copilot",  "description": "Direkt mit Copilot im Repo chatten"},
-        {"command": "new",      "description": "Neue KeyCodi-Sitzung starten"},
+        {"command": "new",      "description": "Neue Konversation starten"},
         {"command": "events",   "description": "Letzte Ereignisse"},
         {"command": "help",     "description": "Hilfe anzeigen"},
     ])

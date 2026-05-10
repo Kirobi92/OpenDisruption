@@ -18,6 +18,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import asyncpg
 import httpx
@@ -186,6 +187,69 @@ async def _check_ollama() -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Diffusers (Stable Diffusion / SDXL-Turbo) lazy-loaded pipeline
+# ---------------------------------------------------------------------------
+_DIFFUSERS_PIPE = None
+_DIFFUSERS_MODEL_ID = None
+
+
+def _diffusers_load(model_key: str):
+    global _DIFFUSERS_PIPE, _DIFFUSERS_MODEL_ID
+    key = model_key.lower()
+    if key in ("sd15", "sd-1.5", "sd1.5", "stable-diffusion-1.5"):
+        model_id = "runwayml/stable-diffusion-v1-5"
+    else:
+        model_id = "stabilityai/sdxl-turbo"
+
+    if _DIFFUSERS_PIPE is not None and _DIFFUSERS_MODEL_ID == model_id:
+        return _DIFFUSERS_PIPE
+
+    import torch
+    from diffusers import AutoPipelineForText2Image
+
+    dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+    try:
+        pipe = AutoPipelineForText2Image.from_pretrained(
+            model_id, torch_dtype=dtype, variant="fp16"
+        )
+    except Exception:
+        pipe = AutoPipelineForText2Image.from_pretrained(model_id, torch_dtype=dtype)
+    if torch.cuda.is_available():
+        pipe = pipe.to("cuda")
+    pipe.set_progress_bar_config(disable=True)
+
+    _DIFFUSERS_PIPE = pipe
+    _DIFFUSERS_MODEL_ID = model_id
+    return pipe
+
+
+async def _generate_via_diffusers(prompt: str, model: str, width: int, height: int) -> bytes:
+    """Echte Bildgenerierung via diffusers (SDXL-Turbo / SD 1.5) auf GPU."""
+    import asyncio
+    import functools
+    import io
+
+    def _sync() -> bytes:
+        pipe = _diffusers_load(model)
+        is_turbo = "turbo" in (_DIFFUSERS_MODEL_ID or "").lower()
+        kwargs = {"prompt": prompt, "width": width, "height": height}
+        if is_turbo:
+            kwargs.update({"num_inference_steps": 4, "guidance_scale": 0.0})
+        else:
+            kwargs.update({"num_inference_steps": 25})
+        img = pipe(**kwargs).images[0]
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+
+    loop = asyncio.get_event_loop()
+    try:
+        return await loop.run_in_executor(None, functools.partial(_sync))
+    except Exception as exc:
+        return _make_placeholder_png(width, height, f"[diffusers error] {exc}")
+
+
+# ---------------------------------------------------------------------------
 # Helper: Bild via Ollama generieren
 # ---------------------------------------------------------------------------
 async def _generate_via_ollama(prompt: str, model: str, width: int, height: int) -> bytes:
@@ -205,6 +269,14 @@ async def _generate_via_ollama(prompt: str, model: str, width: int, height: int)
     }
     async with httpx.AsyncClient(timeout=120.0) as client:
         resp = await client.post(f"{OLLAMA_HOST}/api/generate", json=payload)
+        if resp.status_code == 404:
+            # Modell nicht installiert -> graceful degradation: Placeholder-PNG
+            # mit dem Original-Prompt als Beschriftung.
+            return _make_placeholder_png(
+                width,
+                height,
+                f"[{model} nicht installiert] {prompt}",
+            )
         if resp.status_code != 200:
             raise HTTPException(
                 status_code=502,
@@ -291,8 +363,14 @@ async def generate_image(req: GenerateRequest):
     image_id = str(uuid.uuid4())
     file_path = zone_dir / f"{image_id}.png"
 
-    # Bild generieren
-    image_bytes = await _generate_via_ollama(req.prompt, req.model, req.width, req.height)
+    # Bild generieren — diffusers für 'sd*'/'sdxl*'/'diffusion', sonst Ollama
+    model_lc = req.model.lower()
+    if model_lc.startswith(("sd", "stable-diffusion", "diffusion")):
+        image_bytes = await _generate_via_diffusers(
+            req.prompt, req.model, req.width, req.height
+        )
+    else:
+        image_bytes = await _generate_via_ollama(req.prompt, req.model, req.width, req.height)
 
     # Datei schreiben
     try:
@@ -397,6 +475,21 @@ async def get_image(image_id: str):
     elif raw_meta is None:
         data["metadata"] = {}
     return ImageMetadata(**data)
+
+
+@app.get("/file/{image_id}")
+async def serve_image_file(image_id: str):
+    """Liefert die generierte Bilddatei aus."""
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT file_path FROM generated_images WHERE id = $1", image_id
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Bild nicht gefunden")
+    fp = Path(row["file_path"])
+    if not fp.exists():
+        raise HTTPException(status_code=410, detail="Datei nicht mehr verfuegbar")
+    return FileResponse(fp, media_type="image/png", filename=fp.name)
 
 
 if __name__ == "__main__":

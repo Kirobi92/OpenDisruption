@@ -9,11 +9,15 @@ import {
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   GlobeAltIcon,
+  MicrophoneIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
   { href: '/control-center', label: 'Hub', icon: BoltIcon },
   { href: '/chat', label: 'Chat', icon: ChatBubbleLeftRightIcon },
+  { href: '/voice-chat', label: 'Sprache', icon: MicrophoneIcon },
+  { href: '/creative', label: 'Kreativ', icon: SparklesIcon },
   { href: '/search', label: 'Suche', icon: MagnifyingGlassIcon },
   { href: '/knowledge-graph-3d', label: 'Graph 3D', icon: GlobeAltIcon },
   { href: '/upload', label: 'Upload', icon: CloudArrowUpIcon },

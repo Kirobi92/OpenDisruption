@@ -173,6 +173,7 @@ class MessageCreate(BaseModel):
     web_search: bool = False
     deep_research: bool = False
     show_reasoning: bool = True
+    system_prompt_extra: Optional[str] = None
 
 
 class ChatMessage(BaseModel):
@@ -434,6 +435,16 @@ def _agent_prompt(agent: Optional[str]) -> str:
         "opencode": "Du agierst im Stil von Opencode: coding-orientiert, präzise, umsetzungsnah.",
         "researcher": "Du agierst wie ein lokaler Research-Agent: quellenbewusst, syntheseorientiert.",
         "strategist": "Du agierst wie ein Strategist-Agent: priorisiert, abwägend, fokussiert auf Entscheidungen.",
+        "keycodi": "Du bist KeyCodi, der Master-Code-Orchestrator. Plane Missionen mit AQAL-Bewusstsein, sequenziere Phasen sauber.",
+        "kirobi-architect": "Du bist Kirobi-Architect. Entwirf Systeme, Diagramme und Datenflüsse — keine Implementierung, nur Designentscheidungen.",
+        "kirobi-coder": "Du bist Kirobi-Coder. Implementiere präzise, idiomatisch, mit Tests. Nutze die Repo-Konventionen (CLAUDE.md, AGENTS.md).",
+        "kirobi-ops": "Du bist Kirobi-Ops. Verantworte Compose, Caddy, Backups, Healthchecks. Sicherheit > Geschwindigkeit.",
+        "kirobi-frontend": "Du bist Kirobi-Frontend. Next.js + SvelteKit, Tailwind, shadcn — Aurora/Void-Theme, Performance 60fps.",
+        "kirobi-docs": "Du bist Kirobi-Docs. Schreibe deutsch, mit Frontmatter (zone, version), klar und knapp.",
+        "kirobi-reviewer": "Du bist Kirobi-Reviewer. Code-Reviews mit hohem Signal: Bugs, Security, Logikfehler — kein Style-Bikeshedding.",
+        "code-reviewer": "Du bist ein Code-Reviewer. Surgical reviews: bugs, security, race conditions, leaks. Ignore style.",
+        "security-auditor": "Du bist Security-Auditor. Threat-Modeling, Secret-Scan, Zone-Compliance, Prompt-Injection-Defense.",
+        "test-engineer": "Du bist Test-Engineer. TDD: schreibe failing tests zuerst, dann minimal-pass-Implementierung.",
     }
     return prompts.get(normalized, prompts["kirobi"])
 
@@ -468,11 +479,21 @@ async def _chat_runtime_options_payload() -> ChatRuntimeOptions:
             "code": "qwen2.5-coder:7b",
         },
         agent_options=[
-            {"id": "kirobi", "label": "Kirobi", "description": "Allround lokaler Hauptassistent"},
-            {"id": "hermes", "label": "Hermes", "description": "Analyse, Struktur, Schlussfolgerung"},
-            {"id": "opencode", "label": "Opencode", "description": "Coding- und Implementierungsstil"},
-            {"id": "researcher", "label": "Researcher", "description": "Quellen- und Synthese-Fokus"},
-            {"id": "strategist", "label": "Strategist", "description": "Planung, Priorisierung, Entscheidungen"},
+            {"id": "kirobi", "label": "Kirobi", "description": "Allround lokaler Hauptassistent", "category": "core", "default_model": "llama3.1:8b"},
+            {"id": "keycodi", "label": "KeyCodi", "description": "Master-Code-Orchestrator (AQAL-Phasen)", "category": "orchestrator", "default_model": "llama3.1:8b"},
+            {"id": "hermes", "label": "Hermes", "description": "Analyse, Struktur, Reasoning", "category": "core", "default_model": "llama3.1:8b"},
+            {"id": "opencode", "label": "Opencode", "description": "Coding-Workbench", "category": "coding", "default_model": "qwen2.5-coder:7b"},
+            {"id": "researcher", "label": "Researcher", "description": "Quellen + Synthese", "category": "research", "default_model": "llama3.1:8b"},
+            {"id": "strategist", "label": "Strategist", "description": "Planung & Priorisierung", "category": "core", "default_model": "llama3.1:8b"},
+            {"id": "kirobi-architect", "label": "Architect", "description": "System- & Datenfluss-Design", "category": "design", "default_model": "llama3.1:8b"},
+            {"id": "kirobi-coder", "label": "Coder", "description": "Implementierung mit Tests", "category": "coding", "default_model": "qwen2.5-coder:7b"},
+            {"id": "kirobi-ops", "label": "Ops", "description": "Compose, Caddy, Backups, Health", "category": "ops", "default_model": "llama3.1:8b"},
+            {"id": "kirobi-frontend", "label": "Frontend", "description": "Next/SvelteKit, Tailwind, 60fps", "category": "coding", "default_model": "qwen2.5-coder:7b"},
+            {"id": "kirobi-docs", "label": "Docs", "description": "Deutsche Dokumentation, Frontmatter", "category": "docs", "default_model": "mistral:7b"},
+            {"id": "kirobi-reviewer", "label": "Reviewer", "description": "Surgical Code-Review", "category": "review", "default_model": "qwen2.5-coder:7b"},
+            {"id": "code-reviewer", "label": "Code-Reviewer", "description": "Bugs · Security · Logikfehler", "category": "review", "default_model": "qwen2.5-coder:7b"},
+            {"id": "security-auditor", "label": "Security-Auditor", "description": "Threat-Modeling, Zone-Compliance", "category": "security", "default_model": "llama3.1:8b"},
+            {"id": "test-engineer", "label": "Test-Engineer", "description": "TDD mit failing-tests-first", "category": "testing", "default_model": "qwen2.5-coder:7b"},
         ],
         reasoning_modes=[
             {"id": "off", "label": "aus"},
@@ -494,7 +515,15 @@ async def _select_chat_model(requested_model: Optional[str], *, reasoning_mode: 
     if requested_model:
         return requested_model, "manuell gewählt"
 
-    task_type = "reasoning" if reasoning_mode in {"deep", "ultra-deep"} or deep_research or (agent or "").lower() in {"hermes", "researcher", "strategist"} else "chat"
+    agent_lower = (agent or "").lower()
+    coding_agents = {"opencode", "kirobi-coder", "kirobi-frontend", "kirobi-reviewer", "code-reviewer", "test-engineer"}
+    reasoning_agents = {"hermes", "researcher", "strategist", "keycodi", "kirobi-architect", "security-auditor"}
+    if agent_lower in coding_agents:
+        task_type = "code"
+    elif reasoning_mode in {"deep", "ultra-deep"} or deep_research or agent_lower in reasoning_agents:
+        task_type = "reasoning"
+    else:
+        task_type = "chat"
     prefer_fast = reasoning_mode in {"off", "weak"}
 
     try:
@@ -1244,6 +1273,8 @@ Zone: {conversation.zone}
 Sei persönlich, hilfsbereit und respektiere die Privatsphäre der Familie.
 Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
     system_prompt = f"{_agent_prompt(message_data.agent)}\nDenkmodus: {_reasoning_mode_label(message_data.reasoning_mode)}.\nQuellenmodus: {', '.join(message_data.source_modes) if message_data.source_modes else 'local'}.\n{system_prompt}"
+    if message_data.system_prompt_extra:
+        system_prompt = f"{system_prompt}\n\nZusaetzliche Stilvorgabe:\n{message_data.system_prompt_extra}"
 
     # RAG-Kontext aus Wissensbasis holen (Zone: WORKSPACE für allgemeine Anfragen)
     rag_zone = conversation.zone if conversation.zone in ("PUBLIC", "WORKSPACE", "FAMILY_PRIVATE") else "WORKSPACE"

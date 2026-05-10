@@ -12,11 +12,12 @@ RUN groupadd --gid 1001 kirobi \
 WORKDIR /app
 
 # Abhängigkeiten installieren
-COPY requirements.txt .
+COPY services/video-generation/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Quellcode kopieren
-COPY main.py .
+COPY services/video-generation/main.py .
+COPY kirobi_core /app/kirobi_core
 
 # Datenpfad anlegen und Rechte setzen
 RUN mkdir -p /data/videos && chown -R kirobi:kirobi /data/videos /app

@@ -18,6 +18,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import asyncpg
 import httpx
@@ -560,6 +561,21 @@ async def get_track(track_id: str):
     elif raw_meta is None:
         data["metadata"] = {}
     return TrackMetadata(**data)
+
+
+@app.get("/file/{track_id}")
+async def serve_track_file(track_id: str):
+    """Liefert die generierte WAV-Datei aus."""
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT file_path FROM generated_tracks WHERE id = $1", track_id
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Track nicht gefunden")
+    fp = Path(row["file_path"])
+    if not fp.exists():
+        raise HTTPException(status_code=410, detail="Datei nicht mehr verfuegbar")
+    return FileResponse(fp, media_type="audio/wav", filename=fp.name)
 
 
 if __name__ == "__main__":

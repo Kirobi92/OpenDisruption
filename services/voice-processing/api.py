@@ -259,6 +259,140 @@ async def get_models_info():
     }
 
 
+# =============================================================================
+# Voice catalog & persona presets
+# =============================================================================
+from voices import list_voices, find_voice, default_voice  # noqa: E402
+from personas import list_tones, get_tone, apply_tone_to_text  # noqa: E402
+
+
+@app.get("/voices")
+async def get_voices():
+    """List all available Piper TTS voices."""
+    return {"voices": [v.to_dict() for v in list_voices()]}
+
+
+@app.get("/personas")
+async def get_personas():
+    """List all available tone presets (layered on top of agent personas)."""
+    return {"tones": [t.to_dict() for t in list_tones()]}
+
+
+# =============================================================================
+# Multi-turn conversation endpoint with memory
+# =============================================================================
+import httpx  # noqa: E402
+from kirobi_bridge import ensure_conversation, send_message  # noqa: E402
+
+
+@app.post("/conversation/turn")
+async def conversation_turn(
+    audio_file: UploadFile = File(...),
+    conversation_id: Optional[str] = None,
+    agent: str = "kirobi",
+    tone: str = "neutral",
+    voice: Optional[str] = None,
+    language: str = "de",
+):
+    """One full voice-conversation turn with persistent memory.
+
+    1. STT: transcribe uploaded audio.
+    2. LLM: post the transcript to the kirobi-api `/conversations/{id}/messages`
+       endpoint. The API attaches the agent system prompt + the tone modifier
+       and uses the existing conversation history for memory.
+    3. TTS: synthesize the assistant reply with the chosen Piper voice.
+
+    Returns conversation_id (re-use for continuous chat), transcript, reply text,
+    and a URL to the synthesized audio.
+    """
+    # ---- 1. STT ----
+    temp_in = f"/tmp/voice_turn_{int(datetime.now().timestamp() * 1000)}.wav"
+    try:
+        with open(temp_in, "wb") as fh:
+            fh.write(await audio_file.read())
+        stt_result = voice_interface.stt.transcribe_audio(temp_in, language)
+        transcript = (stt_result.get("text") or "").strip()
+    finally:
+        if os.path.exists(temp_in):
+            os.remove(temp_in)
+
+    if not transcript:
+        raise HTTPException(status_code=400, detail="STT lieferte leeren Text")
+
+    # ---- 2. LLM via API (with memory) ----
+    tone_preset = get_tone(tone)
+    try:
+        async with httpx.AsyncClient() as client:
+            conv_id = await ensure_conversation(
+                client=client,
+                conversation_id=conversation_id,
+                title=f"Voice {agent}",
+                agent=agent,
+            )
+            assistant = await send_message(
+                client=client,
+                conversation_id=conv_id,
+                text=transcript,
+                agent=agent,
+                extra_system=tone_preset.modifier,
+            )
+    except httpx.HTTPStatusError as exc:
+        # Conversation may have vanished — try a fresh one once.
+        if exc.response.status_code == 404 and conversation_id:
+            async with httpx.AsyncClient() as client:
+                conv_id = await ensure_conversation(
+                    client=client,
+                    conversation_id=None,
+                    title=f"Voice {agent}",
+                    agent=agent,
+                )
+                assistant = await send_message(
+                    client=client,
+                    conversation_id=conv_id,
+                    text=transcript,
+                    agent=agent,
+                    extra_system=tone_preset.modifier,
+                )
+        else:
+            logger.error("API call failed: %s", exc)
+            raise HTTPException(status_code=502, detail=f"API-Fehler: {exc}")
+    except Exception as exc:  # noqa: BLE001
+        logger.error("LLM bridge failed: %s", exc)
+        raise HTTPException(status_code=502, detail=str(exc))
+
+    reply_text_full = assistant.get("content") or assistant.get("text") or ""
+    reply_text_tts = apply_tone_to_text(reply_text_full, tone_preset)
+
+    # ---- 3. TTS with chosen voice ----
+    chosen = find_voice(voice) or default_voice()
+    if chosen is None:
+        raise HTTPException(status_code=503, detail="Keine TTS-Stimme verfuegbar")
+
+    out_path = f"/data/voice_turn_{int(datetime.now().timestamp() * 1000)}.wav"
+    try:
+        voice_interface.tts.synthesize(
+            reply_text_tts,
+            output_path=out_path,
+            voice_onnx=chosen.onnx_path,
+            voice_config=chosen.config_path,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.error("TTS failed: %s", exc)
+        raise HTTPException(status_code=500, detail=f"TTS-Fehler: {exc}")
+
+    return {
+        "conversation_id": conv_id,
+        "transcript": transcript,
+        "reply_text": reply_text_full,
+        "reply_text_tts": reply_text_tts,
+        "audio_url": f"/audio/{Path(out_path).name}",
+        "agent": agent,
+        "tone": tone_preset.tone_id,
+        "voice": chosen.voice_id,
+        "model": assistant.get("model"),
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

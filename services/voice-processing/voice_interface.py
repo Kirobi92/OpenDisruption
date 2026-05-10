@@ -112,7 +112,6 @@ class WhisperSTT:
                     min_speech_duration_ms=250,
                     max_speech_duration_s=float('inf'),
                     min_silence_duration_ms=2000,
-                    window_size_samples=1024,
                     speech_pad_ms=400
                 )
             )
@@ -179,13 +178,15 @@ class PiperTTS:
         self.config_path = Path(config.PIPER_CONFIG_PATH)
         logger.info(f"Initializing Piper TTS with model: {self.model_path}")
 
-    def synthesize(self, text: str, output_path: Optional[str] = None) -> str:
+    def synthesize(self, text: str, output_path: Optional[str] = None, voice_onnx: Optional[str] = None, voice_config: Optional[str] = None) -> str:
         """
         Synthesize speech from text
 
         Args:
             text: Text to speak
             output_path: Output audio file path (auto-generated if None)
+            voice_onnx: Override path to .onnx voice model (defaults to configured voice)
+            voice_config: Override path to .onnx.json config
 
         Returns:
             Path to generated audio file
@@ -193,14 +194,17 @@ class PiperTTS:
         if not output_path:
             output_path = f"/tmp/kirobi_tts_{int(time.time())}.wav"
 
+        model_path = voice_onnx or str(self.model_path)
+        config_path = voice_config or str(self.config_path)
+
         try:
             # Run piper command
             import subprocess
 
             cmd = [
                 "piper",
-                "--model", str(self.model_path),
-                "--config", str(self.config_path),
+                "--model", model_path,
+                "--config", config_path,
                 "--output_file", output_path
             ]
 

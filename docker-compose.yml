@@ -19,6 +19,10 @@ volumes:
   hermes_data:
   openclaw_config_data:
   openclaw_workspace_data:
+  hf_cache:
+  hf_cache_image:
+  torch_cache:
+  torch_cache_image:
 
 services:
   ollama:
@@ -165,11 +169,16 @@ services:
     volumes:
       - ./data/conversations:/data/conversations
       - ./data/recordings:/data/recordings
+      - ./data/piper-voices:/models/piper
     environment:
       - WHISPER_MODEL=${WHISPER_MODEL:-large-v3}
       - WHISPER_DEVICE=${WHISPER_DEVICE:-cuda}
       - WHISPER_COMPUTE_TYPE=${WHISPER_COMPUTE_TYPE:-float16}
       - VOICE_LANGUAGE=${VOICE_LANGUAGE:-de}
+      - KIROBI_API_URL=${KIROBI_API_URL:-http://api:8000}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://auth:8000}
+      - KIROBI_API_USER=${KIROBI_DEFAULT_USER:-sven}
+      - KIROBI_API_PASSWORD=${KIROBI_DEFAULT_PASSWORD:-changeme}
     deploy:
       resources:
         reservations:
@@ -208,8 +217,8 @@ services:
 
   image-generation:
     build:
-      context: ./services/image-generation
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/image-generation/Dockerfile
     container_name: kirobi-image-generation
     restart: unless-stopped
     ports:
@@ -224,15 +233,25 @@ services:
       - IMAGE_STORAGE_PATH=/data/images
     volumes:
       - images_data:/data/images
+      - hf_cache_image:/data/hf-cache
+      - torch_cache_image:/data/torch-cache
     depends_on:
       - ollama
       - postgres
     networks:
       - kirobi-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8011/health')"]
       interval: 30s
       timeout: 10s
+      start_period: 120s
       retries: 3
 
   media-processing:
@@ -253,8 +272,8 @@ services:
 
   music-generation:
     build:
-      context: ./services/music-generation
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/music-generation/Dockerfile
     container_name: kirobi-music-generation
     restart: unless-stopped
     ports:
@@ -269,21 +288,31 @@ services:
       - MUSIC_STORAGE_PATH=/data/music
     volumes:
       - music_data:/data/music
+      - hf_cache:/data/hf-cache
+      - torch_cache:/data/torch-cache
     depends_on:
       - postgres
       - ollama
     networks:
       - kirobi-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8013/health')"]
       interval: 30s
       timeout: 10s
+      start_period: 180s
       retries: 3
 
   video-generation:
     build:
-      context: ./services/video-generation
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/video-generation/Dockerfile
     container_name: kirobi-video-generation
     restart: unless-stopped
     ports:

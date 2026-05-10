@@ -67,7 +67,30 @@ log = logging.getLogger("kirobi.telegram")
 db_pool: Optional[asyncpg.Pool] = None
 api_token_cache: Optional[str] = KIROBI_API_TOKEN or None
 user_state: dict[int, dict] = {}
-conversation_by_user: dict[int, str] = {}
+# (user_id, agent) -> conversation_id  — eigene Konversation pro Agent
+conversation_by_user: dict[tuple[int, str], str] = {}
+# user_id -> aktiv ausgewählter Agent
+active_agent_by_user: dict[int, str] = {}
+
+DEFAULT_AGENT = "kirobi"
+AGENT_CATALOG: list[dict[str, str]] = [
+    {"id": "kirobi",            "label": "🌌 Kirobi",          "desc": "Allround-Begleiter"},
+    {"id": "keycodi",           "label": "🧭 KeyCodi",         "desc": "Master-Code-Orchestrator"},
+    {"id": "hermes",            "label": "🪶 Hermes",          "desc": "Reasoning & Synthese"},
+    {"id": "opencode",          "label": "🛠️ Opencode",        "desc": "Code-Workbench"},
+    {"id": "researcher",        "label": "🔬 Researcher",      "desc": "Recherche tief & breit"},
+    {"id": "strategist",        "label": "♟️ Strategist",      "desc": "Strategie & Entscheidungen"},
+    {"id": "kirobi-architect",  "label": "🏛️ Architect",       "desc": "Architektur & Design"},
+    {"id": "kirobi-coder",      "label": "👨‍💻 Coder",          "desc": "Implementierung"},
+    {"id": "kirobi-frontend",   "label": "🎨 Frontend",        "desc": "UI & UX Code"},
+    {"id": "kirobi-ops",        "label": "⚙️ Ops",             "desc": "Infra & Deployment"},
+    {"id": "kirobi-docs",       "label": "📚 Docs",            "desc": "Dokumentation"},
+    {"id": "kirobi-reviewer",   "label": "🔍 Reviewer",        "desc": "Code-Review"},
+    {"id": "code-reviewer",     "label": "🧪 Code-Reviewer",   "desc": "Strenger PR-Review"},
+    {"id": "security-auditor",  "label": "🛡️ Security",        "desc": "Threat-Modeling"},
+    {"id": "test-engineer",     "label": "✅ Test-Engineer",    "desc": "Tests schreiben"},
+]
+AGENT_LOOKUP: dict[str, dict[str, str]] = {a["id"]: a for a in AGENT_CATALOG}
 
 
 def _html(value: object) -> str:
@@ -160,11 +183,14 @@ async def answer_callback(callback_query_id: str, text: str = "") -> dict:
 async def set_bot_commands() -> None:
     commands = [
         {"command": "start", "description": "Hauptmenue oeffnen"},
+        {"command": "agents", "description": "Agent waehlen"},
+        {"command": "agent", "description": "Agent setzen: /agent hermes"},
+        {"command": "who", "description": "Aktuellen Agent zeigen"},
         {"command": "status", "description": "System-Status"},
         {"command": "tasks", "description": "Tasks anzeigen"},
         {"command": "add", "description": "Neuen Task anlegen"},
-        {"command": "chat", "description": "Mit Kirobi chatten"},
-        {"command": "new", "description": "Neue Kirobi-Konversation"},
+        {"command": "chat", "description": "Mit aktivem Agent chatten"},
+        {"command": "new", "description": "Neue Konversation"},
         {"command": "events", "description": "Letzte Ereignisse"},
         {"command": "help", "description": "Hilfe"},
     ]
@@ -217,14 +243,16 @@ async def _api_post(client: httpx.AsyncClient, path: str, payload: dict) -> http
     return response
 
 
-async def _ensure_conversation(client: httpx.AsyncClient, user_id: int, title_seed: str) -> tuple[Optional[str], Optional[str]]:
-    if user_id in conversation_by_user:
-        return conversation_by_user[user_id], None
+async def _ensure_conversation(client: httpx.AsyncClient, user_id: int, agent: str, title_seed: str) -> tuple[Optional[str], Optional[str]]:
+    key = (user_id, agent)
+    if key in conversation_by_user:
+        return conversation_by_user[key], None
 
+    label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
     response = await _api_post(
         client,
         "/conversations",
-        {"title": f"Telegram: {title_seed[:40]}", "zone": "WORKSPACE"},
+        {"title": f"TG {label}: {title_seed[:30]}", "zone": "WORKSPACE"},
     )
     if response.status_code != 201:
         return None, f"Konversation konnte nicht erstellt werden ({response.status_code})"
@@ -232,13 +260,15 @@ async def _ensure_conversation(client: httpx.AsyncClient, user_id: int, title_se
     conversation_id = _response_json(response).get("id")
     if not conversation_id:
         return None, "Konversation ohne ID erhalten"
-    conversation_by_user[user_id] = conversation_id
+    conversation_by_user[key] = conversation_id
     return conversation_id, None
 
 
 async def send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
-    log.info("Chat-Nachricht von user_id=%s length=%s", user_id, len(text))
-    await send(chat_id, "⌛ Kirobi denkt nach...")
+    agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+    label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+    log.info("Chat-Nachricht von user_id=%s agent=%s length=%s", user_id, agent, len(text))
+    await send(chat_id, f"⌛ {label} denkt nach...")
 
     if not await get_api_token():
         await send(
@@ -251,8 +281,8 @@ async def send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
         return
 
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
-            conversation_id, error = await _ensure_conversation(client, user_id, text)
+        async with httpx.AsyncClient(timeout=180) as client:
+            conversation_id, error = await _ensure_conversation(client, user_id, agent, text)
             if error or not conversation_id:
                 await send(chat_id, f"❌ API-Fehler: {_html(error or 'Keine Konversation verfuegbar')}", back_keyboard())
                 return
@@ -260,18 +290,21 @@ async def send_to_kirobi(chat_id: int, user_id: int, text: str) -> None:
             response = await _api_post(
                 client,
                 f"/conversations/{conversation_id}/messages",
-                {"content": text},
+                {"content": text, "agent": agent},
             )
             if response.status_code == 404:
-                conversation_by_user.pop(user_id, None)
+                conversation_by_user.pop((user_id, agent), None)
             if response.status_code != 200:
                 await send(chat_id, f"❌ API-Fehler beim Nachrichtenversand ({response.status_code})", back_keyboard())
                 return
 
-            ai_response = _response_json(response).get("content", "(Keine Antwort)")
-            if len(ai_response) > 3800:
-                ai_response = ai_response[:3800] + "\n\n<i>... (Antwort gekuerzt)</i>"
-            await send(chat_id, f"🤖 <b>Kirobi:</b>\n\n{_html(ai_response)}", back_keyboard())
+            payload = _response_json(response)
+            ai_response = payload.get("content", "(Keine Antwort)")
+            model_used = payload.get("model_used") or ""
+            footer = f"\n\n<i>— {label}{' · <code>' + _html(model_used) + '</code>' if model_used else ''}</i>"
+            for chunk in _message_chunks(ai_response):
+                await send(chat_id, f"{_html(chunk)}{footer}")
+                footer = ""
     except Exception as exc:
         log.error("Chat-Fehler: %s", exc)
         await send(chat_id, f"❌ Fehler: {_html(exc)}", back_keyboard())
@@ -411,10 +444,25 @@ def main_menu_keyboard() -> dict:
                 {"text": "➕ Task anlegen", "callback_data": "menu:add_task"},
                 {"text": "📡 Events", "callback_data": "menu:events"},
             ],
-            [{"text": "💬 Chat mit Kirobi", "callback_data": "menu:chat"}],
+            [{"text": "💬 Chat mit Agent", "callback_data": "menu:chat"}],
+            [{"text": "🤖 Agent waehlen", "callback_data": "menu:agents"}],
             [{"text": "🔧 System", "callback_data": "menu:system"}],
         ]
     }
+
+
+def agents_keyboard() -> dict:
+    rows = []
+    row: list[dict] = []
+    for idx, agent in enumerate(AGENT_CATALOG):
+        row.append({"text": agent["label"], "callback_data": f"agent:set:{agent['id']}"})
+        if (idx + 1) % 2 == 0:
+            rows.append(row)
+            row = []
+    if row:
+        rows.append(row)
+    rows.append([{"text": "🏠 Hauptmenue", "callback_data": "menu:home"}])
+    return {"inline_keyboard": rows}
 
 
 def tasks_keyboard(tasks: list[dict]) -> dict:
@@ -559,8 +607,34 @@ async def handle_callback(callback_query: dict) -> None:
         user_state[user_id] = {"state": "awaiting_task_name"}
         text, keyboard = "➕ <b>Neuer Task</b>\n\nWie soll der Task heissen?", cancel_keyboard()
     elif data == "menu:chat":
+        agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
         user_state[user_id] = {"state": "chatting"}
-        text, keyboard = "💬 <b>Chat-Modus aktiv.</b>\nSchreib einfach los. /new startet frisch.", cancel_keyboard()
+        text, keyboard = (
+            f"💬 <b>Chat-Modus aktiv.</b>\nAktiver Agent: {label}\nSchreib einfach los. /new startet frisch, /agents wechselt.",
+            cancel_keyboard(),
+        )
+    elif data == "menu:agents":
+        agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+        text, keyboard = (
+            f"🤖 <b>Agent waehlen</b>\n\nAktiv: {label}\n\nJeder Agent hat eine eigene Konversation und sein eigenes Modell.",
+            agents_keyboard(),
+        )
+    elif data.startswith("agent:set:"):
+        agent_id = data.split(":", 2)[2]
+        if agent_id not in AGENT_LOOKUP:
+            text, keyboard = "❌ Unbekannter Agent.", agents_keyboard()
+        else:
+            active_agent_by_user[user_id] = agent_id
+            user_state[user_id] = {"state": "chatting"}
+            agent_meta = AGENT_LOOKUP[agent_id]
+            text, keyboard = (
+                f"✅ Aktiver Agent: <b>{agent_meta['label']}</b>\n<i>{agent_meta['desc']}</i>\n\n"
+                f"Schreib mir jetzt direkt — ich antworte als {agent_meta['label']}.\n"
+                f"/new = frische Konversation, /agents = wechseln.",
+                cancel_keyboard(),
+            )
     elif data.startswith("task:view:"):
         text, keyboard = await screen_task_detail(data.split(":")[-1])
     elif data == "sys:telegram":
@@ -633,12 +707,41 @@ async def handle_slash(chat_id: int, user_id: int, user_name: str, command: str,
         text, keyboard = await screen_events()
         await send(chat_id, text, keyboard)
     elif command == "chat":
+        agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
         user_state[user_id] = {"state": "chatting"}
-        await send(chat_id, "💬 <b>Chat-Modus aktiv.</b>\nSchreib einfach los.", cancel_keyboard())
+        await send(chat_id, f"💬 <b>Chat-Modus aktiv.</b>\nAktiver Agent: {label}\nSchreib einfach los.", cancel_keyboard())
     elif command in {"new", "reset"}:
-        conversation_by_user.pop(user_id, None)
+        agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+        conversation_by_user.pop((user_id, agent), None)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
         user_state[user_id] = {"state": "chatting"}
-        await send(chat_id, "✅ <b>Neue Kirobi-Konversation gestartet.</b>\nSchreib einfach los.", cancel_keyboard())
+        await send(chat_id, f"✅ <b>Neue Konversation mit {label} gestartet.</b>\nSchreib einfach los.", cancel_keyboard())
+    elif command == "agents":
+        agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+        label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+        await send(
+            chat_id,
+            f"🤖 <b>Agent waehlen</b>\n\nAktiv: {label}\n\nJeder Agent = eigenes Profil, eigenes Modell, eigene Konversation.",
+            agents_keyboard(),
+        )
+    elif command == "agent":
+        target = args.strip().lower().lstrip("@")
+        if not target:
+            agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+            label = AGENT_LOOKUP.get(agent, {}).get("label", agent)
+            await send(chat_id, f"🤖 Aktiver Agent: <b>{label}</b>\n\nNutze /agents zum Wechseln oder <code>/agent &lt;id&gt;</code>.", agents_keyboard())
+        elif target in AGENT_LOOKUP:
+            active_agent_by_user[user_id] = target
+            user_state[user_id] = {"state": "chatting"}
+            meta = AGENT_LOOKUP[target]
+            await send(chat_id, f"✅ Aktiver Agent: <b>{meta['label']}</b>\n<i>{meta['desc']}</i>\n\nSchreib einfach los.", cancel_keyboard())
+        else:
+            await send(chat_id, f"❌ Unbekannter Agent <code>{_html(target)}</code>.\n\nVerfuegbar:\n" + "\n".join(f"• <code>{a['id']}</code> — {a['label']}" for a in AGENT_CATALOG), agents_keyboard())
+    elif command == "who":
+        agent = active_agent_by_user.get(user_id, DEFAULT_AGENT)
+        meta = AGENT_LOOKUP.get(agent, {"label": agent, "desc": ""})
+        await send(chat_id, f"🤖 Aktiver Agent: <b>{meta['label']}</b>\n<i>{meta.get('desc','')}</i>\n\n/agents zum Wechseln.")
     elif command == "add":
         if args:
             parts = args.split("|", 1)

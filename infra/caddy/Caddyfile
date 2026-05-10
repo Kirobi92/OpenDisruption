@@ -453,6 +453,14 @@ kirobi.local {
 	import kirobi_routes
 }
 
+# LAN-IP — selbe Routes ueber direkte IP (mDNS unzuverlaessig auf Mobilgeraeten).
+# Override mit KIROBI_LAN_IP in .env wenn sich die IP aendert.
+# HTTP-only weil Caddy `tls internal` mit IP-SAN auf einigen Clients TLS-Errors wirft.
+# Fuer TLS unterwegs nutze die Tailscale-URL (echtes Cert).
+http://{$KIROBI_LAN_IP:192.168.178.10} {
+	import kirobi_routes
+}
+
 
 # --- Dedicated HTTPS service roots --------------------------------------------
 # Prefix proxies are fine for simple services, but Open WebUI/Flowise/Qdrant

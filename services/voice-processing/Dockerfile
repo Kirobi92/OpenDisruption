@@ -21,12 +21,12 @@ RUN apt-get update && apt-get install -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Piper TTS
+# Install Piper TTS (full package — binary + libs + espeak-ng-data)
 RUN wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_amd64.tar.gz \
-    && tar -xzf piper_amd64.tar.gz \
-    && mv piper/piper /usr/local/bin/ \
-    && chmod +x /usr/local/bin/piper \
-    && rm -rf piper piper_amd64.tar.gz
+    && tar -xzf piper_amd64.tar.gz -C /opt/ \
+    && ln -sf /opt/piper/piper /usr/local/bin/piper \
+    && rm -f piper_amd64.tar.gz
+ENV LD_LIBRARY_PATH=/opt/piper:${LD_LIBRARY_PATH}
 
 # Create app directory
 WORKDIR /app

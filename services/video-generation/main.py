@@ -17,6 +17,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Header, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import asyncpg
 import httpx
@@ -312,6 +313,23 @@ async def list_jobs(x_user_id: Optional[str] = Header(None, alias="X-User-Id")):
 async def list_resolutions():
     """Gibt verfügbare Videoauflösungen zurück."""
     return {"resolutions": AVAILABLE_RESOLUTIONS}
+
+
+@app.get("/file/{job_id}")
+async def serve_video_file(job_id: str):
+    """Liefert die generierte Video-Datei aus (nur falls Job completed)."""
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT status, file_path FROM video_jobs WHERE id = $1", job_id
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Job nicht gefunden")
+    if row["status"] != "completed" or not row["file_path"]:
+        raise HTTPException(status_code=409, detail=f"Job-Status: {row['status']}")
+    fp = Path(row["file_path"])
+    if not fp.exists():
+        raise HTTPException(status_code=410, detail="Datei nicht mehr verfuegbar")
+    return FileResponse(fp, media_type="video/mp4", filename=fp.name)
 
 
 if __name__ == "__main__":
