@@ -11,13 +11,16 @@ import {
   GlobeAltIcon,
   MicrophoneIcon,
   SparklesIcon,
+  FilmIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
   { href: '/control-center', label: 'Hub', icon: BoltIcon },
   { href: '/chat', label: 'Chat', icon: ChatBubbleLeftRightIcon },
   { href: '/voice-chat', label: 'Sprache', icon: MicrophoneIcon },
+  { href: '/voice-studio', label: 'Voice Studio', icon: MicrophoneIcon },
   { href: '/creative', label: 'Kreativ', icon: SparklesIcon },
+  { href: '/studio', label: 'Studio', icon: FilmIcon },
   { href: '/search', label: 'Suche', icon: MagnifyingGlassIcon },
   { href: '/knowledge-graph-3d', label: 'Graph 3D', icon: GlobeAltIcon },
   { href: '/upload', label: 'Upload', icon: CloudArrowUpIcon },

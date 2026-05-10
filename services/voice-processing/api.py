@@ -5,13 +5,17 @@ FastAPI service for voice interaction
 
 import logging
 import os
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect, Request, Form
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+import asyncio
+import json
+import re
 
 from voice_interface import VoiceInterface, VoiceConfig
 
@@ -36,7 +40,60 @@ async def startup_event():
     """Initialize models on startup"""
     logger.info("Starting Voice Processing API...")
     voice_interface.initialize()
+
+    SAMPLES_PATH = Path(os.getenv("VOICE_SAMPLES_PATH", "/data/voice-samples"))
+    SAMPLES_PATH.mkdir(parents=True, exist_ok=True)
+    app.state.samples_path = SAMPLES_PATH
+
+    # Voice Profiles Tabelle
+    try:
+        import asyncpg as _asyncpg
+        DATABASE_URL_VP = (
+            f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}"
+            f":{os.getenv('POSTGRES_PASSWORD', 'changeme')}"
+            f"@{os.getenv('POSTGRES_HOST', 'postgres')}"
+            f":{os.getenv('POSTGRES_PORT', '5432')}"
+            f"/{os.getenv('POSTGRES_DB', 'kirobi')}"
+        )
+        _vp_pool = await _asyncpg.create_pool(DATABASE_URL_VP, min_size=1, max_size=4)
+        await _vp_pool.execute("""
+            CREATE TABLE IF NOT EXISTS voice_profiles (
+                id          TEXT PRIMARY KEY,
+                name        TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                language    TEXT DEFAULT 'de_DE',
+                piper_voice TEXT DEFAULT 'de_DE-thorsten-high',
+                gender      TEXT DEFAULT 'neutral',
+                speed       DOUBLE PRECISION DEFAULT 1.0,
+                pitch       DOUBLE PRECISION DEFAULT 0.0,
+                created_at  TIMESTAMPTZ DEFAULT NOW(),
+                updated_at  TIMESTAMPTZ DEFAULT NOW()
+            );
+            CREATE TABLE IF NOT EXISTS voice_profile_samples (
+                id          TEXT PRIMARY KEY,
+                profile_id  TEXT NOT NULL REFERENCES voice_profiles(id) ON DELETE CASCADE,
+                filename    TEXT NOT NULL,
+                file_path   TEXT NOT NULL,
+                reference_text TEXT DEFAULT '',
+                duration_s  DOUBLE PRECISION DEFAULT 0,
+                created_at  TIMESTAMPTZ DEFAULT NOW()
+            );
+        """)
+        app.state.vp_pool = _vp_pool
+        logger.info("Voice profile DB pool initialized")
+    except Exception as _exc:  # noqa: BLE001
+        logger.warning("Voice profile DB not available: %s", _exc)
+        app.state.vp_pool = None
+
     logger.info("Voice Processing API ready!")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    pool = getattr(app.state, "vp_pool", None)
+    if pool is not None:
+        await pool.close()
+        app.state.vp_pool = None
 
 
 @app.get("/health")
@@ -68,6 +125,9 @@ class SynthesizeRequest(BaseModel):
     """Request model for TTS"""
     text: str
     language: Optional[str] = "de"
+    voice: Optional[str] = None
+    tone: Optional[str] = "neutral"
+    speed: Optional[float] = 1.0
 
 
 class SynthesizeResponse(BaseModel):
@@ -118,11 +178,23 @@ async def synthesize_speech(request: SynthesizeRequest):
     - **language**: Language code (currently only 'de' supported)
     """
     try:
-        # Synthesize
-        output_path = f"/data/tts_{datetime.now().timestamp()}.wav"
-        audio_path = voice_interface.tts.synthesize(request.text, output_path)
+        chosen_voice = None
+        if request.voice:
+            chosen_voice = find_voice(request.voice)
+            if chosen_voice is None or chosen_voice.voice_id != request.voice:
+                raise HTTPException(status_code=404, detail="TTS-Stimme nicht gefunden")
 
-        # Get audio info
+        tone_preset = get_tone(request.tone or "neutral")
+        spoken_text = apply_tone_to_text(request.text, tone_preset)
+
+        output_path = f"/data/tts_{datetime.now().timestamp()}.wav"
+        audio_path = voice_interface.tts.synthesize(
+            spoken_text,
+            output_path,
+            voice_onnx=chosen_voice.onnx_path if chosen_voice else None,
+            voice_config=chosen_voice.config_path if chosen_voice else None,
+        )
+
         import soundfile as sf
         info = sf.info(audio_path)
 
@@ -132,6 +204,8 @@ async def synthesize_speech(request: SynthesizeRequest):
             duration=info.duration
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"TTS error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -391,6 +465,498 @@ async def conversation_turn(
         "voice": chosen.voice_id,
         "model": assistant.get("model"),
     }
+
+
+# =============================================================================
+# Voice-Conversation v2 — streaming WebSocket
+# =============================================================================
+# Protocol (client <-> server, all JSON unless noted):
+#   1. Client connects to /conversation/ws
+#   2. Client sends JSON config:
+#        {"type":"config","agent":"kirobi","tone":"neutral","voice":null,
+#         "language":"de","conversation_id":null,"jwt":"<token>"}
+#   3. Client sends ONE binary frame containing the full WAV/webm audio blob
+#   4. Server emits events as JSON text frames:
+#        {"event":"transcript","text":"..."}
+#        {"event":"text_chunk","delta":"..."}
+#        {"event":"audio_chunk","seq":1,"url":"/audio/voice_ws_xxx.wav","text":"..."}
+#        {"event":"done","conversation_id":"...","reply_text":"...","chunks":N}
+#        {"event":"error","detail":"..."}
+#   5. Server closes the socket.
+
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[\.!\?\n])\s+")
+_MIN_SENTENCE_CHARS = 30  # don't TTS micro-fragments
+
+
+def _flush_sentences(buffer: str, force: bool = False) -> tuple[list[str], str]:
+    """Split *buffer* on sentence boundaries.
+
+    Returns (complete_sentences, remainder). If *force* is True, returns the
+    whole buffer as a final sentence (used at end of stream).
+    """
+    if force:
+        text = buffer.strip()
+        return ([text] if text else [], "")
+    parts = _SENTENCE_SPLIT_RE.split(buffer)
+    if len(parts) < 2:
+        return ([], buffer)
+    *complete, remainder = parts
+    out: list[str] = []
+    pending = ""
+    for piece in complete:
+        pending = (pending + " " + piece).strip() if pending else piece.strip()
+        if len(pending) >= _MIN_SENTENCE_CHARS:
+            out.append(pending)
+            pending = ""
+    if pending:
+        # carry the still-too-short prefix forward
+        remainder = (pending + " " + remainder).strip()
+    return out, remainder
+
+
+@app.websocket("/conversation/ws")
+async def conversation_ws(ws: WebSocket):
+    """Streaming voice conversation: STT → SSE-LLM-stream → sentence-level TTS."""
+    await ws.accept()
+    seq = 0
+    full_reply_parts: list[str] = []
+
+    async def send_event(payload: dict):
+        try:
+            await ws.send_text(json.dumps(payload))
+        except Exception:  # noqa: BLE001
+            pass
+
+    try:
+        # ---- 1. Receive config ----
+        config_raw = await ws.receive_text()
+        try:
+            config = json.loads(config_raw)
+        except json.JSONDecodeError:
+            await send_event({"event": "error", "detail": "first frame must be JSON config"})
+            await ws.close()
+            return
+        if config.get("type") != "config":
+            await send_event({"event": "error", "detail": "first frame must have type=config"})
+            await ws.close()
+            return
+
+        agent = (config.get("agent") or "kirobi").strip()
+        tone = (config.get("tone") or "neutral").strip()
+        voice_id = config.get("voice")
+        language = (config.get("language") or "de").strip()
+        conversation_id = config.get("conversation_id")
+        jwt = config.get("jwt")
+        mode = (config.get("mode") or "oneshot").strip()
+
+        # ---- 2. Receive audio ----
+        # oneshot:  ONE binary frame containing the full webm/wav blob.
+        # chunked:  N binary frames (live MediaRecorder chunks) terminated by JSON {"type":"end"}.
+        audio_bytes: bytes
+        if mode == "chunked":
+            buf = bytearray()
+            max_bytes = 50 * 1024 * 1024  # 50 MB hard cap
+            while True:
+                msg = await ws.receive()
+                if msg.get("type") == "websocket.disconnect":
+                    return
+                if "bytes" in msg and msg["bytes"] is not None:
+                    buf.extend(msg["bytes"])
+                    if len(buf) > max_bytes:
+                        await send_event({"event": "error", "detail": "audio too large (>50 MB)"})
+                        await ws.close()
+                        return
+                    continue
+                if "text" in msg and msg["text"] is not None:
+                    try:
+                        ctrl = json.loads(msg["text"])
+                    except json.JSONDecodeError:
+                        continue
+                    if ctrl.get("type") == "end":
+                        break
+            if not buf:
+                await send_event({"event": "error", "detail": "no audio received"})
+                await ws.close()
+                return
+            audio_bytes = bytes(buf)
+        else:
+            audio_msg = await ws.receive()
+            audio_bytes = audio_msg.get("bytes")
+            if not audio_bytes:
+                await send_event({"event": "error", "detail": "second frame must be binary audio"})
+                await ws.close()
+                return
+
+        temp_in = f"/tmp/voice_ws_{int(datetime.now().timestamp() * 1000)}.wav"
+        try:
+            with open(temp_in, "wb") as fh:
+                fh.write(audio_bytes)
+            stt_result = voice_interface.stt.transcribe_audio(temp_in, language)
+        finally:
+            if os.path.exists(temp_in):
+                os.remove(temp_in)
+
+        transcript = (stt_result.get("text") or "").strip()
+        if not transcript:
+            await send_event({"event": "error", "detail": "STT lieferte leeren Text"})
+            await ws.close()
+            return
+        await send_event({"event": "transcript", "text": transcript})
+
+        tone_preset = get_tone(tone)
+        chosen_voice = find_voice(voice_id) or default_voice()
+        if chosen_voice is None:
+            await send_event({"event": "error", "detail": "Keine TTS-Stimme verfuegbar"})
+            await ws.close()
+            return
+
+        # ---- 3. Ensure conversation in api ----
+        api_url = os.getenv("KIROBI_API_URL", "http://api:8000").rstrip("/")
+        auth_url = os.getenv("AUTH_SERVICE_URL", "http://auth:8000").rstrip("/")
+        async with httpx.AsyncClient(timeout=httpx.Timeout(180.0, connect=10.0)) as client:
+            # JWT: prefer client-supplied; fall back to bridge service-account login
+            if jwt:
+                token = jwt
+            else:
+                from kirobi_bridge import _login as _bridge_login  # type: ignore
+                token = await _bridge_login(client)
+            headers = {"Authorization": f"Bearer {token}"}
+
+            # Ensure conversation belongs to the *current* token's user
+            conv_id = conversation_id
+            if conv_id:
+                check = await client.get(f"{api_url}/conversations/{conv_id}", headers=headers, timeout=8.0)
+                if check.status_code != 200:
+                    conv_id = None
+            if not conv_id:
+                create = await client.post(
+                    f"{api_url}/conversations",
+                    json={"title": f"Voice {agent}", "agent": agent},
+                    headers=headers,
+                    timeout=10.0,
+                )
+                if create.status_code >= 400:
+                    await send_event({"event": "error", "detail": f"create conversation failed: HTTP {create.status_code} {create.text[:200]}"})
+                    await ws.close()
+                    return
+                conv_id = create.json()["id"]
+
+            # ---- 4. Stream LLM via api SSE endpoint ----
+            payload = {
+                "content": transcript,
+                "agent": agent,
+                "system_prompt_extra": tone_preset.modifier or None,
+            }
+            buffer = ""
+            persisted_reply = ""
+            try:
+                async with client.stream(
+                    "POST",
+                    f"{api_url}/conversations/{conv_id}/messages/stream",
+                    json=payload,
+                    headers=headers,
+                ) as resp:
+                    if resp.status_code != 200:
+                        body = await resp.aread()
+                        await send_event({"event": "error", "detail": f"api stream HTTP {resp.status_code}: {body[:300].decode(errors='replace')}"})
+                        await ws.close()
+                        return
+                    async for raw_line in resp.aiter_lines():
+                        if not raw_line or not raw_line.startswith("data:"):
+                            continue
+                        try:
+                            evt = json.loads(raw_line[5:].strip())
+                        except json.JSONDecodeError:
+                            continue
+                        if evt.get("event") == "delta":
+                            delta = evt.get("text", "")
+                            if not delta:
+                                continue
+                            buffer += delta
+                            full_reply_parts.append(delta)
+                            await send_event({"event": "text_chunk", "delta": delta})
+
+                            sentences, buffer = _flush_sentences(buffer)
+                            for sentence in sentences:
+                                seq += 1
+                                spoken = apply_tone_to_text(sentence, tone_preset)
+                                out_path = f"/data/voice_ws_{int(datetime.now().timestamp() * 1000)}_{seq}.wav"
+                                try:
+                                    voice_interface.tts.synthesize(
+                                        spoken,
+                                        output_path=out_path,
+                                        voice_onnx=chosen_voice.onnx_path,
+                                        voice_config=chosen_voice.config_path,
+                                    )
+                                    await send_event({
+                                        "event": "audio_chunk",
+                                        "seq": seq,
+                                        "url": f"/audio/{Path(out_path).name}",
+                                        "text": sentence,
+                                    })
+                                except Exception as exc:  # noqa: BLE001
+                                    await send_event({"event": "error", "detail": f"TTS failed seq={seq}: {exc}"})
+                        elif evt.get("event") == "done":
+                            persisted_reply = evt.get("content") or "".join(full_reply_parts)
+                        elif evt.get("event") == "error":
+                            await send_event({"event": "error", "detail": evt.get("detail", "upstream error")})
+            except httpx.HTTPError as exc:
+                await send_event({"event": "error", "detail": f"api stream error: {exc}"})
+                await ws.close()
+                return
+
+            # Flush any tail
+            tail_sentences, _ = _flush_sentences(buffer, force=True)
+            for sentence in tail_sentences:
+                seq += 1
+                spoken = apply_tone_to_text(sentence, tone_preset)
+                out_path = f"/data/voice_ws_{int(datetime.now().timestamp() * 1000)}_{seq}.wav"
+                try:
+                    voice_interface.tts.synthesize(
+                        spoken,
+                        output_path=out_path,
+                        voice_onnx=chosen_voice.onnx_path,
+                        voice_config=chosen_voice.config_path,
+                    )
+                    await send_event({
+                        "event": "audio_chunk",
+                        "seq": seq,
+                        "url": f"/audio/{Path(out_path).name}",
+                        "text": sentence,
+                    })
+                except Exception as exc:  # noqa: BLE001
+                    await send_event({"event": "error", "detail": f"TTS failed seq={seq}: {exc}"})
+
+            await send_event({
+                "event": "done",
+                "conversation_id": conv_id,
+                "reply_text": persisted_reply or "".join(full_reply_parts),
+                "chunks": seq,
+                "voice": chosen_voice.voice_id,
+                "tone": tone_preset.tone_id,
+                "agent": agent,
+            })
+    except WebSocketDisconnect:
+        logger.info("voice WS client disconnected")
+        return
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("voice WS error: %s", exc)
+        await send_event({"event": "error", "detail": str(exc)})
+    finally:
+        try:
+            await ws.close()
+        except Exception:  # noqa: BLE001
+            pass
+
+
+# ─────────────────────────────────────────────────────────────
+# Voice Profiles  (Voicebox-kompatible API)
+# ─────────────────────────────────────────────────────────────
+class VoiceProfileCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=64)
+    description: str = Field("", max_length=256)
+    language: str = Field("de_DE", max_length=16)
+    piper_voice: str = Field("de_DE-thorsten-high", max_length=64)
+    gender: str = Field("neutral", max_length=16)
+    speed: float = Field(1.0, ge=0.5, le=2.0)
+    pitch: float = Field(0.0, ge=-10.0, le=10.0)
+
+
+class VoiceProfileResponse(BaseModel):
+    id: str
+    name: str
+    description: str
+    language: str
+    piper_voice: str
+    gender: str
+    speed: float
+    pitch: float
+    sample_count: int
+    created_at: str
+    updated_at: str
+
+
+def _get_vp_pool(request: Request):
+    pool = getattr(request.app.state, "vp_pool", None)
+    if pool is None:
+        raise HTTPException(503, "Voice profile DB nicht verfügbar")
+    return pool
+
+
+@app.get("/profiles")
+async def list_profiles(request: Request):
+    """Alle Voice-Profile mit Sample-Count."""
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT vp.*,
+                   COALESCE((SELECT COUNT(*) FROM voice_profile_samples vps WHERE vps.profile_id = vp.id), 0) AS sample_count
+            FROM voice_profiles vp
+            ORDER BY vp.created_at DESC
+        """)
+    return [
+        {**dict(r), "created_at": r["created_at"].isoformat(), "updated_at": r["updated_at"].isoformat()}
+        for r in rows
+    ]
+
+
+@app.post("/profiles", status_code=201)
+async def create_profile(request: Request, body: VoiceProfileCreate):
+    """Neues Voice-Profil anlegen."""
+    pool = _get_vp_pool(request)
+    profile_id = str(uuid.uuid4())
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO voice_profiles (id, name, description, language, piper_voice, gender, speed, pitch)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        """, profile_id, body.name, body.description, body.language, body.piper_voice, body.gender, body.speed, body.pitch)
+        row = await conn.fetchrow("SELECT * FROM voice_profiles WHERE id=$1", profile_id)
+    return {**dict(row), "created_at": row["created_at"].isoformat(), "updated_at": row["updated_at"].isoformat(), "sample_count": 0}
+
+
+@app.get("/profiles/{profile_id}")
+async def get_profile(profile_id: str, request: Request):
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow("""
+            SELECT vp.*,
+                   COALESCE((SELECT COUNT(*) FROM voice_profile_samples vps WHERE vps.profile_id = vp.id), 0) AS sample_count
+            FROM voice_profiles vp WHERE vp.id = $1
+        """, profile_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Profil nicht gefunden")
+    return {**dict(row), "created_at": row["created_at"].isoformat(), "updated_at": row["updated_at"].isoformat()}
+
+
+@app.put("/profiles/{profile_id}")
+async def update_profile(profile_id: str, request: Request, body: VoiceProfileCreate):
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        exists = await conn.fetchval("SELECT id FROM voice_profiles WHERE id=$1", profile_id)
+        if not exists:
+            raise HTTPException(404, "Profil nicht gefunden")
+        await conn.execute("""
+            UPDATE voice_profiles
+            SET name=$2, description=$3, language=$4, piper_voice=$5, gender=$6, speed=$7, pitch=$8, updated_at=NOW()
+            WHERE id=$1
+        """, profile_id, body.name, body.description, body.language, body.piper_voice, body.gender, body.speed, body.pitch)
+        row = await conn.fetchrow("SELECT * FROM voice_profiles WHERE id=$1", profile_id)
+        count = await conn.fetchval("SELECT COUNT(*) FROM voice_profile_samples WHERE profile_id=$1", profile_id)
+    return {**dict(row), "created_at": row["created_at"].isoformat(), "updated_at": row["updated_at"].isoformat(), "sample_count": count}
+
+
+@app.delete("/profiles/{profile_id}", status_code=204)
+async def delete_profile(profile_id: str, request: Request):
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        sample_paths = await conn.fetch("SELECT file_path FROM voice_profile_samples WHERE profile_id=$1", profile_id)
+        exists = await conn.fetchval("SELECT id FROM voice_profiles WHERE id=$1", profile_id)
+        if not exists:
+            raise HTTPException(404, "Profil nicht gefunden")
+        await conn.execute("DELETE FROM voice_profiles WHERE id=$1", profile_id)
+    for sample in sample_paths:
+        try:
+            Path(sample["file_path"]).unlink(missing_ok=True)
+        except Exception:  # noqa: BLE001
+            pass
+    profile_dir = getattr(request.app.state, "samples_path", Path("/data/voice-samples")) / profile_id
+    try:
+        profile_dir.rmdir()
+    except Exception:  # noqa: BLE001
+        pass
+
+
+@app.get("/profiles/{profile_id}/samples")
+async def list_samples(profile_id: str, request: Request):
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT * FROM voice_profile_samples WHERE profile_id=$1 ORDER BY created_at DESC",
+            profile_id
+        )
+    return [
+        {**dict(r), "created_at": r["created_at"].isoformat()}
+        for r in rows
+    ]
+
+
+@app.post("/profiles/{profile_id}/samples", status_code=201)
+async def add_sample(
+    profile_id: str,
+    request: Request,
+    file: UploadFile = File(...),
+    reference_text: str = Form(""),
+):
+    """Lädt eine Audio-Referenz-Datei für ein Profil hoch."""
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        exists = await conn.fetchval("SELECT id FROM voice_profiles WHERE id=$1", profile_id)
+    if not exists:
+        raise HTTPException(404, "Profil nicht gefunden")
+
+    sample_id = str(uuid.uuid4())
+    samples_dir = getattr(request.app.state, "samples_path", Path("/data/voice-samples"))
+    profile_dir = samples_dir / profile_id
+    profile_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = Path(file.filename or "sample.wav").suffix.lower() or ".wav"
+    file_path = profile_dir / f"{sample_id}{suffix}"
+    content = await file.read()
+    file_path.write_bytes(content)
+
+    duration_s = 0.0
+    try:
+        import wave
+        if suffix == ".wav":
+            with wave.open(str(file_path), "rb") as wf:
+                duration_s = wf.getnframes() / wf.getframerate()
+    except Exception:  # noqa: BLE001
+        pass
+
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            INSERT INTO voice_profile_samples (id, profile_id, filename, file_path, reference_text, duration_s)
+            VALUES ($1,$2,$3,$4,$5,$6)
+        """, sample_id, profile_id, file.filename or f"{sample_id}{suffix}", str(file_path), reference_text, duration_s)
+        row = await conn.fetchrow("SELECT * FROM voice_profile_samples WHERE id=$1", sample_id)
+
+    return {**dict(row), "created_at": row["created_at"].isoformat()}
+
+
+@app.delete("/profiles/{profile_id}/samples/{sample_id}", status_code=204)
+async def delete_sample(profile_id: str, sample_id: str, request: Request):
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT file_path FROM voice_profile_samples WHERE id=$1 AND profile_id=$2",
+            sample_id, profile_id
+        )
+        if not row:
+            raise HTTPException(404, "Sample nicht gefunden")
+        await conn.execute("DELETE FROM voice_profile_samples WHERE id=$1", sample_id)
+    try:
+        Path(row["file_path"]).unlink(missing_ok=True)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+@app.post("/profiles/{profile_id}/generate")
+async def generate_with_profile(profile_id: str, request: Request, body: SynthesizeRequest):
+    """Generiert Audio mit einem Voice-Profil (überschreibt voice/speed mit Profil-Werten)."""
+    pool = _get_vp_pool(request)
+    async with pool.acquire() as conn:
+        profile = await conn.fetchrow("SELECT * FROM voice_profiles WHERE id=$1", profile_id)
+    if not profile:
+        raise HTTPException(404, "Profil nicht gefunden")
+
+    override = SynthesizeRequest(
+        text=body.text,
+        language=body.language,
+        voice=profile["piper_voice"],
+        tone=body.tone,
+        speed=profile["speed"],
+    )
+    return await synthesize_speech(override)
 
 
 if __name__ == "__main__":

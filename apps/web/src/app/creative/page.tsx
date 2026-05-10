@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -9,9 +9,15 @@ import {
   FilmIcon,
   SparklesIcon,
   ArrowPathIcon,
+  HeartIcon,
+  DocumentTextIcon,
+  PlayIcon,
+  ArrowDownTrayIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
-type Tab = 'image' | 'music' | 'video';
+type Tab = 'image' | 'music' | 'heartmula' | 'video';
 
 const IMG_API = '/api/image-generation';
 const MUSIC_API = '/api/music-generation';
@@ -78,14 +84,16 @@ export default function CreativePage() {
           </p>
         </header>
 
-        <div className="flex gap-2 mb-6 border-b border-gray-800">
+        <div className="flex gap-2 mb-6 border-b border-gray-800 overflow-x-auto">
           <TabBtn active={tab === 'image'} onClick={() => setTab('image')} icon={PhotoIcon} label="Bild" />
           <TabBtn active={tab === 'music'} onClick={() => setTab('music')} icon={MusicalNoteIcon} label="Musik" />
+          <TabBtn active={tab === 'heartmula'} onClick={() => setTab('heartmula')} icon={HeartIcon} label="HeartMuLa" />
           <TabBtn active={tab === 'video'} onClick={() => setTab('video')} icon={FilmIcon} label="Video" />
         </div>
 
         {tab === 'image' && <ImagePanel />}
         {tab === 'music' && <MusicPanel />}
+        {tab === 'heartmula' && <HeartMuLaPanel />}
         {tab === 'video' && <VideoPanel />}
       </div>
     </div>
@@ -180,6 +188,199 @@ function ImagePanel() {
           </a>
         ))}
         {items.length === 0 && <p className="text-gray-500 text-sm col-span-full text-center py-8">Noch keine Bilder generiert.</p>}
+      </div>
+    </div>
+  );
+}
+
+// ---------- HeartMuLa ----------
+function HeartMuLaPanel() {
+  const [lyrics, setLyrics] = useState('');
+  const [tags, setTags] = useState('pop, uplifting, 120bpm');
+  const [temperature, setTemperature] = useState(1.0);
+  const [cfgScale, setCfgScale] = useState(1.5);
+  const [maxDurationS, setMaxDurationS] = useState(60);
+  const [zone, setZone] = useState('WORKSPACE');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [items, setItems] = useState<TrackItem[]>([]);
+  const [status, setStatus] = useState<{ available: boolean; message: string } | null>(null);
+
+  // Transcription
+  const [transcribeId, setTranscribeId] = useState('');
+  const [transcribeResult, setTranscribeResult] = useState('');
+  const [transcribeBusy, setTranscribeBusy] = useState(false);
+
+  useEffect(() => {
+    axios.get('/api/music-generation/heartmula/status')
+      .then((r) => setStatus(r.data))
+      .catch(() => setStatus({ available: false, message: 'Status nicht abrufbar' }));
+    loadTracks();
+  }, []);
+
+  async function loadTracks() {
+    try {
+      const r = await axios.get<TrackItem[]>('/api/music-generation/tracks?limit=24');
+      setItems(r.data.filter((t) => t.model_used?.includes('heartmula') || t.prompt.length > 50));
+    } catch (_e) { /* ignore */ }
+  }
+
+  async function generate() {
+    if (!lyrics.trim()) return;
+    setBusy(true); setErr('');
+    try {
+      await axios.post('/api/music-generation/heartmula/generate', {
+        lyrics,
+        tags,
+        temperature,
+        cfg_scale: cfgScale,
+        max_audio_length_ms: maxDurationS * 1000,
+        zone,
+      });
+      setLyrics('');
+      await loadTracks();
+    } catch (e: unknown) {
+      const r = (e as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+      setErr(`Fehler: ${r || String(e)}`);
+    } finally { setBusy(false); }
+  }
+
+  async function transcribe(trackId: string) {
+    setTranscribeId(trackId); setTranscribeResult(''); setTranscribeBusy(true);
+    try {
+      const r = await axios.post('/api/music-generation/heartmula/transcribe', { track_id: trackId });
+      setTranscribeResult(r.data.lyrics);
+    } catch (e: unknown) {
+      const r = (e as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+      setTranscribeResult(`Fehler: ${r || String(e)}`);
+    } finally { setTranscribeBusy(false); }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Status Banner */}
+      {status && (
+        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm ${
+          status.available
+            ? 'bg-emerald-950/50 border-emerald-700 text-emerald-300'
+            : 'bg-amber-950/50 border-amber-700 text-amber-300'
+        }`}>
+          {status.available
+            ? <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />
+            : <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />}
+          <span>{status.message}</span>
+        </div>
+      )}
+
+      {/* Generation Form */}
+      <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-gray-200 flex items-center gap-2">
+          <HeartIcon className="w-4 h-4 text-rose-400" />
+          HeartMuLa — Lyrics-konditionierte Musikgenerierung
+        </h2>
+
+        <div>
+          <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Liedtext (Lyrics)</label>
+          <textarea
+            value={lyrics}
+            onChange={(e) => setLyrics(e.target.value)}
+            placeholder={'[Verse]\nSchreibe hier deinen Liedtext...\n\n[Chorus]\nDer Refrain geht so...'}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm h-40 focus:outline-none focus:border-rose-500 resize-y font-mono"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Tags (Genre, Stimmung, BPM)</label>
+          <input
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="z.B. pop, uplifting, 120bpm, female vocals"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-rose-500"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">Temperature</label>
+            <input type="range" min="0.1" max="2.0" step="0.1" value={temperature}
+              onChange={(e) => setTemperature(Number(e.target.value))}
+              className="w-full accent-rose-500" />
+            <p className="text-xs text-gray-500 text-center mt-1">{temperature.toFixed(1)}</p>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 uppercase tracking-wider mb-1">CFG Scale</label>
+            <input type="range" min="0.5" max="5.0" step="0.1" value={cfgScale}
+              onChange={(e) => setCfgScale(Number(e.target.value))}
+              className="w-full accent-rose-500" />
+            <p className="text-xs text-gray-500 text-center mt-1">{cfgScale.toFixed(1)}</p>
+          </div>
+          <FieldSelect label="Max. Dauer" value={String(maxDurationS)} onChange={(v) => setMaxDurationS(Number(v))}
+            options={[['30','30s'],['60','60s'],['120','2min'],['180','3min'],['240','4min']]} />
+          <FieldSelect label="Zone" value={zone} onChange={setZone}
+            options={[['PUBLIC','PUBLIC'],['WORKSPACE','WORKSPACE'],['FAMILY_PRIVATE','FAMILY_PRIVATE']]} />
+        </div>
+
+        {err && <p className="text-sm text-rose-400">{err}</p>}
+
+        <button
+          onClick={generate}
+          disabled={busy || !lyrics.trim()}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:bg-gray-700 rounded-lg text-sm font-medium transition"
+        >
+          {busy ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <HeartIcon className="w-4 h-4" />}
+          {busy ? 'Generiere Musik...' : 'Musik generieren'}
+        </button>
+      </div>
+
+      {/* Generated Tracks */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-300">Generierte Tracks</h3>
+        {items.map((it) => (
+          <div key={it.id} className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-200 line-clamp-3 whitespace-pre-line">{it.prompt}</p>
+                {it.enhanced_prompt && (
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">Tags: {it.enhanced_prompt}</p>
+                )}
+              </div>
+              <div className="text-right flex-shrink-0 space-y-1">
+                <p className="text-[10px] text-gray-400">{it.model_used}</p>
+                <p className="text-[10px] text-gray-500">{it.duration_seconds}s</p>
+                {it.is_placeholder && (
+                  <span className="text-[10px] text-amber-400 flex items-center gap-1 justify-end">
+                    <ExclamationTriangleIcon className="w-3 h-3" /> Placeholder
+                  </span>
+                )}
+              </div>
+            </div>
+            <audio controls src={`/api/music-generation/file/${it.id}`} className="w-full" />
+            <div className="flex items-center gap-2">
+              <a href={`/api/music-generation/file/${it.id}`} download
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs transition">
+                <ArrowDownTrayIcon className="w-3.5 h-3.5" /> Download
+              </a>
+              <button
+                onClick={() => transcribe(it.id)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs transition"
+              >
+                <DocumentTextIcon className="w-3.5 h-3.5" />
+                {transcribeBusy && transcribeId === it.id ? 'Transkribiere...' : 'Lyrics extrahieren'}
+              </button>
+            </div>
+            {transcribeId === it.id && transcribeResult && (
+              <div className="bg-gray-800/80 rounded-lg p-3 border border-gray-700">
+                <p className="text-xs font-mono text-gray-200 whitespace-pre-line">{transcribeResult}</p>
+              </div>
+            )}
+          </div>
+        ))}
+        {items.length === 0 && (
+          <div className="text-center py-10 text-gray-500 text-sm">
+            <HeartIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p>Noch keine HeartMuLa-Tracks. Schreibe Lyrics oben und starte die Generierung.</p>
+          </div>
+        )}
       </div>
     </div>
   );

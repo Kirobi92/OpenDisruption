@@ -61,6 +61,16 @@ try:
 except ImportError:
     pass
 
+# HeartMuLa verfügbar?
+_HEARTMULA_AVAILABLE = False
+_HEARTMULA_MODEL_PATH = Path(os.getenv("HEARTMULA_MODEL_PATH", "/data/models/heartmula"))
+try:
+    import heartlib  # noqa: F401
+    if _HEARTMULA_MODEL_PATH.exists():
+        _HEARTMULA_AVAILABLE = True
+except ImportError:
+    pass
+
 # ---------------------------------------------------------------------------
 # DB schema
 # ---------------------------------------------------------------------------
@@ -132,6 +142,27 @@ class TrackMetadata(BaseModel):
     is_placeholder: bool
     metadata: dict
     created_at: datetime
+
+
+class HeartMuLaRequest(BaseModel):
+    lyrics: str = Field(..., description="Liedtext (Multiline)")
+    tags: str = Field("pop, uplifting", description="Genre, Stimmung, BPM z.B. 'pop, happy, 120bpm'")
+    max_audio_length_ms: int = Field(240_000, ge=10_000, le=600_000)
+    temperature: float = Field(1.0, ge=0.1, le=2.0)
+    cfg_scale: float = Field(1.5, ge=0.5, le=5.0)
+    topk: int = Field(50, ge=1, le=200)
+    zone: str = Field("WORKSPACE")
+
+
+class HeartMuLaTranscribeRequest(BaseModel):
+    track_id: str = Field(..., description="ID eines generierten Tracks")
+
+
+class HeartMuLaStatusResponse(BaseModel):
+    available: bool
+    model_path: str
+    model_exists: bool
+    message: str
 
 
 # ---------------------------------------------------------------------------
@@ -576,6 +607,160 @@ async def serve_track_file(track_id: str):
     if not fp.exists():
         raise HTTPException(status_code=410, detail="Datei nicht mehr verfuegbar")
     return FileResponse(fp, media_type="audio/wav", filename=fp.name)
+
+
+@app.get("/heartmula/status", response_model=HeartMuLaStatusResponse)
+async def heartmula_status():
+    """Prüft ob HeartMuLa Model verfügbar ist."""
+    model_exists = _HEARTMULA_MODEL_PATH.exists()
+    return HeartMuLaStatusResponse(
+        available=_HEARTMULA_AVAILABLE,
+        model_path=str(_HEARTMULA_MODEL_PATH),
+        model_exists=model_exists,
+        message=(
+            "HeartMuLa bereit" if _HEARTMULA_AVAILABLE else
+            f"Model nicht gefunden unter {_HEARTMULA_MODEL_PATH}. Lade mit: pip install heartlib und lade das Modell herunter."
+        ),
+    )
+
+
+@app.post("/heartmula/generate")
+async def heartmula_generate(req: HeartMuLaRequest):
+    """
+    Generiert Musik via HeartMuLa (lyrics-konditioniert).
+    Fallback: MusicGen/Placeholder falls Modell nicht verfügbar.
+    """
+    track_id = str(uuid.uuid4())
+    out_path = AUDIO_STORAGE_PATH / f"{track_id}.wav"
+
+    if _HEARTMULA_AVAILABLE:
+        import torch
+        from heartlib import HeartMuLaGenPipeline
+
+        def _sync_generate_heartmula() -> None:
+            pipe = HeartMuLaGenPipeline.from_pretrained(
+                str(_HEARTMULA_MODEL_PATH),
+                device={"mula": torch.device("cuda"), "codec": torch.device("cuda")},
+                dtype={"mula": torch.bfloat16, "codec": torch.float32},
+                version="3B",
+                lazy_load=True,
+            )
+            with torch.no_grad():
+                pipe(
+                    {"lyrics": req.lyrics, "tags": req.tags},
+                    max_audio_length_ms=req.max_audio_length_ms,
+                    save_path=str(out_path),
+                    topk=req.topk,
+                    temperature=req.temperature,
+                    cfg_scale=req.cfg_scale,
+                )
+
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _sync_generate_heartmula)
+        model_used = "heartmula-3b"
+    else:
+        # Fallback: Placeholder WAV + Prompt-Enhancement
+        prompt = f"lyrics-based music: {req.tags}\n{req.lyrics[:200]}"
+        enhanced = await _enhance_prompt_via_ollama(
+            prompt,
+            "music_generation",
+            int(req.max_audio_length_ms / 1000),
+        )
+        wav_bytes = _make_placeholder_wav(int(req.max_audio_length_ms / 1000), enhanced)
+        out_path.write_bytes(wav_bytes)
+        model_used = "placeholder (heartmula-unavailable)"
+
+    duration_s = req.max_audio_length_ms // 1000
+
+    async with db_pool.acquire() as conn:
+        await conn.execute(
+            """
+            INSERT INTO generated_tracks
+                (id, prompt, enhanced_prompt, genre, duration_seconds, model_used, file_path, zone, is_placeholder, metadata)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            """,
+            track_id,
+            req.lyrics[:500],
+            req.tags,
+            req.tags,
+            duration_s,
+            model_used,
+            str(out_path),
+            req.zone,
+            not _HEARTMULA_AVAILABLE,
+            json.dumps({"source": "heartmula", "temperature": req.temperature, "cfg_scale": req.cfg_scale}),
+        )
+
+    await _analytics_track(
+        "heartmula_generate",
+        zone=req.zone,
+        model=model_used,
+        metadata={"source": "heartmula"},
+    )
+
+    return {
+        "id": track_id,
+        "model_used": model_used,
+        "duration_seconds": duration_s,
+        "file_url": f"/file/{track_id}",
+        "is_placeholder": not _HEARTMULA_AVAILABLE,
+        "zone": req.zone,
+    }
+
+
+@app.post("/heartmula/transcribe")
+async def heartmula_transcribe(req: HeartMuLaTranscribeRequest):
+    """
+    Transkribiert Lyrics aus einem vorhandenen Track via HeartTranscriptor.
+    Fallback: Whisper aus voice-processing wenn HeartMuLa nicht verfügbar.
+    """
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT file_path FROM generated_tracks WHERE id = $1", req.track_id
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Track nicht gefunden")
+
+    fp = Path(row["file_path"])
+    if not fp.exists():
+        raise HTTPException(status_code=410, detail="Datei nicht verfügbar")
+
+    if _HEARTMULA_AVAILABLE:
+        import torch
+        from heartlib import HeartTranscriptorPipeline
+
+        transcriptor_path = _HEARTMULA_MODEL_PATH / "transcriptor"
+        if not transcriptor_path.exists():
+            raise HTTPException(status_code=503, detail="HeartTranscriptor Modell nicht gefunden")
+
+        def _sync_transcribe() -> str:
+            pipe = HeartTranscriptorPipeline.from_pretrained(
+                str(transcriptor_path),
+                device=torch.device("cuda"),
+                dtype=torch.float16,
+            )
+            with torch.no_grad():
+                result = pipe(
+                    str(fp),
+                    max_new_tokens=256,
+                    num_beams=2,
+                    task="transcribe",
+                    condition_on_prev_tokens=False,
+                    compression_ratio_threshold=1.8,
+                    temperature=(0.0, 0.1, 0.2, 0.4),
+                    logprob_threshold=-1.0,
+                    no_speech_threshold=0.4,
+                )
+            return str(result)
+
+        loop = asyncio.get_event_loop()
+        lyrics = await loop.run_in_executor(None, _sync_transcribe)
+        engine = "hearttranscriptor"
+    else:
+        lyrics = "[HeartTranscriptor nicht verfügbar — lade das HeartMuLa Modell herunter]"
+        engine = "unavailable"
+
+    return {"track_id": req.track_id, "lyrics": lyrics, "engine": engine}
 
 
 if __name__ == "__main__":
