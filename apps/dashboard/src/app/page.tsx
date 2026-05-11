@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -19,6 +19,7 @@ import {
   ShieldCheckIcon,
   BoltIcon,
 } from '@heroicons/react/24/outline';
+import { BACKEND_API_SERVICES } from '@/lib/service-catalog';
 
 type ServiceStatus = 'online' | 'offline' | 'unknown';
 
@@ -101,21 +102,11 @@ interface RecentActivity {
   created_at: string;
 }
 
-const SERVICES: Pick<ServiceHealth, 'name' | 'label' | 'endpoint'>[] = [
-  { name: 'api', label: 'API Service', endpoint: '/api/proxy/api/health' },
-  { name: 'auth', label: 'Auth Service', endpoint: '/api/proxy/auth/health' },
-  { name: 'embeddings', label: 'Embeddings', endpoint: '/api/proxy/embeddings/health' },
-  { name: 'ingest', label: 'Ingest', endpoint: '/api/proxy/ingest/health' },
-  { name: 'retrieval', label: 'Retrieval', endpoint: '/api/proxy/retrieval/health' },
-  { name: 'model-routing', label: 'Model Routing', endpoint: '/api/proxy/model-routing/health' },
-  { name: 'analytics', label: 'Analytics', endpoint: '/api/proxy/analytics/health' },
-  { name: 'image-generation', label: 'Image Generation', endpoint: '/api/proxy/image-generation/health' },
-  { name: 'media-processing', label: 'Media Processing', endpoint: '/api/proxy/media-processing/health' },
-  { name: 'music-generation', label: 'Music Generation', endpoint: '/api/proxy/music-generation/health' },
-  { name: 'video-generation', label: 'Video Generation', endpoint: '/api/proxy/video-generation/health' },
-  { name: 'telegram', label: 'Telegram (KeyCodi)', endpoint: '/api/proxy/telegram/health' },
-  { name: 'ollama', label: 'Ollama LLM', endpoint: '/api/proxy/ollama/api/tags' },
-];
+const SERVICES: Pick<ServiceHealth, 'name' | 'label' | 'endpoint'>[] = BACKEND_API_SERVICES.map((service) => ({
+  name: service.name,
+  label: service.label,
+  endpoint: service.healthEndpoint,
+}));
 
 interface FrontendLink {
   name: string;
@@ -696,7 +687,7 @@ function ControlPanel({ control, loading }: { control: ControlStatus | null; loa
   );
 }
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState<NavSection>('control');
   const [services, setServices] = useState<ServiceHealth[]>(SERVICES.map((s) => ({ ...s, status: 'unknown', latencyMs: null, lastChecked: null })));
@@ -831,73 +822,82 @@ export default function DashboardPage() {
     : `${services.length - onlineCount} Problem${services.length - onlineCount > 1 ? 'e' : ''}`;
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      <aside className="w-60 flex-shrink-0 bg-gray-800/80 border-r border-gray-700/60 flex flex-col">
-        <div className="px-5 py-5 border-b border-gray-700/60">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-kirobi-600 flex items-center justify-center text-white font-bold text-sm">K</div>
-            <div>
-              <p className="text-sm font-bold text-white leading-tight">Kirobi</p>
-              <p className="text-xs text-gray-500 leading-tight">Admin Dashboard</p>
-            </div>
+    <>
+      <header className="sticky top-0 z-10 border-b border-gray-700/60 bg-gray-900/80 px-6 py-4 backdrop-blur">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-base font-semibold text-white">Übersicht</h1>
+            <p className="mt-0.5 text-xs text-gray-500">OpenDisruption · lokal, transparent, operator-controlled</p>
           </div>
-        </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setActiveSection(id)} className={`nav-item w-full ${activeSection === id ? 'nav-item-active' : 'nav-item-inactive'}`}>
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span>{label}</span>
-              {id === 'control' && controlStatus && (
-                <span className={`ml-auto text-xs font-mono px-1.5 py-0.5 rounded ${controlStatus.attentionRequired > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>{controlStatus.attentionRequired}</span>
-              )}
-              {id === 'services' && (
-                <span className={`ml-auto text-xs font-mono px-1.5 py-0.5 rounded ${allOnline ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>{onlineCount}/{services.length}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className="px-4 py-4 border-t border-gray-700/60 space-y-2">
-          <div className="flex items-center gap-2 text-xs text-gray-500"><ClockIcon className="w-3.5 h-3.5" /><span>Aktualisiert {formatRelativeTime(lastRefresh)}</span></div>
-          <button onClick={refreshAll} disabled={refreshing} className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-white bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-all disabled:opacity-50">
-            <ArrowPathIcon className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Lädt...' : 'Jetzt aktualisieren'}
-          </button>
-          <p className="text-xs text-gray-600 text-center">Auto-Refresh alle 30s</p>
-        </div>
-      </aside>
-
-      <main className="flex-1 overflow-y-auto">
-        <header className="sticky top-0 z-10 bg-gray-900/80 backdrop-blur border-b border-gray-700/60 px-6 py-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-base font-semibold text-white capitalize">{navItems.find((n) => n.id === activeSection)?.label}</h1>
-              <p className="text-xs text-gray-500 mt-0.5">OpenDisruption · lokal, transparent, operator-controlled</p>
+          <div className="flex items-center gap-3 flex-wrap justify-end">
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <ClockIcon className="w-3.5 h-3.5" />
+              <span>Aktualisiert {formatRelativeTime(lastRefresh)}</span>
             </div>
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border ${topBadgeTone}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${controlStatus?.attentionRequired ? 'bg-amber-400' : allOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
+            <button
+              onClick={refreshAll}
+              disabled={refreshing}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-300 transition-all hover:border-gray-600 hover:text-white disabled:opacity-50"
+            >
+              <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Lädt...' : 'Jetzt aktualisieren'}
+            </button>
+            <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${topBadgeTone}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${controlStatus?.attentionRequired ? 'bg-amber-400' : allOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
               {topBadgeText}
             </div>
           </div>
-        </header>
-
-        <div className="p-6 max-w-6xl">
-          {activeSection === 'control' && (
-            <div className="space-y-6">
-              <ControlPanel control={controlStatus} loading={controlLoading} />
-              <ActivityPanel items={recentActivity} loading={activityLoading} />
-            </div>
-          )}
-          {activeSection === 'services' && <ServicesPanel services={services} />}
-          {activeSection === 'analytics' && (
-            <div className="space-y-6">
-              <AnalyticsPanel stats={analyticsStats} loading={analyticsLoading} />
-              <ActivityPanel items={recentActivity} loading={activityLoading} />
-            </div>
-          )}
-          {activeSection === 'users' && <UsersPanel />}
-          {activeSection === 'system' && <SystemPanel info={systemInfo} loading={systemLoading} />}
         </div>
-      </main>
-    </div>
+      </header>
+
+      <div className="max-w-6xl space-y-6 p-6">
+        <div className="flex gap-2 flex-wrap">
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveSection(id)}
+              className={`nav-item ${activeSection === id ? 'nav-item-active' : 'nav-item-inactive'}`}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              <span>{label}</span>
+              {id === 'control' && controlStatus && (
+                <span className={`ml-auto rounded px-1.5 py-0.5 text-xs font-mono ${controlStatus.attentionRequired > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                  {controlStatus.attentionRequired}
+                </span>
+              )}
+              {id === 'services' && (
+                <span className={`ml-auto rounded px-1.5 py-0.5 text-xs font-mono ${allOnline ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                  {onlineCount}/{services.length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {activeSection === 'control' && (
+          <div className="space-y-6">
+            <ControlPanel control={controlStatus} loading={controlLoading} />
+            <ActivityPanel items={recentActivity} loading={activityLoading} />
+          </div>
+        )}
+        {activeSection === 'services' && <ServicesPanel services={services} />}
+        {activeSection === 'analytics' && (
+          <div className="space-y-6">
+            <AnalyticsPanel stats={analyticsStats} loading={analyticsLoading} />
+            <ActivityPanel items={recentActivity} loading={activityLoading} />
+          </div>
+        )}
+        {activeSection === 'users' && <UsersPanel />}
+        {activeSection === 'system' && <SystemPanel info={systemInfo} loading={systemLoading} />}
+      </div>
+    </>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Übersicht wird geladen ...</div>}>
+      <DashboardPageContent />
+    </Suspense>
   );
 }

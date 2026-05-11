@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { DashboardShell } from '@/components/dashboard-shell'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,7 +23,7 @@ export default function RootLayout({
     <html lang="de" className="dark">
       <body className={`${inter.className} relative`}>
         <div className="ambient-field" aria-hidden="true" />
-        <div className="relative z-10">{children}</div>
+        <DashboardShell>{children}</DashboardShell>
       </body>
     </html>
   )

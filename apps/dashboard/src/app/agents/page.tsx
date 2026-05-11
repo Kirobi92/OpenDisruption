@@ -244,90 +244,61 @@ export default function AgentsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-60 flex-shrink-0 bg-gray-800/80 border-r border-gray-700/60 flex flex-col">
-        <div className="px-5 py-5 border-b border-gray-700/60">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-kirobi-600 flex items-center justify-center text-white font-bold text-sm">K</div>
-            <div>
-              <p className="text-sm font-bold text-white leading-tight">Kirobi</p>
-              <p className="text-xs text-gray-500 leading-tight">Admin Dashboard</p>
-            </div>
+    <>
+      <header className="sticky top-0 z-10 border-b border-gray-700/60 bg-gray-900/80 px-6 py-4 backdrop-blur">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-base font-semibold text-white">Agent Registry</h1>
+            <p className="mt-0.5 text-xs text-gray-500">{AGENTS.length} Agenten im OpenDisruption-Ökosystem</p>
           </div>
+          <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-mono text-emerald-400">
+            {counts.active} aktiv
+          </span>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          <a href="/" className="nav-item nav-item-inactive w-full flex"><ServerIcon className="w-4 h-4" /><span>Übersicht</span></a>
-          <a href="/services" className="nav-item nav-item-inactive w-full flex"><ServerIcon className="w-4 h-4" /><span>Services</span></a>
-          <a href="/tasks" className="nav-item nav-item-inactive w-full flex"><ClipboardDocumentListIcon className="w-4 h-4" /><span>Tasks</span></a>
-          <a href="/agents" className="nav-item nav-item-active w-full flex"><CpuChipIcon className="w-4 h-4" /><span>Agents</span></a>
-        </nav>
-        <div className="px-4 py-4 border-t border-gray-700/60">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <ClockIcon className="w-3.5 h-3.5" />
-            <span>Statisch aus CLAUDE.md</span>
-          </div>
+      </header>
+
+      <div className="space-y-6 p-6">
+        <div className="flex gap-2 flex-wrap">
+          {(['all', 'active', 'scaffold', 'planned'] as const).map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                filter === f
+                  ? 'bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30'
+                  : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'
+              }`}
+            >
+              {f === 'all' ? 'Alle' : f === 'active' ? 'Aktiv' : f === 'scaffold' ? 'Scaffold' : 'Geplant'}
+              <span className="ml-1.5 text-gray-500">{counts[f]}</span>
+            </button>
+          ))}
         </div>
-      </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto">
-        <header className="sticky top-0 z-10 bg-gray-900/80 backdrop-blur border-b border-gray-700/60 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-base font-semibold text-white">Agent Registry</h1>
-              <p className="text-xs text-gray-500 mt-0.5">{AGENTS.length} Agenten im OpenDisruption-Ökosystem</p>
-            </div>
-            <span className="text-xs text-emerald-400 font-mono">{counts.active} aktiv</span>
-          </div>
-        </header>
-
-        <div className="p-6 space-y-6">
-          {/* Filter */}
-          <div className="flex gap-2 flex-wrap">
-            {(['all', 'active', 'scaffold', 'planned'] as const).map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  filter === f
-                    ? 'bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30'
-                    : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'
-                }`}
-              >
-                {f === 'all' ? 'Alle' : f === 'active' ? 'Aktiv' : f === 'scaffold' ? 'Scaffold' : 'Geplant'}
-                <span className="ml-1.5 text-gray-500">{counts[f]}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Zone legend */}
-          <div className="card">
-            <p className="text-xs text-gray-500 mb-3 font-semibold uppercase tracking-wider">Zonen-Legende</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { zone: 'PUBLIC', desc: '🌍 Öffentlich' },
-                { zone: 'WORKSPACE', desc: '💼 Intern' },
-                { zone: 'FAMILY_PRIVATE', desc: '👨‍👩‍👦 Familie' },
-                { zone: 'QUARANTINE', desc: '⚠️ Ungeprüft' },
-                { zone: 'SACRED', desc: '🔐 Höchst vertraulich' },
-              ].map(({ zone, desc }) => (
-                <div key={zone} className="flex items-center gap-1.5">
-                  <ZoneBadge zone={zone} />
-                  <span className="text-xs text-gray-500">{desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Agent grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filtered.map(agent => (
-              <AgentCard key={agent.id} agent={agent} />
+        <div className="card">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Zonen-Legende</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { zone: 'PUBLIC', desc: '🌍 Öffentlich' },
+              { zone: 'WORKSPACE', desc: '💼 Intern' },
+              { zone: 'FAMILY_PRIVATE', desc: '👨‍👩‍👦 Familie' },
+              { zone: 'QUARANTINE', desc: '⚠️ Ungeprüft' },
+              { zone: 'SACRED', desc: '🔐 Höchst vertraulich' },
+            ].map(({ zone, desc }) => (
+              <div key={zone} className="flex items-center gap-1.5">
+                <ZoneBadge zone={zone} />
+                <span className="text-xs text-gray-500">{desc}</span>
+              </div>
             ))}
           </div>
         </div>
-      </main>
-    </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {filtered.map(agent => (
+            <AgentCard key={agent.id} agent={agent} />
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

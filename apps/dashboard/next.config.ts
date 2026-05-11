@@ -35,6 +35,7 @@ function buildRewrites(): { source: string; destination: string }[] {
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  distDir: '.next-build',
   poweredByHeader: false,
   async rewrites() {
     return buildRewrites();

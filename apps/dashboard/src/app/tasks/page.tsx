@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import {
@@ -154,7 +154,7 @@ function TaskCard({ task }: { task: Task }) {
   );
 }
 
-export default function TasksPage() {
+function TasksPageContent() {
   const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,102 +211,98 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
-      <aside className="w-60 flex-shrink-0 bg-gray-800/80 border-r border-gray-700/60 flex flex-col">
-        <div className="px-5 py-5 border-b border-gray-700/60">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-kirobi-600 flex items-center justify-center text-white font-bold text-sm">K</div>
-            <div>
-              <p className="text-sm font-bold text-white leading-tight">Kirobi</p>
-              <p className="text-xs text-gray-500 leading-tight">Admin Dashboard</p>
+    <>
+      <header className="sticky top-0 z-10 border-b border-gray-700/60 bg-gray-900/80 px-6 py-4 backdrop-blur">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-base font-semibold text-white">Supervisor Tasks</h1>
+            <p className="mt-0.5 text-xs text-gray-500">Lokale Queue, Human-Gates und Dead-Letter im Blick</p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap justify-end">
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <ClockIcon className="w-3.5 h-3.5" />
+              <span>Aktualisiert {formatRelativeTime(lastRefresh)}</span>
             </div>
+            <button
+              onClick={loadTasks}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-300 transition-all hover:border-gray-600 hover:text-white disabled:opacity-50"
+            >
+              <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? 'Lädt...' : 'Aktualisieren'}
+            </button>
+            <span className={`rounded-full border px-3 py-1.5 text-xs font-medium ${counts.blocked + counts.dead_letter > 0 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+              {counts.blocked + counts.dead_letter > 0 ? `${counts.blocked + counts.dead_letter} Task(s) brauchen Triage` : 'Keine offenen Triage-Fälle'}
+            </span>
           </div>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          <a href="/" className="nav-item nav-item-inactive w-full flex"><ShieldCheckIcon className="w-4 h-4" /><span>Kontrolle</span></a>
-          <a href="/services" className="nav-item nav-item-inactive w-full flex"><ServerIcon className="w-4 h-4" /><span>Services</span></a>
-          <a href="/tasks" className="nav-item nav-item-active w-full flex"><ClipboardDocumentListIcon className="w-4 h-4" /><span>Tasks</span></a>
-          <a href="/agents" className="nav-item nav-item-inactive w-full flex"><ServerIcon className="w-4 h-4" /><span>Agents</span></a>
-        </nav>
-        <div className="px-4 py-4 border-t border-gray-700/60 space-y-2">
-          <div className="flex items-center gap-2 text-xs text-gray-500"><ClockIcon className="w-3.5 h-3.5" /><span>Aktualisiert {formatRelativeTime(lastRefresh)}</span></div>
-          <button onClick={loadTasks} disabled={loading} className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-white bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-all disabled:opacity-50">
-            <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Lädt...' : 'Aktualisieren'}
-          </button>
-          <p className="text-xs text-gray-600 text-center">Auto-Refresh alle 30s</p>
+      </header>
+
+      <div className="space-y-6 p-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <SummaryCard label="Pending" value={counts.pending} tone="kirobi" />
+          <SummaryCard label="In Arbeit" value={counts.in_progress} tone="emerald" />
+          <SummaryCard label="Blockiert" value={counts.blocked} tone="amber" />
+          <SummaryCard label="Dead-Letter" value={counts.dead_letter} tone="red" />
         </div>
-      </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <header className="sticky top-0 z-10 bg-gray-900/80 backdrop-blur border-b border-gray-700/60 px-6 py-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-base font-semibold text-white">Supervisor Tasks</h1>
-              <p className="text-xs text-gray-500 mt-0.5">Lokale Queue, Human-Gates und Dead-Letter im Blick</p>
+        <div className="flex gap-2 flex-wrap">
+          {(['all', 'pending', 'in_progress', 'completed', 'blocked', 'dead_letter'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f ? 'bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'}`}
+            >
+              {f === 'all' ? 'Alle' : f === 'in_progress' ? 'In Arbeit' : f === 'completed' ? 'Erledigt' : f === 'blocked' ? 'Blockiert' : f === 'dead_letter' ? 'Dead-Letter' : 'Ausstehend'}
+              <span className="ml-1.5 text-gray-500">{counts[f] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+
+        {error && (
+          <div className="card border-red-500/30 bg-red-500/5">
+            <div className="flex items-center gap-3">
+              <ExclamationTriangleIcon className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-sm text-red-300">{error}</p>
             </div>
-            <span className={`text-xs font-medium px-3 py-1.5 rounded-full border ${counts.blocked + counts.dead_letter > 0 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>{counts.blocked + counts.dead_letter > 0 ? `${counts.blocked + counts.dead_letter} Task(s) brauchen Triage` : 'Keine offenen Triage-Fälle'}</span>
           </div>
-        </header>
+        )}
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            <SummaryCard label="Pending" value={counts.pending} tone="kirobi" />
-            <SummaryCard label="In Arbeit" value={counts.in_progress} tone="emerald" />
-            <SummaryCard label="Blockiert" value={counts.blocked} tone="amber" />
-            <SummaryCard label="Dead-Letter" value={counts.dead_letter} tone="red" />
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {(['all', 'pending', 'in_progress', 'completed', 'blocked', 'dead_letter'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f ? 'bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'}`}
-              >
-                {f === 'all' ? 'Alle' : f === 'in_progress' ? 'In Arbeit' : f === 'completed' ? 'Erledigt' : f === 'blocked' ? 'Blockiert' : f === 'dead_letter' ? 'Dead-Letter' : 'Ausstehend'}
-                <span className="ml-1.5 text-gray-500">{counts[f] ?? 0}</span>
-              </button>
+        {loading && (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="card animate-pulse">
+                <div className="mb-2 h-4 w-3/4 rounded bg-gray-700" />
+                <div className="h-3 w-1/2 rounded bg-gray-700" />
+              </div>
             ))}
           </div>
+        )}
 
-          {error && (
-            <div className="card border-red-500/30 bg-red-500/5">
-              <div className="flex items-center gap-3">
-                <ExclamationTriangleIcon className="w-5 h-5 text-red-400 flex-shrink-0" />
-                <p className="text-sm text-red-300">{error}</p>
-              </div>
-            </div>
-          )}
+        {!loading && !error && filtered.length === 0 && (
+          <div className="card py-12 text-center">
+            <ClipboardDocumentListIcon className="mx-auto mb-3 h-12 w-12 text-gray-600" />
+            <p className="text-sm text-gray-400">Keine Tasks gefunden</p>
+            <p className="mt-1 text-xs text-gray-600">{filter !== 'all' ? 'Versuche einen anderen Filter' : 'Der API-Service liefert keine Supervisor-Tasks'}</p>
+          </div>
+        )}
 
-          {loading && (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="card animate-pulse">
-                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-gray-700 rounded w-1/2" />
-                </div>
-              ))}
-            </div>
-          )}
+        {!loading && filtered.length > 0 && (
+          <div className="space-y-3">
+            {filtered.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
 
-          {!loading && !error && filtered.length === 0 && (
-            <div className="card text-center py-12">
-              <ClipboardDocumentListIcon className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm">Keine Tasks gefunden</p>
-              <p className="text-gray-600 text-xs mt-1">{filter !== 'all' ? 'Versuche einen anderen Filter' : 'Der API-Service liefert keine Supervisor-Tasks'}</p>
-            </div>
-          )}
-
-          {!loading && filtered.length > 0 && (
-            <div className="space-y-3">
-              {filtered.map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+export default function TasksPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Tasks werden geladen ...</div>}>
+      <TasksPageContent />
+    </Suspense>
   );
 }

@@ -97,6 +97,7 @@ lerna-debug.log*
 .node_repl_history
 *.tsbuildinfo
 .next/
+.next-build/
 .nuxt/
 .cache/
 .parcel-cache/

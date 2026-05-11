@@ -700,6 +700,9 @@ services:
     build:
       context: ./apps/dashboard
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_TAILSCALE_HOST: ${NEXT_PUBLIC_TAILSCALE_HOST:-pop-os.taildd322d.ts.net}
+        NEXT_PUBLIC_LAN_HOST: ${NEXT_PUBLIC_LAN_HOST:-192.168.178.10}
     container_name: kirobi-dashboard
     restart: unless-stopped
     ports:
@@ -707,6 +710,8 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_TAILSCALE_HOST=${NEXT_PUBLIC_TAILSCALE_HOST:-pop-os.taildd322d.ts.net}
+      - NEXT_PUBLIC_LAN_HOST=${NEXT_PUBLIC_LAN_HOST:-192.168.178.10}
     depends_on:
       - api
       - auth

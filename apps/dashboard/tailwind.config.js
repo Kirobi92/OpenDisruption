@@ -3,6 +3,14 @@
  * Shared theme is mirrored from apps/_design/tailwind-theme.js — keep in sync.
  */
 /** @type {import('tailwindcss').Config} */
+const tailwindAnimate = (() => {
+  try {
+    return require('tailwindcss-animate');
+  } catch {
+    return null;
+  }
+})();
+
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -65,5 +73,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: tailwindAnimate ? [tailwindAnimate] : [],
 };
