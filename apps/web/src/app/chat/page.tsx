@@ -16,7 +16,8 @@ import {
   GlobeAltIcon,
   BoltIcon,
   ChatBubbleLeftRightIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { useClientSearchParams } from '@/lib/use-client-search-params';
 
@@ -125,6 +126,7 @@ export default function ChatPage() {
   const [reasoningMode, setReasoningMode] = useState('normal');
   const [sourceModes, setSourceModes] = useState<string[]>(['local']);
   const [showReasoning, setShowReasoning] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [recording, setRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -477,7 +479,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
+    <div className="flex h-full bg-gray-900 text-white">
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:static inset-y-0 left-0 z-50 w-64 bg-gray-800 border-r border-gray-700 transition-transform duration-300 ease-in-out`}>
         <div className="flex flex-col h-full">
@@ -568,15 +570,23 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <div className="md:hidden bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
+        <div className="md:hidden bg-gray-800 border-b border-gray-700 p-3 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white p-1"
           >
             <ChatBubbleLeftRightIcon className="w-6 h-6" />
           </button>
-          <h1 className="font-semibold">Kirobi</h1>
-          <div className="w-6" />
+          <span className="font-medium text-sm truncate max-w-[140px] text-gray-200">
+            {selectedModel || runtimeOptions.default_model}
+          </span>
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className={`p-1 transition-colors ${settingsOpen ? 'text-kirobi-400' : 'text-gray-400 hover:text-white'}`}
+            title="Modell-Einstellungen"
+          >
+            <AdjustmentsHorizontalIcon className="w-6 h-6" />
+          </button>
         </div>
 
         {activeConversation && (
@@ -599,7 +609,8 @@ export default function ChatPage() {
                 Quellen: {sourceModeLabel}
               </span>
             </div>
-            <div className="grid gap-3 lg:grid-cols-4">
+            <div className={settingsOpen ? 'block' : 'hidden md:block'}>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <label className="space-y-1">
                 <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
                   <SparklesIcon className="h-4 w-4" />
@@ -694,6 +705,7 @@ export default function ChatPage() {
                 Sichtbare Reasoning-Spur anzeigen
               </label>
             </div>
+            </div>{/* end collapsible settings */}
             <p className="text-xs text-gray-500">
               Antworten nutzen nur freigegebenen Kontext aus dieser Zone. Versteckte Chain-of-Thought wird nicht angezeigt; stattdessen siehst du eine kurze, sichere Runtime-Spur.
             </p>

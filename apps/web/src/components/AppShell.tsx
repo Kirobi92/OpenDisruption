@@ -156,7 +156,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="relative xl:pl-80">
+      <div className="relative xl:pl-80 flex flex-col h-screen">
         <header className="sticky top-0 z-30 border-b border-[color:var(--border-soft)] bg-[color:var(--bg-void)]/75 backdrop-blur-2xl">
           <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           )}
         </AnimatePresence>
 
-        <main className="relative mx-auto max-w-[1800px] px-0 pb-10">
+        <main className="relative mx-auto w-full max-w-[1800px] px-0 pb-10 flex-1 min-h-0 overflow-y-auto">
           {children}
         </main>
       </div>
