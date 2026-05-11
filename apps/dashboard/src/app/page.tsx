@@ -109,6 +109,37 @@ const SERVICES: Pick<ServiceHealth, 'name' | 'label' | 'endpoint'>[] = [
   { name: 'retrieval', label: 'Retrieval', endpoint: '/api/proxy/retrieval/health' },
   { name: 'model-routing', label: 'Model Routing', endpoint: '/api/proxy/model-routing/health' },
   { name: 'analytics', label: 'Analytics', endpoint: '/api/proxy/analytics/health' },
+  { name: 'image-generation', label: 'Image Generation', endpoint: '/api/proxy/image-generation/health' },
+  { name: 'media-processing', label: 'Media Processing', endpoint: '/api/proxy/media-processing/health' },
+  { name: 'music-generation', label: 'Music Generation', endpoint: '/api/proxy/music-generation/health' },
+  { name: 'video-generation', label: 'Video Generation', endpoint: '/api/proxy/video-generation/health' },
+  { name: 'telegram', label: 'Telegram (KeyCodi)', endpoint: '/api/proxy/telegram/health' },
+  { name: 'ollama', label: 'Ollama LLM', endpoint: '/api/proxy/ollama/api/tags' },
+];
+
+interface FrontendLink {
+  name: string;
+  label: string;
+  description: string;
+  port: number;
+  path: string;
+  icon: string;
+  category: 'ui' | 'ai' | 'infra' | 'agent';
+  embedable: boolean;
+}
+
+const TAILSCALE_HOST = 'pop-os.taildd322d.ts.net';
+const LAN_HOST = '192.168.178.10';
+
+const FRONTENDS: FrontendLink[] = [
+  // UI Frontends
+  { name: 'web-pwa', label: 'Kirobi Family PWA', description: 'Haupt-Chat, Suche, Upload', port: 3002, path: '/', icon: '🏠', category: 'ui', embedable: true },
+  { name: 'open-webui', label: 'Open WebUI', description: 'Ollama Chat-Interface', port: 3000, path: '/', icon: '💬', category: 'ai', embedable: true },
+  { name: 'flowise', label: 'Flowise', description: 'LangChain Workflow-Builder', port: 3001, path: '/', icon: '🔄', category: 'ai', embedable: false },
+  { name: 'voice', label: 'Voice Interface', description: 'STT/TTS Voice-App', port: 3004, path: '/', icon: '🎤', category: 'ui', embedable: true },
+  // Infra
+  { name: 'qdrant', label: 'Qdrant Dashboard', description: 'Vektor-Datenbank UI', port: 6333, path: '/dashboard', icon: '🗄️', category: 'infra', embedable: true },
+  { name: 'hermes', label: 'Hermes Dashboard', description: 'Hermes Agent Control', port: 9119, path: '/', icon: '🤖', category: 'agent', embedable: true },
 ];
 
 const AUTO_REFRESH_INTERVAL_MS = 30_000;
@@ -214,9 +245,29 @@ function StatCard({
 function ServicesPanel({ services }: { services: ServiceHealth[] }) {
   const onlineCount = services.filter((s) => s.status === 'online').length;
   const total = services.length;
+  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
+  const [embedLabel, setEmbedLabel] = useState<string>('');
+
+  const getTailscaleUrl = (fe: FrontendLink) =>
+    `http://${TAILSCALE_HOST}:${fe.port}${fe.path}`;
+  const getLanUrl = (fe: FrontendLink) =>
+    `http://${LAN_HOST}:${fe.port}${fe.path}`;
+
+  const categoryLabel: Record<FrontendLink['category'], string> = {
+    ui: '🖥 Web-UIs',
+    ai: '🧠 AI-Tools',
+    infra: '⚙️ Infrastruktur',
+    agent: '🤖 Agents',
+  };
+
+  const grouped = FRONTENDS.reduce(
+    (acc, fe) => { (acc[fe.category] ??= []).push(fe); return acc; },
+    {} as Record<FrontendLink['category'], FrontendLink[]>
+  );
 
   return (
     <div className="space-y-6">
+      {/* Backend-Service Health */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Service-Status</h2>
         <span className="text-sm text-gray-400">
@@ -232,9 +283,9 @@ function ServicesPanel({ services }: { services: ServiceHealth[] }) {
         </div>
         <p className="text-xs text-gray-500">{onlineCount === total ? '✅ Alle Services laufen einwandfrei' : `⚠️ ${total - onlineCount} Service${total - onlineCount > 1 ? 's' : ''} nicht erreichbar`}</p>
       </div>
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         {services.map((svc) => (
-          <div key={svc.name} className="card flex items-center justify-between gap-4">
+          <div key={svc.name} className="card flex items-center justify-between gap-4 py-2">
             <div className="flex items-center gap-3 min-w-0">
               <StatusDot status={svc.status} />
               <div className="min-w-0">
@@ -249,6 +300,71 @@ function ServicesPanel({ services }: { services: ServiceHealth[] }) {
           </div>
         ))}
       </div>
+
+      {/* Frontend Links */}
+      <div className="pt-2">
+        <h2 className="text-lg font-semibold text-white mb-2">🌐 Frontends &amp; UIs</h2>
+        <p className="text-xs text-gray-500 mb-4">Tailscale oder LAN-Zugriff. Embed öffnet die UI direkt hier.</p>
+        {(Object.entries(grouped) as [FrontendLink['category'], FrontendLink[]][]).map(([cat, items]) => (
+          <div key={cat} className="mb-5">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{categoryLabel[cat]}</h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {items.map((fe) => (
+                <div key={fe.name} className="card space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{fe.icon} {fe.label}</p>
+                      <p className="text-xs text-gray-400">{fe.description}</p>
+                    </div>
+                    <span className="text-xs text-gray-600 font-mono flex-shrink-0">:{fe.port}</span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <a href={getTailscaleUrl(fe)} target="_blank" rel="noopener noreferrer"
+                      className="text-xs px-2 py-1 rounded bg-kirobi-600 hover:bg-kirobi-500 text-white font-medium transition-colors">
+                      🌐 Tailscale
+                    </a>
+                    <a href={getLanUrl(fe)} target="_blank" rel="noopener noreferrer"
+                      className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium transition-colors">
+                      🏠 LAN
+                    </a>
+                    {fe.embedable && (
+                      <button
+                        onClick={() => {
+                          if (embedUrl === getTailscaleUrl(fe)) {
+                            setEmbedUrl(null);
+                          } else {
+                            setEmbedUrl(getTailscaleUrl(fe));
+                            setEmbedLabel(fe.label);
+                          }
+                        }}
+                        className="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-400 font-medium transition-colors"
+                      >
+                        {embedUrl === getTailscaleUrl(fe) ? '✕ Schließen' : '⬛ Embed'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Embedded iframe */}
+      {embedUrl && (
+        <div className="card p-0 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
+            <span className="text-sm font-semibold text-white">{embedLabel}</span>
+            <div className="flex items-center gap-3">
+              <a href={embedUrl} target="_blank" rel="noopener noreferrer"
+                className="text-xs text-kirobi-400 hover:text-kirobi-300">↗ Neues Tab</a>
+              <button onClick={() => setEmbedUrl(null)} className="text-xs text-gray-400 hover:text-gray-200">✕</button>
+            </div>
+          </div>
+          <iframe src={embedUrl} className="w-full" style={{ height: '600px', border: 'none' }}
+            title={embedLabel} sandbox="allow-scripts allow-same-origin allow-forms allow-popups" />
+        </div>
+      )}
     </div>
   );
 }
