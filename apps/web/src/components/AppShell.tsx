@@ -108,7 +108,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return key ? TITLES[key] : { title: 'Kirobi', subtitle: 'Lokale agentische Oberfläche.' };
   }, [pathname]);
 
-  if (pathname === '/') return <>{children}</>;
+  if (pathname === '/' || pathname === '/knowledge-graph-3d') return <>{children}</>;
 
   return (
     <div className="relative min-h-screen text-[color:var(--text-primary)]">
