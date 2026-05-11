@@ -873,7 +873,18 @@ services:
       - HERMES_UID=${HERMES_UID:-10000}
       - HERMES_GID=${HERMES_GID:-10000}
       - OLLAMA_BASE_URL=http://ollama:11434/v1
-      - HERMES_DEFAULT_MODEL=${HERMES_DEFAULT_MODEL:-llama3.1:8b}
+      # Dashboard als Hintergrundprozess starten; gateway run ist der Vordergrundprozess
+      - HERMES_DASHBOARD=1
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_PORT=${HERMES_RUNTIME_PORT:-9119}
+      # Telegram-Gateway: KIROBI_TELEGRAM_HERMES_TOKEN_FILE hält das Bot-Token für diesen Agent
+      - TELEGRAM_BOT_TOKEN=${KIROBI_TELEGRAM_HERMES_TOKEN_FILE:-}
+      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USER_IDS:-}
+      # GitHub Models API (gh auth token oder PAT mit models:read Scope)
+      - GH_TOKEN=${GH_TOKEN:-}
+      - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN:-}
+      # Fallback-Provider URL: GitHub Models OpenAI-kompatibler Endpunkt
+      - COPILOT_API_BASE_URL=https://models.github.ai/inference/v1
     volumes:
       - hermes_data:/opt/data
       - ./services/hermes-runtime/config/cli-config.yaml:/opt/data/cli-config.yaml:ro
@@ -883,7 +894,7 @@ services:
       - ollama
     networks:
       - kirobi-net
-    command: ["dashboard", "--host", "0.0.0.0", "--no-open", "--insecure"]
+    command: ["gateway", "run"]
 
   openclaw-gateway:
     build:

@@ -3,8 +3,23 @@ model:
   provider: "custom"
   base_url: "http://ollama:11434/v1"
 
+# GitHub Copilot Pro+ als Fallback (aktiviert wenn COPILOT_GITHUB_TOKEN oder GH_TOKEN gesetzt)
+fallback_providers:
+  - provider: "copilot"
+    model: "${HERMES_COPILOT_MODEL:claude-sonnet-4-5}"
+
 agent:
   api_timeout: 1800
+
+# Telegram-Gateway: Token kommt aus TELEGRAM_BOT_TOKEN Umgebungsvariable
+telegram:
+  require_mention: false
+  streaming: true
+
+streaming:
+  enabled: true
+  transport: "edit"
+  edit_interval: 1.2
 
 skills: []
 channels: {}
