@@ -29,6 +29,12 @@ services:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -sf http://localhost:11434/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
     networks:
       - kirobi-net
     environment:
@@ -565,6 +571,12 @@ services:
     depends_on:
       - auth
       - api
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     networks:
       - kirobi-net
 
@@ -748,6 +760,12 @@ services:
       - open-webui
       - flowise
       - qdrant
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:80/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
     networks:
       - kirobi-net
 
@@ -887,6 +905,12 @@ services:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:${HERMES_RUNTIME_PORT:-9119}:9119"
     depends_on:
       - ollama
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:9119/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 45s
+      retries: 3
     networks:
       - kirobi-net
     command: ["gateway", "run"]
