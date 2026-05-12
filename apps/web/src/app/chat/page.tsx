@@ -580,36 +580,44 @@ export default function ChatPage() {
           <span className="font-medium text-sm truncate max-w-[140px] text-gray-200">
             {selectedModel || runtimeOptions.default_model}
           </span>
-          <button
-            onClick={() => setSettingsOpen(!settingsOpen)}
-            className={`p-1 transition-colors ${settingsOpen ? 'text-kirobi-400' : 'text-gray-400 hover:text-white'}`}
-            title="Modell-Einstellungen"
-          >
-            <AdjustmentsHorizontalIcon className="w-6 h-6" />
-          </button>
+          {/* mobile settings toggle is now the universal one in the header row */}
+          <span className="w-8" />
         </div>
 
         {activeConversation && (
-          <div className="border-b border-gray-700 bg-gray-800/60 px-4 py-3 text-sm space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-gray-400">Aktive Zone:</span>
+          <div className="relative border-b border-gray-700 bg-gray-800/60 px-4 py-2 text-sm">
+            {/* Status badges row — always visible, small */}
+            <div className="flex flex-wrap items-center gap-1.5 min-h-[2rem]">
               <span className={`rounded-full border px-2 py-0.5 text-xs ${ZONE_COLORS[activeConversation.zone as Zone] ?? 'border-gray-600 bg-gray-700 text-gray-300'}`}>
                 {ZONE_LABELS[activeConversation.zone as Zone] ?? activeConversation.zone}
               </span>
               <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-xs text-cyan-200">
-                Agent: {selectedAgentLabel}
+                {selectedAgentLabel}
               </span>
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200">
-                Modell: {selectedModel || runtimeOptions.default_model}
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200 max-w-[120px] truncate">
+                {selectedModel || runtimeOptions.default_model}
               </span>
-              <span className="rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-0.5 text-xs text-fuchsia-200">
-                Denken: {activeThinkingLabel}
+              <span className="rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-0.5 text-xs text-fuchsia-200 hidden sm:inline">
+                {activeThinkingLabel}
               </span>
-              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-200">
-                Quellen: {sourceModeLabel}
-              </span>
+              {/* Settings toggle — visible on all screen sizes */}
+              <button
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className={`ml-auto flex items-center gap-1 rounded-lg border px-2 py-1 text-xs transition-colors ${
+                  settingsOpen
+                    ? 'border-kirobi-500/60 bg-kirobi-500/15 text-kirobi-300'
+                    : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+                }`}
+                title="Einstellungen"
+              >
+                <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Einstellungen</span>
+              </button>
             </div>
-            <div className={settingsOpen ? 'block' : 'hidden md:block'}>
+
+            {/* Settings overlay — appears OVER messages, not pushing them down */}
+            {settingsOpen && (
+              <div className="absolute left-0 right-0 top-full z-30 border-b border-gray-700 bg-gray-900/97 px-4 py-4 shadow-2xl backdrop-blur-md">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <label className="space-y-1">
                 <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
@@ -705,10 +713,18 @@ export default function ChatPage() {
                 Sichtbare Reasoning-Spur anzeigen
               </label>
             </div>
-            </div>{/* end collapsible settings */}
-            <p className="text-xs text-gray-500">
-              Antworten nutzen nur freigegebenen Kontext aus dieser Zone. Versteckte Chain-of-Thought wird nicht angezeigt; stattdessen siehst du eine kurze, sichere Runtime-Spur.
-            </p>
+                <p className="mt-3 text-xs text-gray-500">
+                  Antworten nutzen nur freigegebenen Kontext aus dieser Zone. Versteckte Chain-of-Thought wird nicht angezeigt.
+                </p>
+                {/* Click outside to close */}
+                <button
+                  onClick={() => setSettingsOpen(false)}
+                  className="mt-3 w-full rounded-lg border border-gray-700 py-1.5 text-xs text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+                >
+                  ✕ Schließen
+                </button>
+              </div>
+            )}
           </div>
         )}
 

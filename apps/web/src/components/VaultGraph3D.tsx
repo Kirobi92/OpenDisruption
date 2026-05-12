@@ -102,6 +102,7 @@ export default function VaultGraph3D() {
   const [error, setError] = useState<string | null>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
   const [hover, setHover] = useState<RepoNode | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [colorMode, setColorMode] = useState<ColorMode>('zone');
   const [enabledEdgeTypes, setEnabledEdgeTypes] = useState<Record<string, boolean>>({
@@ -240,7 +241,7 @@ export default function VaultGraph3D() {
       </div>
 
       {/* Header / Stats */}
-      <div className="pointer-events-none absolute left-4 top-4 max-w-md rounded-2xl border border-aurora-cyan/30 bg-void-900/85 px-4 py-3 text-xs backdrop-blur-md">
+      <div className="pointer-events-none absolute left-4 top-4 max-w-[calc(100%-5rem)] rounded-2xl border border-aurora-cyan/30 bg-void-900/85 px-4 py-3 text-xs backdrop-blur-md">
         <div className="font-mono uppercase tracking-[0.3em] text-aurora-cyan">
           OpenDisruption · Live Repo Graph
         </div>
@@ -255,8 +256,21 @@ export default function VaultGraph3D() {
         )}
       </div>
 
-      {/* Filter sidebar */}
-      <div className="pointer-events-auto absolute right-4 top-4 max-h-[calc(78vh-2rem)] w-72 overflow-y-auto rounded-2xl border border-white/10 bg-void-900/85 p-4 text-xs text-white/80 backdrop-blur-md">
+      {/* Sidebar toggle button */}
+      <button
+        onClick={() => setSidebarOpen((v) => !v)}
+        className="pointer-events-auto absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-xl border border-white/20 bg-void-900/85 px-3 py-2 text-xs text-white/80 backdrop-blur-md hover:border-aurora-cyan/50 hover:text-aurora-cyan transition-colors"
+        title={sidebarOpen ? 'Filter schließen' : 'Filter öffnen'}
+      >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
+        {sidebarOpen ? '✕' : 'Filter'}
+      </button>
+
+      {/* Filter sidebar — collapsible */}
+      {sidebarOpen && (
+      <div className="pointer-events-auto absolute right-4 top-14 max-h-[calc(78vh-4.5rem)] w-72 overflow-y-auto rounded-2xl border border-white/10 bg-void-900/85 p-4 text-xs text-white/80 backdrop-blur-md">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -334,6 +348,7 @@ export default function VaultGraph3D() {
           </Section>
         )}
       </div>
+      )}
 
       {/* Hover detail */}
       {hover && (
