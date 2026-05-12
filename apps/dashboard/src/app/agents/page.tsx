@@ -1,15 +1,108 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 import {
-  CpuChipIcon,
-  ServerIcon,
-  ClipboardDocumentListIcon,
+  ArrowTopRightOnSquareIcon,
+  CheckCircleIcon,
   ShieldCheckIcon,
-  ClockIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { getServiceOpenUrl } from '@/lib/service-catalog';
+import type { DashboardServiceDefinition } from '@/lib/service-catalog';
+import { AI_AGENT_SERVICES } from '@/lib/service-catalog';
+
+// ─── Runtime Agent Components ─────────────────────────────────────────────────
+
+function RuntimeStatusBadge({ status }: { status: RuntimeStatus }) {
+  const base = 'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium';
+  if (status === 'online') return <span className={`${base} border-emerald-500/20 bg-emerald-500/10 text-emerald-400`}><CheckCircleIcon className="h-3 w-3" />Online</span>;
+  if (status === 'offline') return <span className={`${base} border-red-500/20 bg-red-500/10 text-red-400`}><XCircleIcon className="h-3 w-3" />Offline</span>;
+  return <span className={`${base} border-amber-500/20 bg-amber-500/10 text-amber-400`}><ExclamationTriangleIcon className="h-3 w-3" />Prüft…</span>;
+}
+
+function RuntimeAgentCard({ agent, status, latencyMs }: { agent: RuntimeAgentDef; status: RuntimeStatus; latencyMs: number | null }) {
+  const openUrl = getServiceOpenUrl(agent);
+
+  return (
+    <div className={`card space-y-3 transition-all duration-300 ${status === 'online' ? 'border-violet-500/20' : ''}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`flex-shrink-0 rounded-xl p-2.5 ${status === 'online' ? 'bg-violet-500/10 text-violet-400' : 'bg-gray-800 text-gray-500'}`}>
+            <span className="text-lg leading-none">{agent.emoji}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white">{agent.label}</p>
+            <p className="mt-0.5 text-xs text-gray-500 font-mono">
+              {agent.caddyPath ?? `…:${agent.port}`}
+              {latencyMs !== null && <span className="ml-2 text-gray-600">{latencyMs}ms</span>}
+            </p>
+          </div>
+        </div>
+        <RuntimeStatusBadge status={status} />
+      </div>
+
+      <p className="text-xs text-gray-400 leading-relaxed">{agent.description}</p>
+
+      <div className="flex flex-wrap gap-1.5">
+        {agent.capabilities.map(cap => (
+          <span key={cap} className="rounded-full bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 text-[10px] font-medium text-violet-300">
+            {cap}
+          </span>
+        ))}
+      </div>
+
+      {openUrl && (
+        <a
+          href={openUrl}
+          target="_blank"
+          rel="noreferrer"
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all w-full justify-center ${
+            status === 'online'
+              ? 'border-violet-500/30 bg-violet-500/10 text-violet-300 hover:border-violet-400/40 hover:text-white'
+              : 'border-gray-700 bg-gray-800 text-gray-500'
+          }`}
+        >
+          <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+          {agent.label} öffnen
+        </a>
+      )}
+    </div>
+  );
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+type RuntimeStatus = 'online' | 'offline' | 'unknown';
+
+interface RuntimeAgentDef extends DashboardServiceDefinition {
+  emoji: string;
+  capabilities: string[];
+}
+
+const RUNTIME_AGENTS: RuntimeAgentDef[] = [
+  {
+    ...(AI_AGENT_SERVICES.find(s => s.name === 'hermes-runtime') as DashboardServiceDefinition),
+    emoji: '🧠',
+    capabilities: ['Natürliche Sprache', 'Telegram-Gateway', 'MCP-Tools', 'Skill-Tree', 'Alle Agenten orchestrieren', 'Cron-Jobs', 'Service-Steuerung'],
+  },
+  {
+    ...(AI_AGENT_SERVICES.find(s => s.name === 'openclaw-gateway') as DashboardServiceDefinition),
+    emoji: '🦅',
+    capabilities: ['Dateisystem-Operationen', 'Git-Workflows', 'Code-Ausführung', 'Shell-Commands', 'Projekt-Management'],
+  },
+  {
+    ...(AI_AGENT_SERVICES.find(s => s.name === 'opencode') as DashboardServiceDefinition),
+    emoji: '💻',
+    capabilities: ['KI-Code-Studio', 'Multi-Modell', 'GitHub Copilot', 'Datei-Editor', 'Refactoring', 'Test-Generierung'],
+  },
+  {
+    ...(AI_AGENT_SERVICES.find(s => s.name === 'flowise') as DashboardServiceDefinition),
+    emoji: '🔀',
+    capabilities: ['Visuelle Pipelines', 'LangChain-Flows', 'RAG-Ketten', 'Custom-Chatbots', 'API-Integration'],
+  },
+];
 
 interface AgentDef {
   id: string;
@@ -234,6 +327,30 @@ function AgentCard({ agent }: { agent: AgentDef }) {
 
 export default function AgentsPage() {
   const [filter, setFilter] = useState<'all' | AgentDef['status']>('all');
+  const [runtimeStatuses, setRuntimeStatuses] = useState<Map<string, { status: RuntimeStatus; latencyMs: number | null }>>(
+    () => new Map(RUNTIME_AGENTS.map(a => [a.name, { status: 'unknown', latencyMs: null }]))
+  );
+
+  const checkRuntimeAgents = useCallback(async () => {
+    const results = await Promise.all(
+      RUNTIME_AGENTS.map(async (agent) => {
+        const start = Date.now();
+        try {
+          const res = await axios.get(agent.healthEndpoint, { timeout: 6000 });
+          return [agent.name, { status: (res.status < 400 ? 'online' : 'offline') as RuntimeStatus, latencyMs: Date.now() - start }] as const;
+        } catch {
+          return [agent.name, { status: 'offline' as RuntimeStatus, latencyMs: null }] as const;
+        }
+      })
+    );
+    setRuntimeStatuses(new Map(results as Array<[string, { status: RuntimeStatus; latencyMs: number | null }]>));
+  }, []);
+
+  useEffect(() => {
+    checkRuntimeAgents();
+    const interval = setInterval(checkRuntimeAgents, 30_000);
+    return () => clearInterval(interval);
+  }, [checkRuntimeAgents]);
 
   const filtered = filter === 'all' ? AGENTS : AGENTS.filter(a => a.status === filter);
   const counts = {
@@ -249,7 +366,7 @@ export default function AgentsPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-base font-semibold text-white">Agent Registry</h1>
-            <p className="mt-0.5 text-xs text-gray-500">{AGENTS.length} Agenten im OpenDisruption-Ökosystem</p>
+            <p className="mt-0.5 text-xs text-gray-500">{RUNTIME_AGENTS.length} Runtime-Agenten · {AGENTS.length} Kirobi-Agenten</p>
           </div>
           <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-mono text-emerald-400">
             {counts.active} aktiv
@@ -257,47 +374,73 @@ export default function AgentsPage() {
         </div>
       </header>
 
-      <div className="space-y-6 p-6">
-        <div className="flex gap-2 flex-wrap">
-          {(['all', 'active', 'scaffold', 'planned'] as const).map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                filter === f
-                  ? 'bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30'
-                  : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'
-              }`}
-            >
-              {f === 'all' ? 'Alle' : f === 'active' ? 'Aktiv' : f === 'scaffold' ? 'Scaffold' : 'Geplant'}
-              <span className="ml-1.5 text-gray-500">{counts[f]}</span>
-            </button>
-          ))}
-        </div>
+      <div className="space-y-8 p-6">
 
-        <div className="card">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Zonen-Legende</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { zone: 'PUBLIC', desc: '🌍 Öffentlich' },
-              { zone: 'WORKSPACE', desc: '💼 Intern' },
-              { zone: 'FAMILY_PRIVATE', desc: '👨‍👩‍👦 Familie' },
-              { zone: 'QUARANTINE', desc: '⚠️ Ungeprüft' },
-              { zone: 'SACRED', desc: '🔐 Höchst vertraulich' },
-            ].map(({ zone, desc }) => (
-              <div key={zone} className="flex items-center gap-1.5">
-                <ZoneBadge zone={zone} />
-                <span className="text-xs text-gray-500">{desc}</span>
-              </div>
+        {/* Runtime AI Agents */}
+        <section className="space-y-4">
+          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 px-5 py-4">
+            <h2 className="text-sm font-semibold text-white">🤖 Runtime KI-Agenten</h2>
+            <p className="mt-0.5 text-xs text-gray-400">Live-Services mit eigenen Frontends. Klick öffnet die jeweilige Oberfläche.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {RUNTIME_AGENTS.map(agent => {
+              const s = runtimeStatuses.get(agent.name) ?? { status: 'unknown' as RuntimeStatus, latencyMs: null };
+              return (
+                <RuntimeAgentCard key={agent.name} agent={agent} status={s.status} latencyMs={s.latencyMs} />
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Kirobi Core Agents */}
+        <section className="space-y-4">
+          <div className="rounded-2xl border border-gray-600/30 bg-gray-800/30 px-5 py-4">
+            <h2 className="text-sm font-semibold text-white">🧠 Kirobi-Agenten (Zonen-basiert)</h2>
+            <p className="mt-0.5 text-xs text-gray-400">Spezialisierte Agenten mit Zone-Zugriffs-Matrix laut CLAUDE.md.</p>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {(['all', 'active', 'scaffold', 'planned'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  filter === f
+                    ? 'bg-kirobi-600/20 text-kirobi-400 border border-kirobi-600/30'
+                    : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-gray-600'
+                }`}
+              >
+                {f === 'all' ? 'Alle' : f === 'active' ? 'Aktiv' : f === 'scaffold' ? 'Scaffold' : 'Geplant'}
+                <span className="ml-1.5 text-gray-500">{counts[f]}</span>
+              </button>
             ))}
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {filtered.map(agent => (
-            <AgentCard key={agent.id} agent={agent} />
-          ))}
-        </div>
+          <div className="card">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Zonen-Legende</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { zone: 'PUBLIC', desc: '🌍 Öffentlich' },
+                { zone: 'WORKSPACE', desc: '💼 Intern' },
+                { zone: 'FAMILY_PRIVATE', desc: '👨‍👩‍👦 Familie' },
+                { zone: 'QUARANTINE', desc: '⚠️ Ungeprüft' },
+                { zone: 'SACRED', desc: '🔐 Höchst vertraulich' },
+              ].map(({ zone, desc }) => (
+                <div key={zone} className="flex items-center gap-1.5">
+                  <ZoneBadge zone={zone} />
+                  <span className="text-xs text-gray-500">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {filtered.map(agent => (
+              <AgentCard key={agent.id} agent={agent} />
+            ))}
+          </div>
+        </section>
+
       </div>
     </>
   );

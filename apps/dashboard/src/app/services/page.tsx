@@ -6,27 +6,36 @@ import axios from 'axios';
 import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
+  BoltIcon,
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
   CircleStackIcon,
   ClockIcon,
   CommandLineIcon,
+  CpuChipIcon,
   CubeTransparentIcon,
   ExclamationTriangleIcon,
+  FilmIcon,
   HomeIcon,
   MicrophoneIcon,
+  MusicalNoteIcon,
   PhotoIcon,
   QueueListIcon,
   ServerIcon,
+  ShieldCheckIcon,
   SparklesIcon,
   Squares2X2Icon,
-  SwatchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 import type { DashboardServiceDefinition } from '@/lib/service-catalog';
 import {
+  AI_AGENT_SERVICES,
+  KNOWLEDGE_SERVICES,
+  COMMUNICATION_SERVICES,
+  GENERATION_SERVICES,
+  INFRASTRUCTURE_SERVICES,
   ALL_DASHBOARD_SERVICES,
-  getServiceUrl,
+  getServiceOpenUrl,
   resolveServiceHost,
 } from '@/lib/service-catalog';
 
@@ -36,34 +45,94 @@ interface ServiceDetail extends DashboardServiceDefinition {
   status: ServiceStatus;
   latencyMs: number | null;
   lastChecked: Date | null;
-  responseData: Record<string, unknown> | null;
 }
 
 const SERVICE_ICONS: Record<string, ElementType> = {
-  'open-webui': ChatBubbleLeftRightIcon,
-  flowise: SparklesIcon,
-  web: HomeIcon,
-  dashboard: Squares2X2Icon,
-  'voice-app': MicrophoneIcon,
-  'web-svelte': SwatchIcon,
-  ollama: CommandLineIcon,
-  qdrant: CircleStackIcon,
   'hermes-runtime': CubeTransparentIcon,
-  'openclaw-gateway': QueueListIcon,
-  auth: CheckCircleIcon,
-  api: ServerIcon,
-  'voice-processing': MicrophoneIcon,
+  'openclaw-gateway': CommandLineIcon,
+  opencode: CpuChipIcon,
+  flowise: SparklesIcon,
+  'open-webui': ChatBubbleLeftRightIcon,
+  qdrant: CircleStackIcon,
+  'vault-graph': Squares2X2Icon,
+  'knowledge-graph-3d': Squares2X2Icon,
   embeddings: SparklesIcon,
-  telegram: ChatBubbleLeftRightIcon,
-  ingest: QueueListIcon,
   retrieval: CircleStackIcon,
+  ingest: QueueListIcon,
+  web: HomeIcon,
+  'voice-app': MicrophoneIcon,
+  'telegram-hermes': BoltIcon,
+  telegram: ChatBubbleLeftRightIcon,
+  'voice-processing': MicrophoneIcon,
+  'image-generation': PhotoIcon,
+  'music-generation': MusicalNoteIcon,
+  'video-generation': FilmIcon,
+  'media-processing': PhotoIcon,
+  ollama: CommandLineIcon,
+  api: ServerIcon,
+  auth: ShieldCheckIcon,
   'model-routing': CommandLineIcon,
   analytics: Squares2X2Icon,
-  'image-generation': PhotoIcon,
-  'media-processing': SwatchIcon,
-  'music-generation': SparklesIcon,
-  'video-generation': PhotoIcon,
+  'web-svelte': CpuChipIcon,
 };
+
+interface CategoryConfig {
+  title: string;
+  subtitle: string;
+  accent: string;
+  headerBg: string;
+  iconBg: string;
+  badgeBg: string;
+  services: DashboardServiceDefinition[];
+}
+
+const CATEGORIES: CategoryConfig[] = [
+  {
+    title: '🤖 KI-Agenten & Orchestrierung',
+    subtitle: 'Hermes, OpenClaw, OpenCode, Flowise und Open-WebUI — alle KI-Werkzeuge zentral.',
+    accent: 'violet',
+    headerBg: 'border-violet-500/20 bg-violet-500/5',
+    iconBg: 'bg-violet-500/10 text-violet-400',
+    badgeBg: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+    services: AI_AGENT_SERVICES,
+  },
+  {
+    title: '🧠 Wissen & Vektordatenbank',
+    subtitle: 'Qdrant, Vault-Graph, Embeddings, Retrieval und Document Ingest.',
+    accent: 'cyan',
+    headerBg: 'border-cyan-500/20 bg-cyan-500/5',
+    iconBg: 'bg-cyan-500/10 text-cyan-400',
+    badgeBg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    services: KNOWLEDGE_SERVICES,
+  },
+  {
+    title: '💬 Kommunikation & Sprache',
+    subtitle: 'Kirobi-PWA, Voice-Interface, Telegram-Bots und STT/TTS-Processing.',
+    accent: 'emerald',
+    headerBg: 'border-emerald-500/20 bg-emerald-500/5',
+    iconBg: 'bg-emerald-500/10 text-emerald-400',
+    badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    services: COMMUNICATION_SERVICES,
+  },
+  {
+    title: '🎨 Medien & Generierung',
+    subtitle: 'Bild-, Musik- und Video-Generierung sowie Medienverarbeitung.',
+    accent: 'amber',
+    headerBg: 'border-amber-500/20 bg-amber-500/5',
+    iconBg: 'bg-amber-500/10 text-amber-400',
+    badgeBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    services: GENERATION_SERVICES,
+  },
+  {
+    title: '⚙️ Infrastruktur & APIs',
+    subtitle: 'Ollama LLM Host, Main API, Auth, Model-Routing, Analytics und Svelte-Web.',
+    accent: 'slate',
+    headerBg: 'border-gray-600/30 bg-gray-800/30',
+    iconBg: 'bg-gray-700/50 text-gray-400',
+    badgeBg: 'bg-gray-700 text-gray-400 border-gray-600',
+    services: INFRASTRUCTURE_SERVICES,
+  },
+];
 
 function formatRelativeTime(date: Date | null): string {
   if (!date) return '—';
@@ -74,87 +143,84 @@ function formatRelativeTime(date: Date | null): string {
   return `vor ${Math.floor(diffMs / 3_600_000)}h`;
 }
 
-function StatusBadge({ status }: { status: ServiceStatus }) {
-  const base = 'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium';
-  if (status === 'online') {
-    return (
-      <span className={`${base} border-emerald-500/20 bg-emerald-500/10 text-emerald-400`}>
-        <CheckCircleIcon className="h-3.5 w-3.5" />
-        Online
-      </span>
-    );
-  }
-  if (status === 'offline') {
-    return (
-      <span className={`${base} border-red-500/20 bg-red-500/10 text-red-400`}>
-        <XCircleIcon className="h-3.5 w-3.5" />
-        Offline
-      </span>
-    );
-  }
-  return (
-    <span className={`${base} border-amber-500/20 bg-amber-500/10 text-amber-400`}>
-      <ExclamationTriangleIcon className="h-3.5 w-3.5" />
-      Unbekannt
-    </span>
-  );
+function StatusDot({ status }: { status: ServiceStatus }) {
+  if (status === 'online') return <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />;
+  if (status === 'offline') return <span className="inline-block h-2 w-2 rounded-full bg-red-500" />;
+  return <span className="inline-block h-2 w-2 rounded-full bg-amber-500/60 animate-pulse" />;
 }
 
-function ServiceCard({ service, canOpen }: { service: ServiceDetail; canOpen: boolean }) {
+function StatusBadge({ status }: { status: ServiceStatus }) {
+  const base = 'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium';
+  if (status === 'online') return <span className={`${base} border-emerald-500/20 bg-emerald-500/10 text-emerald-400`}><CheckCircleIcon className="h-3 w-3" />Online</span>;
+  if (status === 'offline') return <span className={`${base} border-red-500/20 bg-red-500/10 text-red-400`}><XCircleIcon className="h-3 w-3" />Offline</span>;
+  return <span className={`${base} border-amber-500/20 bg-amber-500/10 text-amber-400`}><ExclamationTriangleIcon className="h-3 w-3" />Prüft…</span>;
+}
+
+function ServiceCard({
+  service,
+  iconBg,
+  badgeBg,
+  openUrl,
+}: {
+  service: ServiceDetail;
+  iconBg: string;
+  badgeBg: string;
+  openUrl: string | null;
+}) {
   const Icon = SERVICE_ICONS[service.name] ?? ServerIcon;
-  const openUrl = canOpen && service.openInBrowser ? getServiceUrl(service.port) : null;
 
   return (
-    <div className="card space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div
-            className={`rounded-xl p-2.5 ${
-              service.status === 'online'
-                ? 'bg-emerald-500/10 text-emerald-400'
-                : service.status === 'offline'
-                  ? 'bg-red-500/10 text-red-400'
-                  : 'bg-gray-700 text-gray-400'
-            }`}
-          >
-            <Icon className="h-5 w-5" />
+    <div
+      className={`card space-y-3 transition-all duration-300 ${
+        service.status === 'online' ? 'border-gray-700/60' : service.status === 'offline' ? 'border-red-900/30' : 'border-gray-700/40'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`flex-shrink-0 rounded-xl p-2 ${service.status === 'online' ? iconBg : 'bg-gray-800 text-gray-500'}`}>
+            <Icon className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">{service.label}</p>
-            <p className="mt-0.5 text-xs font-mono text-gray-500">:{service.port}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-semibold text-white leading-tight">{service.label}</p>
+              {service.badge && (
+                <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${badgeBg}`}>
+                  {service.badge}
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs font-mono text-gray-600">
+              {service.caddyPath ? service.caddyPath : `…:${service.port}`}
+            </p>
           </div>
         </div>
         <StatusBadge status={service.status} />
       </div>
 
-      <p className="text-sm leading-relaxed text-gray-400">{service.description}</p>
-
-      <div className="grid grid-cols-2 gap-3 text-xs text-gray-500">
-        <div className="rounded-xl border border-gray-700/60 bg-gray-900/60 px-3 py-2">
-          <p className="uppercase tracking-wider text-gray-600">Latenz</p>
-          <p className="mt-1 font-mono text-gray-300">{service.latencyMs !== null ? `${service.latencyMs}ms` : '—'}</p>
-        </div>
-        <div className="rounded-xl border border-gray-700/60 bg-gray-900/60 px-3 py-2">
-          <p className="uppercase tracking-wider text-gray-600">Geprüft</p>
-          <p className="mt-1 text-gray-300">{formatRelativeTime(service.lastChecked)}</p>
-        </div>
-      </div>
+      <p className="text-xs leading-relaxed text-gray-400">{service.description}</p>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="truncate text-xs font-mono text-gray-600">{service.healthEndpoint}</p>
-        {service.openInBrowser && (
+        <div className="flex items-center gap-3 text-xs text-gray-600">
+          <span className="flex items-center gap-1">
+            <ClockIcon className="h-3 w-3" />
+            {formatRelativeTime(service.lastChecked)}
+          </span>
+          {service.latencyMs !== null && (
+            <span className="font-mono text-gray-500">{service.latencyMs}ms</span>
+          )}
+        </div>
+        {service.openInBrowser && openUrl && (
           <a
-            href={openUrl ?? undefined}
+            href={openUrl}
             target="_blank"
             rel="noreferrer"
-            aria-disabled={!openUrl}
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
-              openUrl
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
+              service.status === 'online'
                 ? 'border-kirobi-500/30 bg-kirobi-500/10 text-kirobi-300 hover:border-kirobi-400/40 hover:text-white'
-                : 'cursor-not-allowed border-gray-700 bg-gray-800 text-gray-600'
+                : 'border-gray-700 bg-gray-800 text-gray-500 hover:text-gray-300'
             }`}
           >
-            <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+            <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
             Öffnen
           </a>
         )}
@@ -163,32 +229,43 @@ function ServiceCard({ service, canOpen }: { service: ServiceDetail; canOpen: bo
   );
 }
 
-function ServiceSection({
-  title,
-  subtitle,
+function CategorySection({
+  config,
   services,
-  canOpen,
 }: {
-  title: string;
-  subtitle: string;
-  services: ServiceDetail[];
-  canOpen: boolean;
+  config: CategoryConfig;
+  services: Map<string, ServiceDetail>;
 }) {
+  const details = config.services.map(
+    (s) => services.get(s.name) ?? { ...s, status: 'unknown' as ServiceStatus, latencyMs: null, lastChecked: null }
+  );
+  const online = details.filter((s) => s.status === 'online').length;
+  const total = details.length;
+
   return (
     <section className="space-y-4">
-      <div className="flex items-end justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
-          <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
+      <div className={`rounded-2xl border px-5 py-4 ${config.headerBg}`}>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-sm font-semibold text-white">{config.title}</h2>
+            <p className="mt-0.5 text-xs text-gray-400">{config.subtitle}</p>
+          </div>
+          <span className="text-xs font-mono text-gray-400">
+            <span className={online === total ? 'text-emerald-400' : 'text-amber-400'}>{online}</span>
+            <span className="text-gray-600">/{total} online</span>
+          </span>
         </div>
-        <span className="rounded-full border border-gray-700/60 bg-gray-900/60 px-3 py-1 text-xs font-mono text-gray-400">
-          {services.length} Services
-        </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        {services.map((service) => (
-          <ServiceCard key={service.name} service={service} canOpen={canOpen} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {details.map((service) => (
+          <ServiceCard
+            key={service.name}
+            service={service}
+            iconBg={config.iconBg}
+            badgeBg={config.badgeBg}
+            openUrl={getServiceOpenUrl(service)}
+          />
         ))}
       </div>
     </section>
@@ -196,14 +273,8 @@ function ServiceSection({
 }
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<ServiceDetail[]>(
-    ALL_DASHBOARD_SERVICES.map((service) => ({
-      ...service,
-      status: 'unknown',
-      latencyMs: null,
-      lastChecked: null,
-      responseData: null,
-    }))
+  const [serviceMap, setServiceMap] = useState<Map<string, ServiceDetail>>(
+    () => new Map(ALL_DASHBOARD_SERVICES.map((s) => [s.name, { ...s, status: 'unknown', latencyMs: null, lastChecked: null }]))
   );
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -215,34 +286,25 @@ export default function ServicesPage() {
       ALL_DASHBOARD_SERVICES.map(async (service) => {
         const startedAt = Date.now();
         try {
-          const response = await axios.get(service.healthEndpoint, { timeout: 5000 });
-          const responseData =
-            response.data && typeof response.data === 'object'
-              ? (response.data as Record<string, unknown>)
-              : response.data !== undefined
-                ? { preview: String(response.data).slice(0, 400) }
-                : null;
-
-          return {
+          const response = await axios.get(service.healthEndpoint, { timeout: 6000 });
+          const ok = response.status >= 200 && response.status < 400;
+          return [service.name, {
             ...service,
-            status: 'online' as ServiceStatus,
+            status: ok ? 'online' as ServiceStatus : 'offline' as ServiceStatus,
             latencyMs: Date.now() - startedAt,
             lastChecked: new Date(),
-            responseData,
-          };
+          }] as const;
         } catch {
-          return {
+          return [service.name, {
             ...service,
             status: 'offline' as ServiceStatus,
             latencyMs: null,
             lastChecked: new Date(),
-            responseData: null,
-          };
+          }] as const;
         }
       })
     );
-
-    setServices(results);
+    setServiceMap(new Map(results as Array<[string, ServiceDetail]>));
     setLastRefresh(new Date());
     setRefreshing(false);
   }, []);
@@ -259,11 +321,10 @@ export default function ServicesPage() {
     }
   }, []);
 
-  const onlineCount = services.filter((service) => service.status === 'online').length;
-  const offlineCount = services.filter((service) => service.status === 'offline').length;
-  const webServices = useMemo(() => services.filter((service) => service.category === 'web'), [services]);
-  const backendServices = useMemo(() => services.filter((service) => service.category === 'backend'), [services]);
-  const progress = services.length > 0 ? Math.round((onlineCount / services.length) * 100) : 0;
+  const allServices = useMemo(() => Array.from(serviceMap.values()), [serviceMap]);
+  const onlineCount = allServices.filter((s) => s.status === 'online').length;
+  const offlineCount = allServices.filter((s) => s.status === 'offline').length;
+  const progress = allServices.length > 0 ? Math.round((onlineCount / allServices.length) * 100) : 0;
 
   return (
     <>
@@ -271,17 +332,18 @@ export default function ServicesPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-base font-semibold text-white">Services</h1>
-            <p className="mt-0.5 text-xs text-gray-500">Zentraler Überblick über alle 23 lokalen Frontends, APIs und Operator-Oberflächen.</p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Alle {allServices.length} OpenDisruption-Services in 5 Kategorien.
+              {resolvedHost && (
+                <> Öffnen via <span className="font-mono text-gray-400">{resolvedHost}</span></>
+              )}
+            </p>
           </div>
           <div className="flex items-center gap-3 flex-wrap justify-end">
-            {resolvedHost && (
-              <span className="text-xs text-gray-500">
-                Öffnen via <span className="font-mono text-gray-300">{resolvedHost}</span>
-              </span>
-            )}
             <div className="inline-flex items-center gap-2 rounded-full border border-gray-700/60 bg-gray-900/70 px-3 py-1.5 text-xs font-mono text-gray-400">
-              <span className="text-emerald-400">{onlineCount} online</span>
-              {offlineCount > 0 && <span className="text-red-400">· {offlineCount} offline</span>}
+              <StatusDot status="online" />
+              <span className="text-emerald-400">{onlineCount}</span>
+              {offlineCount > 0 && <><span className="text-gray-600">·</span><StatusDot status="offline" /><span className="text-red-400">{offlineCount}</span></>}
             </div>
             <button
               onClick={checkAll}
@@ -289,46 +351,29 @@ export default function ServicesPage() {
               className="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-300 transition-all hover:border-gray-600 hover:text-white disabled:opacity-50"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing ? 'Lädt...' : 'Jetzt aktualisieren'}
+              {refreshing ? 'Lädt…' : 'Aktualisieren'}
             </button>
           </div>
         </div>
+
+        <div className="mt-3 flex items-center gap-3">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-800">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-kirobi-500 transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-xs font-mono text-gray-500">{progress}%</span>
+          <span className="text-xs text-gray-600">
+            {lastRefresh ? formatRelativeTime(lastRefresh) : 'Noch nicht geprüft'}
+          </span>
+        </div>
       </header>
 
-      <div className="space-y-6 p-6">
-        <div className="card space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-700">
-              <div className="h-full rounded-full bg-emerald-500 transition-all duration-700" style={{ width: `${progress}%` }} />
-            </div>
-            <span className="w-12 text-right text-sm font-medium text-gray-300">{progress}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-4 flex-wrap text-sm text-gray-500">
-            <span>
-              {onlineCount === services.length
-                ? '✅ Alle Services laufen einwandfrei'
-                : `⚠️ ${offlineCount} Service${offlineCount === 1 ? '' : 's'} nicht erreichbar`}
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs">
-              <ClockIcon className="h-3.5 w-3.5" />
-              Aktualisiert {formatRelativeTime(lastRefresh)}
-            </span>
-          </div>
-        </div>
-
-        <ServiceSection
-          title="Web-Frontends"
-          subtitle="Direkte Operator- und Nutzeroberflächen mit Öffnen-Links auf die aktuelle LAN-/Tailscale-Adresse."
-          services={webServices}
-          canOpen={Boolean(resolvedHost)}
-        />
-
-        <ServiceSection
-          title="Backend-Services"
-          subtitle="Health-Checks über den Dashboard-Proxy für alle API- und Verarbeitungsdienste."
-          services={backendServices}
-          canOpen={Boolean(resolvedHost)}
-        />
+      <div className="space-y-8 p-6">
+        {CATEGORIES.map((cat) => (
+          <CategorySection key={cat.title} config={cat} services={serviceMap} />
+        ))}
       </div>
     </>
   );

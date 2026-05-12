@@ -1,39 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 type ServiceProxyDefinition = {
-  port: number;
+  host: string;   // Docker service name (resolved on kirobi-net)
+  port: number;   // Internal container port
   defaultPath: string;
   allowedPrefixes?: string[];
   allowedExact?: string[];
 };
 
+// Uses Docker service hostnames (kirobi-net) + internal ports.
+// External port mappings only apply when accessing from outside Docker.
 const SERVICE_PROXY_DEFINITIONS: Record<string, ServiceProxyDefinition> = {
-  auth: { port: 8002, defaultPath: '/health', allowedPrefixes: ['/health', '/stats'] },
-  api: { port: 8003, defaultPath: '/health', allowedPrefixes: ['/health', '/control', '/dashboard', '/tasks'] },
-  'voice-processing': { port: 8001, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  embeddings: { port: 8004, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  telegram: { port: 8005, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  ingest: { port: 8007, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  retrieval: { port: 8006, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  'model-routing': { port: 8009, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  analytics: { port: 8010, defaultPath: '/health', allowedPrefixes: ['/health', '/stats'] },
-  'image-generation': { port: 8011, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  'media-processing': { port: 8012, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  'music-generation': { port: 8013, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  'video-generation': { port: 8014, defaultPath: '/health', allowedPrefixes: ['/health'] },
-  ollama: { port: 11434, defaultPath: '/api/tags', allowedPrefixes: ['/api/tags'] },
-  'open-webui': { port: 3000, defaultPath: '/api/v1/ping', allowedPrefixes: ['/api/v1/ping'] },
-  flowise: { port: 3001, defaultPath: '/api/v1/ping', allowedPrefixes: ['/api/v1/ping'] },
-  web: { port: 3002, defaultPath: '/', allowedExact: ['/'] },
-  dashboard: { port: 3003, defaultPath: '/', allowedExact: ['/'] },
-  'voice-app': { port: 3004, defaultPath: '/', allowedExact: ['/'] },
-  'web-svelte': { port: 3007, defaultPath: '/v2/login', allowedPrefixes: ['/v2/login'] },
-  qdrant: { port: 6333, defaultPath: '/healthz', allowedPrefixes: ['/healthz', '/dashboard'] },
-  'hermes-runtime': { port: 9119, defaultPath: '/', allowedExact: ['/'] },
-  'openclaw-gateway': { port: 18789, defaultPath: '/healthz', allowedPrefixes: ['/healthz'] },
+  auth: { host: 'auth', port: 8000, defaultPath: '/health', allowedPrefixes: ['/health', '/stats'] },
+  api: { host: 'api', port: 8000, defaultPath: '/health', allowedPrefixes: ['/health', '/control', '/dashboard', '/tasks'] },
+  'voice-processing': { host: 'voice-processing', port: 8001, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  embeddings: { host: 'embeddings', port: 8000, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  telegram: { host: 'telegram', port: 8005, defaultPath: '/ready', allowedPrefixes: ['/health', '/ready'] },
+  'telegram-hermes': { host: 'telegram-hermes', port: 8005, defaultPath: '/health', allowedPrefixes: ['/health', '/ready'] },
+  ingest: { host: 'ingest', port: 8000, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  retrieval: { host: 'retrieval', port: 8000, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  'model-routing': { host: 'model-routing', port: 8009, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  analytics: { host: 'analytics', port: 8010, defaultPath: '/health', allowedPrefixes: ['/health', '/stats'] },
+  'image-generation': { host: 'image-generation', port: 8011, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  'media-processing': { host: 'media-processing', port: 8012, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  'music-generation': { host: 'music-generation', port: 8013, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  'video-generation': { host: 'video-generation', port: 8014, defaultPath: '/health', allowedPrefixes: ['/health'] },
+  ollama: { host: 'ollama', port: 11434, defaultPath: '/api/tags', allowedPrefixes: ['/api/tags'] },
+  'open-webui': { host: 'open-webui', port: 8080, defaultPath: '/api/v1/ping', allowedPrefixes: ['/api/v1/ping'] },
+  flowise: { host: 'flowise', port: 3000, defaultPath: '/api/v1/ping', allowedPrefixes: ['/api/v1/ping'] },
+  web: { host: 'web', port: 3000, defaultPath: '/', allowedExact: ['/'] },
+  dashboard: { host: 'dashboard', port: 3003, defaultPath: '/', allowedExact: ['/'] },
+  'voice-app': { host: 'voice', port: 3004, defaultPath: '/', allowedExact: ['/'] },
+  'web-svelte': { host: 'web-svelte', port: 3007, defaultPath: '/login', allowedPrefixes: ['/login', '/graph'] },
+  qdrant: { host: 'qdrant', port: 6333, defaultPath: '/healthz', allowedPrefixes: ['/healthz', '/dashboard'] },
+  'hermes-runtime': { host: 'hermes-runtime', port: 9119, defaultPath: '/', allowedExact: ['/'] },
+  'openclaw-gateway': { host: 'openclaw-gateway', port: 18789, defaultPath: '/healthz', allowedPrefixes: ['/healthz'] },
+  opencode: { host: 'opencode', port: 4096, defaultPath: '/', allowedExact: ['/'] },
 };
-
-const BIND_HOST = process.env.KIROBI_BIND_HOST ?? '127.0.0.1';
 
 function isAllowedPath(definition: ServiceProxyDefinition, path: string): boolean {
   if (definition.allowedExact?.includes(path)) return true;
@@ -56,7 +59,7 @@ export async function handleServiceProxy(
     return NextResponse.json({ error: 'Path not allowed through dashboard proxy' }, { status: 403 });
   }
 
-  const upstreamUrl = `http://${BIND_HOST}:${definition.port}${upstreamPath}${request.nextUrl.search}`;
+  const upstreamUrl = `http://${definition.host}:${definition.port}${upstreamPath}${request.nextUrl.search}`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
 
