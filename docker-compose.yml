@@ -893,7 +893,7 @@ services:
     volumes:
       - hermes_data:/opt/data
       - ./services/hermes-runtime/config/cli-config.yaml:/opt/data/cli-config.yaml:ro
-      - ./services/hermes-runtime/config/skills:/opt/data/skills:ro
+      - ./services/hermes-runtime/config/skills/opendisruption:/opt/data/skills/opendisruption:ro
     ports:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:${HERMES_RUNTIME_PORT:-9119}:9119"
     depends_on:
