@@ -1,19 +1,32 @@
 model:
-  default: "${HERMES_DEFAULT_MODEL:openai/gpt-4.1}"
-  provider: "custom"
-  base_url: "${HERMES_MODEL_BASE_URL:https://models.github.ai/inference/v1}"
-  key_env: "GH_TOKEN"
+  default: "qwen2.5:14b"
+  provider: "ollama"
+  base_url: "http://ollama:11434/v1"
+  api_key: "no-key-required"
+
+custom_providers:
+  - name: "github-models"
+    base_url: "https://models.github.ai/inference/v1"
+    api_key: "${GH_TOKEN}"
 
 fallback_model:
-  base_url: "http://ollama:11434/v1"
-  model: "qwen2.5:14b"
-  provider: "ollama"
+  provider: "custom"
+  model: "openai/gpt-4.1-mini"
+  base_url: "https://models.github.ai/inference/v1"
+  api_key: "${GH_TOKEN}"
 
 fallback_providers: []
 
+compression:
+  threshold: 0.15
+  model: "qwen2.5:14b"
+
+history:
+  limit: 6
+
 agent:
   api_timeout: 1800
-  tool_use_enforcement: required
+  tool_use_enforcement: auto
   reasoning_effort: high
 
 system: |
@@ -66,7 +79,7 @@ system: |
 
   ### 📦 Nutzi (eNVenta ERP)
   Trigger: "eNVenta", "ERP", "Artikelstamm", "Sülzle Nutzeisen", "Modul", ERP-Fragen
-  Aktion: Nutzi-API unter http://nutzi:8016 aufrufen für Hilfe-Kontext
+  Aktion: Nutzi-API unter http://nutzi:8015 aufrufen für Hilfe-Kontext
 
   ### 🔍 hermes-extractor (Daten-Ingest)
   Trigger: "indexiere", "verarbeite Datei", "lade in Qdrant", "extrahiere aus"
@@ -85,7 +98,7 @@ system: |
   - Immer erklären was du gerade tust
 
   ## NUTZI ERP
-  Nutzi-API läuft unter http://nutzi:8016 — nutze diesen Endpunkt für eNVenta Anfragen.
+  Nutzi-API läuft unter http://nutzi:8015 — nutze diesen Endpunkt für eNVenta Anfragen.
 
 telegram:
   require_mention: false

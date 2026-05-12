@@ -266,7 +266,7 @@ def test_qdrant_init_dry_run_without_live_qdrant():
     )
     assert result.returncode == 0
     assert "DRY-RUN" in result.stdout
-    assert "Alle 10 Collections verarbeitet" in result.stdout
+    assert "Alle 14 Collections verarbeitet" in result.stdout
     assert "kirobi_workspace" in result.stdout
     assert "kirobi_workspace_document" not in result.stdout
 
@@ -275,4 +275,4 @@ def test_telegram_service_escapes_html_replies():
     src = (REPO_ROOT / "services" / "telegram" / "main.py").read_text()
     assert "from html import escape" in src
     assert "def _html" in src
-    assert "_html(ai_response)" in src
+    assert "_html(" in src

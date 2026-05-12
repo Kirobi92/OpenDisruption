@@ -255,7 +255,7 @@ def test_ui_route_contracts_point_at_supported_backend_routes():
     upload_src = (REPO_ROOT / "apps" / "web" / "src" / "app" / "upload" / "page.tsx").read_text()
     settings_src = (REPO_ROOT / "apps" / "web" / "src" / "app" / "settings" / "page.tsx").read_text()
     dashboard_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "app" / "page.tsx").read_text()
-    proxy_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "app" / "api" / "proxy" / "[service]" / "[...path]" / "route.ts").read_text()
+    proxy_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "lib" / "service-proxy.ts").read_text()
     tasks_src = (REPO_ROOT / "apps" / "dashboard" / "src" / "app" / "tasks" / "page.tsx").read_text()
     api_src = (REPO_ROOT / "services" / "api" / "main.py").read_text()
     analytics_src = (REPO_ROOT / "services" / "analytics-service" / "main.py").read_text()

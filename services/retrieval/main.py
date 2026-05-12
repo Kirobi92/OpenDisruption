@@ -56,11 +56,9 @@ PORT = int(os.getenv("RETRIEVAL_SERVICE_PORT", "8006"))
 
 ALLOWED_ORIGINS: list[str] = [
     origin.strip()
-    for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    for origin in os.getenv("ALLOWED_ORIGINS", "http://web:3000,http://dashboard:3003,http://voice:3004,http://web-svelte:3007,http://localhost:3000,http://localhost:3002,http://localhost:3003").split(",")
     if origin.strip()
 ]
-
-# Erlaubte Collections pro Zone (Zone-Enforcement)
 ZONE_COLLECTIONS = {zone: list(collections) for zone, collections in _CANONICAL_ZONE_COLLECTIONS.items()}
 
 

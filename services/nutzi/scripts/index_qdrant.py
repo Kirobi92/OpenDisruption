@@ -13,8 +13,8 @@ from pathlib import Path
 
 import httpx
 
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-EMBEDDINGS_URL = os.getenv("EMBEDDINGS_URL", "http://localhost:8004")
+QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
+EMBEDDINGS_URL = os.getenv("EMBEDDINGS_URL", "http://embeddings:8000")
 COLLECTION = "nutzi_enventa"
 EMBEDDING_DIM = 768  # nomic-embed-text
 CHAPTERS_DIR = Path(__file__).parent.parent / "data" / "chapters"

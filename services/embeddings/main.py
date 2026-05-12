@@ -51,7 +51,7 @@ EMBED_DIM: int = int(os.getenv("EMBED_DIM", "768"))
 
 ALLOWED_ORIGINS: list[str] = [
     origin.strip()
-    for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    for origin in os.getenv("ALLOWED_ORIGINS", "http://web:3000,http://dashboard:3003,http://voice:3004,http://web-svelte:3007,http://localhost:3000,http://localhost:3002,http://localhost:3003").split(",")
     if origin.strip()
 ]
 
