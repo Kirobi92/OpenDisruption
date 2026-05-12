@@ -1,15 +1,22 @@
 model:
-  default: "${HERMES_DEFAULT_MODEL:llama3.1:8b}"
+  # GitHub AI als primäres Modell (GH_TOKEN muss gesetzt sein) - zuverlässiges Function Calling
+  default: "${HERMES_DEFAULT_MODEL:openai/gpt-4.1-mini}"
   provider: "custom"
-  base_url: "http://ollama:11434/v1"
+  base_url: "${HERMES_MODEL_BASE_URL:https://models.github.ai/inference/v1}"
+  key_env: "GH_TOKEN"
 
-# GitHub Copilot Pro+ als Fallback (aktiviert wenn COPILOT_GITHUB_TOKEN oder GH_TOKEN gesetzt)
-fallback_providers:
-  - provider: "copilot"
-    model: "${HERMES_COPILOT_MODEL:claude-sonnet-4-5}"
+# Ollama als Fallback wenn offline
+fallback_model:
+  base_url: "http://ollama:11434/v1"
+  model: "llama3.1:8b"
+  provider: "ollama"
+
+fallback_providers: []
 
 agent:
   api_timeout: 1800
+  tool_use_enforcement: required
+  reasoning_effort: high
 
 # Telegram-Gateway: Token kommt aus TELEGRAM_BOT_TOKEN Umgebungsvariable
 telegram:
