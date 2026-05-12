@@ -19,7 +19,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 import asyncpg
 import httpx
 from dotenv import load_dotenv
@@ -105,6 +105,7 @@ class GeneratedImageResponse(BaseModel):
 
 
 class ImageMetadata(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     id: str
     prompt: str
     model_used: Optional[str]

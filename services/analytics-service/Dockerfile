@@ -11,7 +11,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY main.py .
+COPY services/analytics-service/main.py .
+COPY kirobi_core /app/kirobi_core
 
 # Switch to non-root user
 USER kirobi

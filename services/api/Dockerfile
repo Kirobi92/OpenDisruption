@@ -9,11 +9,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY requirements.txt .
+COPY services/api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY services/api/ .
+COPY kirobi_core /app/kirobi_core
 
 # Create non-root user
 RUN useradd -m -u 1000 kirobi && chown -R kirobi:kirobi /app

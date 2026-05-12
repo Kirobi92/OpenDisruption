@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 import asyncpg
 from dotenv import load_dotenv
 from kirobi_core.asyncpg_compat import ensure_asyncpg_compat
@@ -97,6 +97,7 @@ class ZoneStats(BaseModel):
 
 
 class ModelUsage(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     model_used: str
     usage_count: int
 

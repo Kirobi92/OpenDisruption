@@ -18,7 +18,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, F
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 import asyncpg
 import httpx
 from dotenv import load_dotenv
@@ -194,6 +194,7 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     message: str
     response: str
     content: str
@@ -202,6 +203,7 @@ class ChatResponse(BaseModel):
 
 
 class Message(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     id: str
     conversation_id: str
     user_id: Optional[str]

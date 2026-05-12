@@ -16,7 +16,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Service-Code
-COPY main.py .
+COPY services/retrieval/main.py .
+COPY kirobi_core /app/kirobi_core
 
 # Nicht-root User
 RUN useradd -m -u 1000 kirobi && chown -R kirobi:kirobi /app

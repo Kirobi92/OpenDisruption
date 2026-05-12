@@ -8,10 +8,11 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY services/ingest/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY services/ingest/ .
+COPY kirobi_core /app/kirobi_core
 
 # Ingest data directory is mounted at runtime; pre-create so the service
 # can start without a volume mount in development.

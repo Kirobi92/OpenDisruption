@@ -20,7 +20,8 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 
 # Anwendungscode kopieren
-COPY main.py .
+COPY services/embeddings/main.py .
+COPY kirobi_core /app/kirobi_core
 
 # Nicht-Root-User aktivieren
 USER kirobi

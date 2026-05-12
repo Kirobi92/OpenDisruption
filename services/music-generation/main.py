@@ -19,7 +19,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 import asyncpg
 import httpx
 from dotenv import load_dotenv
@@ -119,6 +119,7 @@ class GenerateRequest(BaseModel):
 
 
 class GeneratedTrackResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     id: str
     file_path: str
     zone: str
@@ -131,6 +132,7 @@ class GeneratedTrackResponse(BaseModel):
 
 
 class TrackMetadata(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     id: str
     prompt: str
     enhanced_prompt: Optional[str]
@@ -159,6 +161,7 @@ class HeartMuLaTranscribeRequest(BaseModel):
 
 
 class HeartMuLaStatusResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     available: bool
     model_path: str
     model_exists: bool
