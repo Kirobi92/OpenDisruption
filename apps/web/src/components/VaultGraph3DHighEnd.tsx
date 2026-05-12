@@ -319,13 +319,14 @@ export default function VaultGraph3DHighEnd({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // UI-State
-  const [hoveredNode,  setHoveredNode]  = useState<RepoNode | null>(null);
-  const [selectedNode, setSelectedNode] = useState<RepoNode | null>(null);
-  const [drawerOpen,   setDrawerOpen]   = useState(false);
-  const [colorMode,    setColorMode]    = useState<ColorMode>(initialColorMode);
-  const [autoRotate,   setAutoRotate]   = useState(initialAutoRotate);
-  const [fps,          setFps]          = useState(60);
-  const [stats, setStats] = useState({ nodes: 0, edges: 0, tris: 0 });
+  const [hoveredNode,    setHoveredNode]    = useState<RepoNode | null>(null);
+  const [selectedNode,   setSelectedNode]   = useState<RepoNode | null>(null);
+  const [drawerOpen,     setDrawerOpen]     = useState(false);
+  const [colorMode,      setColorMode]      = useState<ColorMode>(initialColorMode);
+  const [autoRotate,     setAutoRotate]     = useState(initialAutoRotate);
+  const [fps,            setFps]            = useState(60);
+  const [stats,          setStats]          = useState({ nodes: 0, edges: 0, tris: 0 });
+  const [controlsOpen,   setControlsOpen]   = useState(false);
 
   // Refs für Three.js-Objekte — außerhalb von React-Render-Zyklen
   const nodeMeshRef  = useRef<THREE.InstancedMesh | null>(null);
@@ -885,7 +886,18 @@ export default function VaultGraph3DHighEnd({
       )}
 
       {/* ── Rechte Steuerleiste ──────────────────────────────────────────── */}
+      {/* Mobile: single toggle button, Desktop: always visible */}
       <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+        {/* Mobile toggle button */}
+        <button
+          onClick={() => setControlsOpen(v => !v)}
+          className="md:hidden rounded-xl px-3 py-2 text-xs font-medium backdrop-blur-sm border border-white/10 bg-black/70 text-white/70 hover:text-white transition-all"
+        >
+          {controlsOpen ? '✕' : '⚙'}
+        </button>
+
+        {/* Controls — always shown on desktop, conditionally on mobile */}
+        <div className={`flex-col gap-2 ${controlsOpen ? 'flex' : 'hidden md:flex'}`}>
         {/* Farb-Modus */}
         <div className="rounded-xl bg-black/55 backdrop-blur-sm border border-white/10 p-2 flex flex-col gap-1">
           <div className="font-mono text-[9px] uppercase tracking-widest text-white/40 px-1 mb-0.5">Farbe</div>
@@ -927,6 +939,7 @@ export default function VaultGraph3DHighEnd({
         >
           ⚡ Reseed
         </button>
+        </div>
       </div>
 
       {/* ── Zonen-Legende ────────────────────────────────────────────────── */}
@@ -942,8 +955,8 @@ export default function VaultGraph3DHighEnd({
         </div>
       </div>
 
-      {/* ── Kanten-Legende ───────────────────────────────────────────────── */}
-      <div className="absolute bottom-3 right-3 z-10 rounded-xl bg-black/55 backdrop-blur-sm border border-white/10 p-2">
+      {/* ── Kanten-Legende (nur Desktop) ─────────────────────────────────── */}
+      <div className="hidden md:block absolute bottom-3 right-3 z-10 rounded-xl bg-black/55 backdrop-blur-sm border border-white/10 p-2">
         <div className="font-mono text-[9px] uppercase tracking-widest text-white/40 mb-1">Kanten</div>
         <div className="flex flex-col gap-0.5">
           {Object.entries(EDGE_COLORS).map(([type, color]) => (
@@ -957,8 +970,18 @@ export default function VaultGraph3DHighEnd({
 
       {/* ── Detail-Drawer (Knoten-Info) ──────────────────────────────────── */}
       {drawerOpen && selectedNode && (
-        <div className="absolute inset-y-0 right-0 z-20 w-80 max-w-full flex flex-col">
-          <div className="h-full bg-black/80 backdrop-blur-xl border-l border-white/10 flex flex-col p-5 overflow-y-auto">
+        /* Mobile: bottom sheet; Desktop: right side drawer */
+        <div className="
+          absolute
+          bottom-0 md:bottom-auto md:inset-y-0
+          left-0 right-0 md:left-auto
+          md:w-80
+          z-20 flex flex-col
+          max-h-[60vh] md:max-h-none
+        ">
+          <div className="h-full bg-black/80 backdrop-blur-xl border-t md:border-t-0 md:border-l border-white/10 flex flex-col p-5 overflow-y-auto rounded-t-2xl md:rounded-none">
+            {/* Mobile drag handle */}
+            <div className="md:hidden w-10 h-1 rounded-full bg-white/20 mx-auto mb-4 flex-shrink-0" />
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-aurora-cyan/70">

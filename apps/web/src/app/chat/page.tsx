@@ -615,9 +615,28 @@ export default function ChatPage() {
               </button>
             </div>
 
-            {/* Settings overlay — appears OVER messages, not pushing them down */}
+            {/* Settings panel — bottom sheet on mobile, dropdown on desktop */}
             {settingsOpen && (
-              <div className="absolute left-0 right-0 top-full z-30 border-b border-gray-700 bg-gray-900/97 px-4 py-4 shadow-2xl backdrop-blur-md">
+              <>
+                {/* Mobile backdrop */}
+                <div
+                  className="sm:hidden fixed inset-0 bg-black/60 z-40"
+                  onClick={() => setSettingsOpen(false)}
+                />
+                <div className="
+                  fixed sm:absolute
+                  bottom-0 sm:bottom-auto sm:top-full
+                  left-0 right-0
+                  z-50 sm:z-30
+                  rounded-t-2xl sm:rounded-none
+                  border-t sm:border-t-0 sm:border-b border-gray-700
+                  bg-gray-900
+                  px-4 pt-2 pb-6 sm:py-4
+                  shadow-2xl backdrop-blur-md
+                  max-h-[80vh] overflow-y-auto
+                ">
+                  {/* Mobile drag handle */}
+                  <div className="sm:hidden w-10 h-1 rounded-full bg-gray-600 mx-auto mb-4" />
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <label className="space-y-1">
                 <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
@@ -723,7 +742,8 @@ export default function ChatPage() {
                 >
                   ✕ Schließen
                 </button>
-              </div>
+                </div>
+              </>
             )}
           </div>
         )}
