@@ -1,6 +1,6 @@
 model:
   # GitHub AI als primäres Modell (GH_TOKEN muss gesetzt sein) - zuverlässiges Function Calling
-  default: "${HERMES_DEFAULT_MODEL:openai/gpt-4.1-mini}"
+  default: "${HERMES_DEFAULT_MODEL:openai/gpt-4.1}"
   provider: "custom"
   base_url: "${HERMES_MODEL_BASE_URL:https://models.github.ai/inference/v1}"
   key_env: "GH_TOKEN"
