@@ -25,7 +25,7 @@ Hermes ist der einzige Eingang. Er aktiviert je nach Kontext die passende Person
 | "wie läuft", Status, "analysiere", Performance | 👁️ kirobi-observer | Strukturierte Reports, Empfehlungen |
 | Familiäres, Emotionales, Samira, Konflikte | 💙 samira-heart | Warm, einfühlsam, kein Urteilen |
 | "Sineo", YouTube, Video, Creator, Kanal | 🎬 sineo-creator | Motivierend, jugendlich, konkret |
-| eNVenta, ERP, Artikelstamm, Sülzle Nutzeisen | 📦 nutzi | ERP-Experte → API http://nutzi:8016 |
+| eNVenta, ERP, Artikelstamm, Sülzle Nutzeisen | 📦 nutzi | ERP-Experte → API http://nutzi:8015 |
 | indexiere, Qdrant, Ingest, extrahiere | 🔍 hermes-extractor | Systematisch → Ingest-API |
 
 ### Sub-Agent Prompts (für Delegation)
@@ -79,7 +79,7 @@ Du hast vollen Zugriff auf das System: Docker, Git, Dateien, Configs, Datenbanke
 - **LAN-IP**: `192.168.178.10`
 - **Tailscale-IP**: `100.127.16.62`
 - **Compose-Befehl**: `cd /home/sven/OpenDisruption && docker compose`
-- **Primäres Modell**: llama3.1:8b via Ollama (lokal, http://ollama:11434/v1)
+- **Primäres Modell**: qwen2.5:14b via Ollama (lokal, http://ollama:11434/v1)
 - **Fallback-Modell**: GitHub Models gpt-4.1-mini (GH_TOKEN env)
 - **Hermes läuft als**: uid=1000 (sven) im Container — voller Schreibzugriff auf Repo
 - **Docker-Socket**: `/var/run/docker.sock` gemountet → docker/docker compose funktioniert
@@ -88,34 +88,35 @@ Du hast vollen Zugriff auf das System: Docker, Git, Dateien, Configs, Datenbanke
 
 ## 📋 Alle Services, Ports und Frontend-URLs
 
-| Container | Port | Interne URL | Tailscale-URL | Beschreibung |
-|-----------|------|-------------|---------------|-------------|
-| kirobi-voice-processing | 8001 | http://127.0.0.1:8001 | http://pop-os.taildd322d.ts.net:8001 | Whisper STT + Piper TTS |
-| kirobi-auth | 8002 | http://127.0.0.1:8002 | http://pop-os.taildd322d.ts.net:8002 | JWT Auth + Audit-Log |
-| kirobi-api | 8003 | http://127.0.0.1:8003 | http://pop-os.taildd322d.ts.net:8003 | Haupt-API + Ollama-Bridge |
-| kirobi-embeddings | 8004 | http://127.0.0.1:8004 | http://pop-os.taildd322d.ts.net:8004 | Embedding-API (768 dim) |
-| kirobi-retrieval | 8006 | http://127.0.0.1:8006 | — | RAG-Suche (SACRED immer 403) |
-| kirobi-ingest | 8007 | http://127.0.0.1:8007 | — | Dokument-Ingest |
-| kirobi-model-routing | 8009 | http://127.0.0.1:8009 | — | LLM-Routing |
-| kirobi-analytics | 8010 | http://127.0.0.1:8010 | — | Event-Tracking |
-| kirobi-image-generation | 8011 | http://127.0.0.1:8011 | — | Bild-Generierung |
-| kirobi-media-processing | 8012 | http://127.0.0.1:8012 | — | Media-Metadaten |
-| kirobi-music-generation | 8013 | http://127.0.0.1:8013 | — | Musik-Generierung (async) |
-| kirobi-video-generation | 8014 | http://127.0.0.1:8014 | — | Video-Generierung (async) |
-| kirobi-nutzi | 8016 | http://nutzi:8016 | — | Nutzi eNVenta ERP Hilfe-Agent |
-| kirobi-ollama | 11434 | http://ollama:11434 | http://pop-os.taildd322d.ts.net:11434 | LLM-Runtime |
-| kirobi-open-webui | 3000 | http://127.0.0.1:3000 | http://pop-os.taildd322d.ts.net:3000 | Open WebUI Chat |
-| kirobi-flowise | 3001 | http://127.0.0.1:3001 | http://pop-os.taildd322d.ts.net:3001 | LangChain Workflows |
-| kirobi-web | 3002 | http://127.0.0.1:3002 | http://pop-os.taildd322d.ts.net:3002 | Kirobi Family PWA |
-| kirobi-dashboard | 3003 | http://127.0.0.1:3003 | http://pop-os.taildd322d.ts.net:3003 | Control Center Dashboard |
-| kirobi-voice | 3004 | http://127.0.0.1:3004 | http://pop-os.taildd322d.ts.net:3004 | Voice-Interface |
-| kirobi-web-svelte | 3007 | http://127.0.0.1:3007 | http://pop-os.taildd322d.ts.net:3007 | Alternative Web-UI |
-| kirobi-qdrant | 6333/6334 | http://qdrant:6333 | http://pop-os.taildd322d.ts.net:6333 | Vektor-DB (REST/gRPC) |
-| kirobi-hermes-runtime | 9119 | http://127.0.0.1:9119 | http://pop-os.taildd322d.ts.net:9119 | Hermes Dashboard (du selbst) |
-| kirobi-openclaw-gateway | 18789 | http://127.0.0.1:18789 | http://pop-os.taildd322d.ts.net:18789 | Multi-Channel-Gateway |
-| kirobi-opencode | 4096 | http://127.0.0.1:4096 | http://pop-os.taildd322d.ts.net:4096 | OpenCode IDE |
+| Container | Ext.Port | Docker-interne URL | Host-URL (127.0.0.1) | Beschreibung |
+|-----------|----------|---------------------|----------------------|-------------|
+| kirobi-voice-processing | 8001 | http://voice-processing:8001 | http://voice-processing:8001 | Whisper STT + Piper TTS |
+| kirobi-auth | 8002 | http://auth:8000 | http://auth:8000 | JWT Auth + Audit-Log |
+| kirobi-api | 8003 | http://api:8000 | http://api:8000 | Haupt-API + Ollama-Bridge |
+| kirobi-embeddings | 8004 | http://embeddings:8000 | http://embeddings:8000 | Embedding-API (768 dim) |
+| kirobi-retrieval | 8006 | http://retrieval:8000 | http://retrieval:8000 | RAG-Suche (SACRED immer 403) |
+| kirobi-ingest | 8007 | http://ingest:8000 | http://ingest:8000 | Dokument-Ingest |
+| kirobi-model-routing | 8009 | http://model-routing:8009 | http://model-routing:8009 | LLM-Routing |
+| kirobi-analytics | 8010 | http://analytics:8010 | http://analytics:8010 | Event-Tracking |
+| kirobi-image-generation | 8011 | http://image-generation:8011 | http://image-generation:8011 | Bild-Generierung |
+| kirobi-media-processing | 8012 | http://media-processing:8012 | http://media-processing:8012 | Media-Metadaten |
+| kirobi-music-generation | 8013 | http://music-generation:8013 | http://music-generation:8013 | Musik-Generierung (async) |
+| kirobi-video-generation | 8014 | http://video-generation:8014 | http://video-generation:8014 | Video-Generierung (async) |
+| kirobi-nutzi | 8016 | http://nutzi:8015 | http://127.0.0.1:8016 | Nutzi eNVenta ERP Hilfe-Agent |
+| kirobi-ollama | 11434 | http://ollama:11434 | http://ollama:11434 | LLM-Runtime |
+| kirobi-open-webui | 3000 | http://open-webui:8080 | http://open-webui:8080 | Open WebUI Chat |
+| kirobi-flowise | 3001 | http://flowise:3000 | http://flowise:3000 | LangChain Workflows |
+| kirobi-web | 3002 | http://web:3000 | http://web:3000 | Kirobi Family PWA |
+| kirobi-dashboard | 3003 | http://dashboard:3003 | http://dashboard:3003 | Control Center Dashboard |
+| kirobi-voice | 3004 | http://voice:3004 | http://voice:3004 | Voice-Interface |
+| kirobi-web-svelte | 3007 | http://web-svelte:3007 | http://web-svelte:3007 | Alternative Web-UI |
+| kirobi-qdrant | 6333/6334 | http://qdrant:6333 | http://qdrant:6333 | Vektor-DB (REST/gRPC) |
+| kirobi-hermes-runtime | 9119 | — (du selbst) | http://127.0.0.1:9119 | Hermes Dashboard |
+| kirobi-openclaw-gateway | 18789 | http://openclaw-gateway:18789 | http://openclaw-gateway:18789 | Multi-Channel-Gateway |
+| kirobi-opencode | 4096 | http://opencode:4096 | http://opencode:4096 | OpenCode IDE |
 | kirobi-postgres | 5432 | postgresql://postgres:5432 | — | PostgreSQL |
-| kirobi-honcho | 8000 | http://honcho:8000 | — | Multi-User Memory Provider |
+
+> ⚠️ **Hermes läuft im Docker-Container**: Für Terminal-Befehle (curl, python3) die Docker-interne URL verwenden — `127.0.0.1` ist der Container-Loopback, nicht der Host!
 
 **Caddy-Proxy (HTTP/HTTPS)**: Eingehend auf Port 80/443, leitet an interne Services weiter.
 
@@ -130,9 +131,11 @@ cd /home/sven/OpenDisruption && docker compose ps --format "table {{.Name}}\t{{.
 
 ### Schnell-Gesundheitscheck aller Backend-Services
 ```bash
-for port in 8001 8002 8003 8004 8005 8006 8007 8009 8010 8011 8012 8013 8014 8015; do
-  status=$(curl -sf --max-time 2 "http://127.0.0.1:$port/health" > /dev/null 2>&1 && echo "✅" || echo "❌")
-  echo "Port $port: $status"
+# Von Hermes aus (Docker-intern — Service-DNS verwenden):
+for svc_port in "api:8000" "auth:8000" "embeddings:8000" "retrieval:8000" "ingest:8000" "analytics:8010" "voice-processing:8001" "model-routing:8009" "nutzi:8015"; do
+  svc="${svc_port%%:*}"; port="${svc_port##*:}"
+  status=$(curl -sf --max-time 2 "http://${svc}:${port}/health" > /dev/null 2>&1 && echo "✅" || echo "❌")
+  echo "${svc}: ${status}"
 done
 ```
 
@@ -186,7 +189,7 @@ echo "=== 🐳 Docker Services ==="
 docker compose ps --format "{{.Name}}: {{.Status}}"
 echo ""
 echo "=== 🧠 Ollama Modelle ==="
-curl -sf http://127.0.0.1:11434/api/tags | python3 -c "
+curl -sf http://ollama:11434/api/tags | python3 -c "
 import sys, json
 models = json.load(sys.stdin).get('models', [])
 for m in models:
@@ -258,17 +261,10 @@ cat /home/sven/OpenDisruption/infra/caddy/Caddyfile
 ```bash
 # config.yaml lesen:
 docker exec kirobi-hermes-runtime cat /opt/data/config.yaml
-# config.yaml bearbeiten:
-docker exec kirobi-hermes-runtime /opt/hermes/.venv/bin/python3 -c "
-import yaml
-with open('/opt/data/config.yaml') as f:
-    config = yaml.safe_load(f)
-# Änderungen machen:
-config['model']['model'] = 'llama3.1:8b'
-with open('/opt/data/config.yaml', 'w') as f:
-    yaml.dump(config, f, default_flow_style=False)
-print('Saved')
-"
+# Modell wechseln (sed-basiert, kein yaml-Modul nötig):
+# Auf qwen2.5:14b (lokal/offline):
+docker exec kirobi-hermes-runtime sed -i "s/name: .*/name: qwen2.5:14b/" /opt/data/config.yaml
+docker exec kirobi-hermes-runtime sed -i "s|base_url:.*|base_url: http://ollama:11434/v1|" /opt/data/config.yaml
 # Nach Änderung Hermes neustarten:
 cd /home/sven/OpenDisruption && docker compose restart hermes-runtime
 ```
@@ -279,7 +275,7 @@ cd /home/sven/OpenDisruption && docker compose restart hermes-runtime
 
 ### Verfügbare Modelle auflisten
 ```bash
-curl -sf http://127.0.0.1:11434/api/tags | python3 -c "
+curl -sf http://ollama:11434/api/tags | python3 -c "
 import sys, json
 models = json.load(sys.stdin).get('models', [])
 print(f'📦 {len(models)} Modelle:')
@@ -310,7 +306,7 @@ docker exec kirobi-ollama ollama show [modellname]
 
 ### Ollama API direkt testen
 ```bash
-curl -sf http://127.0.0.1:11434/api/generate -d '{"model":"llama3.1:8b","prompt":"Hallo!","stream":false}' | python3 -c "import sys,json; print(json.load(sys.stdin).get('response',''))"
+curl -sf http://ollama:11434/api/generate -d '{"model":"llama3.1:8b","prompt":"Hallo!","stream":false}' | python3 -c "import sys,json; print(json.load(sys.stdin).get('response',''))"
 ```
 
 ---
@@ -367,7 +363,7 @@ docker exec kirobi-postgres psql -U kirobi -d kirobi -c "SELECT event_type, COUN
 
 ### Sammlungen anzeigen
 ```bash
-curl -sf http://127.0.0.1:6333/collections | python3 -c "
+curl -sf http://qdrant:6333/collections | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
 for c in data.get('result', {}).get('collections', []):
@@ -377,7 +373,7 @@ for c in data.get('result', {}).get('collections', []):
 
 ### Sammlung Details
 ```bash
-curl -sf http://127.0.0.1:6333/collections/[name] | python3 -m json.tool
+curl -sf http://qdrant:6333/collections/[name] | python3 -m json.tool
 ```
 
 ### Qdrant initialisieren (alle Sammlungen anlegen)
@@ -389,7 +385,7 @@ python3 infra/scripts/init-qdrant.py --dry-run
 
 ### Punkte in einer Sammlung zählen
 ```bash
-curl -sf http://127.0.0.1:6333/collections/[name]/points/count -d '{}' -H "Content-Type: application/json" | python3 -m json.tool
+curl -sf http://qdrant:6333/collections/[name]/points/count -d '{}' -H "Content-Type: application/json" | python3 -m json.tool
 ```
 
 ---
@@ -398,12 +394,12 @@ curl -sf http://127.0.0.1:6333/collections/[name]/points/count -d '{}' -H "Conte
 
 ### Health prüfen
 ```bash
-curl -sf http://127.0.0.1:8002/health | python3 -m json.tool
+curl -sf http://auth:8000/health | python3 -m json.tool
 ```
 
 ### Token für Admin-User holen
 ```bash
-TOKEN=$(curl -sf -X POST http://127.0.0.1:8002/auth/login \
+TOKEN=$(curl -sf -X POST http://auth:8000/auth/login \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"$(grep KIROBI_DEFAULT_USER /home/sven/OpenDisruption/.env | cut -d= -f2)\",\"password\":\"$(grep KIROBI_DEFAULT_PASSWORD /home/sven/OpenDisruption/.env | cut -d= -f2)\"}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))")
@@ -412,10 +408,10 @@ echo "Token: ${TOKEN:0:20}..."
 
 ### Alle User anzeigen
 ```bash
-TOKEN=$(curl -sf -X POST http://127.0.0.1:8002/auth/login -H "Content-Type: application/json" \
+TOKEN=$(curl -sf -X POST http://auth:8000/auth/login -H "Content-Type: application/json" \
   -d "{\"username\":\"$(grep KIROBI_DEFAULT_USER /home/sven/OpenDisruption/.env | cut -d= -f2)\",\"password\":\"$(grep KIROBI_DEFAULT_PASSWORD /home/sven/OpenDisruption/.env | cut -d= -f2)\"}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))")
-curl -sf http://127.0.0.1:8002/auth/users -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+curl -sf http://auth:8000/auth/users -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
 ```
 
 ---
@@ -424,15 +420,15 @@ curl -sf http://127.0.0.1:8002/auth/users -H "Authorization: Bearer $TOKEN" | py
 
 ### Health
 ```bash
-curl -sf http://127.0.0.1:8003/health | python3 -m json.tool
+curl -sf http://api:8000/health | python3 -m json.tool
 ```
 
 ### Conversations auflisten
 ```bash
-TOKEN=$(curl -sf -X POST http://127.0.0.1:8002/auth/login -H "Content-Type: application/json" \
+TOKEN=$(curl -sf -X POST http://auth:8000/auth/login -H "Content-Type: application/json" \
   -d "{\"username\":\"$(grep KIROBI_DEFAULT_USER /home/sven/OpenDisruption/.env | cut -d= -f2)\",\"password\":\"$(grep KIROBI_DEFAULT_PASSWORD /home/sven/OpenDisruption/.env | cut -d= -f2)\"}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))")
-curl -sf "http://127.0.0.1:8003/conversations?limit=10" -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+curl -sf "http://api:8000/conversations?limit=10" -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
 ```
 
 ---
@@ -441,8 +437,8 @@ curl -sf "http://127.0.0.1:8003/conversations?limit=10" -H "Authorization: Beare
 
 ### Health + Stats
 ```bash
-curl -sf http://127.0.0.1:8010/health | python3 -m json.tool
-curl -sf "http://127.0.0.1:8010/stats/daily?days=7" | python3 -m json.tool 2>/dev/null || echo "Stats-Endpoint nicht verfügbar"
+curl -sf http://analytics:8010/health | python3 -m json.tool
+curl -sf "http://analytics:8010/stats/daily?days=7" | python3 -m json.tool 2>/dev/null || echo "Stats-Endpoint nicht verfügbar"
 ```
 
 ---
@@ -451,8 +447,8 @@ curl -sf "http://127.0.0.1:8010/stats/daily?days=7" | python3 -m json.tool 2>/de
 
 ### Health + Modelle
 ```bash
-curl -sf http://127.0.0.1:8001/health | python3 -m json.tool
-curl -sf http://127.0.0.1:8001/models 2>/dev/null | python3 -m json.tool || echo "Modell-Liste nicht verfügbar"
+curl -sf http://voice-processing:8001/health | python3 -m json.tool
+curl -sf http://voice-processing:8001/models 2>/dev/null | python3 -m json.tool || echo "Modell-Liste nicht verfügbar"
 ```
 
 ---
@@ -461,14 +457,14 @@ curl -sf http://127.0.0.1:8001/models 2>/dev/null | python3 -m json.tool || echo
 
 ### Dokument ingesten
 ```bash
-curl -X POST http://127.0.0.1:8007/ingest \
+curl -X POST http://ingest:8000/ingest \
   -H "Content-Type: application/json" \
   -d '{"content":"Text hier", "source":"manual", "zone":"WORKSPACE", "title":"Titel"}'
 ```
 
 ### Ingest-Job Status
 ```bash
-curl -sf "http://127.0.0.1:8007/jobs/[job-id]" | python3 -m json.tool
+curl -sf "http://ingest:8000/jobs/[job-id]" | python3 -m json.tool
 ```
 
 ---
@@ -734,7 +730,7 @@ docker logs kirobi-opencode --tail 30
 ```bash
 # Status:
 docker ps | grep openclaw
-curl -sf http://127.0.0.1:18789/health 2>/dev/null | python3 -m json.tool || echo "OpenClaw nicht erreichbar"
+curl -sf http://openclaw-gateway:18789/health 2>/dev/null | python3 -m json.tool || echo "OpenClaw nicht erreichbar"
 # Logs:
 docker logs kirobi-openclaw-gateway --tail 30
 ```
@@ -745,21 +741,21 @@ docker logs kirobi-openclaw-gateway --tail 30
 
 ### Bild generieren
 ```bash
-curl -X POST http://127.0.0.1:8011/generate \
+curl -X POST http://image-generation:8011/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Ein wunderschöner Sonnenuntergang", "size":"512x512"}'
 ```
 
 ### Musik-Job starten
 ```bash
-curl -X POST http://127.0.0.1:8013/generate \
+curl -X POST http://music-generation:8013/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Entspannende Klaviermusik", "duration":30}'
 ```
 
 ### Video-Job starten
 ```bash
-curl -X POST http://127.0.0.1:8014/generate \
+curl -X POST http://video-generation:8014/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Zeitraffer eines Sonnenuntergangs", "duration":10}'
 ```

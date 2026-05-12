@@ -18,11 +18,45 @@ fallback_model:
 fallback_providers: []
 
 compression:
-  threshold: 0.15
+  threshold: 0.12
   model: "qwen2.5:14b"
 
 history:
-  limit: 6
+  limit: 4
+
+mcp_servers:
+  memory:
+    command: npx
+    args:
+    - -y
+    - "@modelcontextprotocol/server-memory"
+    env:
+      MEMORY_FILE_PATH: /opt/data/memory/knowledge_graph.json
+    connect_timeout: 30
+    timeout: 60
+  sequential-thinking:
+    command: npx
+    args:
+    - -y
+    - "@modelcontextprotocol/server-sequential-thinking"
+    connect_timeout: 60
+    timeout: 180
+  postgres:
+    command: npx
+    args:
+    - -y
+    - "@modelcontextprotocol/server-postgres"
+    - "postgresql://kirobi:${POSTGRES_PASSWORD}@postgres:5432/kirobi"
+    connect_timeout: 30
+    timeout: 60
+  filesystem:
+    command: npx
+    args:
+    - -y
+    - "@modelcontextprotocol/server-filesystem"
+    - /home/sven/OpenDisruption
+    connect_timeout: 30
+    timeout: 60
 
 agent:
   api_timeout: 1800
