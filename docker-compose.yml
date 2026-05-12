@@ -590,108 +590,6 @@ services:
       timeout: 10s
       retries: 3
 
-  telegram:
-    build:
-      context: ./services/telegram
-      dockerfile: Dockerfile
-    container_name: kirobi-telegram
-    restart: unless-stopped
-    ports:
-      - "${KIROBI_BIND_HOST:-127.0.0.1}:${TELEGRAM_SERVICE_PORT:-8005}:8005"
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
-      - TELEGRAM_ALLOWED_USER_IDS=${TELEGRAM_ALLOWED_USER_IDS:-}
-      - TELEGRAM_NOTIFY_CHANNEL_ID=${TELEGRAM_NOTIFY_CHANNEL_ID:-}
-      - TELEGRAM_NOTIFY_ON_START=${TELEGRAM_NOTIFY_ON_START:-false}
-      - TELEGRAM_WEBHOOK_HOST=${TELEGRAM_WEBHOOK_HOST:-}
-      - KIROBI_TELEGRAM_WEB_BASE_URL=${KIROBI_TELEGRAM_WEB_BASE_URL:-}
-      - KIROBI_TAILSCALE_HOST=${KIROBI_TAILSCALE_HOST:-}
-      - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-}
-      - TELEGRAM_SERVICE_PORT=8005
-      - AUTH_SERVICE_URL=http://auth:8000
-      - KIROBI_AUTH_URL=http://auth:8000
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
-      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - KIROBI_API_URL=http://api:8000
-      - KIROBI_API_TOKEN=${KIROBI_API_TOKEN:-}
-      - KIROBI_BOT_USER=${KIROBI_BOT_USER:-}
-      - KIROBI_BOT_PASSWORD=${KIROBI_BOT_PASSWORD:-}
-      - KIROBI_DEFAULT_USER=${KIROBI_DEFAULT_USER:-sven}
-      - KIROBI_DEFAULT_PASSWORD=${KIROBI_DEFAULT_PASSWORD:-}
-      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
-      - GITHUB_MODELS_TOKEN=${GITHUB_MODELS_TOKEN:-}
-      - GITHUB_MODELS_URL=${GITHUB_MODELS_URL:-https://models.github.ai/inference/chat/completions}
-      - GITHUB_CHAT_MODEL=${GITHUB_CHAT_MODEL:-openai/gpt-4.1-mini}
-      - GITHUB_REASONING_MODEL=${GITHUB_REASONING_MODEL:-openai/gpt-4.1}
-      - GITHUB_CODE_MODEL=${GITHUB_CODE_MODEL:-openai/gpt-4.1}
-      - VOICE_SERVICE_URL=http://voice-processing:8001
-    depends_on:
-      postgres:
-        condition: service_healthy
-      api:
-        condition: service_started
-    networks:
-      - kirobi-net
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/ready')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  telegram-hermes:
-    build:
-      context: ./services/telegram
-      dockerfile: Dockerfile
-    container_name: kirobi-telegram-hermes
-    restart: unless-stopped
-    ports:
-      - "${KIROBI_BIND_HOST:-127.0.0.1}:${HERMES_TELEGRAM_SERVICE_PORT:-8015}:8005"
-    environment:
-      - TELEGRAM_BOT_TOKEN=${HERMES_TELEGRAM_BOT_TOKEN:-}
-      - TELEGRAM_ALLOWED_USER_IDS=${TELEGRAM_ALLOWED_USER_IDS:-}
-      - TELEGRAM_NOTIFY_CHANNEL_ID=${TELEGRAM_NOTIFY_CHANNEL_ID:-}
-      - TELEGRAM_NOTIFY_ON_START=${HERMES_TELEGRAM_NOTIFY_ON_START:-true}
-      - TELEGRAM_WEBHOOK_HOST=${HERMES_TELEGRAM_WEBHOOK_HOST:-}
-      - KIROBI_TELEGRAM_WEB_BASE_URL=${KIROBI_TELEGRAM_WEB_BASE_URL:-}
-      - KIROBI_TAILSCALE_HOST=${KIROBI_TAILSCALE_HOST:-}
-      - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-}
-      - TELEGRAM_SERVICE_PORT=8005
-      - AUTH_SERVICE_URL=http://auth:8000
-      - KIROBI_AUTH_URL=http://auth:8000
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=${POSTGRES_DB:-kirobi}
-      - POSTGRES_USER=${POSTGRES_USER:-kirobi}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - KIROBI_API_URL=http://api:8000
-      - KIROBI_API_TOKEN=${KIROBI_API_TOKEN:-}
-      - KIROBI_BOT_USER=${KIROBI_BOT_USER:-}
-      - KIROBI_BOT_PASSWORD=${KIROBI_BOT_PASSWORD:-}
-      - KIROBI_DEFAULT_USER=${KIROBI_DEFAULT_USER:-sven}
-      - KIROBI_DEFAULT_PASSWORD=${KIROBI_DEFAULT_PASSWORD:-}
-      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
-      - GITHUB_MODELS_TOKEN=${GITHUB_MODELS_TOKEN:-}
-      - GITHUB_MODELS_URL=${GITHUB_MODELS_URL:-https://models.github.ai/inference/chat/completions}
-      - GITHUB_CHAT_MODEL=${GITHUB_CHAT_MODEL:-openai/gpt-4.1-mini}
-      - GITHUB_REASONING_MODEL=${GITHUB_REASONING_MODEL:-openai/gpt-4.1}
-      - GITHUB_CODE_MODEL=${GITHUB_CODE_MODEL:-openai/gpt-4.1}
-      - VOICE_SERVICE_URL=http://voice-processing:8001
-    depends_on:
-      postgres:
-        condition: service_healthy
-      api:
-        condition: service_started
-    networks:
-      - kirobi-net
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/ready')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   model-routing:
     build:
       context: ./services/model-routing
@@ -893,8 +791,7 @@ services:
       context: ./external/hermes-agent
     image: hermes-agent:local
     container_name: kirobi-hermes-runtime
-    profiles:
-      - external-agents
+    # Kein Profile-Gate — Hermes ist der einzige Telegram-Gateway
     restart: unless-stopped
     # Run entrypoint as root so it can remap hermes → sven's UID (1000) via gosu.
     # This gives the hermes process read/write access to the mounted repo.
@@ -910,8 +807,9 @@ services:
       - HERMES_DASHBOARD=1
       - HERMES_DASHBOARD_HOST=0.0.0.0
       - HERMES_DASHBOARD_PORT=${HERMES_RUNTIME_PORT:-9119}
-      # Telegram-Gateway: KIROBI_TELEGRAM_HERMES_TOKEN_FILE hält das Bot-Token für diesen Agent
-      - TELEGRAM_BOT_TOKEN=${KIROBI_TELEGRAM_HERMES_TOKEN_FILE:-}
+      # Telegram-Gateway: Einziger Bot — Hermes übernimmt alles
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_ALLOWED_USER_IDS=${TELEGRAM_ALLOWED_USER_IDS:-}
       - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USER_IDS:-}
       # GitHub Models API (gh auth token oder PAT mit models:read Scope)
       - GH_TOKEN=${GH_TOKEN:-}
