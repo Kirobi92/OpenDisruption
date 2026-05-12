@@ -373,7 +373,7 @@ def create_refresh_token(data: dict):
 async def get_user_by_username(username: str) -> Optional[UserInDB]:
     async with db_pool.acquire() as conn:
         row = await conn.fetchrow(
-            "SELECT id, username, display_name, email, role, password_hash, avatar_url, bio, is_active, created_at FROM users WHERE username = $1",
+            "SELECT id, username, display_name, email, role, password_hash, avatar_url, bio, is_active, created_at FROM users WHERE LOWER(username) = LOWER($1)",
             username
         )
         if row:

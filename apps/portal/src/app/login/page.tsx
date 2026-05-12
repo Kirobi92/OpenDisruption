@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/auth';
 
 const profiles = [
   {
-    username: 'sven',
+    username: 'Sven',
     emoji: '🌟',
     title: 'Sven',
     subtitle: 'Vision, Systeme, Fokus',
@@ -45,7 +45,7 @@ export default function LoginPage() {
   }, [auth.isLoading, auth.token, router]);
 
   const selectedProfile = useMemo(
-    () => profiles.find((profile) => profile.username === username.toLowerCase()),
+    () => profiles.find((profile) => profile.username.toLowerCase() === username.toLowerCase()),
     [username],
   );
 
