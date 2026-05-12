@@ -1,0 +1,14 @@
+[Unit]
+Description=Kirobi Daily AI Research Timer — 07:00 Uhr täglich
+Requires=kirobi-daily-research.service
+
+[Timer]
+# Jeden Tag um 07:00 Uhr (Ortszeit)
+OnCalendar=*-*-* 07:00:00
+# Bis zu 5 Min zufällig verzögern, damit nicht alles gleichzeitig startet
+RandomizedDelaySec=300
+# Verpasste Ausführungen beim nächsten Boot nachholen
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=Kirobi Daily AI Research — täglich KI-Space scannen und Optimierungen vorschlagen
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/sven/OpenDisruption/infra/scripts/daily-ai-research.sh
+WorkingDirectory=/home/sven/OpenDisruption
+Environment=HOME=/home/sven
+Nice=10
+IOSchedulingClass=idle
+StandardOutput=journal
+StandardError=journal
