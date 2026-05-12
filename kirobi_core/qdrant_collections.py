@@ -33,6 +33,7 @@ COLLECTION_SPECS: tuple[CollectionSpec, ...] = (
     CollectionSpec("kirobi_research", "WORKSPACE", "Recherche-Ergebnisse und technische Analysen"),
     CollectionSpec("kirobi_conversations", "WORKSPACE", "Zonierte Konversations-Indizes"),
     CollectionSpec("kirobi_metadata", "WORKSPACE", "Metadaten, Taxonomien und Systemwissen"),
+    CollectionSpec("nutzi_enventa", "WORKSPACE", "Nutzi eNVenta ERP Wissensbasis (4559 Kapitel)"),
     CollectionSpec("kirobi_family", "FAMILY_PRIVATE", "Lokale Family-Private Indizes"),
     CollectionSpec("kirobi_sacred", "SACRED", "Lokaler verschlüsselter SACRED-Sonderindex"),
 )
@@ -48,6 +49,7 @@ ZONE_COLLECTIONS: dict[str, tuple[str, ...]] = {
         "kirobi_research",
         "kirobi_conversations",
         "kirobi_metadata",
+        "nutzi_enventa",
     ),
     "FAMILY_PRIVATE": ("kirobi_family",),
 }
