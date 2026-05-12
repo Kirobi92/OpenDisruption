@@ -8,7 +8,7 @@ model:
 # Ollama als Fallback wenn offline
 fallback_model:
   base_url: "http://ollama:11434/v1"
-  model: "llama3.1:8b"
+  model: "qwen2.5:14b"
   provider: "ollama"
 
 fallback_providers: []

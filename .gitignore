@@ -201,3 +201,4 @@ sacred/profiles/*.sensitive.json
 services/nutzi/data/chapters/
 services/nutzi/data/master_index.json
 services/nutzi/data/topic_lookup.json
+data/piper-voices/

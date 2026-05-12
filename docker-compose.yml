@@ -347,7 +347,7 @@ services:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:8016:8015"
     environment:
       - OLLAMA_URL=http://ollama:11434
-      - OLLAMA_MODEL=${NUTZI_MODEL:-llama3.1:8b}
+      - OLLAMA_MODEL=${NUTZI_MODEL:-qwen2.5:14b}
       - QDRANT_URL=http://qdrant:6333
     depends_on:
       - ollama
@@ -528,7 +528,7 @@ services:
       - QDRANT_PORT=6333
       - EMBEDDINGS_SERVICE_URL=http://embeddings:8004
       - OLLAMA_HOST=http://ollama:11434
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1:8b}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:14b}
       - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-120}
     depends_on:
       qdrant:
@@ -701,9 +701,9 @@ services:
     restart: unless-stopped
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
-      - MODEL_CHAT_PRIMARY=${MODEL_CHAT_PRIMARY:-llama3.1:8b}
+      - MODEL_CHAT_PRIMARY=${MODEL_CHAT_PRIMARY:-qwen2.5:14b}
       - MODEL_CODE_PRIMARY=${MODEL_CODE_PRIMARY:-qwen2.5-coder:7b}
-      - MODEL_REASONING_PRIMARY=${MODEL_REASONING_PRIMARY:-deepseek-r1:7b}
+      - MODEL_REASONING_PRIMARY=${MODEL_REASONING_PRIMARY:-qwen2.5:14b}
       - MODEL_ROUTING_PORT=8009
     ports:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:8009:8009"
