@@ -198,3 +198,6 @@ sacred/profiles/*.sensitive.json
 # OBSIDIAN VAULT CONFIG
 # -----------------------------------------------------------------------------
 .obsidian/
+services/nutzi/data/chapters/
+services/nutzi/data/master_index.json
+services/nutzi/data/topic_lookup.json

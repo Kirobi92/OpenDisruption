@@ -36,7 +36,7 @@ version: 1.1
 
 ## Architecture
 - The file system is the system of record; Postgres and Qdrant are derived indices that should be rebuildable.
-- **Active Compose services:** `ollama`, `open-webui`, `qdrant`, `postgres`, `flowise`, `voice-processing`, `supervisor`, `auth`, `api`, `web`, `caddy`, `telegram`, `embeddings`, `ingest`, `retrieval`, `model-routing`, `analytics`, `image-generation`, `media-processing`, `music-generation`, `video-generation`, `dashboard`.
+- **Active Compose services:** `ollama`, `open-webui`, `qdrant`, `postgres`, `flowise`, `voice-processing`, `supervisor`, `auth`, `api`, `web`, `caddy`, `telegram`, `embeddings`, `ingest`, `retrieval`, `model-routing`, `analytics`, `image-generation`, `media-processing`, `music-generation`, `video-generation`, `dashboard`, `nutzi`.
 - Default service ports bind to `KIROBI_BIND_HOST=127.0.0.1`; Caddy is the LAN-facing entry point via `KIROBI_PROXY_BIND_HOST`.
 - `auth` bootstraps users and auth tables on startup; `services/api/main.py` bootstraps `conversations`, `messages`, and `file_uploads` on first start.
 - `supervisor` seeds tasks from `kirobi_core` only when `KIROBI_SEED_BACKLOG=true`.
@@ -59,6 +59,7 @@ version: 1.1
 | media-processing | 8012 | Pillow/mutagen, graceful fallback |
 | music-generation | 8013 | Async jobs, `generated_tracks` table |
 | video-generation | 8014 | Async jobs, `generated_videos` table |
+| nutzi | 8016 | eNVenta ERP Hilfe-Agent, `/search`, `/ask`, `/artikelstamm/guide` |
 | web (PWA) | 3002 | Next.js 15 Family-PWA |
 | dashboard | 3003 | Next.js 15 Admin-Dashboard, auto-refresh 30s |
 | voice app | 3004 | Next.js 15 Voice-Interface, MediaRecorder |

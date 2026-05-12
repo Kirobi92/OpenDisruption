@@ -25,6 +25,7 @@ streaming:
 # Aktive Skills für OpenDisruption-Orchestrierung
 skills:
   - opendisruption
+  - nutzi
 
 # Genehmigungen: bei kritischen Aktionen via Telegram nachfragen
 approvals:

@@ -60,6 +60,7 @@ HTTP_AGENTS = {
     "model-routing": "http://127.0.0.1:8009",
     "voice": "http://127.0.0.1:8001",
     "image-generation": "http://127.0.0.1:8011",
+    "nutzi": "http://127.0.0.1:8016",
 }
 
 
@@ -83,6 +84,10 @@ def call_http_agent(agent_name: str, task_type: str, payload: dict) -> dict:
         "synthesize": "/synthesize",
         "tts": "/synthesize",
         "stt": "/transcribe",
+        "ask": "/ask",
+        "topics": "/topics",
+        "modules": "/modules",
+        "artikelstamm": "/artikelstamm/guide",
     }
     endpoint = endpoint_map.get(task_type, f"/{task_type}")
     url = f"{base_url}{endpoint}"
