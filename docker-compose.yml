@@ -873,10 +873,15 @@ services:
     profiles:
       - external-agents
     restart: unless-stopped
-    user: "${HERMES_UID:-10000}:${HERMES_GID:-10000}"
+    # Run entrypoint as root so it can remap hermes → sven's UID (1000) via gosu.
+    # This gives the hermes process read/write access to the mounted repo.
+    user: "0:0"
+    group_add:
+      - "${DOCKER_GID:-985}"  # docker group → /var/run/docker.sock access
     environment:
-      - HERMES_UID=${HERMES_UID:-10000}
-      - HERMES_GID=${HERMES_GID:-10000}
+      # Remap hermes user to sven's UID so it can write to the mounted repo
+      - HERMES_UID=${HERMES_UID:-1000}
+      - HERMES_GID=${HERMES_GID:-1000}
       - OLLAMA_BASE_URL=http://ollama:11434/v1
       # Dashboard als Hintergrundprozess starten; gateway run ist der Vordergrundprozess
       - HERMES_DASHBOARD=1
@@ -890,10 +895,20 @@ services:
       - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN:-}
       # Fallback-Provider URL: GitHub Models OpenAI-kompatibler Endpunkt
       - COPILOT_API_BASE_URL=https://models.github.ai/inference/v1
+      # Terminal tool: lokal im Container ausführen (Standard)
+      - TERMINAL_ENV=local
+      # Git-Safe-Directory für das gemountete Repo
+      - GIT_CONFIG_GLOBAL=/opt/data/home/.gitconfig
     volumes:
       - hermes_data:/opt/data
       - ./services/hermes-runtime/config/cli-config.yaml:/opt/data/cli-config.yaml:ro
       - ./services/hermes-runtime/config/skills/opendisruption:/opt/data/skills/opendisruption:ro
+      # Docker-Socket → Hermes kann docker compose / docker exec ausführen
+      - /var/run/docker.sock:/var/run/docker.sock
+      # OpenDisruption-Repo → Hermes kann Dateien lesen und bearbeiten, git pull/push
+      - /home/sven/OpenDisruption:/home/sven/OpenDisruption:rw
+      # Home-Verzeichnis von sven → Zugriff auf .ssh, .env, etc. (read-only für Sicherheit)
+      - /home/sven/.ssh:/home/sven/.ssh:ro
     ports:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:${HERMES_RUNTIME_PORT:-9119}:9119"
     depends_on:
