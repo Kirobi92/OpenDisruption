@@ -1045,3 +1045,25 @@ Hermes versteht natürlichsprachliche Anfragen und leitet sie automatisch:
 - **"Analysiere [Code/Datei]"** → hermes-reasoner (research_synthesis)
 
 Hermes antwortet IMMER auf Deutsch und gibt Fortschritts-Updates.
+
+---
+
+## 🔌 MCP-Server (nativ in Hermes)
+
+Hermes hat 5 MCP-Server direkt integriert. Tools sind als `mcp_[server]_[tool]` verfügbar:
+
+| Server | Präfix | Verfügbare Tools |
+|--------|--------|-----------------|
+| filesystem | `mcp_filesystem_*` | read_file, write_file, create_directory, list_directory, search_files, move_file, get_file_info |
+| git | `mcp_git_*` | git_log, git_diff, git_status, git_commit, git_add, git_checkout, git_branch |
+| postgres | `mcp_postgres_*` | query (beliebige SQL), list_tables, describe_table |
+| memory | `mcp_memory_*` | create_entities, create_relations, search_nodes, read_graph, add_observations |
+| sequential-thinking | `mcp_sequential_thinking_*` | sequentialthinking (strukturierter Denkprozess) |
+
+### Knowledge-Graph (mcp_memory)
+Nutze das Memory-Tool um Wissen persistent zu speichern:
+- `create_entities` — Neue Entitäten (Person, Projekt, Service) anlegen
+- `create_relations` — Beziehungen zwischen Entitäten
+- `add_observations` — Fakten zu Entitäten hinzufügen
+- `search_nodes` — Nach Entitäten suchen
+- Gespeichert in: `/opt/data/memory/knowledge_graph.json`
