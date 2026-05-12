@@ -824,6 +824,7 @@ services:
       - hermes_data:/opt/data
       - ./services/hermes-runtime/config/cli-config.yaml:/opt/data/cli-config.yaml:ro
       - ./services/hermes-runtime/config/skills/opendisruption:/opt/data/skills/opendisruption:ro
+      - ./services/hermes-runtime/config/skills/nutzi:/opt/data/skills/nutzi:ro
       # Docker-Socket → Hermes kann docker compose / docker exec ausführen
       - /var/run/docker.sock:/var/run/docker.sock
       # OpenDisruption-Repo → Hermes kann Dateien lesen und bearbeiten, git pull/push
