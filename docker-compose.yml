@@ -644,6 +644,56 @@ services:
       timeout: 10s
       retries: 3
 
+  admin:
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
+    container_name: kirobi-admin
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:3005:3005"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_TAILSCALE_HOST=${NEXT_PUBLIC_TAILSCALE_HOST:-pop-os.taildd322d.ts.net}
+      - NEXT_PUBLIC_LAN_HOST=${NEXT_PUBLIC_LAN_HOST:-192.168.178.10}
+    depends_on:
+      - api
+      - auth
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  portal:
+    build:
+      context: ./apps/portal
+      dockerfile: Dockerfile
+    container_name: kirobi-portal
+    restart: unless-stopped
+    ports:
+      - "${KIROBI_BIND_HOST:-127.0.0.1}:3006:3006"
+    environment:
+      - NODE_ENV=production
+      - PORT=3006
+      - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_TAILSCALE_HOST=${NEXT_PUBLIC_TAILSCALE_HOST:-pop-os.taildd322d.ts.net}
+      - NEXT_PUBLIC_LAN_HOST=${NEXT_PUBLIC_LAN_HOST:-192.168.178.10}
+    depends_on:
+      - api
+      - auth
+    networks:
+      - kirobi-net
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   web-svelte:
     build:
       context: ./apps/web-svelte
@@ -691,6 +741,8 @@ services:
       - web
       - web-svelte
       - dashboard
+      - admin
+      - portal
       - auth
       - api
       - open-webui

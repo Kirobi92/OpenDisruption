@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-void: #040614; --bg-deep: #080b1f; --bg-rise: #0d1230;
+  --bg-glass: rgba(15,20,50,0.55);
+  --border-subtle: rgba(255,255,255,0.06); --border-soft: rgba(255,255,255,0.1); --border-glow: rgba(120,220,255,0.22);
+  --text-primary: #f4f6ff; --text-secondary: #9aa3c7; --text-muted: #5a627e;
+  --accent-cyan: #5eead4; --accent-cyan-soft: #67e8f9; --accent-cyan-glow: rgba(94,234,212,0.45);
+  --accent-magenta: #e879f9; --accent-magenta-glow: rgba(232,121,249,0.4);
+  --accent-violet: #a78bfa; --accent-gold: #fbbf24;
+  --ease-spring: cubic-bezier(0.16,1,0.3,1);
+  --shadow-glow-cyan: 0 0 24px var(--accent-cyan-glow), 0 0 48px var(--accent-cyan-glow);
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 32px -8px rgba(0,0,0,0.6);
+}
+html { background-color: var(--bg-void); color-scheme: dark; }
+@layer base {
+  body { background-color: var(--bg-void); color: var(--text-primary); -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; min-height: 100dvh; }
+}
+.aurora-bg {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(94,234,212,0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(232,121,249,0.1), transparent),
+    radial-gradient(ellipse 50% 60% at 20% 80%, rgba(167,139,250,0.08), transparent);
+}
+.glass { background: var(--bg-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-subtle); }

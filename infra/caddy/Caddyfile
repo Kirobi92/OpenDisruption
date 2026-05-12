@@ -98,6 +98,22 @@
 		}
 	}
 
+	# Admin Control UI: /admin* -> http://admin:3005
+	redir /admin /admin/ 308
+	handle /admin/* {
+		reverse_proxy admin:3005 {
+			header_up Host {host}
+		}
+	}
+
+	# User Portal: /portal* -> http://portal:3006
+	redir /portal /portal/ 308
+	handle /portal/* {
+		reverse_proxy portal:3006 {
+			header_up Host {host}
+		}
+	}
+
 	# Auth service: /api/auth/* -> http://auth:8000/*
 	handle_path /api/auth/* {
 		reverse_proxy auth:8000 {

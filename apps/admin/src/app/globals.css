@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-void: #040614; --bg-deep: #080b1f; --bg-rise: #0d1230;
+  --bg-glass: rgba(15, 20, 50, 0.55);
+  --border-subtle: rgba(255,255,255,0.06); --border-soft: rgba(255,255,255,0.1); --border-glow: rgba(120,220,255,0.22);
+  --text-primary: #f4f6ff; --text-secondary: #9aa3c7; --text-muted: #5a627e;
+  --accent-cyan: #5eead4; --accent-cyan-soft: #67e8f9; --accent-cyan-glow: rgba(94,234,212,0.45);
+  --accent-magenta: #e879f9; --accent-magenta-glow: rgba(232,121,249,0.4);
+  --accent-violet: #a78bfa; --accent-gold: #fbbf24;
+  --ease-spring: cubic-bezier(0.16,1,0.3,1); --ease-glide: cubic-bezier(0.4,0,0.2,1);
+  --shadow-glow-cyan: 0 0 24px var(--accent-cyan-glow), 0 0 48px var(--accent-cyan-glow);
+  --shadow-glow-magenta: 0 0 24px var(--accent-magenta-glow);
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 32px -8px rgba(0,0,0,0.6);
+}
+html { background-color: var(--bg-void); color-scheme: dark; }
+@layer base { body { background-color: var(--bg-void); color: var(--text-primary); -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; min-height: 100dvh; } }
+
+:root {
+  --shadow-float: 0 24px 48px -12px rgba(6, 8, 30, 0.8), 0 0 0 1px var(--border-subtle) inset;
+}
+
+.ambient-field {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(94, 234, 212, 0.16), transparent 38%),
+    radial-gradient(circle at 82% 8%, rgba(232, 121, 249, 0.14), transparent 36%),
+    radial-gradient(circle at 50% 92%, rgba(167, 139, 250, 0.1), transparent 40%),
+    radial-gradient(circle at 8% 88%, rgba(34, 211, 238, 0.07), transparent 32%);
+}
+
+.ambient-field::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.6  0 0 0 0 0.7  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.55;
+  mix-blend-mode: overlay;
+}
+
+.glass {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-soft);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: var(--shadow-card);
+}
+
+.glass-raised {
+  background: linear-gradient(180deg, rgba(20, 26, 60, 0.72), rgba(8, 11, 31, 0.72));
+  border: 1px solid var(--border-soft);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  box-shadow: var(--shadow-float);
+}
+
+.text-gradient-aurora {
+  background: linear-gradient(110deg, #5eead4 0%, #a78bfa 45%, #e879f9 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(120, 220, 255, 0.12) 50%, rgba(255,255,255,0.04) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+.panel {
+  @apply rounded-2xl border border-white/5 bg-void-rise/50 backdrop-blur-sm shadow-card;
+}
+
+.panel-muted {
+  @apply rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm;
+}
+
+.grid-background {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(94, 234, 212, 0.25), rgba(167, 139, 250, 0.25));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::selection { background: rgba(94, 234, 212, 0.3); color: var(--text-primary); }
+
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+  border-radius: 0.65rem;
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ambient-field::after { display: none; }
+}
