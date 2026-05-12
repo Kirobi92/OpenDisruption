@@ -46,6 +46,7 @@ except ImportError:
 # Konfiguration
 # ---------------------------------------------------------------------------
 REPO_ROOT = Path(__file__).parent.parent.parent
+DATENSPEICHER = Path("/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner")
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 EMBEDDINGS_URL = os.getenv("EMBEDDINGS_URL", "http://localhost:8004")
 EMBED_DIM = 768
@@ -55,6 +56,13 @@ BATCH_SIZE = 15        # Texte pro Embedding-Batch (nomic-embed-text ist langsam
 
 # Checkpoint-Datei für Resume-Fähigkeit
 CHECKPOINT_FILE = REPO_ROOT / ".qdrant-index-checkpoint.json"
+
+# User-Vault Pfade → Collections (FAMILY_PRIVATE)
+USER_VAULTS: dict[str, str] = {
+    str(DATENSPEICHER / "Sven"):   "kirobi_user_sven",
+    str(DATENSPEICHER / "Samira"): "kirobi_user_samira",
+    str(DATENSPEICHER / "Sineo"):  "kirobi_user_sineo",
+}
 
 # ---------------------------------------------------------------------------
 # Pfad → Collection Mapping
@@ -161,6 +169,7 @@ def file_hash(content: str) -> str:
 
 def collect_files(repo_root: Path) -> Generator[tuple[Path, str, str, str], None, None]:
     """Yieldet (path, rel_path, collection, zone) für alle zu indexierenden Dateien."""
+    # 1. Repo-Dateien
     for path in sorted(repo_root.rglob("*")):
         if not path.is_file():
             continue
@@ -174,6 +183,25 @@ def collect_files(repo_root: Path) -> Generator[tuple[Path, str, str, str], None
             continue
         collection, zone = get_collection_for_path(rel)
         yield path, rel, collection, zone
+
+    # 2. User-Vault-Dateien (Datenspeicher)
+    for vault_path_str, collection in USER_VAULTS.items():
+        vault_path = Path(vault_path_str)
+        if not vault_path.exists():
+            continue
+        for path in sorted(vault_path.rglob("*")):
+            if not path.is_file():
+                continue
+            if path.stat().st_size > MAX_FILE_SIZE:
+                continue
+            ext = path.suffix.lower()
+            if ext not in INCLUDE_EXTENSIONS:
+                continue
+            # Skip .obsidian config files
+            if ".obsidian" in path.parts:
+                continue
+            rel = f"vault:{vault_path.name}/{path.relative_to(vault_path)}"
+            yield path, rel, collection, "FAMILY_PRIVATE"
 
 
 def embed_batch(client: httpx.Client, texts: list[str]) -> list[list[float]] | None:
