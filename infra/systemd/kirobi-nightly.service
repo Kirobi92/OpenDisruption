@@ -1,0 +1,20 @@
+[Unit]
+Description=Kirobi Nightly Learning Consolidation
+Documentation=https://github.com/Kirobi92/OpenDisruption
+After=network.target docker.service
+Wants=kirobi-nightly.timer
+
+[Service]
+Type=oneshot
+User=sven
+WorkingDirectory=/home/sven/OpenDisruption
+ExecStart=/home/sven/OpenDisruption/infra/scripts/nightly-consolidation.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=600
+# Niedriger Ressourcen-Priorität damit laufende Services nicht beeinträchtigt werden
+Nice=10
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kirobi Nightly Consolidation Timer (täglich 02:00 Uhr)
+Documentation=https://github.com/Kirobi92/OpenDisruption
+Requires=kirobi-nightly.service
+
+[Timer]
+# Jeden Tag um 02:00 Uhr lokal
+OnCalendar=*-*-* 02:00:00
+# Wenn der Rechner um 02:00 aus war, beim nächsten Start nachholen (innerhalb 15min)
+Persistent=true
+RandomizedDelaySec=300
+Unit=kirobi-nightly.service
+
+[Install]
+WantedBy=timers.target
