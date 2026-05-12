@@ -48,19 +48,24 @@ if _HERMES_VENV_SITE.exists() and str(_HERMES_VENV_SITE) not in sys.path:
 
 
 # ─── HTTP-basierte Agenten ────────────────────────────────────────────────────
+# Docker-interne URLs (Service-DNS-Name + interner Port, nicht der Host-Port).
+# Alle Services liegen im kirobi-net Netzwerk — 127.0.0.1 ist der Container-Loopback,
+# nicht der Host. Externe Host-Ports (z.B. 8007→8000) gelten nicht im Container.
 
 HTTP_AGENTS = {
-    "ingest": "http://127.0.0.1:8007",
-    "retrieval": "http://127.0.0.1:8006",
-    "analytics": "http://127.0.0.1:8010",
-    "embeddings": "http://127.0.0.1:8004",
-    "auth": "http://127.0.0.1:8002",
-    "api": "http://127.0.0.1:8003",
-    "supervisor": "http://127.0.0.1:8008",
-    "model-routing": "http://127.0.0.1:8009",
-    "voice": "http://127.0.0.1:8001",
-    "image-generation": "http://127.0.0.1:8011",
-    "nutzi": "http://127.0.0.1:8016",
+    "ingest":           "http://ingest:8000",           # Host: 8007→8000
+    "retrieval":        "http://retrieval:8000",        # Host: 8006→8000
+    "analytics":        "http://analytics:8010",        # Host: 8010→8010
+    "embeddings":       "http://embeddings:8000",       # Host: 8004→8000
+    "auth":             "http://auth:8000",             # Host: 8002→8000
+    "api":              "http://api:8000",              # Host: 8003→8000
+    "model-routing":    "http://model-routing:8009",    # Host: 8009→8009
+    "voice":            "http://voice-processing:8001", # Host: 8001→8001
+    "image-generation": "http://image-generation:8011", # Host: 8011→8011
+    "music-generation": "http://music-generation:8013", # Host: 8013→8013
+    "video-generation": "http://video-generation:8014", # Host: 8014→8014
+    "media-processing": "http://media-processing:8012", # Host: 8012→8012
+    "nutzi":            "http://nutzi:8015",            # Host: 8016→8015
 }
 
 
@@ -122,7 +127,7 @@ def call_python_agent(agent_name: str, task_type: str, payload: dict, zone: str 
                 os.environ["OLLAMA_HOST"] = "http://ollama:11434"
             # Set full model tag if only base name given
             if "OLLAMA_MODEL" not in os.environ:
-                os.environ["OLLAMA_MODEL"] = "llama3.2:3b"
+                os.environ["OLLAMA_MODEL"] = "qwen2.5:14b"
             from agents.hermes.agent import HermesReasonerAgent
             agent = HermesReasonerAgent()
         elif agent_name == "obsidian":

@@ -16,7 +16,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 import asyncpg
@@ -42,10 +42,10 @@ load_dotenv()
 _INTERNAL_SERVICE_PORTS = {
     "api": 8000,
     "auth": 8000,
-    "analytics": 8000,
+    "analytics": 8010,
     "embeddings": 8000,
     "ingest": 8000,
-    "model-routing": 8000,
+    "model-routing": 8009,  # external=8009, internal=8009 — no-op, prevents wrong rewrite
     "retrieval": 8000,
 }
 
@@ -925,6 +925,48 @@ async def call_ollama(prompt: str, model: str = "llama3.1:8b", system_prompt: Op
             return f"Error calling Ollama: {str(e)}"
 
 
+async def call_ollama_stream(prompt: str, model: str = "llama3.1:8b", system_prompt: Optional[str] = None):
+    """Stream Ollama chat tokens as they're produced. Yields plain text deltas."""
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
+
+    payload_for = lambda m: {"model": m, "messages": messages, "stream": True}
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(180.0, connect=10.0)) as client:
+        async def _stream(model_name: str):
+            async with client.stream("POST", f"{OLLAMA_HOST}/api/chat", json=payload_for(model_name)) as resp:
+                if resp.status_code != 200:
+                    yield f"[Ollama error {resp.status_code}]"
+                    return
+                async for line in resp.aiter_lines():
+                    if not line:
+                        continue
+                    try:
+                        chunk = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    delta = chunk.get("message", {}).get("content", "")
+                    if delta:
+                        yield delta
+                    if chunk.get("done"):
+                        return
+
+        gen = _stream(model)
+        first = True
+        try:
+            async for delta in gen:
+                if first and delta.startswith("[Ollama error 404]") and model != OLLAMA_FALLBACK_MODEL:
+                    async for delta2 in _stream(OLLAMA_FALLBACK_MODEL):
+                        yield delta2
+                    return
+                first = False
+                yield delta
+        except Exception as exc:  # noqa: BLE001
+            yield f"[Stream error: {exc}]"
+
+
 def _extract_chat_prompt(request: ChatRequest) -> str:
     """Extract the latest user prompt from compatibility chat payloads."""
     if request.message and request.message.strip():
@@ -1342,6 +1384,136 @@ Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
             ai_message_id
         )
         return _message_from_row(row)
+
+
+@app.post("/conversations/{conversation_id}/messages/stream")
+async def create_message_stream(
+    conversation_id: str,
+    message_data: MessageCreate,
+    current_user: User = Depends(get_current_user),
+):
+    """Stream a chat reply token-by-token via SSE.
+
+    Persists the user message immediately and the assistant message at the end.
+    Each SSE event is JSON-encoded with one of these shapes:
+      data: {"event":"start","model":"..."}
+      data: {"event":"delta","text":"..."}
+      data: {"event":"done","message_id":"...","model":"...","content":"..."}
+      data: {"event":"error","detail":"..."}
+    """
+    conversation = await get_conversation(conversation_id, current_user)
+
+    # Persist user message + load history (mirrors create_message)
+    user_message_id = str(uuid.uuid4())
+    async with db_pool.acquire() as conn:
+        user_message_metadata = {
+            "agent": (message_data.agent or "kirobi").lower(),
+            "reasoning_mode": message_data.reasoning_mode,
+            "source_modes": message_data.source_modes,
+            "web_search": message_data.web_search,
+            "deep_research": message_data.deep_research,
+            "show_reasoning": message_data.show_reasoning,
+            "stream": True,
+        }
+        await conn.execute(
+            """
+            INSERT INTO messages (id, conversation_id, user_id, role, content, attachments, metadata)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            """,
+            user_message_id,
+            conversation_id,
+            current_user.id,
+            "user",
+            message_data.content,
+            json.dumps(message_data.attachments or []),
+            json.dumps(user_message_metadata),
+        )
+
+    # Build system prompt (same logic as create_message)
+    system_prompt = f"""Du bist Kirobi, ein persönlicher KI-Assistent für die Familie Darusi.
+
+Du sprichst mit: {current_user.display_name} ({current_user.username})
+Zone: {conversation.zone}
+
+Sei persönlich, hilfsbereit und respektiere die Privatsphäre der Familie.
+Antworte auf Deutsch und passe deinen Tonfall an den Nutzer an."""
+    system_prompt = (
+        f"{_agent_prompt(message_data.agent)}\n"
+        f"Denkmodus: {_reasoning_mode_label(message_data.reasoning_mode)}.\n"
+        f"Quellenmodus: {', '.join(message_data.source_modes) if message_data.source_modes else 'local'}.\n"
+        f"{system_prompt}"
+    )
+    if message_data.system_prompt_extra:
+        system_prompt = f"{system_prompt}\n\nZusaetzliche Stilvorgabe:\n{message_data.system_prompt_extra}"
+
+    rag_zone = conversation.zone if conversation.zone in ("PUBLIC", "WORKSPACE", "FAMILY_PRIVATE") else "WORKSPACE"
+    rag_context = await _get_rag_context(
+        message_data.content,
+        current_user.id,
+        zone=rag_zone,
+        family_private_approved=conversation.zone == "FAMILY_PRIVATE",
+    )
+    if rag_context:
+        system_prompt = f"Relevanter Kontext aus der Wissensbasis:\n{rag_context}\n\n{system_prompt}"
+
+    default_model = "llama3.1:70b" if current_user.role == "admin" else "llama3.1:8b"
+    model, model_reason = await _select_chat_model(
+        message_data.model,
+        reasoning_mode=message_data.reasoning_mode,
+        deep_research=message_data.deep_research,
+        agent=message_data.agent,
+    )
+    if not model:
+        model = default_model
+
+    async def event_stream():
+        accumulated_parts: List[str] = []
+        try:
+            yield f"data: {json.dumps({'event': 'start', 'model': model})}\n\n"
+            async for delta in call_ollama_stream(message_data.content, model=model, system_prompt=system_prompt):
+                accumulated_parts.append(delta)
+                yield f"data: {json.dumps({'event': 'delta', 'text': delta})}\n\n"
+        except Exception as exc:  # noqa: BLE001
+            yield f"data: {json.dumps({'event': 'error', 'detail': str(exc)})}\n\n"
+
+        full_content = "".join(accumulated_parts).strip() or "[leere Antwort]"
+        ai_message_id = str(uuid.uuid4())
+        try:
+            assistant_metadata = _build_visible_reasoning_summary(
+                agent=message_data.agent,
+                reasoning_mode=message_data.reasoning_mode,
+                source_modes=message_data.source_modes,
+                web_search=message_data.web_search,
+                deep_research=message_data.deep_research,
+                used_rag_context=bool(rag_context),
+                selected_model_reason=model_reason,
+                show_reasoning=message_data.show_reasoning,
+            )
+            assistant_metadata["stream"] = True
+            async with db_pool.acquire() as conn:
+                await conn.execute(
+                    """
+                    INSERT INTO messages (id, conversation_id, role, content, model_used, metadata)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    """,
+                    ai_message_id,
+                    conversation_id,
+                    "assistant",
+                    full_content,
+                    model,
+                    json.dumps(assistant_metadata),
+                )
+                await conn.execute(
+                    "UPDATE conversations SET updated_at = NOW() WHERE id = $1",
+                    conversation_id,
+                )
+            asyncio.create_task(_analytics_track("conversation", zone=conversation.zone, model=model))
+        except Exception as exc:  # noqa: BLE001
+            yield f"data: {json.dumps({'event': 'error', 'detail': f'persist failed: {exc}'})}\n\n"
+
+        yield f"data: {json.dumps({'event': 'done', 'message_id': ai_message_id, 'model': model, 'content': full_content})}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.post("/upload", response_model=FileUploadResponse)
@@ -1868,6 +2040,170 @@ async def operator_control_status() -> OperatorControlStatus:
         ],
         operatorGuidance=guidance,
     )
+
+
+# ============================================================================
+# USER-SPACE & FAMILY-SPACE — filesystem-backed personal/shared notes
+# ============================================================================
+
+USERSPACE_ROOT = Path(os.getenv("KIROBI_USERSPACE_ROOT", "/data/experiences/users"))
+FAMILY_SPACE_ROOT = Path(os.getenv("KIROBI_FAMILY_SPACE_ROOT", "/data/experiences/family"))
+_USERSPACE_NAME_RE = __import__("re").compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$")
+_USERSPACE_ALLOWED_EXTS = {".md", ".txt", ".json"}
+
+
+class UserspaceNote(BaseModel):
+    name: str
+    size: int
+    modified: str
+    space: str  # "user" or "family"
+
+
+class UserspaceWriteRequest(BaseModel):
+    content: str = Field(..., max_length=512_000)
+
+
+def _safe_username(username: str) -> str:
+    norm = username.strip().lower()
+    if not _USERSPACE_NAME_RE.match(norm):
+        raise HTTPException(status_code=400, detail=f"invalid username: {username!r}")
+    return norm
+
+
+def _safe_note_name(name: str) -> str:
+    name = name.strip()
+    if not _USERSPACE_NAME_RE.match(name):
+        raise HTTPException(status_code=400, detail="invalid note name (alnum, .-_, max 100)")
+    if Path(name).suffix.lower() not in _USERSPACE_ALLOWED_EXTS:
+        raise HTTPException(status_code=400, detail=f"unsupported extension; allowed: {sorted(_USERSPACE_ALLOWED_EXTS)}")
+    return name
+
+
+def _user_dir(username: str) -> Path:
+    safe = _safe_username(username)
+    base = USERSPACE_ROOT / safe
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def _list_notes(directory: Path, space: str) -> List[UserspaceNote]:
+    if not directory.exists():
+        return []
+    out: List[UserspaceNote] = []
+    for p in sorted(directory.iterdir()):
+        if not p.is_file():
+            continue
+        if p.suffix.lower() not in _USERSPACE_ALLOWED_EXTS:
+            continue
+        if p.name == "README.md":
+            continue
+        try:
+            stat = p.stat()
+        except OSError:
+            continue
+        out.append(UserspaceNote(
+            name=p.name,
+            size=stat.st_size,
+            modified=datetime.utcfromtimestamp(stat.st_mtime).isoformat() + "Z",
+            space=space,
+        ))
+    return out
+
+
+@app.get("/userspace/notes", response_model=List[UserspaceNote], tags=["userspace"])
+async def list_user_notes(current_user: User = Depends(get_current_user)):
+    """List notes in the current user's personal space."""
+    return _list_notes(_user_dir(current_user.username), "user")
+
+
+@app.get("/userspace/notes/{name}", tags=["userspace"])
+async def read_user_note(name: str, current_user: User = Depends(get_current_user)):
+    safe = _safe_note_name(name)
+    path = _user_dir(current_user.username) / safe
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="note not found")
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise HTTPException(status_code=500, detail=f"read failed: {exc}")
+    return {"name": safe, "content": content, "space": "user"}
+
+
+@app.put("/userspace/notes/{name}", response_model=UserspaceNote, tags=["userspace"])
+async def write_user_note(
+    name: str,
+    body: UserspaceWriteRequest,
+    current_user: User = Depends(get_current_user),
+):
+    safe = _safe_note_name(name)
+    path = _user_dir(current_user.username) / safe
+    path.write_text(body.content, encoding="utf-8")
+    stat = path.stat()
+    return UserspaceNote(
+        name=safe, size=stat.st_size,
+        modified=datetime.utcfromtimestamp(stat.st_mtime).isoformat() + "Z",
+        space="user",
+    )
+
+
+@app.delete("/userspace/notes/{name}", status_code=204, tags=["userspace"])
+async def delete_user_note(name: str, current_user: User = Depends(get_current_user)):
+    safe = _safe_note_name(name)
+    path = _user_dir(current_user.username) / safe
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="note not found")
+    path.unlink()
+    return None
+
+
+@app.get("/family-space/notes", response_model=List[UserspaceNote], tags=["family-space"])
+async def list_family_notes(current_user: User = Depends(get_current_user)):
+    if not await check_zone_permission(current_user.id, "FAMILY_PRIVATE", "read"):
+        raise HTTPException(status_code=403, detail="missing FAMILY_PRIVATE read permission")
+    return _list_notes(FAMILY_SPACE_ROOT, "family")
+
+
+@app.get("/family-space/notes/{name}", tags=["family-space"])
+async def read_family_note(name: str, current_user: User = Depends(get_current_user)):
+    if not await check_zone_permission(current_user.id, "FAMILY_PRIVATE", "read"):
+        raise HTTPException(status_code=403, detail="missing FAMILY_PRIVATE read permission")
+    safe = _safe_note_name(name)
+    path = FAMILY_SPACE_ROOT / safe
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="note not found")
+    return {"name": safe, "content": path.read_text(encoding="utf-8"), "space": "family"}
+
+
+@app.put("/family-space/notes/{name}", response_model=UserspaceNote, tags=["family-space"])
+async def write_family_note(
+    name: str,
+    body: UserspaceWriteRequest,
+    current_user: User = Depends(get_current_user),
+):
+    if not await check_zone_permission(current_user.id, "FAMILY_PRIVATE", "write"):
+        raise HTTPException(status_code=403, detail="missing FAMILY_PRIVATE write permission")
+    safe = _safe_note_name(name)
+    FAMILY_SPACE_ROOT.mkdir(parents=True, exist_ok=True)
+    path = FAMILY_SPACE_ROOT / safe
+    path.write_text(body.content, encoding="utf-8")
+    stat = path.stat()
+    return UserspaceNote(
+        name=safe, size=stat.st_size,
+        modified=datetime.utcfromtimestamp(stat.st_mtime).isoformat() + "Z",
+        space="family",
+    )
+
+
+@app.delete("/family-space/notes/{name}", status_code=204, tags=["family-space"])
+async def delete_family_note(name: str, current_user: User = Depends(get_current_user)):
+    if not await check_zone_permission(current_user.id, "FAMILY_PRIVATE", "write"):
+        raise HTTPException(status_code=403, detail="missing FAMILY_PRIVATE write permission")
+    safe = _safe_note_name(name)
+    path = FAMILY_SPACE_ROOT / safe
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="note not found")
+    path.unlink()
+    return None
 
 
 if __name__ == "__main__":

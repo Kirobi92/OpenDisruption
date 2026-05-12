@@ -109,6 +109,7 @@ async def lifespan(app: FastAPI):
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
     await _ensure_schema()
     await _ensure_default_user()
+    await _ensure_family_users()
     yield
     # Shutdown
     await db_pool.close()
@@ -218,6 +219,68 @@ async def _ensure_default_user() -> None:
             "INSERT INTO user_preferences (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
             user_id,
         )
+
+
+FAMILY_ZONES = [
+    ("PUBLIC", True, True),
+    ("WORKSPACE", True, False),
+    ("FAMILY_PRIVATE", True, True),
+]
+
+
+async def _ensure_family_users() -> None:
+    """Seed/refresh additional family users from ``KIROBI_FAMILY_USERS``.
+
+    Format (comma-separated entries, fields ``:``-separated):
+        username:password[:display_name[:role]]
+
+    Existing usernames are kept but their password and zone permissions
+    are reset to the configured defaults so families never get stuck on
+    a forgotten password. Set ``KIROBI_FAMILY_USERS=`` to disable.
+    """
+    raw = os.getenv("KIROBI_FAMILY_USERS", "").strip()
+    if not raw:
+        return
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        parts = entry.split(":")
+        if len(parts) < 2 or not parts[0] or not parts[1]:
+            continue
+        username = parts[0].strip()
+        password = parts[1].strip()
+        display = parts[2].strip() if len(parts) > 2 and parts[2].strip() else username.title()
+        role = parts[3].strip() if len(parts) > 3 and parts[3].strip() else "family_member"
+        async with db_pool.acquire() as conn:
+            row = await conn.fetchrow("SELECT id FROM users WHERE username = $1", username)
+            pw_hash = get_password_hash(password)
+            if row:
+                user_id = row["id"]
+                await conn.execute(
+                    "UPDATE users SET password_hash = $1, display_name = $2, "
+                    "role = $3, is_active = TRUE WHERE id = $4",
+                    pw_hash, display, role, user_id,
+                )
+            else:
+                user_id = str(uuid.uuid4())
+                await conn.execute(
+                    "INSERT INTO users (id, username, display_name, password_hash, role) "
+                    "VALUES ($1, $2, $3, $4, $5)",
+                    user_id, username, display, pw_hash, role,
+                )
+            for zone, can_r, can_w in FAMILY_ZONES:
+                await conn.execute(
+                    "INSERT INTO zone_permissions (user_id, zone, can_read, can_write) "
+                    "VALUES ($1, $2, $3, $4) "
+                    "ON CONFLICT (user_id, zone) DO UPDATE "
+                    "SET can_read = EXCLUDED.can_read, can_write = EXCLUDED.can_write",
+                    user_id, zone, can_r, can_w,
+                )
+            await conn.execute(
+                "INSERT INTO user_preferences (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
+                user_id,
+            )
 
 
 # FastAPI app
@@ -594,7 +657,35 @@ async def logout(current_user: User = Depends(get_current_user), token: str = De
 
 @app.post("/register", response_model=User, status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate, request: Request):
-    """Register a new user (admin only in production)"""
+    """Register a new user. Role 'admin' requires an existing admin session."""
+    # Prevent unauthenticated privilege escalation: admin role requires auth header
+    requested_role = user_data.role if user_data.role else "user"
+    if requested_role == "admin":
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Admin role requires authentication",
+            )
+        try:
+            token = auth_header.split(" ", 1)[1]
+            token_data = _decode_access_token(token)
+            caller = await get_user_by_id(token_data.user_id)
+            if caller is None or caller.role != "admin":
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only admins may create admin accounts",
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admins may create admin accounts",
+            )
+    else:
+        requested_role = "user"
+
     # Check if user exists
     existing_user = await get_user_by_username(user_data.username)
     if existing_user:
@@ -619,11 +710,11 @@ async def register_user(user_data: UserCreate, request: Request):
             user_data.display_name,
             user_data.email,
             password_hash,
-            user_data.role
+            requested_role
         )
 
         # Set default permissions
-        if user_data.role == "admin":
+        if requested_role == "admin":
             zones = [("PUBLIC", True, True), ("WORKSPACE", True, True), ("FAMILY_PRIVATE", True, True), ("QUARANTINE", True, True), ("SACRED", True, True)]
         else:
             zones = [("PUBLIC", True, True), ("WORKSPACE", True, False), ("FAMILY_PRIVATE", True, True)]
@@ -646,7 +737,7 @@ async def register_user(user_data: UserCreate, request: Request):
             user_id
         )
 
-    await log_audit_event(user_id, "register", "user", {"username": user_data.username}, request)
+    await log_audit_event(user_id, "register", "user", {"username": user_data.username, "role": requested_role}, request)
 
     user = await get_user_by_id(user_id)
     return user
