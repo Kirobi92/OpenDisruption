@@ -118,4 +118,11 @@ def find_voice(voice_id: Optional[str]) -> Optional[Voice]:
 
 
 def default_voice() -> Optional[Voice]:
-    return find_voice(os.getenv("PIPER_DEFAULT_VOICE", "de_DE-thorsten-high"))
+    return find_voice(os.getenv("PIPER_DEFAULT_VOICE", "de_DE-thorsten_emotional-medium"))
+
+# Thorsten emotional added 2026-05-12
+VOICE_METADATA["de_DE-thorsten_emotional-medium"] = {
+    "label": "Thorsten Emotional (natürlich, expressiv)",
+    "gender": "male",
+    "description": "Natürlichste deutsche Männerstimme mit Emotionen — Standard für alle Konversationen.",
+}
