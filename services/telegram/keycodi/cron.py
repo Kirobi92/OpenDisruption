@@ -204,6 +204,19 @@ def _is_notable(counts: dict, down_services: list, down_containers: list,
     if gpu_metrics.get("temp", 0) > 85:
         reasons.append(f"GPU-Temperatur hoch: {gpu_metrics['temp']}°C")
 
+    # Disk-Warnungen (kritisch: <5GB frei oder >92% belegt)
+    try:
+        import shutil as _shutil
+        _du = _shutil.disk_usage("/")
+        _free_gb = _du.free / 1024**3
+        _pct_used = _du.used / _du.total * 100
+        if _free_gb < 5.0:
+            reasons.append(f"🚨 Disk KRITIS: nur {_free_gb:.1f}GB frei!")
+        elif _pct_used > 90:
+            reasons.append(f"Disk voll: {_pct_used:.0f}% belegt ({_free_gb:.1f}GB frei)")
+    except Exception:
+        pass
+
     # Tasks-Delta: Hat sich etwas verändert seit letztem Report?
     last_counts = _last_state.get("counts", {})
     new_completed = counts.get("completed", 0) - last_counts.get("completed", 0)
@@ -301,6 +314,21 @@ async def _build_status_report() -> tuple[str, bool]:
     sofort_count = counts.get("sofort", 0)
     if sofort_count and sofort_count > 0:
         lines.append(f"  🚨 <b>SOFORT: {sofort_count}</b> — sofortige Erledigung nötig!")
+
+    # Git-Aktivität der letzten 6h
+    try:
+        import subprocess as _sp
+        git_out = _sp.check_output(
+            ["git", "-C", "/home/sven/OpenDisruption", "log",
+             "--oneline", "--since=6 hours ago", "--max-count=5"],
+            timeout=5, stderr=_sp.DEVNULL,
+        ).decode().strip()
+        if git_out:
+            lines += ["", "📝 <b>Letzte Git-Commits:</b>"]
+            for gl in git_out.splitlines()[:4]:
+                lines.append(f"  • <code>{escape(gl[:72])}</code>")
+    except Exception:
+        pass
 
     # Wichtige Events (nur Warnings und Errors)
     important_events = [

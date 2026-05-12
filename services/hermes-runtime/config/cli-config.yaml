@@ -15,11 +15,28 @@ agent:
 telegram:
   require_mention: false
   streaming: true
+  allowed_chats: "${TELEGRAM_ALLOWED_USER_IDS}"
 
 streaming:
   enabled: true
   transport: "edit"
   edit_interval: 1.2
 
-skills: []
+# Aktive Skills für OpenDisruption-Orchestrierung
+skills:
+  - opendisruption
+
+# Genehmigungen: bei kritischen Aktionen via Telegram nachfragen
+approvals:
+  mode: auto
+  cron_mode: deny
+
+display:
+  language: de
+  personality: kirobi
+
+terminal:
+  backend: local
+  cwd: /home/sven/OpenDisruption
+
 channels: {}
