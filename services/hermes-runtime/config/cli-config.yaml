@@ -8,6 +8,7 @@ custom_providers:
   - name: "github-models"
     base_url: "https://models.github.ai/inference/v1"
     api_key: "${GH_TOKEN}"
+    context_length: 131072
 
 fallback_model:
   provider: "custom"
@@ -18,11 +19,11 @@ fallback_model:
 fallback_providers: []
 
 compression:
-  threshold: 0.12
+  threshold: 0.5
   model: "qwen2.5:14b"
 
 history:
-  limit: 4
+  limit: 20
 
 mcp_servers:
   memory:
@@ -150,7 +151,7 @@ skills:
 
 approvals:
   mode: auto
-  cron_mode: deny
+  cron_mode: auto
 
 display:
   language: de
