@@ -676,7 +676,7 @@ services:
     networks:
       - kirobi-net
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005/admin', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -701,7 +701,7 @@ services:
     networks:
       - kirobi-net
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006/portal', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3

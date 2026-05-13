@@ -115,6 +115,7 @@ class AskRequest(BaseModel):
     question: str
     chapter_ids: Optional[list[str]] = None
     max_context_chapters: int = 3
+    use_llm: bool = True
 
 
 class AskResponse(BaseModel):
@@ -124,6 +125,19 @@ class AskResponse(BaseModel):
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
+
+@app.get("/")
+def root():
+    """Nutzi API — eNVenta ERP Assistent."""
+    index = load_master_index()
+    return {
+        "agent": "Nutzi",
+        "description": "eNVenta 4.5 ERP Hilfe-Agent für Sülzle Nutzeisen",
+        "version": "1.0.0",
+        "total_chapters": index.get("total_chapters", 0),
+        "endpoints": ["/health", "/search", "/ask", "/topics", "/chapter/{id}", "/modules", "/artikelstamm/guide"],
+    }
+
 
 @app.get("/health")
 def health():
@@ -242,7 +256,14 @@ Relevante eNVenta Hilfe-Inhalte:
 
 Bitte beantworte die Frage präzise und praxisorientiert für den Einsatz bei Sülzle Nutzeisen."""
 
-    # Call Ollama
+    # Call Ollama (skip if use_llm=False — return context only)
+    if not req.use_llm:
+        return AskResponse(
+            answer=context[:2000] if context_parts else "Kein Kontext gefunden.",
+            sources=sources_meta,
+            model="context-only",
+        )
+
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
             resp = await client.post(
