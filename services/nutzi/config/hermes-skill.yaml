@@ -1,0 +1,122 @@
+---
+# Nutzi Hermes Skill Definition
+# Hermes lädt diese Datei um Nutzi-Delegation zu konfigurieren
+# Trigger: User mentions eNVenta, ERP, Artikel, Nutzeisen, Nutzi etc.
+
+skill_id: nutzi-erp
+name: "Nutzi — eNVenta ERP Experte"
+version: "1.1.0"
+description: "Persönlicher ERP-Assistent für eNVenta 4.5 bei Sülzle Nutzeisen"
+base_url: "http://nutzi:8015"
+
+triggers:
+  keywords:
+    - "nutzi"
+    - "enventa"
+    - "eNVenta"
+    - "erp"
+    - "artikel"
+    - "artikelstamm"
+    - "nutzeisen"
+    - "stahl"
+    - "einkauf"
+    - "verkauf"
+    - "lager"
+    - "inventur"
+    - "fibu"
+    - "buchhaltung"
+    - "lieferant"
+    - "kunde"
+    - "rechnung"
+    - "bestellung"
+    - "chargen"
+    - "zertifikat"
+  phrases:
+    - "wie lege ich"
+    - "wie buche ich"
+    - "wie erstelle ich"
+    - "menüpfad"
+    - "schritt für schritt"
+    - "in eNVenta"
+    - "im erp"
+
+tools:
+  - name: nutzi_intro
+    description: "Nutzi stellt sich vor — alle Bereiche und Fähigkeiten"
+    endpoint: "GET /intro"
+    when: "User fragt was Nutzi kann, wer Nutzi ist, oder will Überblick"
+    response_format: "intro_text + modules list"
+
+  - name: nutzi_ask
+    description: "Nutzi beantwortet eine eNVenta ERP Frage auf Deutsch"
+    endpoint: "POST /ask"
+    payload: |
+      {
+        "question": "<user_question>",
+        "max_context_chapters": 3,
+        "use_llm": true
+      }
+    when: "User stellt konkrete Frage zu eNVenta Funktion, Prozess oder Menüpfad"
+    response_format: "answer (Markdown), sources (Kapitel-Referenzen)"
+
+  - name: nutzi_search
+    description: "Suche nach eNVenta Hilfe-Kapiteln zu einem Thema"
+    endpoint: "GET /search?q=<query>&limit=5"
+    when: "User sucht nach einem spezifischen eNVenta Thema, will Kapitel-Liste sehen"
+    response_format: "Liste von Kapiteln mit Titel und Relevanz"
+
+  - name: nutzi_modules
+    description: "Alle eNVenta Module mit Beschreibung auflisten"
+    endpoint: "GET /modules"
+    when: "User fragt welche Module eNVenta hat, Überblick über Funktionsbereiche"
+    response_format: "Liste der 10 Module mit Icons und Beschreibungen"
+
+  - name: nutzi_artikelstamm_guide
+    description: "Vollständiger Leitfaden zum Anlegen des Artikelstamms für Nutzeisen"
+    endpoint: "GET /artikelstamm/guide"
+    when: "User fragt nach Artikelstamm-Anlage, Stahlprofile, Werkstoff, Normen"
+    response_format: "5-Phasen Leitfaden mit konkreten Schritten"
+
+  - name: nutzi_chapter
+    description: "Vollständigen Inhalt eines eNVenta Hilfe-Kapitels abrufen"
+    endpoint: "GET /chapter/<chapter_id>"
+    when: "User will konkretes Kapitel lesen, Nutzi hat eine chapter_id aus Suche"
+    response_format: "Volltext des Kapitels"
+
+  - name: nutzi_stats
+    description: "Statistiken über die Nutzi Wissensdatenbank"
+    endpoint: "GET /stats"
+    when: "User fragt wie viele Kapitel Nutzi hat, Status der Wissensdatenbank"
+
+telegram_responses:
+  intro: |
+    🤖 **Nutzi** — dein eNVenta ERP-Experte bei Sülzle Nutzeisen
+
+    Ich kenne das **eNVenta 4.5** vollständig mit **4.559 Hilfe-Kapiteln**.
+
+    **Was ich kann:**
+    🔍 Fragen zu eNVenta präzise beantworten
+    📋 Schritt-für-Schritt Anleitungen geben
+    🗂️ Artikelstamm für Nutzeisen aufbauen
+    ⚙️ Module: Stammdaten, Einkauf, Verkauf, Lager, FiBu...
+
+    Einfach fragen! 👇
+
+  no_result: |
+    ❓ Ich habe in meiner Wissensdatenbank keinen passenden Artikel gefunden.
+    Formuliere die Frage anders oder nenne das genaue Menü in eNVenta.
+
+  error: |
+    ⚠️ Nutzi ist momentan nicht erreichbar. Bitte versuche es später erneut.
+
+persona:
+  name: "Nutzi"
+  icon: "🏭"
+  language: "de"
+  tone: "präzise, technisch, praxisorientiert"
+  style: |
+    - Antwortet immer auf Deutsch
+    - Gibt konkrete Menüpfade an: z.B. "Stammdaten → Artikel → Neu"
+    - Strukturiert Antworten mit nummerierten Schritten
+    - Kennt Nutzeisen-spezifische Besonderheiten (Stahl, Profile, Chargen)
+    - Kurz und präzise — kein Bla-Bla

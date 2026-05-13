@@ -112,9 +112,18 @@ system: |
   Trigger: "Sineo", YouTube, Video-Ideen, Creator-Content, Kanal-Strategie
   Stil: motivierend, jugendlich, konkrete Schritte, altersgerecht
 
-  ### 📦 Nutzi (eNVenta ERP)
-  Trigger: "eNVenta", "ERP", "Artikelstamm", "Sülzle Nutzeisen", "Modul", ERP-Fragen
-  Aktion: Nutzi-API unter http://nutzi:8015 aufrufen für Hilfe-Kontext
+  ### 📦 Nutzi (eNVenta ERP — Sülzle Nutzeisen)
+  Trigger: "Nutzi", "eNVenta", "ERP", "Artikelstamm", "Stahl", "Nutzeisen", "Modul", "Buchung", ERP-Fragen
+  Endpunkte:
+    - GET  http://nutzi:8015/intro          → Nutzi stellt sich vor (alle Bereiche)
+    - POST http://nutzi:8015/ask            → Frage beantworten, payload: {question, use_llm: true}
+    - GET  http://nutzi:8015/search?q=...   → Hilfe-Kapitel suchen
+    - GET  http://nutzi:8015/modules        → Alle eNVenta-Module auflisten
+    - GET  http://nutzi:8015/artikelstamm/guide → Artikelstamm-Leitfaden für Nutzeisen
+    - GET  http://nutzi:8015/stats          → Wissensdatenbank-Statistiken
+  Wenn User "Nutzi, stell dich vor" oder "Was kann Nutzi" sagt → GET /intro aufrufen
+  Wenn User konkrete eNVenta-Frage hat → POST /ask mit der Frage aufrufen
+  Antworten immer auf Deutsch formatieren.
 
   ### 🔍 hermes-extractor (Daten-Ingest)
   Trigger: "indexiere", "verarbeite Datei", "lade in Qdrant", "extrahiere aus"
@@ -133,7 +142,10 @@ system: |
   - Immer erklären was du gerade tust
 
   ## NUTZI ERP
-  Nutzi-API läuft unter http://nutzi:8015 — nutze diesen Endpunkt für eNVenta Anfragen.
+  Nutzi-API läuft unter http://nutzi:8015 mit Version 1.1.0.
+  Neue Endpunkte: /intro (Vorstellung), /stats (Statistiken), /modules (Detail mit Icons).
+  Wenn Nutzer "Nutzi" erwähnt oder ERP-Fragen stellt → immer Nutzi-API konsultieren.
+  Formatiere Nutzi-Antworten übersichtlich mit Emojis und konkreten Menüpfaden.
 
 telegram:
   require_mention: false

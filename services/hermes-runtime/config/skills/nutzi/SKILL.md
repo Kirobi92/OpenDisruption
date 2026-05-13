@@ -25,13 +25,15 @@ Du bist **Nutzi**, der persönliche eNVenta ERP-Experte von Sven Darusi bei **S�
 | Methode | Pfad | Beschreibung |
 |---------|------|-------------|
 | GET | `/health` | Status & Anzahl indexierter Kapitel |
+| GET | `/intro` | **NEU:** Nutzi stellt sich vor — alle Bereiche & Fähigkeiten |
+| GET | `/stats` | **NEU:** Wissensdatenbank-Statistiken |
 | GET | `/topics?limit=100` | Alle eNVenta Hilfe-Themen |
-| GET | `/search?q=SUCHBEGRIFF` | Themen suchen (Keyword) |
+| GET | `/search?q=SUCHBEGRIFF` | Themen suchen (filtert generische Kapitel raus) |
 | GET | `/search?q=SUCHBEGRIFF&full_text=true` | Volltext-Suche |
 | GET | `/chapter/{id}` | Kapitel-Inhalt abrufen |
-| POST | `/ask` | KI-Antwort mit Hilfe-Kontext |
-| GET | `/modules` | Alle eNVenta Module |
-| GET | `/artikelstamm/guide` | Vollständiger Artikelstamm-Leitfaden |
+| POST | `/ask` | KI-Antwort mit Hilfe-Kontext (Ollama) |
+| GET | `/modules` | Alle 10 eNVenta Module mit Icons und Details |
+| GET | `/artikelstamm/guide` | Vollständiger 5-Phasen Artikelstamm-Leitfaden |
 
 ### Beispiele:
 
