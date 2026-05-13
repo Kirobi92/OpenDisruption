@@ -219,6 +219,15 @@
 		}
 	}
 
+	# Nutzi eNVenta Agent: /nutzi/* -> http://nutzi:8015/*
+	handle /nutzi/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /nutzi
+		reverse_proxy nutzi:8015 {
+			header_up Host {host}
+		}
+	}
+
 	# Analytics Service: /analytics/* -> http://analytics:8010/*
 	handle /analytics/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
@@ -417,6 +426,11 @@
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
 		uri strip_prefix /model-routing
 		reverse_proxy model-routing:8009
+	}
+	handle /nutzi/* {
+		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
+		uri strip_prefix /nutzi
+		reverse_proxy nutzi:8015
 	}
 	handle /analytics/* {
 		respond @not_edge_private "Forbidden: private LAN or Tailscale only" 403
