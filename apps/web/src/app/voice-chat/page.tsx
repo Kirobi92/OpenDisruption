@@ -11,6 +11,7 @@ import {
   ArrowPathIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
+import { useVoiceConversation } from '@/lib/use-voice-conversation';
 
 interface AgentOption {
   id: string;
@@ -36,30 +37,6 @@ interface ToneOption {
   description: string;
 }
 
-interface TurnEntry {
-  id: string;
-  user_text: string;
-  assistant_text: string;
-  audio_url: string;
-  agent: string;
-  voice: string;
-  tone: string;
-  model?: string;
-  created_at: string;
-}
-
-interface TurnResponse {
-  conversation_id: string;
-  transcript: string;
-  reply_text: string;
-  reply_text_tts: string;
-  audio_url: string;
-  agent: string;
-  tone: string;
-  voice: string;
-  model?: string;
-}
-
 const VOICE_BASE = '/voice';
 const API_BASE = '/api';
 
@@ -75,18 +52,30 @@ export default function VoiceChatPage() {
   const [tone, setTone] = useState('neutral');
   const [autoPlay, setAutoPlay] = useState(true);
   const [pushToTalk, setPushToTalk] = useState(false);
+  const [streamMode, setStreamMode] = useState<'oneshot' | 'chunked'>('chunked');
 
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [history, setHistory] = useState<TurnEntry[]>([]);
-  const [recording, setRecording] = useState(false);
-  const [thinking, setThinking] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [statusMsg, setStatusMsg] = useState<string>('Bereit. Druecke das Mikrofon, um zu starten.');
-
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
+  const voice_ws = useVoiceConversation();
+  const { state: vsState, start: vsStart, stop: vsStop, reset: vsReset, setAutoplay: vsSetAutoplay } = voice_ws;
+
+  const recording = vsState.status === 'recording';
+  const thinking = vsState.status === 'streaming';
+  const speaking = vsState.status === 'speaking';
+  const error = vsState.error;
+  const conversationId = vsState.conversationId;
+  const history = vsState.history;
+
+  const statusMsg = (() => {
+    if (vsState.status === 'recording') return 'Hoere zu...';
+    if (vsState.status === 'streaming') return vsState.transcript ? 'Denkt nach…' : 'Verarbeite Sprache…';
+    if (vsState.status === 'speaking') {
+      const ms = vsState.firstAudioMs ? `${(vsState.firstAudioMs / 1000).toFixed(1)}s bis erstes Audio` : '';
+      return `Spricht… ${ms}`;
+    }
+    if (vsState.status === 'error') return 'Fehler — bitte erneut versuchen.';
+    if (vsState.history.length === 0) return 'Bereit. Druecke das Mikrofon, um zu starten.';
+    return 'Bereit fuer naechste Frage.';
+  })();
 
   useEffect(() => {
     const t = typeof window !== 'undefined' ? localStorage.getItem('kirobi_token') : null;
@@ -108,100 +97,46 @@ export default function VoiceChatPage() {
         setTones(ts.data.tones || []);
       } catch (err) {
         console.error('Settings load failed', err);
-        setError('Konnte Voice-Settings nicht laden.');
+        // settings load is non-fatal — surface via console only
       }
     })();
   }, [token]);
 
+  // Keep the hook's autoplay flag in sync with the user toggle.
+  useEffect(() => { vsSetAutoplay(autoPlay); }, [autoPlay, vsSetAutoplay]);
+
   async function startRecording() {
     try {
-      setError('');
-      setStatusMsg('Hoere zu...');
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true } });
-      streamRef.current = stream;
-      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      audioChunksRef.current = [];
-      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      mr.onstop = handleRecorderStop;
-      mr.start();
-      mediaRecorderRef.current = mr;
-      setRecording(true);
+      await vsStart({
+        agent, voice, tone,
+        language: 'de',
+        conversationId,
+        jwt: token,
+        mode: streamMode,
+      });
     } catch (err: unknown) {
-      console.error('Mic error', err);
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`Mikrofon-Zugriff fehlgeschlagen: ${msg}`);
-      setStatusMsg('Bereit.');
+      console.error('Voice start failed', err);
     }
   }
 
-  function stopRecording() {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    setRecording(false);
-  }
-
-  async function handleRecorderStop() {
-    if (audioChunksRef.current.length === 0) { setStatusMsg('Bereit.'); return; }
-    const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-    audioChunksRef.current = [];
-    await sendTurn(blob);
-  }
-
-  async function sendTurn(blob: Blob) {
-    setThinking(true);
-    setStatusMsg('Denkt nach...');
-    try {
-      const fd = new FormData();
-      fd.append('audio_file', blob, 'turn.webm');
-      const params = new URLSearchParams();
-      if (conversationId) params.set('conversation_id', conversationId);
-      params.set('agent', agent);
-      params.set('tone', tone);
-      params.set('voice', voice);
-      const url = `${VOICE_BASE}/conversation/turn?${params.toString()}`;
-      const resp = await axios.post<TurnResponse>(url, fd, { timeout: 180000 });
-      const data = resp.data;
-      setConversationId(data.conversation_id);
-      const entry: TurnEntry = {
-        id: `${Date.now()}`,
-        user_text: data.transcript,
-        assistant_text: data.reply_text,
-        audio_url: `${VOICE_BASE}${data.audio_url}`,
-        agent: data.agent,
-        voice: data.voice,
-        tone: data.tone,
-        model: data.model,
-        created_at: new Date().toISOString(),
-      };
-      setHistory((h) => [...h, entry]);
-      setStatusMsg('Antwort fertig.');
-      if (autoPlay && audioElRef.current) {
-        audioElRef.current.src = entry.audio_url;
-        try { await audioElRef.current.play(); } catch { /* autoplay blocked */ }
-      }
-    } catch (err: unknown) {
-      console.error('Turn failed', err);
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`Fehler: ${msg}`);
-      setStatusMsg('Fehler — bitte erneut versuchen.');
-    } finally {
-      setThinking(false);
-    }
+  async function stopRecording() {
+    await vsStop();
   }
 
   function resetConversation() {
-    setConversationId(null);
-    setHistory([]);
-    setStatusMsg('Neue Konversation gestartet.');
+    vsReset();
   }
 
-  function playEntry(entry: TurnEntry) {
-    if (audioElRef.current) {
-      audioElRef.current.src = entry.audio_url;
-      audioElRef.current.play().catch(() => {});
-    }
+  function playEntry(entry: { audio_urls: string[] }) {
+    if (!audioElRef.current || entry.audio_urls.length === 0) return;
+    let i = 0;
+    const playNext = () => {
+      if (!audioElRef.current || i >= entry.audio_urls.length) return;
+      audioElRef.current.src = entry.audio_urls[i++];
+      audioElRef.current.onended = playNext;
+      audioElRef.current.play().catch(() => { /* ignore */ });
+    };
+    playNext();
   }
 
   if (!token) return null;
@@ -225,7 +160,7 @@ export default function VoiceChatPage() {
             <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Agent</label>
             <select
               value={agent}
-              onChange={(e) => { setAgent(e.target.value); setConversationId(null); }}
+              onChange={(e) => { setAgent(e.target.value); vsReset(); }}
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-kirobi-500"
             >
               {agents.map((a) => (<option key={a.id} value={a.id}>{a.label}</option>))}
@@ -267,6 +202,15 @@ export default function VoiceChatPage() {
             <input type="checkbox" checked={pushToTalk} onChange={(e) => setPushToTalk(e.target.checked)} className="accent-kirobi-500" />
             <span>Push-to-Talk (gedrueckt halten)</span>
           </label>
+          <label className="flex items-center gap-2 px-3 py-2 bg-gray-900/60 border border-gray-800 rounded-lg cursor-pointer hover:border-kirobi-500 transition">
+            <input
+              type="checkbox"
+              checked={streamMode === 'chunked'}
+              onChange={(e) => setStreamMode(e.target.checked ? 'chunked' : 'oneshot')}
+              className="accent-kirobi-500"
+            />
+            <span>Live-Upload (Audio waehrend Aufnahme streamen)</span>
+          </label>
           <button
             onClick={resetConversation}
             className="flex items-center gap-2 px-3 py-2 bg-rose-900/40 border border-rose-800 rounded-lg hover:bg-rose-900/60 transition"
@@ -290,7 +234,7 @@ export default function VoiceChatPage() {
                 <span>·</span><span className="text-kirobi-400">{e.agent}</span>
                 <span>·</span><span>{e.voice}</span>
                 <span>·</span><span>{e.tone}</span>
-                {e.model && (<><span>·</span><span className="text-gray-600">{e.model}</span></>)}
+                <span>·</span><span className="text-gray-600">{e.audio_urls.length} chunks</span>
               </div>
               <p className="text-sm text-gray-300 mb-2"><span className="text-gray-500 mr-2">Du:</span>{e.user_text}</p>
               <p className="text-sm text-white whitespace-pre-wrap"><span className="text-kirobi-400 mr-2">{e.agent}:</span>{e.assistant_text}</p>
@@ -303,6 +247,23 @@ export default function VoiceChatPage() {
               </button>
             </div>
           ))}
+
+          {(vsState.transcript || vsState.partialReply) && (thinking || speaking) && (
+            <div className="bg-kirobi-950/40 border border-kirobi-800/60 rounded-xl p-4">
+              <div className="text-xs text-kirobi-400 mb-2 flex items-center gap-2">
+                <span className="inline-block w-2 h-2 bg-kirobi-400 rounded-full animate-pulse" />
+                <span>{speaking ? 'Spricht…' : 'Streamt…'}</span>
+                {vsState.firstAudioMs && <span className="text-gray-500">· {(vsState.firstAudioMs / 1000).toFixed(1)}s bis 1. Audio</span>}
+                {vsState.audioChunks > 0 && <span className="text-gray-500">· {vsState.audioChunks} chunks</span>}
+              </div>
+              {vsState.transcript && (
+                <p className="text-sm text-gray-300 mb-2"><span className="text-gray-500 mr-2">Du:</span>{vsState.transcript}</p>
+              )}
+              {vsState.partialReply && (
+                <p className="text-sm text-white whitespace-pre-wrap"><span className="text-kirobi-400 mr-2">{agent}:</span>{vsState.partialReply}<span className="text-kirobi-400 animate-pulse">▌</span></p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="text-center text-sm text-gray-400 mb-4">

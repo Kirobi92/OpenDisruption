@@ -1,55 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-
-// ─── Typen ────────────────────────────────────────────────────────────────────
-
-type RecordingState = 'idle' | 'recording' | 'processing';
-
-interface TranscribeResponse { text: string; }
-interface ChatMessage { role: 'user' | 'assistant'; content: string; }
-interface ApiChatResponse { message?: string; response?: string; content?: string; }
-interface SynthesizeResponse { audio_base64?: string; audio_url?: string; }
-
-// ─── Endpunkte ────────────────────────────────────────────────────────────────
-
-const VOICE_BASE_URL = process.env.NEXT_PUBLIC_VOICE_SERVICE_URL ?? '/voice';
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
-
-// ─── API-Helfer ───────────────────────────────────────────────────────────────
-
-async function transcribeAudio(blob: Blob): Promise<string> {
-  const form = new FormData();
-  form.append('audio_file', blob, 'recording.webm');
-  const res = await fetch(`${VOICE_BASE_URL}/stt/transcribe`, { method: 'POST', body: form });
-  if (!res.ok) throw new Error(`Transkription fehlgeschlagen: ${res.status}`);
-  const data = (await res.json()) as TranscribeResponse;
-  return data.text.trim();
-}
-
-async function askAssistant(messages: ChatMessage[]): Promise<string> {
-  const res = await fetch(`${API_BASE_URL}/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages }),
-  });
-  if (!res.ok) throw new Error(`API-Fehler: ${res.status}`);
-  const data = (await res.json()) as ApiChatResponse;
-  return (data.message ?? data.response ?? data.content ?? '').trim();
-}
-
-async function synthesizeSpeech(text: string): Promise<string | null> {
-  const res = await fetch(`${VOICE_BASE_URL}/tts/synthesize`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
-  });
-  if (!res.ok) return null;
-  const data = (await res.json()) as SynthesizeResponse;
-  if (data.audio_base64) return `data:audio/wav;base64,${data.audio_base64}`;
-  return data.audio_url ?? null;
-}
+import { useVoiceConversation } from '@/lib/use-voice-conversation';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -82,8 +35,6 @@ function Spinner() {
   );
 }
 
-// ─── Wave-Bars (während Aufnahme, CSS-Animation) ─────────────────────────────
-
 function WaveBars({ active }: { active: boolean }) {
   if (!active) return null;
   return (
@@ -99,119 +50,64 @@ function WaveBars({ active }: { active: boolean }) {
   );
 }
 
-// ─── Hauptkomponente ──────────────────────────────────────────────────────────
-
 const SPRING = { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const };
 
 export default function VoicePage() {
   const reduced = useReducedMotion();
-  const [recordingState, setRecordingState] = useState<RecordingState>('idle');
-  const [transcript, setTranscript] = useState<string>('');
-  const [aiResponse, setAiResponse] = useState<string>('');
-  const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<ChatMessage[]>([]);
+  const [token, setToken] = useState<string>('');
+  const [tokenChecked, setTokenChecked] = useState(false);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const startRecording = useCallback(async () => {
-    setError(null);
-    setTranscript('');
-    setAiResponse('');
-    setAudioSrc(null);
-
-    let stream: MediaStream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch {
-      setError('Mikrofon-Zugriff verweigert. Bitte Berechtigung erteilen.');
-      return;
-    }
-
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-      ? 'audio/webm;codecs=opus'
-      : 'audio/webm';
-
-    const recorder = new MediaRecorder(stream, { mimeType });
-    chunksRef.current = [];
-
-    recorder.ondataavailable = (e: BlobEvent) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
-
-    recorder.onstop = async () => {
-      stream.getTracks().forEach((t) => t.stop());
-      const blob = new Blob(chunksRef.current, { type: mimeType });
-      await processRecording(blob);
-    };
-
-    recorder.start(250);
-    mediaRecorderRef.current = recorder;
-    setRecordingState('recording');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const stopRecording = useCallback(() => {
-    mediaRecorderRef.current?.stop();
-    setRecordingState('processing');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const t = localStorage.getItem('access_token') ?? localStorage.getItem('kirobi_token') ?? '';
+    setToken(t);
+    setTokenChecked(true);
   }, []);
 
-  const processRecording = useCallback(
-    async (blob: Blob) => {
-      try {
-        const text = await transcribeAudio(blob);
-        setTranscript(text);
-        if (!text) {
-          setError('Keine Sprache erkannt. Bitte erneut versuchen.');
-          setRecordingState('idle');
-          return;
-        }
-        const updatedHistory: ChatMessage[] = [...history, { role: 'user', content: text }];
-        const reply = await askAssistant(updatedHistory);
-        setAiResponse(reply);
-        setHistory([...updatedHistory, { role: 'assistant', content: reply }]);
-        const src = await synthesizeSpeech(reply);
-        setAudioSrc(src);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unbekannter Fehler';
-        setError(msg);
-      } finally {
-        setRecordingState('idle');
-      }
-    },
-    [history],
-  );
+  const { state, start, stop, reset } = useVoiceConversation();
 
-  const playAudio = useCallback(() => {
-    if (!audioSrc) return;
-    if (audioRef.current) {
-      audioRef.current.src = audioSrc;
-      audioRef.current.play().catch(() => setError('Audio-Wiedergabe fehlgeschlagen.'));
+  const isRecording = state.status === 'recording';
+  const isProcessing = state.status === 'streaming';
+  const isSpeaking = state.status === 'speaking';
+  const lastTurn = state.history[state.history.length - 1] ?? null;
+  const transcript = state.transcript || lastTurn?.user_text || '';
+  const aiResponse = state.partialReply || lastTurn?.assistant_text || '';
+  const error = state.error || (tokenChecked && !token ? 'Bitte zuerst in der Web-App einloggen.' : '');
+
+  const handleMicButton = useCallback(async () => {
+    if (!token) return;
+    if (state.status === 'idle' || state.status === 'speaking' || state.status === 'error') {
+      await start({
+        agent: 'kirobi',
+        voice: 'de_DE-thorsten-high',
+        tone: 'neutral',
+        language: 'de',
+        conversationId: state.conversationId,
+        jwt: token,
+        mode: 'chunked',
+      });
+    } else if (state.status === 'recording') {
+      await stop();
     }
-  }, [audioSrc]);
+  }, [token, state.status, state.conversationId, start, stop]);
 
-  const resetConversation = useCallback(() => {
-    setHistory([]);
-    setTranscript('');
-    setAiResponse('');
-    setAudioSrc(null);
-    setError(null);
-  }, []);
-
-  const handleMicButton = useCallback(() => {
-    if (recordingState === 'idle') startRecording();
-    else if (recordingState === 'recording') stopRecording();
-  }, [recordingState, startRecording, stopRecording]);
-
-  const isRecording = recordingState === 'recording';
-  const isProcessing = recordingState === 'processing';
+  const audioElPlayLast = useCallback(() => {
+    if (!lastTurn || lastTurn.audio_urls.length === 0) return;
+    const el = document.createElement('audio');
+    let i = 0;
+    const next = () => {
+      if (i >= lastTurn.audio_urls.length) return;
+      el.src = lastTurn.audio_urls[i++];
+      el.onended = next;
+      el.play().catch(() => { /* ignore */ });
+    };
+    next();
+  }, [lastTurn]);
 
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-between overflow-hidden px-4 py-10 gap-8">
       <div className="ambient-field" aria-hidden="true" />
 
-      {/* Header */}
       <header className="relative z-10 text-center">
         <motion.h1
           initial={reduced ? false : { opacity: 0, y: -10 }}
@@ -222,11 +118,10 @@ export default function VoicePage() {
           Kirobi <span className="text-gradient-aurora">Voice</span>
         </motion.h1>
         <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
-          Sprich mit deinem lokalen Assistenten.
+          Sprich mit deinem lokalen Assistenten — streamt satzweise.
         </p>
       </header>
 
-      {/* Mittlerer Bereich */}
       <section className="relative z-10 flex w-full max-w-md flex-1 flex-col justify-center gap-4">
         <AnimatePresence mode="popLayout">
           {transcript && (
@@ -254,12 +149,20 @@ export default function VoicePage() {
               style={{ borderColor: 'rgba(232, 121, 249, 0.25)' }}
             >
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.28em]" style={{ color: 'var(--accent-magenta)' }}>
-                Kirobi
+                Kirobi {(isProcessing || isSpeaking) && <span className="ml-2 text-aurora-cyan">●</span>}
               </p>
-              <p className="leading-relaxed text-[color:var(--text-primary)]">{aiResponse}</p>
-              {audioSrc && (
+              <p className="leading-relaxed text-[color:var(--text-primary)]">
+                {aiResponse}
+                {(isProcessing || isSpeaking) && <span className="text-aurora-cyan animate-pulse">▌</span>}
+              </p>
+              {state.firstAudioMs && (
+                <p className="mt-1 text-[10px] text-[color:var(--text-muted)]">
+                  {(state.firstAudioMs / 1000).toFixed(1)}s bis erstes Audio · {state.audioChunks} chunks
+                </p>
+              )}
+              {lastTurn && lastTurn.audio_urls.length > 0 && state.status === 'idle' && (
                 <button
-                  onClick={playAudio}
+                  onClick={audioElPlayLast}
                   className="mt-3 inline-flex items-center gap-2 text-sm text-aurora-cyan transition-colors hover:text-white"
                   aria-label="Antwort vorlesen"
                 >
@@ -270,7 +173,7 @@ export default function VoicePage() {
             </motion.div>
           )}
 
-          {isProcessing && (
+          {isProcessing && !aiResponse && (
             <motion.div
               key="processing"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -306,16 +209,13 @@ export default function VoicePage() {
         </AnimatePresence>
       </section>
 
-      {/* Mikrofon-Button */}
       <section className="relative z-10 flex flex-col items-center gap-6">
         <div className="relative flex items-center justify-center">
-          {/* Aurora-Halo, immer sichtbar (sanft) */}
           <span
             aria-hidden="true"
             className="pointer-events-none absolute -inset-6 rounded-full blur-2xl opacity-60"
             style={{ background: 'radial-gradient(circle, rgba(94,234,212,0.4), transparent 70%)' }}
           />
-          {/* Pulsierender Aufnahme-Ring */}
           {isRecording && (
             <>
               <span aria-hidden="true" className="absolute -inset-2 rounded-full bg-aurora-magenta/40 mic-ring-active" />
@@ -325,7 +225,7 @@ export default function VoicePage() {
 
           <motion.button
             onClick={handleMicButton}
-            disabled={isProcessing}
+            disabled={isProcessing || !token}
             aria-label={isRecording ? 'Aufnahme stoppen' : 'Aufnahme starten'}
             whileTap={reduced ? undefined : { scale: 0.94 }}
             transition={{ duration: 0.15 }}
@@ -336,7 +236,7 @@ export default function VoicePage() {
               'focus:outline-none focus-visible:ring-4 focus-visible:ring-aurora-cyan/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-void)]',
               isRecording
                 ? 'shadow-glow-magenta'
-                : isProcessing
+                : isProcessing || !token
                   ? 'cursor-not-allowed opacity-60'
                   : 'shadow-glow-cyan hover:scale-[1.04]',
             ].join(' ')}
@@ -352,7 +252,6 @@ export default function VoicePage() {
           </motion.button>
         </div>
 
-        {/* Status-Label + Wave-Bars */}
         <div className="flex h-6 items-center gap-3 text-xs uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
           {isRecording && (
             <>
@@ -360,23 +259,21 @@ export default function VoicePage() {
               <span className="text-aurora-magenta">● Aufnahme läuft</span>
             </>
           )}
-          {isProcessing && <span>Verarbeite Sprache…</span>}
-          {recordingState === 'idle' && !transcript && !aiResponse && <span>Bereit</span>}
-          {recordingState === 'idle' && (transcript || aiResponse) && <span>Bereit für nächste Frage</span>}
+          {isProcessing && <span>Streamt…</span>}
+          {isSpeaking && <span className="text-aurora-cyan">● Spricht</span>}
+          {state.status === 'idle' && !lastTurn && <span>Bereit</span>}
+          {state.status === 'idle' && lastTurn && <span>Bereit für nächste Frage</span>}
         </div>
 
-        {(transcript || aiResponse || history.length > 0) && (
+        {(transcript || aiResponse || state.history.length > 0) && (
           <button
-            onClick={resetConversation}
+            onClick={reset}
             className="text-xs text-[color:var(--text-muted)] underline-offset-2 transition-colors hover:text-aurora-cyan hover:underline"
           >
             Gespräch zurücksetzen
           </button>
         )}
       </section>
-
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio ref={audioRef} className="hidden" />
     </main>
   );
 }

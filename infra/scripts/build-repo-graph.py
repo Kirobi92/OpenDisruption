@@ -52,7 +52,12 @@ MAX_FILE_BYTES = 256_000
 
 WIKILINK_RE = re.compile(r"\[\[([^\]\|#]+)(?:#[^\]\|]+)?(?:\|([^\]]+))?\]\]")
 PY_IMPORT_RE = re.compile(r"^\s*(?:from\s+([\w\.]+)\s+import|import\s+([\w\.]+))", re.MULTILINE)
-TS_IMPORT_RE = re.compile(r"""(?:^|\n)\s*import\s+(?:[^'"]+from\s+)?['"]([^'"]+)['"]""")
+TS_IMPORT_RE = re.compile(
+    r"""(?:^|\n)\s*(?:import|export)\s+(?:[^'"\n;]*?\sfrom\s+)?['"]([^'"]+)['"]"""
+)
+CADDY_REVERSE_RE = re.compile(r"reverse_proxy\s+(?:[^\s{]+\s+)?([a-zA-Z0-9_-]+):\d+")
+TELEGRAM_HINT_RE = re.compile(r"TELEGRAM_BOT_TOKEN|TELEGRAM_CHAT_ID|telegram_bot|aiogram|python-telegram-bot", re.I)
+SERVICE_HTTP_RE = re.compile(r"https?://([a-zA-Z][a-zA-Z0-9_-]+):\d+")
 COMPOSE_DEP_RE = re.compile(r"^\s+depends_on:\s*\n((?:\s+-\s+\w+\s*\n)+)", re.MULTILINE)
 COMPOSE_SERVICE_RE = re.compile(r"^\s{2}(\w[\w-]*):\s*$", re.MULTILINE)
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
@@ -177,6 +182,35 @@ def extract_compose_deps(text: str) -> list[tuple[str, str]]:
     return edges
 
 
+def ts_import_to_node(spec: str, source_id: str, all_node_ids: set[str]) -> str | None:
+    """Resolve a TS/JS/Svelte import specifier to an existing node id.
+
+    Only repo-internal relative imports are kept. Bare specifiers (npm packages,
+    `$lib`, `$app`) are dropped to avoid noise — they are not source-of-truth nodes.
+    """
+    if not spec or spec.startswith(("$", "@")) or not spec.startswith((".", "/")):
+        return None
+    src_dir = Path(source_id).parent
+    target = (src_dir / spec).as_posix() if spec.startswith(".") else spec.lstrip("/")
+    target = re.sub(r"/+", "/", target)
+    while "/./" in target:
+        target = target.replace("/./", "/")
+    while "/../" in target:
+        target = re.sub(r"[^/]+/\.\./", "", target, count=1)
+    candidates = [
+        target,
+        f"{target}.ts", f"{target}.tsx", f"{target}.js", f"{target}.jsx", f"{target}.svelte",
+        f"{target}/index.ts", f"{target}/index.js", f"{target}/+page.svelte",
+    ]
+    for cand in candidates:
+        nid = cand.removesuffix(".md").removesuffix(".py")
+        if nid in all_node_ids:
+            return nid
+        if cand in all_node_ids:
+            return cand
+    return None
+
+
 def python_module_to_path(module: str, all_paths: set[str]) -> str | None:
     parts = module.split(".")
     candidates = [
@@ -189,13 +223,16 @@ def python_module_to_path(module: str, all_paths: set[str]) -> str | None:
     return None
 
 
+INCLUDE_FILENAMES = {"Caddyfile", "Dockerfile", "Makefile"}
+
+
 def should_skip(path: Path, rel: str) -> bool:
     parts = rel.split("/")
     if any(p in EXCLUDE_DIRS for p in parts):
         return True
     if parts[0] in EXCLUDE_TOPLEVEL:
         return True
-    if path.suffix not in INCLUDE_EXTS:
+    if path.suffix not in INCLUDE_EXTS and path.name not in INCLUDE_FILENAMES:
         return True
     try:
         if path.stat().st_size > MAX_FILE_BYTES:
@@ -247,6 +284,8 @@ def build_graph(repo_root: Path) -> dict:
 
     py_paths = {f"{nid}.py" for nid, p, _, _ in all_files if p.suffix == ".py"}
     py_paths |= {f"{nid}/__init__.py" for nid, p, _, _ in all_files if p.suffix == ".py"}
+    all_node_ids = set(nodes.keys())
+    service_dirs = {nid.split("/")[1] for nid in nodes if nid.startswith("services/") and "/" in nid[len("services/"):]}
 
     for node_id, path, text, _fm in all_files:
         src_zone = nodes[node_id]["zone"]
@@ -272,6 +311,17 @@ def build_graph(repo_root: Path) -> dict:
                     edge_type = "zone-flow" if nodes.get(target, {}).get("zone") not in {src_zone, "PUBLIC"} else "import"
                     edges.append({"source": node_id, "target": target, "type": edge_type})
 
+        # TS / JS / Svelte imports — only repo-internal relative paths
+        if path.suffix in {".ts", ".tsx", ".js", ".jsx", ".svelte"}:
+            seen_targets: set[str] = set()
+            for spec in TS_IMPORT_RE.findall(text):
+                target = ts_import_to_node(spec, node_id, all_node_ids)
+                if target and target != node_id and target not in seen_targets:
+                    seen_targets.add(target)
+                    tgt_zone = nodes.get(target, {}).get("zone")
+                    edge_type = "zone-flow" if tgt_zone and tgt_zone not in {src_zone, "PUBLIC"} else "import"
+                    edges.append({"source": node_id, "target": target, "type": edge_type})
+
         # docker-compose service deps
         if path.name in {"docker-compose.yml", "docker-compose.override.yml"}:
             for svc, dep in extract_compose_deps(text):
@@ -280,6 +330,36 @@ def build_graph(repo_root: Path) -> dict:
                 src_node = next((nid for nid in nodes if nid.startswith(f"services/{svc}/")), node_id)
                 if dep_node:
                     edges.append({"source": src_node, "target": dep_node, "type": "service-dep"})
+
+        # Caddy reverse_proxy → service edges (route topology)
+        if "Caddyfile" in path.name or path.suffix == ".caddy":
+            for svc in set(CADDY_REVERSE_RE.findall(text)):
+                if svc in service_dirs:
+                    dep_node = next((nid for nid in nodes if nid.startswith(f"services/{svc}/")), None)
+                    if dep_node:
+                        edges.append({"source": node_id, "target": dep_node, "type": "route"})
+                # special case: web/web-svelte are app dirs not services/
+                if svc in {"web", "web-svelte", "dashboard", "voice"}:
+                    app_node = next((nid for nid in nodes if nid.startswith(f"apps/{svc}/")), None)
+                    if app_node:
+                        edges.append({"source": node_id, "target": app_node, "type": "route"})
+
+        # Telegram bot bindings: any service/script that uses TELEGRAM_* connects to telegram service
+        if path.suffix in {".py", ".ts", ".js", ".yml", ".yaml"} and TELEGRAM_HINT_RE.search(text):
+            telegram_node = next((nid for nid in nodes if nid.startswith("services/telegram/")), None)
+            if telegram_node and telegram_node != node_id and not node_id.startswith("services/telegram/"):
+                edges.append({"source": telegram_node, "target": node_id, "type": "telegram-bind"})
+
+        # Service-to-service HTTP calls (e.g. http://auth:8000) — runtime topology
+        if path.suffix in {".py", ".ts", ".js", ".svelte"}:
+            seen_http: set[str] = set()
+            for svc in SERVICE_HTTP_RE.findall(text):
+                if svc in seen_http or svc not in service_dirs:
+                    continue
+                seen_http.add(svc)
+                dep_node = next((nid for nid in nodes if nid.startswith(f"services/{svc}/")), None)
+                if dep_node and dep_node != node_id:
+                    edges.append({"source": node_id, "target": dep_node, "type": "http-call"})
 
         # Agent registry: AGENTREGISTRY.md / AGENT-DECISION-MATRIX.md mention agents
         if path.name in {"AGENTREGISTRY.md", "AGENT-DECISION-MATRIX.md", "metadata/AGENTREGISTRY.md"}:
@@ -315,7 +395,8 @@ def build_graph(repo_root: Path) -> dict:
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "node_count": len(nodes),
             "link_count": len(edges),
-            "edge_types": ["wikilink", "import", "service-dep", "agent-call", "zone-flow"],
+            "edge_types": ["wikilink", "import", "service-dep", "agent-call",
+                           "zone-flow", "route", "telegram-bind", "http-call"],
             "quadrants": {"UL": "Bewusstsein/Innen-Individuell", "UR": "Verhalten/Außen-Individuell",
                           "LL": "Kultur/Innen-Kollektiv", "LR": "Systeme/Außen-Kollektiv"},
             "spirals": ["beige", "purple", "red", "blue", "orange", "green", "yellow", "turquoise"],

@@ -1177,6 +1177,18 @@
       "size": 1
     },
     {
+      "id": ".qdrant-index-checkpoint.json",
+      "label": ".qdrant-index-checkpoint",
+      "dir": ".qdrant-index-checkpoint.json",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "AGENT-DECISION-MATRIX",
       "label": "AGENT-DECISION-MATRIX",
       "dir": "AGENT-DECISION-MATRIX.md",
@@ -1364,6 +1376,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LR",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "Makefile",
+      "label": "Makefile",
+      "dir": "Makefile",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "turquoise",
       "agent": "",
       "tags": [],
       "size": 1
@@ -1597,6 +1621,18 @@
       "size": 1
     },
     {
+      "id": "agents/hermes/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "agents",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "agents/hermes/README",
       "label": "README",
       "dir": "agents",
@@ -1649,6 +1685,18 @@
       "label": "AGENTS",
       "dir": "agents",
       "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "agents/obsidian/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "agents",
+      "ext": "",
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "turquoise",
@@ -1717,6 +1765,18 @@
       "size": 1
     },
     {
+      "id": "agents/openclaw/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "agents",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "agents/openclaw/README",
       "label": "README",
       "dir": "agents",
@@ -1769,6 +1829,18 @@
       "label": "AGENTS",
       "dir": "agents",
       "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "agents/opencode/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "agents",
+      "ext": "",
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "turquoise",
@@ -2041,6 +2113,1914 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/.next-build/app-build-manifest.json",
+      "label": "app-build-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "apps/dashboard/.next-build/app-path-routes-manifest.json",
+      "label": "app-path-routes-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/build-manifest.json",
+      "label": "build-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/diagnostics/build-diagnostics.json",
+      "label": "build-diagnostics",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/diagnostics/framework.json",
+      "label": "framework",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/export-marker.json",
+      "label": "export-marker",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/images-manifest.json",
+      "label": "images-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/next-minimal-server.js.nft.json",
+      "label": "next-minimal-server.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/next-server.js.nft.json",
+      "label": "next-server.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/prerender-manifest.json",
+      "label": "prerender-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/react-loadable-manifest.json",
+      "label": "react-loadable-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/required-server-files.json",
+      "label": "required-server-files",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/routes-manifest.json",
+      "label": "routes-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app-paths-manifest.json",
+      "label": "app-paths-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/_not-found/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/_not-found/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/_not-found/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/agents/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/agents/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/agents/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/config/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/config/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/config/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/proxy/[service]/[...path]/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/proxy/[service]/[...path]/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/proxy/[service]/[...path]/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/proxy/[service]/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/proxy/[service]/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/api/proxy/[service]/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/config/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/config/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/config/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/services/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/services/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/services/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/tasks/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/tasks/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/tasks/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/chunks/104.js",
+      "label": "104",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/chunks/331.js",
+      "label": "331",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/chunks/611.js",
+      "label": "611",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/chunks/692.js",
+      "label": "692",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/chunks/703.js",
+      "label": "703",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/functions-config-manifest.json",
+      "label": "functions-config-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/interception-route-rewrite-manifest.js",
+      "label": "interception-route-rewrite-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/middleware-build-manifest.js",
+      "label": "middleware-build-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/middleware-manifest.json",
+      "label": "middleware-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/middleware-react-loadable-manifest.js",
+      "label": "middleware-react-loadable-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/next-font-manifest.js",
+      "label": "next-font-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/next-font-manifest.json",
+      "label": "next-font-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages-manifest.json",
+      "label": "pages-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages/_app.js",
+      "label": "_app",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages/_app.js.nft.json",
+      "label": "_app.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages/_document.js",
+      "label": "_document",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages/_document.js.nft.json",
+      "label": "_document.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages/_error.js",
+      "label": "_error",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/pages/_error.js.nft.json",
+      "label": "_error.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/server-reference-manifest.js",
+      "label": "server-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/server-reference-manifest.json",
+      "label": "server-reference-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/webpack-runtime.js",
+      "label": "webpack-runtime",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/app-build-manifest.json",
+      "label": "app-build-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/app-path-routes-manifest.json",
+      "label": "app-path-routes-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/build-manifest.json",
+      "label": "build-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/prerender-manifest.json",
+      "label": "prerender-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/react-loadable-manifest.json",
+      "label": "react-loadable-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/required-server-files.json",
+      "label": "required-server-files",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/routes-manifest.json",
+      "label": "routes-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app-paths-manifest.json",
+      "label": "app-paths-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/_not-found/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/_not-found/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/_not-found/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/agents/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/agents/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/agents/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/config/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/config/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/config/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/proxy/[service]/[...path]/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/proxy/[service]/[...path]/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/proxy/[service]/[...path]/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/proxy/[service]/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/proxy/[service]/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/api/proxy/[service]/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/config/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/config/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/config/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/services/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/services/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/services/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/tasks/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/tasks/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/tasks/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/chunks/104.js",
+      "label": "104",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/chunks/331.js",
+      "label": "331",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/chunks/611.js",
+      "label": "611",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/chunks/692.js",
+      "label": "692",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/chunks/703.js",
+      "label": "703",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/functions-config-manifest.json",
+      "label": "functions-config-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/middleware-build-manifest.js",
+      "label": "middleware-build-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/middleware-manifest.json",
+      "label": "middleware-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/middleware-react-loadable-manifest.js",
+      "label": "middleware-react-loadable-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/next-font-manifest.js",
+      "label": "next-font-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/next-font-manifest.json",
+      "label": "next-font-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages-manifest.json",
+      "label": "pages-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages/_app.js",
+      "label": "_app",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages/_app.js.nft.json",
+      "label": "_app.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages/_document.js",
+      "label": "_document",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages/_document.js.nft.json",
+      "label": "_document.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages/_error.js",
+      "label": "_error",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/pages/_error.js.nft.json",
+      "label": "_error.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/server-reference-manifest.js",
+      "label": "server-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/server-reference-manifest.json",
+      "label": "server-reference-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/webpack-runtime.js",
+      "label": "webpack-runtime",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/server.js",
+      "label": "server",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/23-78f7badd628b4d96.js",
+      "label": "23-78f7badd628b4d96",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/255-483932fd5153cebd.js",
+      "label": "255-483932fd5153cebd",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "label": "4bd1b696-c023c6e3521b1417",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/515-4571124e71b0675f.js",
+      "label": "515-4571124e71b0675f",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/_not-found/page-a1c64d58230b8155.js",
+      "label": "page-a1c64d58230b8155",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/agents/page-3cb28573d2013b03.js",
+      "label": "page-3cb28573d2013b03",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/api/config/route-9a5d3535c95e97ef.js",
+      "label": "route-9a5d3535c95e97ef",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/api/proxy/[service]/[...path]/route-9a5d3535c95e97ef.js",
+      "label": "route-9a5d3535c95e97ef",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/api/proxy/[service]/route-9a5d3535c95e97ef.js",
+      "label": "route-9a5d3535c95e97ef",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/config/page-0542737f2eb755da.js",
+      "label": "page-0542737f2eb755da",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/layout-a12d2f9c696bc836.js",
+      "label": "layout-a12d2f9c696bc836",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/page-9fd9ea32bcbb5f12.js",
+      "label": "page-9fd9ea32bcbb5f12",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/services/page-e776a9fc2fd768a1.js",
+      "label": "page-e776a9fc2fd768a1",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/tasks/page-dd49f073a6ade54d.js",
+      "label": "page-dd49f073a6ade54d",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/framework-a6e0b7e30f98059a.js",
+      "label": "framework-a6e0b7e30f98059a",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/main-0611082dae099e92.js",
+      "label": "main-0611082dae099e92",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/main-app-2bdf6d36e36199e5.js",
+      "label": "main-app-2bdf6d36e36199e5",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/pages/_app-7d307437aca18ad4.js",
+      "label": "_app-7d307437aca18ad4",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/pages/_error-cb2a52f75f2162e2.js",
+      "label": "_error-cb2a52f75f2162e2",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/polyfills-42372ed130431b0a.js",
+      "label": "polyfills-42372ed130431b0a",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/webpack-724bb23752810918.js",
+      "label": "webpack-724bb23752810918",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/db_sMG4gyCuDzpE6suSJ-/_buildManifest.js",
+      "label": "_buildManifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/db_sMG4gyCuDzpE6suSJ-/_ssgManifest.js",
+      "label": "_ssgManifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/agents/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/api/config/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/api/proxy/[service]/[...path]/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/api/proxy/[service]/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/config/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/layout.ts",
+      "label": "layout",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/services/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/tasks/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/cache-life.d.ts",
+      "label": "cache-life.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/routes.d.ts",
+      "label": "routes.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/validator.ts",
+      "label": "validator",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/AGENTS",
       "label": "AGENTS",
       "dir": "apps",
@@ -2048,6 +4028,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "apps",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2083,7 +4075,7 @@
       "ext": "ts",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "blue",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2167,7 +4159,19 @@
       "ext": "tsx",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "orange",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/src/app/api/config/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "beige",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2191,7 +4195,31 @@
       "ext": "ts",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "purple",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/src/app/api/proxy/[service]/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/src/app/config/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2239,7 +4267,7 @@
       "ext": "tsx",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "purple",
+      "spiral": "blue",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2269,6 +4297,42 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/src/components/dashboard-shell.tsx",
+      "label": "dashboard-shell",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/src/lib/service-catalog.ts",
+      "label": "service-catalog",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/src/lib/service-proxy.ts",
+      "label": "service-proxy",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/tailwind.config.js",
       "label": "tailwind.config",
       "dir": "apps",
@@ -2287,7 +4351,7 @@
       "ext": "json",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "blue",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2350,7 +4414,7 @@
       "spiral": "green",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/desktop/src/README",
@@ -2557,6 +4621,18 @@
       "size": 1
     },
     {
+      "id": "apps/voice/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "apps",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/voice/README",
       "label": "README",
       "dir": "apps",
@@ -2585,6 +4661,18 @@
       "label": "next.config",
       "dir": "apps",
       "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/voice/package-lock.json",
+      "label": "package-lock",
+      "dir": "apps",
+      "ext": "json",
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "blue",
@@ -2635,7 +4723,19 @@
       "ext": "tsx",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "beige",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/voice/src/lib/use-voice-conversation.ts",
+      "label": "use-voice-conversation",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -2674,7 +4774,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/client.js",
@@ -2686,7 +4786,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
@@ -2698,7 +4798,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 8
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/equality.js",
@@ -2710,7 +4810,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/exports.js",
@@ -2722,7 +4822,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/hooks.server.js",
@@ -2746,7 +4846,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 7
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index2.js",
@@ -2758,7 +4858,7 @@
       "spiral": "red",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 4
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
@@ -2770,7 +4870,7 @@
       "spiral": "red",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
@@ -2782,7 +4882,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 8
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/entries/endpoints/api/logout/_server.ts.js",
@@ -2818,7 +4918,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/_layout.svelte.js",
@@ -2842,7 +4942,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.server.ts.js",
@@ -2854,7 +4954,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.svelte.js",
@@ -2878,7 +4978,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.svelte.js",
@@ -3034,7 +5134,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/generated/client-optimized/nodes/0.js",
@@ -3118,7 +5218,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/generated/client/nodes/0.js",
@@ -3190,7 +5290,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 4
     },
     {
       "id": "apps/web-svelte/.svelte-kit/generated/root.svelte",
@@ -3202,7 +5302,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/generated/server/internal.js",
@@ -3586,7 +5686,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
@@ -3598,7 +5698,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 8
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/equality.js",
@@ -3610,7 +5710,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/exports.js",
@@ -3622,7 +5722,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/hooks.server.js",
@@ -3646,7 +5746,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 7
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/index2.js",
@@ -3658,7 +5758,7 @@
       "spiral": "red",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 4
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
@@ -3670,7 +5770,7 @@
       "spiral": "red",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
@@ -3682,7 +5782,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 8
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/entries/endpoints/api/logout/_server.ts.js",
@@ -3718,7 +5818,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/entries/pages/_layout.svelte.js",
@@ -3742,7 +5842,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.server.ts.js",
@@ -3754,7 +5854,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.svelte.js",
@@ -3778,7 +5878,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.svelte.js",
@@ -4016,6 +6116,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "apps",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -4354,7 +6466,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/build/handler.js",
@@ -4366,7 +6478,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/build/index.js",
@@ -4498,7 +6610,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
@@ -4510,7 +6622,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 8
     },
     {
       "id": "apps/web-svelte/build/server/chunks/error.svelte-CNCBQfTw.js",
@@ -4534,7 +6646,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 5
     },
     {
       "id": "apps/web-svelte/build/server/chunks/hooks.server-Br6khp-2.js",
@@ -4558,7 +6670,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 7
     },
     {
       "id": "apps/web-svelte/build/server/chunks/index2-BgYfYo_Z.js",
@@ -4570,7 +6682,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 4
     },
     {
       "id": "apps/web-svelte/build/server/chunks/paths-B-nArsf3.js",
@@ -4582,7 +6694,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 6
     },
     {
       "id": "apps/web-svelte/build/server/index.js",
@@ -4594,7 +6706,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/build/server/manifest.js",
@@ -4606,7 +6718,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/build/shims.js",
@@ -4618,7 +6730,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/package-lock.json",
@@ -4690,7 +6802,7 @@
       "spiral": "yellow",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/src/lib/components/NodeDetail.svelte",
@@ -4714,7 +6826,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "apps/web-svelte/src/lib/graph/filters.svelte.ts",
@@ -4774,7 +6886,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/src/routes/+page.server.ts",
@@ -4822,7 +6934,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/src/routes/login/+page.server.ts",
@@ -4846,7 +6958,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "apps/web-svelte/svelte.config.js",
@@ -4892,6 +7004,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "apps/web/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "apps",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -5059,7 +7183,7 @@
       "ext": "tsx",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "turquoise",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -5096,6 +7220,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/app/creative/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -5138,6 +7274,18 @@
     },
     {
       "id": "apps/web/src/app/knowledge-base/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/app/knowledge-graph-3d/page.tsx",
       "label": "page",
       "dir": "apps",
       "ext": "tsx",
@@ -5281,6 +7429,18 @@
       "size": 1
     },
     {
+      "id": "apps/web/src/app/studio/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web/src/app/upload/README",
       "label": "README",
       "dir": "apps",
@@ -5300,6 +7460,30 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/app/voice-chat/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/app/voice-studio/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
       "agent": "",
       "tags": [],
       "size": 1
@@ -5401,6 +7585,18 @@
       "size": 1
     },
     {
+      "id": "apps/web/src/components/VaultGraph3DHighEnd.tsx",
+      "label": "VaultGraph3DHighEnd",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "yellow",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web/src/lib/runtime-surfaces.ts",
       "label": "runtime-surfaces",
       "dir": "apps",
@@ -5415,6 +7611,30 @@
     {
       "id": "apps/web/src/lib/use-client-search-params.ts",
       "label": "use-client-search-params",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/lib/use-voice-conversation.ts",
+      "label": "use-voice-conversation",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/workers/graph-layout.worker.ts",
+      "label": "graph-layout.worker",
       "dir": "apps",
       "ext": "ts",
       "zone": "WORKSPACE",
@@ -6064,7 +8284,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "docs/30-day-ingestion-and-learning-plan",
@@ -6563,6 +8783,18 @@
       "size": 1
     },
     {
+      "id": "experiences/family/sonntag",
+      "label": "sonntag",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "FAMILY_PRIVATE",
+      "quadrant": "LL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "experiences/family/sven-experiences",
       "label": "sven-experiences",
       "dir": "experiences",
@@ -6895,6 +9127,54 @@
       "size": 1
     },
     {
+      "id": "experiences/users/samira/README",
+      "label": "README",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "FAMILY_PRIVATE",
+      "quadrant": "LL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/users/samira/hello",
+      "label": "hello",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/users/sineo/README",
+      "label": "README",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "FAMILY_PRIVATE",
+      "quadrant": "LL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/users/sven/README",
+      "label": "README",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "FAMILY_PRIVATE",
+      "quadrant": "LL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "extracts/README",
       "label": "README",
       "dir": "extracts",
@@ -7119,6 +9399,18 @@
       "size": 1
     },
     {
+      "id": "infra/caddy/Caddyfile",
+      "label": "Caddyfile",
+      "dir": "infra",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "infra/caddy/README",
       "label": "README",
       "dir": "infra",
@@ -7332,7 +9624,7 @@
       "spiral": "yellow",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "infra/scripts/build-vault-graph",
@@ -7383,6 +9675,18 @@
       "size": 1
     },
     {
+      "id": "infra/scripts/docker-disk-cleanup.sh",
+      "label": "docker-disk-cleanup",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "infra/scripts/healthcheck.sh",
       "label": "healthcheck",
       "dir": "infra",
@@ -7390,6 +9694,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LR",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/index-knowledge-base",
+      "label": "index-knowledge-base",
+      "dir": "infra",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -8970,7 +11286,7 @@
       "spiral": "turquoise",
       "agent": "",
       "tags": [],
-      "size": 15
+      "size": 16
     },
     {
       "id": "kirobi_core/orchestrator",
@@ -10180,6 +12496,18 @@
       "size": 1
     },
     {
+      "id": "services/analytics-service/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "red",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/analytics-service/README",
       "label": "README",
       "dir": "services",
@@ -10225,7 +12553,19 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 5
+      "size": 11
+    },
+    {
+      "id": "services/api/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "services/api/README",
@@ -10297,7 +12637,19 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 5
+      "size": 19
+    },
+    {
+      "id": "services/auth/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "services/auth/README",
@@ -10381,7 +12733,19 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 2
+      "size": 6
+    },
+    {
+      "id": "services/embeddings/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "services/embeddings/README",
@@ -10420,6 +12784,18 @@
       "size": 10
     },
     {
+      "id": "services/hermes-runtime/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 4
+    },
+    {
       "id": "services/hermes-runtime/README",
       "label": "README",
       "dir": "services",
@@ -10429,7 +12805,19 @@
       "spiral": "green",
       "agent": "",
       "tags": [],
-      "size": 3
+      "size": 1
+    },
+    {
+      "id": "services/hermes-runtime/agent_dispatcher",
+      "label": "agent_dispatcher",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "services/hermes-runtime/config/cli-config.yaml",
@@ -10441,6 +12829,38 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/hermes-runtime/config/skills/nutzi/SKILL",
+      "label": "SKILL",
+      "dir": "services",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "Nutzi",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/hermes-runtime/config/skills/opendisruption/SKILL",
+      "label": "SKILL",
+      "dir": "services",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [
+        "OpenDisruption",
+        "Docker",
+        "Kirobi",
+        "DevOps",
+        "Self-Hosting",
+        "Administration",
+        "Orchestration"
+      ],
       "size": 1
     },
     {
@@ -10451,6 +12871,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/image-generation/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -10498,6 +12930,18 @@
       "ext": "md",
       "zone": "WORKSPACE",
       "quadrant": "LL",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 3
+    },
+    {
+      "id": "services/ingest/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
       "spiral": "blue",
       "agent": "",
       "tags": [],
@@ -10549,6 +12993,18 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/media-processing/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
       "size": 1
     },
     {
@@ -10594,6 +13050,18 @@
       "ext": "md",
       "zone": "WORKSPACE",
       "quadrant": "LL",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 3
+    },
+    {
+      "id": "services/model-routing/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
       "spiral": "blue",
       "agent": "",
       "tags": [],
@@ -10645,6 +13113,18 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/music-generation/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
       "size": 1
     },
     {
@@ -10678,6 +13158,66 @@
       "ext": "py",
       "zone": "WORKSPACE",
       "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/nutzi/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/nutzi/app/main",
+      "label": "main",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/nutzi/config/SKILL",
+      "label": "SKILL",
+      "dir": "services",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "Nutzi",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/nutzi/scripts/convert_help",
+      "label": "convert_help",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/nutzi/scripts/index_qdrant",
+      "label": "index_qdrant",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
       "spiral": "blue",
       "agent": "",
       "tags": [],
@@ -10693,7 +13233,7 @@
       "spiral": "green",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "services/orchestrator/AGENTS",
@@ -10703,6 +13243,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/orchestrator/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "purple",
       "agent": "",
       "tags": [],
       "size": 1
@@ -10753,6 +13305,18 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
+      "size": 4
+    },
+    {
+      "id": "services/retrieval/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
       "size": 1
     },
     {
@@ -10799,6 +13363,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/telegram/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "turquoise",
       "agent": "",
       "tags": [],
       "size": 1
@@ -10984,6 +13560,30 @@
       "size": 1
     },
     {
+      "id": "services/telegram/kirobi_core/__init__",
+      "label": "__init__",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/telegram/kirobi_core/asyncpg_compat",
+      "label": "asyncpg_compat",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/telegram/main",
       "label": "main",
       "dir": "services",
@@ -11002,6 +13602,18 @@
       "ext": "md",
       "zone": "WORKSPACE",
       "quadrant": "LL",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/video-generation/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
       "spiral": "blue",
       "agent": "",
       "tags": [],
@@ -11053,6 +13665,18 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
+      "size": 5
+    },
+    {
+      "id": "services/voice-processing/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
       "size": 1
     },
     {
@@ -11092,8 +13716,44 @@
       "size": 1
     },
     {
+      "id": "services/voice-processing/kirobi_bridge",
+      "label": "kirobi_bridge",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/voice-processing/personas",
+      "label": "personas",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/voice-processing/voice_interface",
       "label": "voice_interface",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/voice-processing/voices",
+      "label": "voices",
       "dir": "services",
       "ext": "py",
       "zone": "WORKSPACE",
@@ -12460,7 +15120,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": "tests/unit/test_orchestrator",
@@ -12661,6 +15321,621 @@
       "type": "import"
     },
     {
+      "source": "apps/desktop/src/main.tsx",
+      "target": "apps/desktop/src/App.tsx",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/client.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/exports.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/client.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/exports.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/exports.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/equality.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/hooks.server.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/hooks.server.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index2.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index2.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/equality.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/endpoints/api/logout/_server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/fallbacks/error.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/fallbacks/error.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/client.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index2.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.server.ts.js",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index2.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/client.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/index.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/index.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/index.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/index.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/exports.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/internal.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/nodes/0.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/_layout.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/nodes/2.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/_page.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/nodes/3.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/graph/_page.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/adapter-node/nodes/4.js",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/entries/pages/login/_page.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client/app.js",
+      "target": "apps/web-svelte/.svelte-kit/generated/client/matchers.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client/app.js",
+      "target": "apps/web-svelte/.svelte-kit/generated/root.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client/nodes/0.js",
+      "target": "apps/web-svelte/src/routes/+layout.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client/nodes/3.js",
+      "target": "apps/web-svelte/src/routes/graph/+page.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client/nodes/4.js",
+      "target": "apps/web-svelte/src/routes/login/+page.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client-optimized/app.js",
+      "target": "apps/web-svelte/.svelte-kit/generated/client-optimized/matchers.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client-optimized/app.js",
+      "target": "apps/web-svelte/.svelte-kit/generated/root.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client-optimized/nodes/0.js",
+      "target": "apps/web-svelte/src/routes/+layout.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client-optimized/nodes/3.js",
+      "target": "apps/web-svelte/src/routes/graph/+page.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/client-optimized/nodes/4.js",
+      "target": "apps/web-svelte/src/routes/login/+page.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/root.js",
+      "target": "apps/web-svelte/.svelte-kit/generated/root.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/generated/server/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/generated/root.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/client.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/exports.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/client.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/exports.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/exports.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/equality.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/hooks.server.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/hooks.server.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/index2.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index2.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/equality.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/endpoints/api/logout/_server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/fallbacks/error.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/fallbacks/error.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/client.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index2.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.server.ts.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.server.ts.js",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index2.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/client.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.svelte.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/context.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/index.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/index.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/index.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/index.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/exports.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/internal.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/internal.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/chunks/paths.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/nodes/0.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/entries/pages/_layout.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/nodes/2.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/entries/pages/_page.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/nodes/3.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/entries/pages/graph/_page.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/output/server/nodes/4.js",
+      "target": "apps/web-svelte/.svelte-kit/output/server/entries/pages/login/_page.server.ts.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/.svelte-kit/types/src/routes/login/proxy+page.server.ts",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/web-svelte/build/handler.js",
+      "target": "apps/web-svelte/build/shims.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/handler.js",
+      "target": "apps/web-svelte/build/server/index.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/handler.js",
+      "target": "apps/web-svelte/build/server/manifest.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/handler.js",
+      "target": "apps/web-svelte/build/env.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/index.js",
+      "target": "apps/web-svelte/build/handler.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/index.js",
+      "target": "apps/web-svelte/build/env.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/2-CgXo-BHq.js",
+      "target": "apps/web-svelte/build/server/chunks/index-DHSpIlkf.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/2-CgXo-BHq.js",
+      "target": "apps/web-svelte/build/server/chunks/paths-B-nArsf3.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/3-DpPmtv0N.js",
+      "target": "apps/web-svelte/build/server/chunks/index-DHSpIlkf.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/3-DpPmtv0N.js",
+      "target": "apps/web-svelte/build/server/chunks/paths-B-nArsf3.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/4-C47w5_Tg.js",
+      "target": "apps/web-svelte/build/server/chunks/index-DHSpIlkf.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/4-C47w5_Tg.js",
+      "target": "apps/web-svelte/build/server/chunks/paths-B-nArsf3.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/4-C47w5_Tg.js",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_page.svelte-D8dRQXfW.js",
+      "target": "apps/web-svelte/build/server/chunks/index2-BgYfYo_Z.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_page.svelte-D8dRQXfW.js",
+      "target": "apps/web-svelte/build/server/chunks/client-VhnoyKc0.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_page.svelte-D8dRQXfW.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_page.svelte-D8dRQXfW.js",
+      "target": "apps/web-svelte/build/server/chunks/exports-D4LhcR3n.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_page.svelte-NaL7F3Lx.js",
+      "target": "apps/web-svelte/build/server/chunks/index2-BgYfYo_Z.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_page.svelte-NaL7F3Lx.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/_server.ts-BvDJvKEz.js",
+      "target": "apps/web-svelte/build/server/chunks/index-DHSpIlkf.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/client-VhnoyKc0.js",
+      "target": "apps/web-svelte/build/server/chunks/exports-D4LhcR3n.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/client-VhnoyKc0.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/error.svelte-CNCBQfTw.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/error.svelte-CNCBQfTw.js",
+      "target": "apps/web-svelte/build/server/chunks/client-VhnoyKc0.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/error.svelte-CNCBQfTw.js",
+      "target": "apps/web-svelte/build/server/chunks/exports-D4LhcR3n.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/exports-D4LhcR3n.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/hooks.server-Br6khp-2.js",
+      "target": "apps/web-svelte/build/server/chunks/index-DHSpIlkf.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/hooks.server-Br6khp-2.js",
+      "target": "apps/web-svelte/build/server/chunks/paths-B-nArsf3.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/chunks/index2-BgYfYo_Z.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/index.js",
+      "target": "apps/web-svelte/build/server/chunks/index2-BgYfYo_Z.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/index.js",
+      "target": "apps/web-svelte/build/server/chunks/context-wcOFFW0f.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/index.js",
+      "target": "apps/web-svelte/build/server/chunks/exports-D4LhcR3n.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/index.js",
+      "target": "apps/web-svelte/build/server/chunks/paths-B-nArsf3.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/build/server/index.js",
+      "target": "apps/web-svelte/build/server/chunks/index-DHSpIlkf.js",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/src/lib/components/Graph3D.svelte",
+      "target": "apps/web-svelte/src/lib/components/GraphScene.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/src/lib/components/GraphScene.svelte",
+      "target": "apps/web-svelte/src/lib/components/OrbitControls.svelte",
+      "type": "import"
+    },
+    {
+      "source": "apps/web-svelte/src/routes/login/+page.server.ts",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
       "source": "services/ingest/AGENTS",
       "target": "services/embeddings/AGENTS",
       "type": "service-dep"
@@ -12706,6 +15981,106 @@
       "type": "service-dep"
     },
     {
+      "source": "services/telegram/AGENTS",
+      "target": "docker-compose.yml",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/hermes-runtime/Dockerfile",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/model-routing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/embeddings/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/video-generation/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/retrieval/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/media-processing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/ingest/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/openclaw-gateway/README",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/telegram/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/dashboard/.next-build/app-build-manifest.json",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/.vite/manifest.json",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/auth/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/voice-processing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/image-generation/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/music-generation/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/api/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/web/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": "infra/scripts/build-repo-graph",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "infra/scripts/build-repo-graph",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
       "source": "infra/scripts/init-qdrant",
       "target": "kirobi_core/qdrant_collections",
       "type": "import"
@@ -12724,6 +16099,11 @@
       "source": "kidi/serve",
       "target": "kirobi_core/scanner",
       "type": "import"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": "kirobi_core/notify",
+      "type": "telegram-bind"
     },
     {
       "source": "metadata/AGENTREGISTRY",
@@ -12827,12 +16207,12 @@
     },
     {
       "source": "metadata/AGENTREGISTRY",
-      "target": "services/hermes-runtime/README",
+      "target": "services/hermes-runtime/Dockerfile",
       "type": "agent-call"
     },
     {
       "source": "metadata/AGENTREGISTRY",
-      "target": "services/hermes-runtime/README",
+      "target": "services/hermes-runtime/Dockerfile",
       "type": "agent-call"
     },
     {
@@ -13046,6 +16426,26 @@
       "type": "import"
     },
     {
+      "source": "services/api/main",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/api/main",
+      "target": "services/retrieval/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/api/main",
+      "target": "services/model-routing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/api/main",
+      "target": "services/voice-processing/AGENTS",
+      "type": "http-call"
+    },
+    {
       "source": "services/auth/main",
       "target": "kirobi_core/asyncpg_compat",
       "type": "import"
@@ -13061,6 +16461,11 @@
       "type": "import"
     },
     {
+      "source": "services/telegram/AGENTS",
+      "target": "services/hermes-runtime/config/cli-config.yaml",
+      "type": "telegram-bind"
+    },
+    {
       "source": "services/image-generation/main",
       "target": "kirobi_core/asyncpg_compat",
       "type": "import"
@@ -13079,6 +16484,16 @@
       "source": "services/ingest/main",
       "target": "kirobi_core/analytics_client",
       "type": "import"
+    },
+    {
+      "source": "services/ingest/main",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/ingest/main",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
     },
     {
       "source": "services/music-generation/main",
@@ -13116,9 +16531,59 @@
       "type": "import"
     },
     {
+      "source": "services/orchestrator/supervisor",
+      "target": "services/voice-processing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/orchestrator/supervisor",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/orchestrator/supervisor",
+      "target": "services/ingest/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/orchestrator/supervisor",
+      "target": "services/retrieval/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/orchestrator/supervisor",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/orchestrator/supervisor",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
       "source": "services/retrieval/main",
       "target": "kirobi_core/qdrant_collections",
       "type": "import"
+    },
+    {
+      "source": "services/retrieval/main",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/keycodi/config",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/keycodi/config",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/keycodi/config",
+      "target": "services/voice-processing/AGENTS",
+      "type": "http-call"
     },
     {
       "source": "services/telegram/keycodi/db",
@@ -13131,9 +16596,39 @@
       "type": "import"
     },
     {
+      "source": "services/telegram/main",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/main",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
       "source": "services/video-generation/main",
       "target": "kirobi_core/asyncpg_compat",
       "type": "import"
+    },
+    {
+      "source": "services/voice-processing/api",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/voice-processing/api",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/voice-processing/kirobi_bridge",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/voice-processing/kirobi_bridge",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
     },
     {
       "source": "tests/unit/kidi/context_db/test_egress_guard",
@@ -13546,6 +17041,11 @@
       "type": "import"
     },
     {
+      "source": "services/telegram/AGENTS",
+      "target": "tests/unit/test_notify",
+      "type": "telegram-bind"
+    },
+    {
       "source": "tests/unit/test_orchestrator",
       "target": "kirobi_core/backlog",
       "type": "import"
@@ -13722,15 +17222,18 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-05-09T22:33:14.096222+00:00",
-    "node_count": 1042,
-    "link_count": 220,
+    "generated_at": "2026-05-12T18:21:32.723432+00:00",
+    "node_count": 1263,
+    "link_count": 388,
     "edge_types": [
       "wikilink",
       "import",
       "service-dep",
       "agent-call",
-      "zone-flow"
+      "zone-flow",
+      "route",
+      "telegram-bind",
+      "http-call"
     ],
     "quadrants": {
       "UL": "Bewusstsein/Innen-Individuell",

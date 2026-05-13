@@ -149,12 +149,12 @@ async def _docker_status() -> tuple[str, list[str]]:
 async def _service_health_check() -> tuple[str, list[str]]:
     """Schneller Health-Check der wichtigsten Backend-Services."""
     services = [
-        ("api", "http://127.0.0.1:8003/health"),
-        ("auth", "http://127.0.0.1:8002/health"),
-        ("ollama", "http://127.0.0.1:11434/"),
-        ("embeddings", "http://127.0.0.1:8004/health"),
-        ("retrieval", "http://127.0.0.1:8006/health"),
-        ("analytics", "http://127.0.0.1:8010/health"),
+        ("api",        "http://api:8000/health"),
+        ("auth",       "http://auth:8000/health"),
+        ("ollama",     "http://ollama:11434/"),
+        ("embeddings", "http://embeddings:8000/health"),
+        ("retrieval",  "http://retrieval:8000/health"),
+        ("analytics",  "http://analytics:8010/health"),
     ]
     down: list[str] = []
     up: list[str] = []

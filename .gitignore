@@ -202,3 +202,13 @@ services/nutzi/data/chapters/
 services/nutzi/data/master_index.json
 services/nutzi/data/topic_lookup.json
 data/piper-voices/
+
+# Auto-generated index checkpoints
+.qdrant-index-checkpoint.json
+
+# Temporary percentage artifacts
+85%,
+92%
+
+# User profile data (FAMILY_PRIVATE)
+experiences/users/
