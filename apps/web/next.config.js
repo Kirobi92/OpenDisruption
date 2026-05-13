@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa')({
+const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   register: true,
   skipWaiting: true,
@@ -7,34 +7,36 @@ const withPWA = require('next-pwa')({
   fallbacks: {
     document: '/offline.html',
   },
-  runtimeCaching: [
-    {
-      // Same-origin API calls go through Caddy at /api/* — never cache POST/PUT,
-      // serve the latest GET when online and fall back to cache offline.
-      urlPattern: /^\/api\/.*$/i,
-      handler: 'NetworkFirst',
-      method: 'GET',
-      options: {
-        cacheName: 'kirobi-api',
-        networkTimeoutSeconds: 5,
-        expiration: { maxEntries: 64, maxAgeSeconds: 60 * 60 * 24 },
-        cacheableResponse: { statuses: [0, 200] },
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        // Same-origin API calls go through Caddy at /api/* — never cache POST/PUT,
+        // serve the latest GET when online and fall back to cache offline.
+        urlPattern: /^\/api\/.*$/i,
+        handler: 'NetworkFirst',
+        method: 'GET',
+        options: {
+          cacheName: 'kirobi-api',
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 64, maxAgeSeconds: 60 * 60 * 24 },
+          cacheableResponse: { statuses: [0, 200] },
+        },
       },
-    },
-    {
-      urlPattern: /^https?:.*\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'kirobi-images',
-        expiration: { maxEntries: 64, maxAgeSeconds: 60 * 60 * 24 * 30 },
+      {
+        urlPattern: /^https?:.*\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/i,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'kirobi-images',
+          expiration: { maxEntries: 64, maxAgeSeconds: 60 * 60 * 24 * 30 },
+        },
       },
-    },
-    {
-      urlPattern: /^https?:.*\.(?:js|css|woff2?)$/i,
-      handler: 'StaleWhileRevalidate',
-      options: { cacheName: 'kirobi-static' },
-    },
-  ],
+      {
+        urlPattern: /^https?:.*\.(?:js|css|woff2?)$/i,
+        handler: 'StaleWhileRevalidate',
+        options: { cacheName: 'kirobi-static' },
+      },
+    ],
+  },
 });
 
 // Build the rewrite list dynamically so it stays empty when no upstream is
