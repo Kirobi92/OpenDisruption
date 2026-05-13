@@ -2,6 +2,7 @@
 const path = require('path')
 const nextConfig = {
   output: 'standalone',
+  basePath: '/portal',
   eslint: { ignoreDuringBuilds: true },
   outputFileTracingRoot: path.join(__dirname, '../../'),
 };
