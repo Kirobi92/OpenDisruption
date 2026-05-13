@@ -9,6 +9,6 @@ aiofiles>=23.2.1
 numpy<2
 huggingface_hub>=0.26.0,<2.0
 diffusers==0.38.0
-transformers==4.57.6
+transformers==5.0.0rc3
 accelerate==1.13.0
 safetensors
