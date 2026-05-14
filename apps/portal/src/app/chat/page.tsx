@@ -33,10 +33,19 @@ import {
 function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoading, isAuthenticated } = useRequireAuth();
+  const { isLoading, isAuthenticated, user } = useRequireAuth();
   const { data: conversations = [], mutate: mutateConversations } = useConversations();
   const activeConversationId = searchParams.get('conversation') ?? conversations[0]?.id ?? null;
   const { data: messages = [], mutate: mutateMessages } = useMessages(activeConversationId);
+
+  // Persönlicher Agent basierend auf eingeloggtem User
+  const defaultAgent = useMemo(() => {
+    const name = user?.username?.toLowerCase() ?? '';
+    if (name === 'samira') return 'samira';
+    if (name === 'sineo') return 'sineo';
+    if (name === 'sven') return 'sven';
+    return 'kirobi';
+  }, [user?.username]);
 
   const [search, setSearch] = useState('');
   const [composer, setComposer] = useState('');
@@ -122,7 +131,7 @@ function ChatPageContent() {
         await mutateMessages((current = []) => [...current, optimisticMessage], false);
       }
 
-      const result = await sendMessage(targetConversation.id, content, pendingAttachments);
+      const result = await sendMessage(targetConversation.id, content, pendingAttachments, defaultAgent);
 
       if (targetConversation.id === activeConversationId) {
         await mutateMessages(

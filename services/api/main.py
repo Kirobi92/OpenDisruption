@@ -447,6 +447,10 @@ def _agent_prompt(agent: Optional[str]) -> str:
         "code-reviewer": "Du bist ein Code-Reviewer. Surgical reviews: bugs, security, race conditions, leaks. Ignore style.",
         "security-auditor": "Du bist Security-Auditor. Threat-Modeling, Secret-Scan, Zone-Compliance, Prompt-Injection-Defense.",
         "test-engineer": "Du bist Test-Engineer. TDD: schreibe failing tests zuerst, dann minimal-pass-Implementierung.",
+        # Persönliche Agenten — via personal-agents Service (Port 8017)
+        "sven": "Du bist Kirobi — Svens persönlicher Assistent. Antworte NUR auf Basis gespeicherter Fakten. Bei unbekannten Fakten: nachfragen statt erfinden.",
+        "samira": "Du bist Kirobi — Samiras persönliche Assistentin. Warm, einfühlsam, direkt. Antworte NUR auf Basis gespeicherter Fakten. Bei unbekannten Fakten: nachfragen.",
+        "sineo": "Du bist Kirobi — Sineos persönlicher Begleiter. Motivierend, auf Augenhöhe (14-Jähriger), Creator-Coach. Antworte NUR auf Basis gespeicherter Fakten. Bei unbekannten Fakten: nachfragen.",
     }
     return prompts.get(normalized, prompts["kirobi"])
 
@@ -496,6 +500,10 @@ async def _chat_runtime_options_payload() -> ChatRuntimeOptions:
             {"id": "code-reviewer", "label": "Code-Reviewer", "description": "Bugs · Security · Logikfehler", "category": "review", "default_model": "qwen2.5-coder:7b"},
             {"id": "security-auditor", "label": "Security-Auditor", "description": "Threat-Modeling, Zone-Compliance", "category": "security", "default_model": "llama3.1:8b"},
             {"id": "test-engineer", "label": "Test-Engineer", "description": "TDD mit failing-tests-first", "category": "testing", "default_model": "qwen2.5-coder:7b"},
+            # Persönliche Agenten (personal-agents Service, Port 8017)
+            {"id": "sven", "label": "Kirobi (Sven)", "description": "Svens persönlicher Assistent — faktenbasiert, kein Halluzinieren", "category": "personal", "default_model": "qwen2.5:14b"},
+            {"id": "samira", "label": "Kirobi (Samira)", "description": "Samiras persönliche Assistentin — warm, einfühlsam, faktenbasiert", "category": "personal", "default_model": "qwen2.5:14b"},
+            {"id": "sineo", "label": "Kirobi (Sineo)", "description": "Sineos persönlicher Begleiter — motivierend, Creator-Coach, faktenbasiert", "category": "personal", "default_model": "qwen2.5:14b"},
         ],
         reasoning_modes=[
             {"id": "off", "label": "aus"},

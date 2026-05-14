@@ -163,10 +163,12 @@ export async function sendMessage(
   convId: string,
   content: string,
   attachments: AttachmentReference[] = [],
+  agent?: string,
 ): Promise<SendMessageResult> {
   const response = await apiClient.post(`/api/proxy/api/conversations/${convId}/messages`, {
     content,
     attachments,
+    ...(agent ? { agent } : {}),
   });
 
   const data = unwrap<Record<string, unknown>>(response.data);

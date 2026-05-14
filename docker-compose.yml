@@ -380,22 +380,25 @@ services:
     ports:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:8017:8017"
     volumes:
-      - ./kirobi-core/profiles:/app/profiles
+      - ./kirobi-core/profiles:/app/profiles:ro
+      - /Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner:/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner:rw
     environment:
       - OLLAMA_HOST=http://ollama:11434
       - OLLAMA_MODEL=${PERSONAL_AGENTS_MODEL:-qwen2.5:14b}
       - GH_TOKEN=${GH_TOKEN:-}
       - PROFILES_DIR=/app/profiles
+      - BENUTZER_BASE=/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner
     depends_on:
       - ollama
     networks:
       - kirobi-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8017/health"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8017/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 25s
+
 
   supervisor:
     build:
