@@ -34,6 +34,7 @@ load_dotenv()
 # Configuration
 # ---------------------------------------------------------------------------
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
+IMAGE_GEN_URL = os.getenv("IMAGE_GEN_URL", "http://image-generation:8011")
 DATABASE_URL = (
     f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}"
     f":{os.getenv('POSTGRES_PASSWORD', 'changeme')}"
@@ -218,10 +219,57 @@ def _row_to_job_response(row: dict) -> JobResponse:
 
 
 # ---------------------------------------------------------------------------
-# Background Video Processor
+# Background Video Processor — AI-Frames + Ken Burns Animation
 # ---------------------------------------------------------------------------
+async def _fetch_ai_frame(session: httpx.AsyncClient, prompt: str, idx: int, zone: str) -> Optional[bytes]:
+    """Ruft image-generation Service für einen Video-Frame auf."""
+    try:
+        frame_prompt = f"{prompt}, scene {idx + 1}, cinematic, wide angle"
+        resp = await session.post(
+            f"{IMAGE_GEN_URL}/generate",
+            json={"prompt": frame_prompt, "model": "sdxl-turbo", "width": 896, "height": 512, "zone": zone},
+            timeout=180.0,
+        )
+        if resp.status_code != 201:
+            return None
+        data = resp.json()
+        file_url = data.get("url")
+        if not file_url:
+            return None
+        img_resp = await session.get(f"{IMAGE_GEN_URL}{file_url}", timeout=30.0)
+        if img_resp.status_code == 200:
+            return img_resp.content
+        return None
+    except Exception:
+        return None
+
+
+def _make_gradient_png(prompt: str, idx: int, width: int, height: int) -> bytes:
+    """Fallback-Gradient-Frame wenn image-generation nicht erreichbar."""
+    import io
+    import hashlib
+    try:
+        from PIL import Image, ImageDraw
+        h = hashlib.md5(f"{prompt}{idx}".encode()).hexdigest()
+        c1 = (int(h[0:2], 16)//4, int(h[2:4], 16)//4, int(h[4:6], 16)//4)
+        c2 = (int(h[6:8], 16), int(h[8:10], 16), int(h[10:12], 16))
+        img = Image.new("RGB", (width, height))
+        draw = ImageDraw.Draw(img)
+        for y in range(height):
+            t = y / height
+            r = int(c1[0]*(1-t) + c2[0]*t)
+            g = int(c1[1]*(1-t) + c2[1]*t)
+            b = int(c1[2]*(1-t) + c2[2]*t)
+            draw.line([(0, y), (width, y)], fill=(r, g, b))
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception:
+        return b""
+
+
 async def _process_video_job(job_id: str, prompt: str, resolution: str, duration: int, zone: str) -> None:
-    """Generiert ein Placeholder-Video via ffmpeg (Text auf farbigem Hintergrund)."""
+    """Generiert ein KI-Video: SDXL-Turbo-Frames + Ken-Burns-Animation via ffmpeg."""
     try:
         res_map = {
             "480p":    (854, 480),
@@ -231,32 +279,70 @@ async def _process_video_job(job_id: str, prompt: str, resolution: str, duration
             "portrait": (1080, 1920),
         }
         w, h = res_map.get(resolution, (1280, 720))
-        duration_capped = min(duration, 30)  # Max 30s für Placeholder
+        duration_capped = min(duration, 60)
 
         zone_dir = VIDEO_STORAGE_PATH / zone
         zone_dir.mkdir(parents=True, exist_ok=True)
         file_path = zone_dir / f"{job_id}.mp4"
+        frames_dir = zone_dir / f"{job_id}_frames"
+        frames_dir.mkdir(parents=True, exist_ok=True)
 
-        # Prompt auf max 60 Zeichen kürzen für Anzeige
-        short_prompt = (prompt[:57] + "...") if len(prompt) > 60 else prompt
-        safe_prompt = short_prompt.replace("'", "").replace(":", "")
+        # 1 Frame pro 6s, mindestens 3, max 8
+        num_frames = max(3, min(8, duration_capped // 6))
+        secs_per_frame = max(4, duration_capped // num_frames)
+
+        # KI-Frames parallel generieren
+        async with httpx.AsyncClient() as session:
+            frame_tasks = [_fetch_ai_frame(session, prompt, i, zone) for i in range(num_frames)]
+            frame_bytes_list = await asyncio.gather(*frame_tasks)
+
+        # Frames auf Disk speichern
+        frame_paths = []
+        for i, raw in enumerate(frame_bytes_list):
+            p = frames_dir / f"frame_{i:03d}.png"
+            if raw and len(raw) > 200:
+                p.write_bytes(raw)
+            else:
+                fb = _make_gradient_png(prompt, i, 896, 512)
+                if fb:
+                    p.write_bytes(fb)
+            if p.exists():
+                frame_paths.append(str(p))
+
+        if not frame_paths:
+            raise RuntimeError("Keine Frames generiert")
+
+        # ffmpeg concat-Liste
+        list_file = frames_dir / "frames.txt"
+        with list_file.open("w") as f:
+            for fp in frame_paths:
+                f.write(f"file '{fp}'\n")
+                f.write(f"duration {secs_per_frame}\n")
+            f.write(f"file '{frame_paths[-1]}'\n")
+
+        # Ken Burns: sanfter Zoom-in auf jedes Bild
+        fps = 24
+        zoompan = (
+            f"scale=8000:-1,"
+            f"zoompan=z='min(zoom+0.0006,1.4)'"
+            f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+            f":d={secs_per_frame * fps}:s={w}x{h}:fps={fps}"
+        )
+        safe_text = ((prompt[:55] + "...") if len(prompt) > 58 else prompt).replace("'", "").replace(":", "")
 
         cmd = [
             "ffmpeg", "-y",
-            "-f", "lavfi",
-            "-i", f"color=c=0x1a1a2e:size={w}x{h}:rate=24",
-            "-f", "lavfi",
-            "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+            "-f", "concat", "-safe", "0", "-i", str(list_file),
+            "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
             "-filter_complex",
-            f"[0:v]drawtext=fontsize={max(24, w//40)}:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2"
-            f":text='{safe_prompt}':line_spacing=8[v]",
-            "-map", "[v]",
-            "-map", "1:a",
+            f"[0:v]{zoompan}[vz];"
+            f"[vz]drawtext=fontsize={max(18, w//55)}:fontcolor=white@0.8"
+            f":x=(w-text_w)/2:y=h*0.89:text='{safe_text}'[vout]",
+            "-map", "[vout]", "-map", "1:a",
             "-t", str(duration_capped),
-            "-c:v", "libx264",
-            "-c:a", "aac",
-            "-pix_fmt", "yuv420p",
-            "-movflags", "+faststart",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+            "-c:a", "aac", "-b:a", "128k",
+            "-pix_fmt", "yuv420p", "-movflags", "+faststart",
             str(file_path),
         ]
 
@@ -265,10 +351,17 @@ async def _process_video_job(job_id: str, prompt: str, resolution: str, duration
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        _, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+        _, stderr = await asyncio.wait_for(proc.communicate(), timeout=300)
 
         if proc.returncode != 0:
-            raise RuntimeError(f"ffmpeg failed: {stderr.decode()[-300:]}")
+            raise RuntimeError(f"ffmpeg failed: {stderr.decode()[-500:]}")
+
+        # Frame-Temp-Dateien aufräumen
+        import shutil
+        try:
+            shutil.rmtree(str(frames_dir))
+        except Exception:
+            pass
 
         async with db_pool.acquire() as conn:
             await conn.execute(
@@ -287,6 +380,7 @@ async def _process_video_job(job_id: str, prompt: str, resolution: str, duration
                 str(exc)[:500],
                 job_id,
             )
+
 
 
 # ---------------------------------------------------------------------------

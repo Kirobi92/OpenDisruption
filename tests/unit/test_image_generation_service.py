@@ -212,27 +212,25 @@ def test_generate_image_success(client):
     assert data["model"] == "llava:7b"
 
 
-def test_generate_image_ollama_error_returns_502(client):
-    """POST /generate muss 502 zurückgeben wenn Ollama einen Fehler liefert."""
+def test_generate_image_fallback_when_torch_unavailable(client):
+    """POST /generate muss 201 zurückgeben und Placeholder nutzen wenn torch nicht verfügbar."""
     c, mock_conn = client
 
-    mock_error_resp = MagicMock()
-    mock_error_resp.status_code = 500
-    mock_error_resp.text = "Internal Server Error"
+    image_row = _make_image_row()
+    mock_conn.fetchrow = AsyncMock(return_value=image_row)
 
-    mock_client = _make_mock_async_client(post_resp=mock_error_resp)
-
-    with patch("services.image_generation.main.httpx.AsyncClient", return_value=mock_client), \
-         patch("services.image_generation.main.IMAGE_STORAGE_PATH", _make_mock_storage()):
+    with patch("services.image_generation.main.IMAGE_STORAGE_PATH", _make_mock_storage()):
         resp = c.post("/generate", json={
             "prompt": "a cat",
-            "model": "llava:7b",
+            "model": "sdxl-turbo",
             "zone": "WORKSPACE",
         })
 
-    assert resp.status_code == 502
-    detail = resp.json()["detail"]
-    assert "502" in detail or "Ollama" in detail or "500" in detail
+    # Torch ist in der Test-Umgebung nicht installiert → Placeholder-PNG, aber kein Fehler
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["id"] == "img-1"
+    assert data["zone"] == "WORKSPACE"
 
 
 def test_generate_image_saves_to_db(client):

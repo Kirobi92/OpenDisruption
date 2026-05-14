@@ -21,7 +21,10 @@ WORKDIR /app
 
 COPY services/image-generation/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir torch==2.1.0 --index-url https://download.pytorch.org/whl/cu121 \
+ && pip install --no-cache-dir \
+      torch==2.5.0+cu121 \
+      torchvision==0.20.0+cu121 \
+      --index-url https://download.pytorch.org/whl/cu121 \
  && pip install --no-cache-dir -r requirements.txt
 
 COPY services/image-generation/main.py .

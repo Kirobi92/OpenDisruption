@@ -298,25 +298,32 @@ async def _generate_via_audiocraft(
     file_path: Path,
 ) -> bool:
     """
-    Versucht Musik via AudioCraft/MusicGen zu generieren.
+    Versucht Musik via AudioCraft/MusicGen auf GPU zu generieren.
     Gibt True zurück wenn erfolgreich, False wenn AudioCraft nicht verfügbar.
     """
     if not _AUDIOCRAFT_AVAILABLE:
         return False
 
     try:
-        # AudioCraft ist synchron — in einem Thread-Pool ausführen
         import asyncio
         import functools
 
         def _sync_generate() -> None:
+            import torch
             from audiocraft.models import MusicGen
             from audiocraft.data.audio import audio_write
 
-            model = MusicGen.get_pretrained("facebook/musicgen-small")
-            model.set_generation_params(duration=duration_seconds)
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            # medium bietet bessere Qualität; small als Fallback wenn VRAM knapp
+            try:
+                model = MusicGen.get_pretrained("facebook/musicgen-medium", device=device)
+            except Exception:
+                model = MusicGen.get_pretrained("facebook/musicgen-small", device=device)
+
+            # AudioCraft max. 30s pro Segment
+            clamped_duration = min(duration_seconds, 30)
+            model.set_generation_params(duration=clamped_duration)
             wav = model.generate([enhanced_prompt])
-            # audio_write erwartet Pfad ohne Extension
             audio_write(
                 str(file_path.with_suffix("")),
                 wav[0].cpu(),
@@ -438,7 +445,7 @@ async def generate_track(req: GenerateRequest):
 
     if audiocraft_success:
         is_placeholder = False
-        model_used = "facebook/musicgen-small"
+        model_used = "facebook/musicgen-medium"
     else:
         # Fallback: Placeholder-WAV schreiben
         wav_bytes = _make_placeholder_wav(req.duration_seconds, enhanced_prompt)

@@ -38,12 +38,14 @@ services:
     networks:
       - kirobi-net
     environment:
-      # RTX 3090 — 24 GB VRAM: 4 parallele Anfragen, 90% VRAM für Modell-Layer
-      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-4}
-      - OLLAMA_GPU_MEMORY_FRACTION=${OLLAMA_GPU_MEMORY_FRACTION:-0.90}
-      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-2}
+      # RTX 3090 — 24 GB VRAM: mit SDXL-Turbo max 1 Modell gleichzeitig
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-2}
+      - OLLAMA_GPU_MEMORY_FRACTION=${OLLAMA_GPU_MEMORY_FRACTION:-0.60}
+      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-1}
       - OLLAMA_FLASH_ATTENTION=1
       - OLLAMA_KV_CACHE_TYPE=q8_0
+      # Modelle nach 5min Idle aus VRAM entladen → Platz für Bild/Musik-Generierung
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-5m}
     deploy:
       resources:
         reservations:
@@ -332,6 +334,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-kirobi}
       - OLLAMA_HOST=http://ollama:11434
       - VIDEO_STORAGE_PATH=/data/videos
+      - IMAGE_GEN_URL=http://image-generation:8011
     volumes:
       - video_data:/data/videos
     depends_on:

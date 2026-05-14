@@ -246,7 +246,13 @@ def _diffusers_load(model_key: str):
     except Exception:
         pipe = AutoPipelineForText2Image.from_pretrained(model_id, torch_dtype=dtype)
     if torch.cuda.is_available():
-        pipe = pipe.to("cuda")
+        # enable_model_cpu_offload: Modell bleibt auf CPU, GPU wird nur für
+        # den Forward-Pass genutzt (peak VRAM ~2GB statt ~6GB).
+        # Damit läuft SDXL-Turbo auch wenn Ollama gleichzeitig VRAM belegt.
+        try:
+            pipe.enable_model_cpu_offload()
+        except Exception:
+            pipe = pipe.to("cuda")
     pipe.set_progress_bar_config(disable=True)
 
     _DIFFUSERS_PIPE = pipe
@@ -277,6 +283,10 @@ async def _generate_via_diffusers(prompt: str, model: str, width: int, height: i
     try:
         return await loop.run_in_executor(None, functools.partial(_sync))
     except Exception as exc:
+        import logging
+        logging.getLogger("image-generation").error(
+            "diffusers inference failed: %s: %s", type(exc).__name__, exc, exc_info=True
+        )
         return _make_placeholder_png(width, height, f"[diffusers error] {exc}")
 
 
@@ -455,8 +465,8 @@ async def health_check():
 @app.post("/generate", response_model=GeneratedImageResponse, status_code=status.HTTP_201_CREATED)
 async def generate_image(req: GenerateRequest):
     """
-    Generiert ein Bild via Ollama und speichert es unter
-    IMAGE_STORAGE_PATH/{zone}/{uuid}.png.
+    Generiert ein Bild lokal via SDXL-Turbo (GPU) oder Stability AI API.
+    Fallback: generatives Konzept-PNG via Pillow.
     """
     # Zielverzeichnis anlegen
     zone_dir = IMAGE_STORAGE_PATH / req.zone
@@ -465,20 +475,32 @@ async def generate_image(req: GenerateRequest):
     image_id = str(uuid.uuid4())
     file_path = zone_dir / f"{image_id}.png"
 
-    # Bild generieren — Priorität: Stability AI > diffusers > Ollama/Placeholder
+    # Bild generieren — Priorität:
+    # 1. Lokale diffusers/SDXL-Turbo (immer bevorzugt, 100% lokal, RTX 3090)
+    # 2. Stability AI API (nur wenn STABILITY_API_KEY gesetzt und lokale Generierung fehlschlägt)
+    # 3. Generatives Pillow-Konzept-PNG (Fallback)
     model_lc = req.model.lower()
-    if STABILITY_API_KEY and model_lc in ("sdxl", "stable-diffusion-xl", "stability", "default", ""):
-        try:
-            image_bytes = await _generate_via_stability(req.prompt, req.width, req.height)
-            req = req.model_copy(update={"model": "stable-diffusion-xl-1024-v1-0"})
-        except Exception:
-            image_bytes = _make_placeholder_png(req.width, req.height, req.prompt)
-    elif model_lc.startswith(("sd", "stable-diffusion", "diffusion")):
-        image_bytes = await _generate_via_diffusers(
-            req.prompt, req.model, req.width, req.height
-        )
+
+    # Modell-Auswahl für diffusers
+    if model_lc in ("sd15", "sd-1.5", "stable-diffusion-1.5"):
+        diffusers_model = "sd15"
     else:
-        image_bytes = await _generate_via_ollama(req.prompt, req.model, req.width, req.height)
+        diffusers_model = "sdxl-turbo"  # Standard: SDXL-Turbo
+
+    try:
+        image_bytes = await _generate_via_diffusers(req.prompt, diffusers_model, req.width, req.height)
+        used_model = _DIFFUSERS_MODEL_ID or diffusers_model
+    except Exception:
+        if STABILITY_API_KEY:
+            try:
+                image_bytes = await _generate_via_stability(req.prompt, req.width, req.height)
+                used_model = "stability-ai"
+            except Exception:
+                image_bytes = _make_placeholder_png(req.width, req.height, req.prompt)
+                used_model = req.model or "pillow-placeholder"
+        else:
+            image_bytes = _make_placeholder_png(req.width, req.height, req.prompt)
+            used_model = req.model or "pillow-placeholder"
 
     # Datei schreiben
     try:
@@ -497,7 +519,7 @@ async def generate_image(req: GenerateRequest):
             """,
             image_id,
             req.prompt,
-            req.model,
+            used_model,
             str(file_path),
             req.zone,
             req.width,
