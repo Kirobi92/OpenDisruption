@@ -1121,7 +1121,12 @@ async def chat_compat(request: ChatRequest):
 
 Antworte direkt, warm und präzise auf Deutsch. Nutze ausschließlich lokalen
 WORKSPACE-Kontext aus dieser Anfrage. Greife nicht auf FAMILY_PRIVATE oder
-SACRED Inhalte zu und erfinde keine privaten Details."""
+SACRED Inhalte zu und erfinde keine privaten Details.
+
+⚠️ ANTI-HALLUZINATION — STRIKT EINHALTEN:
+- Sage NIEMALS etwas über Personen (Alter, Hobbys, Beruf, etc.) wenn du es nicht sicher weißt
+- Wenn du etwas nicht weißt: "Das weiß ich nicht" — KEINE Vermutung, KEINE Schätzung
+- Unsichere Aussagen mit [UNSICHER] kennzeichnen"""
 
     response = await call_ollama(prompt, model=model, system_prompt=system_prompt)
     await _analytics_track("chat_compat", zone="WORKSPACE", model=model)

@@ -1,0 +1,63 @@
+---
+zone: FAMILY_PRIVATE
+subject: sineo
+display_name: Sineo
+relation_to_sven: Sohn
+last_updated: "2026-05-14"
+version: "1.0"
+
+# WICHTIG: Nur verifizierte Fakten! Keine Annahmen, keine Schätzungen.
+# Fehlende Fakten → Agent fragt nach statt zu erfinden.
+
+facts: []
+
+# Fakten werden durch gezielte Interviews gesammelt.
+# Beispiel für spätere Einträge:
+# - id: f001
+#   category: identity
+#   fact: "Sineo ist 14 Jahre alt (Stand: Mai 2026)"
+#   confidence: verified
+#   source: sven-confirmed
+#   learned_at: "2026-05-14"
+
+unknown_facts:
+  - id: q001
+    category: identity
+    question: "Wie alt ist Sineo?"
+    priority: high
+  - id: q002
+    category: identity
+    question: "In welche Klasse geht Sineo aktuell?"
+    priority: high
+  - id: q003
+    category: interests
+    question: "Was sind Sineos größte Leidenschaften und Hobbys?"
+    priority: high
+  - id: q004
+    category: personality
+    question: "Wie würdest du Sineos Persönlichkeit in drei Worten beschreiben?"
+    priority: medium
+  - id: q005
+    category: creator
+    question: "Hat Sineo schon einen YouTube-Kanal? Wenn ja, was ist das Thema?"
+    priority: medium
+  - id: q006
+    category: tech
+    question: "Welche Technologie begeistert Sineo am meisten (z.B. Gaming, 3D-Druck, KI)?"
+    priority: medium
+  - id: q007
+    category: school
+    question: "Was ist Sineos Lieblingsschulfach?"
+    priority: low
+  - id: q008
+    category: social
+    question: "Hat Sineo enge Freunde oder ist er eher ein Einzelgänger?"
+    priority: low
+  - id: q009
+    category: dreams
+    question: "Was sind Sineos Träume oder Ziele für die Zukunft?"
+    priority: low
+  - id: q010
+    category: tech
+    question: "Hat Sineo bereits Erfahrung mit Programmieren oder KI?"
+    priority: medium
