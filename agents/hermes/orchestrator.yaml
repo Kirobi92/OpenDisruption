@@ -1,0 +1,75 @@
+---
+zone: WORKSPACE
+created: 2026-05-14
+agent: hermes
+role: orchestrator
+version: 1.0
+status: ACTIVE
+---
+
+# Hermes Orchestrator-Profil
+
+name: hermes-orchestrator
+display_name: "Hermes (OpenDisruption-Hauptagent)"
+description: |
+  Zentraler Orchestrierungs-Agent für OpenDisruption.
+  Tägliche Briefings, Familien-Front-Door, Anti-Halluzination,
+  Code-Delegation an KeyCodi und supervisor.
+
+primary_model: qwen2.5:14b-instruct
+fallback_model: github-copilot/gpt-4.1-mini
+context_window: 32768
+temperature: 0.4
+max_tokens: 2048
+
+system_prompt_file: services/hermes-runtime/config/skills/opendisruption-orchestrator/SKILL.md
+
+mcp_servers:
+  - memory          # Persistent Knowledge-Graph (per User)
+  - sequential-thinking
+  - postgres        # Live DB-Queries
+  - filesystem      # /home/sven/OpenDisruption + /Datenspeicher
+
+skills:
+  - opendisruption-orchestrator   # Hauptrolle
+  - personal-agents               # Family-Profil-Anbindung
+  - nutzi                         # Optional: ERP-Companion
+  # NICHT enthalten: keycodi (Hermes delegiert, übernimmt nicht)
+
+interfaces:
+  telegram:
+    bot: "@Disruptivbot"
+    bot_token_env: TELEGRAM_BOT_TOKEN
+    notify_channel_env: TELEGRAM_NOTIFY_CHANNEL_ID
+    allowed_users_env: TELEGRAM_ALLOWED_USER_IDS
+    daily_briefing_cron: "0 9,20 * * *"
+
+  portal:
+    enabled: true
+    base_url: "http://api:8003"
+
+memory_paths:
+  shared: /opt/data/memory/knowledge_graph.json
+  per_user:
+    sven:   /Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner/Sven/agent/memory/knowledge_graph.json
+    samira: /Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner/Samira/agent/memory/knowledge_graph.json
+    sineo:  /Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner/Sineo/agent/memory/knowledge_graph.json
+
+guardrails:
+  anti_hallucination: strict
+  cite_sources: required
+  fail_on_missing_facts: true   # Lieber Rückfrage statt Vermutung
+  forbid_zones_to_cloud: [FAMILY_PRIVATE, SACRED]
+  forbid_destructive_ops_without_approval: true
+
+delegation:
+  coding_missions: keycodi
+  backlog_tasks: services/orchestrator
+  voice_io: services/voice-processing
+  rag_search: services/retrieval
+
+success_metrics:
+  - "Familie nutzt Hermes täglich"
+  - "Kein Halluzinations-Vorfall seit 30 Tagen"
+  - "Tägliches Briefing zuverlässig versendet"
+  - "Roadmap-Phasen werden in geplanter Reihenfolge erfüllt"
