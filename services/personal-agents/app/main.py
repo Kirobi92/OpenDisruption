@@ -62,12 +62,30 @@ app = FastAPI(
     version="2.0.0",
 )
 
+def _cors_kwargs() -> dict:
+    raw = os.getenv("KIROBI_PUBLIC_ORIGINS", "").strip()
+    if raw:
+        origins = [o.strip().rstrip("/") for o in raw.split(",") if o.strip()]
+        return {"allow_origins": origins}
+    pattern = (
+        r"^https?://("
+        r"localhost(:\d+)?|127\.0\.0\.1(:\d+)?|"
+        r"[a-zA-Z0-9-]+\.local(:\d+)?|"
+        r"10\.\d+\.\d+\.\d+(:\d+)?|"
+        r"192\.168\.\d+\.\d+(:\d+)?|"
+        r"172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?|"
+        r"100\.(6[4-9]|[7-9]\d|1[0-1]\d|12[0-7])\.\d+\.\d+(:\d+)?"
+        r")$"
+    )
+    return {"allow_origin_regex": pattern}
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    **_cors_kwargs(),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
 # ---------------------------------------------------------------------------

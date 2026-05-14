@@ -61,7 +61,10 @@ def _service_url(value: str) -> str:
 
 
 # Configuration
-DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{os.getenv('POSTGRES_PASSWORD', 'changeme')}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
+_PG_PW = os.environ.get("POSTGRES_PASSWORD", "")
+if not _PG_PW or _PG_PW == "changeme":
+    raise RuntimeError("POSTGRES_PASSWORD missing or insecure default ('changeme'). Set it in .env.")
+DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{_PG_PW}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
 AUTH_SERVICE_URL = _service_url(os.getenv("AUTH_SERVICE_URL", "http://auth:8000"))
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
 RETRIEVAL_SERVICE_URL = _service_url(os.getenv("RETRIEVAL_SERVICE_URL", "http://retrieval:8006"))
@@ -2223,4 +2226,4 @@ async def delete_family_note(name: str, current_user: User = Depends(get_current
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=os.getenv("BIND_HOST", "127.0.0.1"), port=8000)

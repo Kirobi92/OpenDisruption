@@ -28,12 +28,20 @@ asyncpg = ensure_asyncpg_compat(asyncpg)
 load_dotenv()
 
 # Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "CHANGEME-in-production-use-strong-secret")
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "")
+if not SECRET_KEY or "CHANGEME" in SECRET_KEY or len(SECRET_KEY) < 32:
+    raise RuntimeError(
+        "JWT_SECRET_KEY missing or too weak. "
+        "Set a strong random string (>=32 chars, no 'CHANGEME') in .env."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
-DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{os.getenv('POSTGRES_PASSWORD', 'changeme')}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
+_PG_PW = os.environ.get("POSTGRES_PASSWORD", "")
+if not _PG_PW or _PG_PW == "changeme":
+    raise RuntimeError("POSTGRES_PASSWORD missing or insecure default ('changeme'). Set it in .env.")
+DATABASE_URL = f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}:{_PG_PW}@{os.getenv('POSTGRES_HOST', 'postgres')}:{os.getenv('POSTGRES_PORT', '5432')}/{os.getenv('POSTGRES_DB', 'kirobi')}"
 
 # Security
 # bcrypt direkt nutzen (passlib inkompatibel mit bcrypt >= 4.x)
@@ -751,4 +759,4 @@ async def verify_token(current_user: User = Depends(get_current_user)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=os.getenv("BIND_HOST", "127.0.0.1"), port=8000)
