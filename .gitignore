@@ -62,6 +62,8 @@ eggs/
 lib/
 !apps/web/src/lib/
 !apps/web/src/lib/**/*.ts
+!apps/portal/src/lib/
+!apps/portal/src/lib/**/*.ts
 lib64/
 parts/
 sdist/
