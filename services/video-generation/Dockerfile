@@ -5,8 +5,10 @@ LABEL maintainer="kirobi-coder" \
       service="video-generation" \
       zone="WORKSPACE"
 
-# Non-root user anlegen
-RUN groupadd --gid 1001 kirobi \
+# Non-root user anlegen + ffmpeg
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd --gid 1001 kirobi \
  && useradd --uid 1001 --gid kirobi --shell /bin/bash --create-home kirobi
 
 WORKDIR /app

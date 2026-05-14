@@ -11,6 +11,7 @@ const SERVICE_MAP: Record<string, string> = {
   'music-generation': 'http://music-generation:8013',
   'video-generation': 'http://video-generation:8014',
   analytics: 'http://analytics:8010',
+  'personal-agents': 'http://personal-agents:8017',
 };
 
 export const dynamic = 'force-dynamic';

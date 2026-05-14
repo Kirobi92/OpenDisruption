@@ -228,6 +228,8 @@ services:
       - "${KIROBI_BIND_HOST:-127.0.0.1}:8011:8011"
     environment:
       - OLLAMA_HOST=http://ollama:11434
+      - GH_TOKEN=${GH_TOKEN:-}
+      - STABILITY_API_KEY=${STABILITY_API_KEY:-}
       - POSTGRES_USER=${POSTGRES_USER:-kirobi}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
       - POSTGRES_HOST=postgres

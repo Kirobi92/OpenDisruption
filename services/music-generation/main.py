@@ -58,7 +58,7 @@ _AUDIOCRAFT_AVAILABLE = False
 try:
     import audiocraft  # noqa: F401
     _AUDIOCRAFT_AVAILABLE = True
-except ImportError:
+except Exception:  # noqa: BLE001 — auch AttributeError bei inkompatiblen torch-Versionen
     pass
 
 # HeartMuLa verfügbar?
@@ -68,7 +68,7 @@ try:
     import heartlib  # noqa: F401
     if _HEARTMULA_MODEL_PATH.exists():
         _HEARTMULA_AVAILABLE = True
-except ImportError:
+except Exception:  # noqa: BLE001
     pass
 
 # ---------------------------------------------------------------------------
@@ -122,6 +122,7 @@ class GeneratedTrackResponse(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
     id: str
     file_path: str
+    url: Optional[str] = None
     zone: str
     model_used: str
     enhanced_prompt: Optional[str]
@@ -480,6 +481,7 @@ async def generate_track(req: GenerateRequest):
     return GeneratedTrackResponse(
         id=row["id"],
         file_path=row["file_path"],
+        url=f"/file/{track_id}",
         zone=row["zone"],
         model_used=row["model_used"],
         enhanced_prompt=row["enhanced_prompt"],

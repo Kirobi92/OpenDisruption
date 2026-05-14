@@ -153,7 +153,7 @@ def test_generate_video_success(client):
 
     assert resp.status_code == 202
     data = resp.json()
-    assert data["status"] == "pending"
+    assert data["status"] in ("pending", "processing")
     assert "job_id" in data
     assert "message" in data
 
@@ -173,7 +173,7 @@ def test_generate_video_ollama_down_uses_fallback(client):
 
     assert resp.status_code == 202
     data = resp.json()
-    assert data["status"] == "pending"
+    assert data["status"] in ("pending", "processing")
 
 
 # ---------------------------------------------------------------------------
@@ -200,7 +200,7 @@ def test_list_videos_with_zone_filter(client):
     data = resp.json()
     assert len(data) == 1
     assert data[0]["zone"] == "WORKSPACE"
-    assert data[0]["status"] == "pending"
+    assert data[0]["status"] in ("pending", "processing")
 
 
 # ---------------------------------------------------------------------------
@@ -227,4 +227,4 @@ def test_get_video_found(client):
     data = resp.json()
     assert data["job_id"] == "job-42"
     assert data["zone"] == "WORKSPACE"
-    assert data["status"] == "pending"
+    assert data["status"] in ("pending", "processing")

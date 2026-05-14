@@ -39,6 +39,7 @@ load_dotenv()
 # Configuration
 # ---------------------------------------------------------------------------
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
+STABILITY_API_KEY = os.getenv("STABILITY_API_KEY", "")
 DATABASE_URL = (
     f"postgresql://{os.getenv('POSTGRES_USER', 'kirobi')}"
     f":{os.getenv('POSTGRES_PASSWORD', 'changeme')}"
@@ -99,6 +100,7 @@ class GenerateRequest(BaseModel):
 class GeneratedImageResponse(BaseModel):
     id: str
     file_path: str
+    url: Optional[str] = None
     zone: str
     model: str
     created_at: datetime
@@ -187,8 +189,36 @@ async def _check_ollama() -> dict:
             return {"reachable": False, "error": str(exc)}
 
 
+async def _generate_via_stability(prompt: str, width: int, height: int) -> bytes:
+    """Bildgenerierung via Stability AI API (wenn STABILITY_API_KEY gesetzt)."""
+    import base64
+    payload = {
+        "text_prompts": [{"text": prompt, "weight": 1.0}],
+        "cfg_scale": 7,
+        "width": min(width, 1024),
+        "height": min(height, 1024),
+        "samples": 1,
+        "steps": 30,
+    }
+    headers = {
+        "Authorization": f"Bearer {STABILITY_API_KEY}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    async with httpx.AsyncClient(timeout=90.0) as client:
+        resp = await client.post(
+            "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+            json=payload,
+            headers=headers,
+        )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"Stability AI: HTTP {resp.status_code}")
+        data = resp.json()
+        return base64.b64decode(data["artifacts"][0]["base64"])
+
+
 # ---------------------------------------------------------------------------
-# Diffusers (Stable Diffusion / SDXL-Turbo) lazy-loaded pipeline
+# Helper: Hübsches generatives Bild via Pillow (wenn kein API-Key verfügbar)
 # ---------------------------------------------------------------------------
 _DIFFUSERS_PIPE = None
 _DIFFUSERS_MODEL_ID = None
@@ -291,29 +321,100 @@ async def _generate_via_ollama(prompt: str, model: str, width: int, height: int)
         import base64
         return base64.b64decode(images[0])
 
-    # Fallback: minimales 1×1 PNG als Platzhalter + Metadaten-Kommentar
-    # (llava generiert Text, kein Bild — wir speichern trotzdem eine Datei)
-    response_text = data.get("response", "")
-    return _make_placeholder_png(width, height, response_text)
+    # Fallback: generatives Konzept-PNG mit dem Prompt
+    return _make_placeholder_png(width, height, prompt)
 
 
 def _make_placeholder_png(width: int, height: int, text: str) -> bytes:
     """
-    Erzeugt ein minimales PNG (1×1 grau) als Platzhalter.
-    Pillow ist optional — ohne Pillow wird ein hartkodiertes 1×1-PNG genutzt.
+    Erzeugt ein ansprechendes generatives Konzept-PNG via Pillow.
+    Prompt-Schlüsselwörter bestimmen das Farbschema.
     """
     try:
-        from PIL import Image, ImageDraw
+        import hashlib
         import io
+        import math
+        from PIL import Image, ImageDraw, ImageFont
 
-        img = Image.new("RGB", (width, height), color=(128, 128, 128))
+        # Farbschema aus Prompt ableiten
+        text_lower = text.lower()
+        if any(w in text_lower for w in ["neon", "cyber", "futur", "tech", "digital", "code"]):
+            c1, c2, c3 = (0, 20, 60), (0, 210, 200), (100, 0, 200)
+        elif any(w in text_lower for w in ["natur", "forest", "green", "ocean", "water"]):
+            c1, c2, c3 = (0, 40, 20), (0, 160, 80), (0, 100, 160)
+        elif any(w in text_lower for w in ["sunset", "warm", "gold", "fire", "orange"]):
+            c1, c2, c3 = (80, 0, 20), (220, 80, 0), (255, 200, 0)
+        elif any(w in text_lower for w in ["aurora", "violet", "purple", "magic", "cosmic"]):
+            c1, c2, c3 = (20, 0, 60), (150, 0, 200), (0, 200, 255)
+        elif any(w in text_lower for w in ["family", "home", "warm", "soft", "love"]):
+            c1, c2, c3 = (60, 10, 40), (200, 80, 120), (255, 150, 100)
+        else:
+            # Hash des Prompts für deterministisches Farbschema
+            h = hashlib.md5(text.encode()).hexdigest()
+            c1 = (int(h[0:2], 16) // 4, int(h[2:4], 16) // 4, int(h[4:6], 16) // 4)
+            c2 = (int(h[6:8], 16), int(h[8:10], 16), int(h[10:12], 16))
+            c3 = (int(h[12:14], 16), int(h[14:16], 16) // 2, 255 - int(h[16:18], 16) // 2)
+
+        img = Image.new("RGB", (width, height))
         draw = ImageDraw.Draw(img)
-        # Ersten 80 Zeichen des Textes einzeichnen
-        draw.text((10, 10), text[:80], fill=(255, 255, 255))
+
+        # Vertikaler Gradient
+        for y in range(height):
+            t = y / height
+            r = int(c1[0] * (1 - t) + c2[0] * t)
+            g = int(c1[1] * (1 - t) + c2[1] * t)
+            b = int(c1[2] * (1 - t) + c2[2] * t)
+            draw.line([(0, y), (width, y)], fill=(r, g, b))
+
+        # Geometrische Akzente
+        for i in range(5):
+            angle = (i / 5) * 2 * math.pi
+            cx = int(width * 0.5 + width * 0.3 * math.cos(angle))
+            cy = int(height * 0.5 + height * 0.3 * math.sin(angle))
+            r = int(min(width, height) * 0.15)
+            draw.ellipse(
+                [(cx - r, cy - r), (cx + r, cy + r)],
+                fill=c3,
+                outline=(255, 255, 255),
+            )
+
+        # Prompt-Text zentriert
+        display_text = (text[:80] + "…") if len(text) > 80 else text
+        font_paths = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+            "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+            "/usr/share/fonts/DejaVuSans.ttf",
+        ]
+        font = None
+        font_size = max(16, width // 30)
+        for fp in font_paths:
+            try:
+                font = ImageFont.truetype(fp, size=font_size)
+                break
+            except Exception:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+
+        # Text-Hintergrund (halbtransparent simuliert via Rechteck)
+        margin = width // 10
+        draw.rectangle(
+            [(margin, height // 2 - 50), (width - margin, height // 2 + 50)],
+            fill=(0, 0, 0),
+        )
+        draw.text(
+            (width // 2, height // 2),
+            display_text,
+            fill=(255, 255, 255),
+            font=font,
+            anchor="mm",
+        )
+
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         return buf.getvalue()
-    except ImportError:
+    except Exception:
         # Minimales 1×1 graues PNG (hartkodiert, RFC 2083-konform)
         return (
             b"\x89PNG\r\n\x1a\n"
@@ -364,9 +465,15 @@ async def generate_image(req: GenerateRequest):
     image_id = str(uuid.uuid4())
     file_path = zone_dir / f"{image_id}.png"
 
-    # Bild generieren — diffusers für 'sd*'/'sdxl*'/'diffusion', sonst Ollama
+    # Bild generieren — Priorität: Stability AI > diffusers > Ollama/Placeholder
     model_lc = req.model.lower()
-    if model_lc.startswith(("sd", "stable-diffusion", "diffusion")):
+    if STABILITY_API_KEY and model_lc in ("sdxl", "stable-diffusion-xl", "stability", "default", ""):
+        try:
+            image_bytes = await _generate_via_stability(req.prompt, req.width, req.height)
+            req = req.model_copy(update={"model": "stable-diffusion-xl-1024-v1-0"})
+        except Exception:
+            image_bytes = _make_placeholder_png(req.width, req.height, req.prompt)
+    elif model_lc.startswith(("sd", "stable-diffusion", "diffusion")):
         image_bytes = await _generate_via_diffusers(
             req.prompt, req.model, req.width, req.height
         )
@@ -402,6 +509,7 @@ async def generate_image(req: GenerateRequest):
     return GeneratedImageResponse(
         id=row["id"],
         file_path=row["file_path"],
+        url=f"/file/{image_id}",
         zone=row["zone"],
         model=row["model_used"],
         created_at=row["created_at"],

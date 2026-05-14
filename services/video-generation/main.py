@@ -10,6 +10,8 @@ Port: 8014
 import os
 import uuid
 import json
+import asyncio
+import subprocess
 from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
@@ -216,6 +218,78 @@ def _row_to_job_response(row: dict) -> JobResponse:
 
 
 # ---------------------------------------------------------------------------
+# Background Video Processor
+# ---------------------------------------------------------------------------
+async def _process_video_job(job_id: str, prompt: str, resolution: str, duration: int, zone: str) -> None:
+    """Generiert ein Placeholder-Video via ffmpeg (Text auf farbigem Hintergrund)."""
+    try:
+        res_map = {
+            "480p":    (854, 480),
+            "720p":    (1280, 720),
+            "1080p":   (1920, 1080),
+            "square":  (1080, 1080),
+            "portrait": (1080, 1920),
+        }
+        w, h = res_map.get(resolution, (1280, 720))
+        duration_capped = min(duration, 30)  # Max 30s für Placeholder
+
+        zone_dir = VIDEO_STORAGE_PATH / zone
+        zone_dir.mkdir(parents=True, exist_ok=True)
+        file_path = zone_dir / f"{job_id}.mp4"
+
+        # Prompt auf max 60 Zeichen kürzen für Anzeige
+        short_prompt = (prompt[:57] + "...") if len(prompt) > 60 else prompt
+        safe_prompt = short_prompt.replace("'", "").replace(":", "")
+
+        cmd = [
+            "ffmpeg", "-y",
+            "-f", "lavfi",
+            "-i", f"color=c=0x1a1a2e:size={w}x{h}:rate=24",
+            "-f", "lavfi",
+            "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+            "-filter_complex",
+            f"[0:v]drawtext=fontsize={max(24, w//40)}:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2"
+            f":text='{safe_prompt}':line_spacing=8[v]",
+            "-map", "[v]",
+            "-map", "1:a",
+            "-t", str(duration_capped),
+            "-c:v", "libx264",
+            "-c:a", "aac",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+            str(file_path),
+        ]
+
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+
+        if proc.returncode != 0:
+            raise RuntimeError(f"ffmpeg failed: {stderr.decode()[-300:]}")
+
+        async with db_pool.acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE video_jobs
+                SET status = 'completed', file_path = $1, completed_at = NOW()
+                WHERE id = $2
+                """,
+                str(file_path),
+                job_id,
+            )
+    except Exception as exc:
+        async with db_pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE video_jobs SET status = 'failed', error = $1 WHERE id = $2",
+                str(exc)[:500],
+                job_id,
+            )
+
+
+# ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
 @app.get("/health")
@@ -245,8 +319,7 @@ async def health_check():
 @app.post("/generate", response_model=JobCreatedResponse, status_code=status.HTTP_202_ACCEPTED)
 async def generate_video(req: GenerateRequest):
     """
-    Erstellt einen asynchronen Video-Generierungs-Job.
-    Die eigentliche Generierung erfolgt im Hintergrund.
+    Erstellt einen asynchronen Video-Generierungs-Job und startet die Verarbeitung.
     """
     job_id = str(uuid.uuid4())
 
@@ -255,7 +328,7 @@ async def generate_video(req: GenerateRequest):
             """
             INSERT INTO video_jobs
                 (id, prompt, resolution, duration_seconds, zone, status, metadata)
-            VALUES ($1, $2, $3, $4, $5, 'pending', $6)
+            VALUES ($1, $2, $3, $4, $5, 'processing', $6)
             """,
             job_id,
             req.prompt,
@@ -265,10 +338,15 @@ async def generate_video(req: GenerateRequest):
             json.dumps({"ollama_host": OLLAMA_HOST}),
         )
 
+    # Hintergrundverarbeitung starten
+    asyncio.create_task(
+        _process_video_job(job_id, req.prompt, req.resolution, req.duration, req.zone)
+    )
+
     return JobCreatedResponse(
         job_id=job_id,
-        status="pending",
-        message=f"Video-Generierungs-Job '{job_id}' wurde erstellt und wird verarbeitet.",
+        status="processing",
+        message=f"Video-Generierungs-Job '{job_id}' wird verarbeitet.",
     )
 
 

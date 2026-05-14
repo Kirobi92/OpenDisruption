@@ -13,7 +13,7 @@ type MediaTab = 'images' | 'music' | 'videos' | 'documents';
 
 type ImageItem = { id: string; title: string; prompt: string; url: string; createdAt: string };
 type MusicItem = { id: string; title: string; prompt: string; url?: string; createdAt: string };
-type VideoItem = { id: string; title: string; prompt: string; url?: string; createdAt: string };
+type VideoItem = { id: string; title: string; prompt: string; url?: string; jobId?: string; status?: string; createdAt: string };
 type DocumentItem = { id: string; title: string; type: string; createdAt: string };
 
 function artDataUri(label: string, from: string, to: string) {
@@ -72,12 +72,15 @@ export default function MediaPage() {
           style: imageStyle,
         });
         const payload = response.data ?? {};
+        const imageId = String(payload.id ?? '');
         setImages((current) => [
           {
-            id: String(payload.id ?? `img-${Date.now()}`),
-            title: String(payload.title ?? 'Neues Bild'),
+            id: imageId || `img-${Date.now()}`,
+            title: String((payload.title ?? imagePrompt.slice(0, 40)) || 'Neues Bild'),
             prompt: imagePrompt,
-            url: String(payload.url ?? artDataUri('Generated Image', '#5eead4', '#0d1230')),
+            url: imageId
+              ? `/api/proxy/image-generation/file/${imageId}`
+              : artDataUri('Generated Image', '#5eead4', '#0d1230'),
             createdAt: new Date().toISOString().slice(0, 10),
           },
           ...current,
@@ -91,12 +94,13 @@ export default function MediaPage() {
           duration: musicDuration,
         });
         const payload = response.data ?? {};
+        const trackId = String(payload.id ?? '');
         setMusicItems((current) => [
           {
-            id: String(payload.id ?? `music-${Date.now()}`),
+            id: trackId || `music-${Date.now()}`,
             title: String(payload.title ?? `${musicGenre} Session`),
             prompt: musicPrompt,
-            url: payload.url ? String(payload.url) : undefined,
+            url: trackId ? `/api/proxy/music-generation/file/${trackId}` : undefined,
             createdAt: new Date().toISOString().slice(0, 10),
           },
           ...current,
@@ -110,21 +114,56 @@ export default function MediaPage() {
           style: videoStyle,
         });
         const payload = response.data ?? {};
+        const jobId = String(payload.job_id ?? '');
         setVideos((current) => [
           {
-            id: String(payload.id ?? `video-${Date.now()}`),
+            id: jobId || `video-${Date.now()}`,
             title: String(payload.title ?? `${videoStyle} Clip`),
             prompt: videoPrompt,
-            url: payload.url ? String(payload.url) : undefined,
+            url: undefined, // wird nach Polling gesetzt
+            jobId,
+            status: payload.status ?? 'processing',
             createdAt: new Date().toISOString().slice(0, 10),
           },
           ...current,
         ]);
+        // Polling für Job-Status starten
+        if (jobId) {
+          void pollVideoJob(jobId);
+        }
       }
 
       setPanelOpen(false);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const pollVideoJob = async (jobId: string) => {
+    for (let i = 0; i < 30; i++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      try {
+        const resp = await apiClient.get(`/api/proxy/video-generation/jobs/${jobId}`);
+        const job = resp.data ?? {};
+        if (job.status === 'completed') {
+          setVideos((current) =>
+            current.map((v) =>
+              v.id === jobId
+                ? { ...v, url: `/api/proxy/video-generation/file/${jobId}`, status: 'completed' }
+                : v,
+            ),
+          );
+          return;
+        }
+        if (job.status === 'failed') {
+          setVideos((current) =>
+            current.map((v) => (v.id === jobId ? { ...v, status: 'failed' } : v)),
+          );
+          return;
+        }
+      } catch {
+        // weiter versuchen
+      }
     }
   };
 
@@ -274,11 +313,18 @@ export default function MediaPage() {
               <div key={video.id} className="glass overflow-hidden rounded-[2rem] shadow-card">
                 {video.url ? (
                   <video controls className="h-64 w-full bg-black">
-                    <source src={video.url} />
+                    <source src={video.url} type="video/mp4" />
                   </video>
                 ) : (
-                  <div className="flex h-64 items-center justify-center bg-gradient-to-br from-aurora-violet/30 to-void-rise text-white/60">
-                    Vorschau wird nach Generierung verfügbar
+                  <div className="flex h-64 flex-col items-center justify-center gap-3 bg-gradient-to-br from-aurora-violet/30 to-void-rise text-white/60">
+                    {video.status === 'failed' ? (
+                      <span className="text-red-400">Generierung fehlgeschlagen</span>
+                    ) : (
+                      <>
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+                        <span className="text-sm">Video wird generiert…</span>
+                      </>
+                    )}
                   </div>
                 )}
                 <div className="p-5">
