@@ -148,7 +148,7 @@ OpenDisruption/
 │   │   └── 001_family_profiles.sql  # DB Schema
 │   └── scripts/
 │       └── init-family-profiles.sh  # Init Script
-├── canon/family/               # Familienprofile
+├── canon/family/               # Kompatibilitätslinks -> /Datenspeicher/.../Benutzer-Ordner/<Name>/Profil.md
 │   ├── sven-profile.md
 │   ├── samira-profile.md
 │   └── sineo-profile.md
@@ -303,7 +303,9 @@ curl -X GET http://localhost:8003/conversations \
 
 ## 👨‍👩‍👦 Familienprofile
 
-Siehe detaillierte Profile:
+Kanonische Quelle: `/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner/<Name>/`
+
+OpenDisruption hält dafür Kompatibilitätslinks im Repo:
 - [Sven's Profil](../../canon/family/sven-profile.md)
 - [Samira's Profil](../../canon/family/samira-profile.md)
 - [Sineo's Profil](../../canon/family/sineo-profile.md)

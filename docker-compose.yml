@@ -423,6 +423,7 @@ services:
       - ./experiences:/experiences
       - ./canon:/canon
       - ./data/supervisor:/data
+      - /Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner:/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner:rw
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
@@ -499,6 +500,7 @@ services:
       - ./canon:/canon:ro
       - ./experiences:/data/experiences:rw
       - ./extracts/family-private:/data/family-private:rw
+      - /Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner:/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner:rw
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432

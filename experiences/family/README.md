@@ -19,3 +19,5 @@ Dokumentation familiärer Erfahrungen, Rituale, Entwicklungen und Erkenntnisse f
 
 ## WICHTIG
 Alle Inhalte hier sind FAMILY_PRIVATE. Kein Agent darf diese Daten an externe APIs senden. Alle Zugriffe werden geloggt.
+
+Die drei personenspezifischen Erfahrungsdateien sind Kompatibilitätslinks auf die kanonischen Benutzerordner unter `/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner/<Name>/03-Erfahrungen/Erfahrungen.md`.

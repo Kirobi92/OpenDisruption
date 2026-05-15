@@ -111,7 +111,8 @@
 ---
 
 ### 5. Familienprofile (Canon)
-✅ **Verzeichnis:** `canon/family/`
+✅ **Kanonischer Speicher:** `/Datenspeicher/OpenDisruption_Datenstruktur/Benutzer-Ordner/<Name>/`
+✅ **Repo-Kompatibilitätslinks:** `canon/family/`
 
 **Profile:**
 - `sven-profile.md` - Sven Darusi (Admin, Visionär)
