@@ -36,6 +36,8 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   distDir: '.next-build',
+  basePath: '/dashboard',
+  assetPrefix: '/dashboard',
   poweredByHeader: false,
   async rewrites() {
     return buildRewrites();

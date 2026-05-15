@@ -208,4 +208,4 @@ async def routing_table() -> dict:
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=os.getenv("BIND_HOST", "127.0.0.1"), port=PORT, reload=False)
+    uvicorn.run("main:app", host=os.getenv("BIND_HOST", "0.0.0.0"), port=PORT, reload=False)
