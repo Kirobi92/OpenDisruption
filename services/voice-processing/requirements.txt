@@ -15,7 +15,7 @@ scipy>=1.11.0
 webrtcvad>=2.0.10
 
 # TTS (will use Piper via subprocess, but these are useful)
-phonemizer>=3.2.0
+phonemizer>=3.3.0
 
 # Utilities
 aiofiles>=23.0.0
