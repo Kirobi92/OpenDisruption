@@ -11,5 +11,5 @@ aiofiles==25.1.0
 pillow==12.2.0
 python-dotenv==1.2.2
 httpx==0.28.1
-requests==2.34.0
+requests==2.34.2
 qdrant-client==1.14.0
