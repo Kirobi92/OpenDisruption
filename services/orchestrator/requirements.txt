@@ -6,7 +6,7 @@ python>=3.10
 # Async & Event Loop
 asyncio>=3.4.3
 aiohttp>=3.13.5
-aiofiles>=23.0.0
+aiofiles>=25.1.0
 
 # Database
 asyncpg>=0.29.0
