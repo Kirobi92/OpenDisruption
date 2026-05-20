@@ -1,8 +1,0 @@
-name: BROKEN TEST WORKFLOW
-on: push
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "${{ toJSON(github.INVALID_EXPRESSION) }}"  # intentional error
