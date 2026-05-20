@@ -87,3 +87,22 @@ jobs:
             -d "parse_mode=Markdown" \
             -d "text=${MESSAGE}" \
             -d "disable_web_page_preview=true" > /dev/null
+
+      - name: Telegram-Notification bei Lint-Erfolg
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIROBI_LINT_NOTIFY_SUCCESS: ${{ vars.KIROBI_LINT_NOTIFY_SUCCESS || 'false' }}
+        run: |
+          # Nur senden wenn KIROBI_LINT_NOTIFY_SUCCESS=true (Standard: false für ruhigen Betrieb)
+          if [ "${KIROBI_LINT_NOTIFY_SUCCESS}" != "true" ]; then
+            echo "Success-Notification deaktiviert (KIROBI_LINT_NOTIFY_SUCCESS=false)"
+            exit 0
+          fi
+          MESSAGE="✅ *lint-workflows.yml PASSED*%0A%0A*Repo:* \`${{ github.repository }}\`%0A*Branch:* \`${{ github.ref_name }}\`%0A*Commit:* \`${{ github.sha }}\`%0A%0AAlle Workflows sind lint-clean — actionlint Exit 0.%0A👉 https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "parse_mode=Markdown" \
+            -d "text=${MESSAGE}" \
+            -d "disable_web_page_preview=true" > /dev/null
