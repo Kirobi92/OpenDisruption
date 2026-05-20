@@ -64,8 +64,8 @@ jobs:
       - name: GitHub Job Summary
         if: always()
         run: |
-          echo "## 📊 APK Download Report — $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 APK Download Report — $(date -u +%Y-%m-%d)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # History JSON auslesen und als Tabelle darstellen
           python3 - << 'PYEOF'

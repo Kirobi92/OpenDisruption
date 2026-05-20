@@ -67,7 +67,9 @@ jobs:
               if echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: error:'; then
                 FILE=$(echo "$line" | cut -d: -f1)
                 LINE=$(echo "$line" | cut -d: -f2)
-                MSG=$(echo "$line" | sed 's/^[^:]*:[0-9]*:[0-9]*: error: //')
+                # Remove "file:line:col: error: " prefix using bash string operations
+                TRIMMED="${line#*: error: }"
+                MSG="${TRIMMED%% \[*\]}"
                 echo "::error file=${FILE},line=${LINE}::${MSG}"
               fi
             done <<< "$LINT_OUTPUT"

@@ -24,7 +24,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # Kern-Abhängigkeiten für kirobi_core und alle Service-Tests
-          pip install pytest pytest-asyncio httpx fastapi pydantic python-jose[cryptography] passlib[bcrypt] python-multipart aiofiles requests
+          pip install pytest pytest-asyncio httpx fastapi pydantic "python-jose[cryptography]" "passlib[bcrypt]" python-multipart aiofiles requests
 
       - name: Unit-Tests ausführen
         run: python -m pytest tests/unit -q
@@ -66,7 +66,7 @@ jobs:
       - name: Abhängigkeiten installieren
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio httpx fastapi pydantic python-jose[cryptography] passlib[bcrypt] python-multipart aiofiles requests
+          pip install pytest pytest-asyncio httpx fastapi pydantic "python-jose[cryptography]" "passlib[bcrypt]" python-multipart aiofiles requests
 
       - name: kirobi_core doctor (offline)
         run: python -m kirobi_core doctor || true
