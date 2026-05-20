@@ -1,0 +1,76 @@
+name: Lint GitHub Actions Workflows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: actionlint — Workflow Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: actionlint installieren
+        run: |
+          ACTIONLINT_VERSION="1.7.12"
+          curl -sSL "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin actionlint
+          actionlint --version
+
+      - name: Alle Workflows linten
+        id: lint
+        run: |
+          set +e
+          LINT_OUTPUT=$(actionlint .github/workflows/*.yml 2>&1)
+          LINT_EXIT=$?
+          set -e
+
+          # GitHub Job-Summary ausgeben
+          {
+            echo "## 🔍 actionlint Lint Results"
+            echo ""
+            echo "**Commit:** \`${{ github.sha }}\`"
+            echo "**Branch:** \`${{ github.ref_name }}\`"
+            echo ""
+            echo "### Geprüfte Workflows"
+            for f in .github/workflows/*.yml; do
+              echo "- \`$f\`"
+            done
+            echo ""
+            if [ $LINT_EXIT -eq 0 ]; then
+              echo "### ✅ Alle Workflows sind lint-clean"
+              echo ""
+              echo "> Keine Fehler gefunden — actionlint Exit 0"
+            else
+              echo "### ❌ Lint-Fehler gefunden"
+              echo ""
+              echo "\`\`\`"
+              echo "$LINT_OUTPUT"
+              echo "\`\`\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Fehler-Annotations für PR-UX
+          if [ $LINT_EXIT -ne 0 ]; then
+            while IFS= read -r line; do
+              # Format: file:line:col: error: message [rule]
+              if echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: error:'; then
+                FILE=$(echo "$line" | cut -d: -f1)
+                LINE=$(echo "$line" | cut -d: -f2)
+                MSG=$(echo "$line" | sed 's/^[^:]*:[0-9]*:[0-9]*: error: //')
+                echo "::error file=${FILE},line=${LINE}::${MSG}"
+              fi
+            done <<< "$LINT_OUTPUT"
+          fi
+
+          exit $LINT_EXIT
