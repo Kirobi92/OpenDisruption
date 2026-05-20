@@ -74,3 +74,16 @@ jobs:
           fi
 
           exit $LINT_EXIT
+
+      - name: Telegram-Notification bei Lint-Fehler
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          MESSAGE="❌ *lint-workflows.yml FAILED*%0A%0A*Repo:* \`${{ github.repository }}\`%0A*Branch:* \`${{ github.ref_name }}\`%0A*Commit:* \`${{ github.sha }}\`%0A%0AActionlint hat Fehler in GitHub Actions Workflows gefunden.%0A👉 https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "parse_mode=Markdown" \
+            -d "text=${MESSAGE}" \
+            -d "disable_web_page_preview=true" > /dev/null
