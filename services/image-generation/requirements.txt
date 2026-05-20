@@ -7,8 +7,8 @@ python-dotenv>=1.0.0
 Pillow>=10.0.0
 aiofiles>=23.2.1
 numpy<2
-huggingface_hub>=0.26.0,<2.0
+huggingface_hub>=1.15.0,<2.0
 diffusers==0.38.0
-transformers==4.57.6
+transformers==5.9.0
 accelerate==1.13.0
 safetensors
