@@ -1,10 +1,16 @@
 # Kirobi / Disruptive OS
 
+[![CI](https://github.com/Kirobi92/OpenDisruption/actions/workflows/ci.yml/badge.svg)](https://github.com/Kirobi92/OpenDisruption/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](./CHANGELOG.md)
+[![Local-First](https://img.shields.io/badge/architecture-local--first-green.svg)](#architektur)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](./kirobi_core/)
+
 > **Local-first, agentengesteuertes Betriebssystem & Ökosystem für Familie, Kreativität und Business**
 
 > 🚧 **KIDI/KEYBRODI Multi-Agent-Rollout (Phase 0):** Architektur, Roadmap und Vault-Topologie liegen in [`keycodi/`](./keycodi/README.md) und [`obsidian/`](./obsidian/README.md). Der lokale OpenCode-Agent ("KeyCodi") arbeitet die Phasen 0–6 aus [`keycodi/ROADMAP.md`](./keycodi/ROADMAP.md) sequentiell ab, bis KEYBRODI die Orchestrierung übernehmen kann.
 
-> 🌐 **LAN/Tailscale Web UI:** Der sichere Komfort-Zugriff läuft über genau einen Caddy-Edge. Starte mit `make webui-up`, prüfe den Host mit `make tailscale-doctor` und liste erreichbare Dienste mit `make tailscale-services`; Details in [`docs/REMOTE-ACCESS.md`](./docs/REMOTE-ACCESS.md).
+> 🌐 **LAN Web UI:** Der sichere Komfort-Zugriff läuft über genau einen Caddy-Edge. Starte mit `make webui-up` und publiziere `kirobi.local` bei Bedarf mit `sudo make pwa-mdns`; Details in [`docs/REMOTE-ACCESS.md`](./docs/REMOTE-ACCESS.md).
 
 ---
 
@@ -68,7 +74,7 @@ make status               # Health prüfen
 ### Erste Schritte nach dem Start
 
 1. **Family PWA** unter `http://localhost:3002` oder via Caddy unter `http://kirobi.local/`
-2. **Admin-Dashboard** unter `http://localhost:3003`
+2. **Admin-Dashboard** unter `http://localhost:3003/dashboard` oder `http://kirobi.local/dashboard`
 3. **Voice-UI** unter `http://localhost:3004`
 4. **Open WebUI** (`http://localhost:3000`) und **Flowise** (`http://localhost:3001`) nur als Zusatzoberflächen öffnen
 5. System-Gesundheit prüfen: `make status`
