@@ -1,0 +1,152 @@
+name: Weekly APK Download Report
+
+on:
+  schedule:
+    # Jeden Montag 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run (kein Telegram-Versand)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write  # Für History-JSON commit
+
+concurrency:
+  group: weekly-download-report
+  cancel-in-progress: false
+
+jobs:
+  download-report:
+    name: APK Download Stats abrufen & reporten
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      GITHUB_REPO: ${{ github.repository }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || '1066082496' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so we can commit updated JSON
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: GitHub CLI auth check
+        run: gh auth status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Download History Script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ env.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ env.TELEGRAM_CHAT_ID }}
+          # Dry-run: Token leer lassen wenn dry_run=true
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "🔬 DRY-RUN: Telegram-Versand deaktiviert"
+            export TELEGRAM_BOT_TOKEN=""
+          fi
+          python3 scripts/apk-download-history.py
+
+      - name: GitHub Job Summary
+        if: always()
+        run: |
+          echo "## 📊 APK Download Report — $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # History JSON auslesen und als Tabelle darstellen
+          python3 - << 'PYEOF'
+          import json, os, sys
+          from pathlib import Path
+
+          history_path = Path("scripts/apk-download-history.json")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY", "/dev/stdout")
+
+          if not history_path.exists():
+              print("⚠️ History-Datei nicht gefunden", file=sys.stderr)
+              sys.exit(0)
+
+          with open(history_path) as f:
+              history = json.load(f)
+
+          lines = []
+          lines.append("| Tag | Diese Woche Debug | Diese Woche Release | Gesamt | Trend | 4W-Trend |")
+          lines.append("|-----|-------------------|---------------------|--------|-------|----------|")
+
+          for tag, data in history.get("tags", {}).items():
+              snaps = data.get("snapshots", [])
+              if not snaps:
+                  continue
+              latest = snaps[-1]
+              totals = [s["total"] for s in snaps]
+
+              # Sparkline
+              blocks = "▁▂▃▄▅▆▇█"
+              vmax = max(totals) if totals else 1
+              spark = "".join(blocks[min(int(v / vmax * 7), 7)] for v in totals[-8:])
+
+              # Trend arrow
+              if len(totals) >= 2:
+                  delta = totals[-1] - totals[-2]
+                  arrow = f"↑+{delta}" if delta > 0 else (f"↓{delta}" if delta < 0 else "→±0")
+              else:
+                  arrow = "–"
+
+              # 4W Trend
+              recent = totals[-4:]
+              previous = totals[-8:-4]
+              avg_r = sum(recent) / len(recent) if recent else 0
+              avg_p = sum(previous) / len(previous) if previous else (totals[0] if totals else 0)
+              if avg_p and avg_p != 0:
+                  pct = ((avg_r - avg_p) / avg_p) * 100
+                  t4w = f"+{pct:.0f}%" if pct >= 0 else f"{pct:.0f}%"
+              else:
+                  t4w = "–"
+
+              lines.append(
+                  f"| `{tag}` | {latest['debug_downloads']} | "
+                  f"{latest['release_downloads']} | {latest['total']} | "
+                  f"{spark} {arrow} | {t4w} |"
+              )
+
+          grand = sum(
+              snaps[-1]["total"]
+              for data in history.get("tags", {}).values()
+              for snaps in [data.get("snapshots", [])]
+              if snaps
+          )
+          lines.append(f"\n**Gesamtdownloads über alle Tags:** {grand}")
+          lines.append(f"\n_Generiert: $(date -u '+%Y-%m-%d %H:%M UTC')_")
+
+          with open(summary_path, "a") as f:
+              f.write("\n".join(lines) + "\n")
+
+          print("✅ Job-Summary geschrieben")
+          PYEOF
+
+      - name: Commit updated history JSON
+        run: |
+          git config user.name  "Kirobi Agent"
+          git config user.email "kirobi@opendisruption.local"
+          git add scripts/apk-download-history.json scripts/apk-milestone-fired.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen — kein Commit nötig"
+          else
+            git commit -m "chore(stats): weekly APK download snapshot $(date -u +%G-W%V)"
+            git push
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
