@@ -54,8 +54,9 @@ jobs:
           fi
 
           SC_ISSUE_COUNT=$(echo "$SC_OUTPUT" | grep -c "^In " || true)
-          # SC_ISSUE_COUNT geloggt für zukünftige Dashboard-Integration
           echo "sc_issue_count=$SC_ISSUE_COUNT"
+          # Als Step-Output exportieren für Job-Summary-Tabelle
+          echo "sc_issue_count=$SC_ISSUE_COUNT" >> "$GITHUB_OUTPUT"
 
           {
             echo "## 🐚 shellcheck Ergebnisse"
@@ -118,6 +119,7 @@ jobs:
             echo "|--------|------|"
             echo "| Geprüfte Workflows | ${WORKFLOW_COUNT} |"
             echo "| Fehler gesamt | ${ERROR_COUNT} |"
+            echo "| shellcheck Findings | ${{ steps.shellcheck.outputs.sc_issue_count || '0' }} |"
             if [ $LINT_EXIT -eq 0 ]; then
               echo "| Ergebnis | ✅ lint-clean |"
             else
