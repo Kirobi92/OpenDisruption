@@ -22,10 +22,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY services/music-generation/requirements.txt .
+# torch 2.1.0 required by audiocraft==1.3.0 (strict pin)
+# xformers==0.0.22.post7 in requirements.txt (audiocraft requires xformers<0.0.23)
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir \
-      torch==2.5.0+cu121 \
-      torchaudio==2.5.0+cu121 \
+      torch==2.1.0+cu121 \
+      torchaudio==2.1.0+cu121 \
       --index-url https://download.pytorch.org/whl/cu121 \
  && pip install --no-cache-dir -r requirements.txt
 
