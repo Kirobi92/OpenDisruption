@@ -2,26 +2,31 @@
 """
 apk-download-history.py — Multi-Tag APK Download History Tracker
 Akkumuliert wöchentliche Download-Zahlen für ALLE Release-Tags.
-Milestone-Alerts pro Tag, konfigurierbar via apk-milestone-config.json.
+Milestone-Config wird via /api/milestone-config vom Kirobi-Backend geladen
+(Fallback: lokale apk-milestone-config.json wenn API nicht erreichbar).
 
 ENV: GITHUB_REPO (default: Kirobi92/OpenDisruption)
      TELEGRAM_BOT_TOKEN
      TELEGRAM_CHAT_ID (default: 1066082496)
+     KIROBI_API_BASE (default: http://127.0.0.1:8765)
 """
 
 import json
 import os
 import subprocess
 import sys
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 # ── Config ────────────────────────────────────────────────────────────────────
 REPO           = os.getenv("GITHUB_REPO", "Kirobi92/OpenDisruption")
 BOT_TOKEN      = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID        = os.getenv("TELEGRAM_CHAT_ID", "1066082496")
+KIROBI_API     = os.getenv("KIROBI_API_BASE", "http://127.0.0.1:8765")
 SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
 HISTORY_FILE   = os.path.join(SCRIPT_DIR, "apk-download-history.json")
-MILESTONE_FILE = os.path.join(SCRIPT_DIR, "apk-milestone-config.json")
+MILESTONE_FILE = os.path.join(SCRIPT_DIR, "apk-milestone-config.json")  # Fallback only
 FIRED_FILE     = os.path.join(SCRIPT_DIR, "apk-milestone-fired.json")
 MAX_WEEKS      = 52  # 1 Jahr History
 
@@ -48,7 +53,19 @@ def load_history() -> dict:
 
 
 def load_milestone_config() -> dict:
-    return load_json(MILESTONE_FILE, {"global_milestones": [5, 10, 25, 50, 100], "tag_overrides": {}})
+    """Lädt Milestone-Config von /api/milestone-config (Kirobi-Backend).
+    Fallback auf lokale apk-milestone-config.json wenn API nicht erreichbar."""
+    url = f"{KIROBI_API}/api/milestone-config"
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            cfg = data.get("config", data)
+            cfg.pop("_comment", None)
+            print(f"✅ Milestone-Config von API geladen: {url}")
+            return cfg
+    except Exception as e:
+        print(f"[WARN] /api/milestone-config nicht erreichbar ({e}) — Fallback auf lokale JSON")
+        return load_json(MILESTONE_FILE, {"global_milestones": [5, 10, 25, 50, 100], "tag_overrides": {}})
 
 
 def load_fired() -> dict:
