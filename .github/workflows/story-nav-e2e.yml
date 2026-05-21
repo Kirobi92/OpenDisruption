@@ -147,3 +147,4 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           KIROBI_STORY_E2E_NOTIFY_SUCCESS: ${{ vars.KIROBI_STORY_E2E_NOTIFY_SUCCESS }}
+# KIROBI_STORY_E2E_NOTIFY_SUCCESS: false (default, ruhiger Betrieb) — gesetzt 2026-05-21 via gh variable
