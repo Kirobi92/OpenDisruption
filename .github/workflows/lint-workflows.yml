@@ -35,6 +35,11 @@ jobs:
           LINT_EXIT=$?
           set -e
 
+          # Zähler berechnen
+          WORKFLOW_FILES=(.github/workflows/*.yml)
+          WORKFLOW_COUNT=${#WORKFLOW_FILES[@]}
+          ERROR_COUNT=$(echo "$LINT_OUTPUT" | grep -cE '^[^:]+:[0-9]+:[0-9]+: error:' || true)
+
           # GitHub Job-Summary ausgeben
           {
             echo "## 🔍 actionlint Lint Results"
@@ -42,17 +47,35 @@ jobs:
             echo "**Commit:** \`${{ github.sha }}\`"
             echo "**Branch:** \`${{ github.ref_name }}\`"
             echo ""
-            echo "### Geprüfte Workflows"
-            for f in .github/workflows/*.yml; do
-              echo "- \`$f\`"
+            echo "### 📊 Zusammenfassung"
+            echo ""
+            echo "| Metrik | Wert |"
+            echo "|--------|------|"
+            echo "| Geprüfte Workflows | ${WORKFLOW_COUNT} |"
+            echo "| Fehler gesamt | ${ERROR_COUNT} |"
+            if [ $LINT_EXIT -eq 0 ]; then
+              echo "| Ergebnis | ✅ lint-clean |"
+            else
+              echo "| Ergebnis | ❌ Fehler gefunden |"
+            fi
+            echo ""
+            echo "### 📋 Workflow-Details"
+            echo ""
+            echo "| Workflow | Status | Fehler |"
+            echo "|----------|--------|--------|"
+            for f in "${WORKFLOW_FILES[@]}"; do
+              fname=$(basename "$f")
+              # Fehler für diese Datei zählen
+              file_errors=$(echo "$LINT_OUTPUT" | grep -cE "^\.github/workflows/${fname}:[0-9]+:[0-9]+: error:" || true)
+              if [ "$file_errors" -eq 0 ]; then
+                echo "| \`${fname}\` | ✅ OK | 0 |"
+              else
+                echo "| \`${fname}\` | ❌ Fehler | ${file_errors} |"
+              fi
             done
             echo ""
-            if [ $LINT_EXIT -eq 0 ]; then
-              echo "### ✅ Alle Workflows sind lint-clean"
-              echo ""
-              echo "> Keine Fehler gefunden — actionlint Exit 0"
-            else
-              echo "### ❌ Lint-Fehler gefunden"
+            if [ $LINT_EXIT -ne 0 ]; then
+              echo "### ❌ Lint-Fehler Detail"
               echo ""
               echo "\`\`\`"
               echo "$LINT_OUTPUT"
