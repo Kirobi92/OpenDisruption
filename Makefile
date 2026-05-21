@@ -445,3 +445,20 @@ aionui-install:
 external-update-submodules:
 	@git submodule update --remote external/hermes-agent external/openclaw
 	@echo "Submodules aktualisiert. Image-Rebuild mit: docker compose --profile external-agents build"
+
+## shellcheck — lokale Parität zu CI (lint-workflows.yml Step "shellcheck installieren")
+## Prüft SC2086/SC2001/SC2102 identisch zu CI; Exit 0 auch bei Warnungen (nur informativ)
+shellcheck-local:
+	@echo "=== shellcheck lokal (CI-Parität) ==="
+	@shellcheck --version
+	@SHELL_FILES=$$(find . -type f \( -name "*.sh" -o -name "*.bash" \) \
+	  ! -path "./.git/*" ! -path "./node_modules/*" ! -path "*/node_modules/*" \
+	  ! -path "./external/*" ! -path "./.venv/*" 2>/dev/null); \
+	if [ -z "$$SHELL_FILES" ]; then \
+	  echo "Keine Shell-Skripte (.sh/.bash) gefunden."; \
+	else \
+	  echo "Gefundene Skripte:"; \
+	  echo "$$SHELL_FILES"; \
+	  echo ""; \
+	  shellcheck -S warning $$SHELL_FILES && echo "✅ shellcheck: keine Warnungen" || echo "⚠️  shellcheck: Warnungen gefunden (nicht blocking)"; \
+	fi
