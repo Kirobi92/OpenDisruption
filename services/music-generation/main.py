@@ -393,6 +393,8 @@ async def health_check():
 
     ollama_status = await _check_ollama()
 
+    heartmula_model_exists = _HEARTMULA_MODEL_PATH.exists()
+
     overall = "healthy" if db_ok and ollama_status["reachable"] else "degraded"
     return {
         "status": overall,
@@ -403,6 +405,11 @@ async def health_check():
         "audiocraft": {
             "available": _AUDIOCRAFT_AVAILABLE,
             "note": "Placeholder-WAV wird genutzt wenn AudioCraft nicht installiert ist",
+        },
+        "heartmula": {
+            "available": _HEARTMULA_AVAILABLE,
+            "model_exists": heartmula_model_exists,
+            "model_path": str(_HEARTMULA_MODEL_PATH),
         },
     }
 

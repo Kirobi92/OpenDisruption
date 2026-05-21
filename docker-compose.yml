@@ -327,7 +327,7 @@ services:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8013/health')"]
       interval: 30s
       timeout: 10s
-      start_period: 180s
+      start_period: 120s
       retries: 3
 
   video-generation:
