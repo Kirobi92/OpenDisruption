@@ -148,17 +148,19 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-          # Fehler-Annotations für PR-UX
+          # Fehler-Annotations für PR-UX (mit Spalte für präzise Inline-Markierung im Diff)
           if [ $LINT_EXIT -ne 0 ]; then
+            # Top-Level Summary-Annotation: erscheint oben in PR-Checks
+            echo "::error::actionlint: ${ERROR_COUNT} Fehler in ${WORKFLOW_COUNT} Workflow-Datei(en) gefunden. Vollständige Details im Job-Summary (Actions Tab)."
             while IFS= read -r line; do
               # Format: file:line:col: error: message [rule]
               if echo "$line" | grep -qE '^[^:]+:[0-9]+:[0-9]+: error:'; then
                 FILE=$(echo "$line" | cut -d: -f1)
                 LINE=$(echo "$line" | cut -d: -f2)
-                # Remove "file:line:col: error: " prefix using bash string operations
+                COL=$(echo "$line" | cut -d: -f3)
+                # Gesamte Nachricht (inkl. Rule-Bezeichnung) für maximale Kontextinformation
                 TRIMMED="${line#*: error: }"
-                MSG="${TRIMMED%% \[*\]}"
-                echo "::error file=${FILE},line=${LINE}::${MSG}"
+                echo "::error file=${FILE},line=${LINE},col=${COL}::actionlint: ${TRIMMED}"
               fi
             done <<< "$LINT_OUTPUT"
           fi
