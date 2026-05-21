@@ -90,7 +90,9 @@ jobs:
         id: lint
         run: |
           set +e
-          LINT_OUTPUT=$(actionlint .github/workflows/*.yml 2>&1)
+          # shellcheck disable=SC2086
+          # SC2086 (info): actionlint -shellcheck übergibt Argumente direkt — disable damit Exit 0 bei reinen info-Findings
+          LINT_OUTPUT=$(actionlint -shellcheck "shellcheck --exclude=SC2086" .github/workflows/*.yml 2>&1)
           LINT_EXIT=$?
           set -e
 
