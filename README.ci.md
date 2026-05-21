@@ -25,7 +25,20 @@ Kein Hardcode, kein manuelles Tracking — automatisch skalierend bei neuen `.ym
 
 ---
 
-## Aktuelle Workflows (Stand: 2026-05-21)
+## Produktiv-Update: 6→7 via unit-tests.yml (Stand: 2026-05-22)
+
+`unit-tests.yml` wurde produktiv hinzugefügt (OPE-217/218). WORKFLOW_COUNT ist damit real auf **7** gestiegen — kein Mock nötig, der Delta-Alert hat korrekt funktioniert:
+
+| Event | WORKFLOW_COUNT | Trigger |
+|---|---|---|
+| Vor unit-tests.yml | 6 | — |
+| Nach unit-tests.yml Commit | **7** | Automatisch via Glob-Array ✅ |
+
+**Bestätigt:** `WORKFLOW_COUNT=${#WORKFLOW_FILES[@]}` zählt live — keine manuelle Pflege erforderlich.
+
+---
+
+## Aktuelle Workflows (Stand: 2026-05-22)
 
 | # | Datei | Zweck |
 |---|---|---|
@@ -34,7 +47,8 @@ Kein Hardcode, kein manuelles Tracking — automatisch skalierend bei neuen `.ym
 | 3 | `lint-workflows.yml` | actionlint + shellcheck für alle Workflows |
 | 4 | `nightly-audit.yml` | Nächtlicher Sicherheits- und Qualitäts-Audit |
 | 5 | `story-nav-e2e.yml` | Playwright E2E: Story-Navigation im APK-Frontend |
-| 6 | `weekly-download-report.yml` | Wöchentlicher APK-Download-Stats-Report via Telegram |
+| 6 | `unit-tests.yml` | Vitest Unit-Tests + pytest für alle Services |
+| 7 | `weekly-download-report.yml` | Wöchentlicher APK-Download-Stats-Report via Telegram |
 
 ---
 
