@@ -1,0 +1,149 @@
+name: Story Navigation E2E (Playwright)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/test_story_nav_e2e.py'
+      - 'tests/conftest.py'
+      - 'frontend/src/stories/**'
+      - 'frontend/src/StoryIndex.tsx'
+      - 'frontend/src/App.tsx'
+      - '.github/workflows/story-nav-e2e.yml'
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'tests/test_story_nav_e2e.py'
+      - 'tests/conftest.py'
+      - 'frontend/src/stories/**'
+      - 'frontend/src/StoryIndex.tsx'
+      - 'frontend/src/App.tsx'
+      - '.github/workflows/story-nav-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: story-nav-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Guard: Bei pull_request nur wenn Label 'e2e' oder 'frontend' gesetzt ist
+  check-labels:
+    name: "Check PR Labels"
+    runs-on: ubuntu-latest
+    outputs:
+      run-e2e: ${{ steps.check.outputs.run-e2e }}
+    steps:
+      - name: Check for e2e or frontend label
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+            echo "run-e2e=true" >> $GITHUB_OUTPUT
+          elif echo '${{ toJson(github.event.pull_request.labels.*.name) }}' | grep -qE '"e2e"|"frontend"'; then
+            echo "run-e2e=true" >> $GITHUB_OUTPUT
+          else
+            echo "run-e2e=false" >> $GITHUB_OUTPUT
+          fi
+
+  story-nav-e2e:
+    name: "Story Nav E2E — Playwright Chromium"
+    needs: check-labels
+    if: needs.check-labels.outputs.run-e2e == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # Standard Desktop-Viewport für Story-Navigation
+      PLAYWRIGHT_VIEWPORT_WIDTH: "1280"
+      PLAYWRIGHT_VIEWPORT_HEIGHT: "800"
+      PLAYWRIGHT_DEVICE_HAS_TOUCH: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements-e2e.txt
+
+      - name: Install Playwright Chromium
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Run Story Navigation E2E Tests
+        id: story-e2e
+        run: |
+          pytest tests/test_story_nav_e2e.py \
+            -v --tb=short --timeout=60
+
+      - name: Write Job Summary
+        if: always()
+        run: |
+          echo "## 🎭 Story Navigation E2E Results" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.story-e2e.outcome }}" == "success" ]; then
+            echo "![PASS](https://img.shields.io/badge/Story%20Nav%20E2E-PASS-brightgreen)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "![FAIL](https://img.shields.io/badge/Story%20Nav%20E2E-FAIL-red)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test-Szenario | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Story-Index erreichbar (/#/story) | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Story-Link vorhanden (music-health-config) | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Klick navigiert zu Story-Route | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Story-Komponente sichtbar nach Navigation | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Zurück zum Story-Index | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deep-Link direkt auf Story-Route | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Story-Pfad im Link angezeigt | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-nav-e2e-failure-${{ github.run_id }}
+          path: |
+            tests/screenshots/
+            tests/*.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Telegram — Failure Notification
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"❌ *Kirobi CI — Story Nav E2E FAILED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\\nCommit: \`${{ github.sha }}\`\\n\\n🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Telegram — Success Notification
+        if: success() && env.KIROBI_STORY_E2E_NOTIFY_SUCCESS == 'true'
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"✅ *Kirobi CI — Story Nav E2E PASSED* (7/7)\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIROBI_STORY_E2E_NOTIFY_SUCCESS: ${{ vars.KIROBI_STORY_E2E_NOTIFY_SUCCESS }}
