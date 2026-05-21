@@ -48,6 +48,35 @@ DATABASE_URL = (
     f"/{os.getenv('POSTGRES_DB', 'kirobi')}"
 )
 AUDIO_STORAGE_PATH = Path(os.getenv("AUDIO_STORAGE_PATH", "/data/audio"))
+MUSIC_HEALTH_REFRESH_S = int(os.getenv("KIROBI_MUSIC_HEALTH_REFRESH_S", "30"))
+
+# Runtime-Override für Health-Refresh-Intervall (überleben Neustarts per JSON-Datei)
+_OVERRIDE_FILE = Path(os.getenv("KIROBI_MUSIC_OVERRIDE_FILE", "/data/music_health_override.json"))
+_music_health_refresh_override: Optional[int] = None
+
+
+def _load_override() -> None:
+    """Lädt persistierten Runtime-Override aus JSON-Datei beim Start."""
+    global _music_health_refresh_override
+    try:
+        if _OVERRIDE_FILE.exists():
+            data = json.loads(_OVERRIDE_FILE.read_text())
+            val = data.get("refresh_s")
+            if isinstance(val, int) and val > 0:
+                _music_health_refresh_override = val
+    except Exception:
+        pass  # Korrupte Datei ignorieren; ENV-Wert bleibt aktiv
+
+
+def _save_override(refresh_s: int) -> None:
+    """Persistiert Runtime-Override in JSON-Datei."""
+    try:
+        _OVERRIDE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _OVERRIDE_FILE.write_text(json.dumps({"refresh_s": refresh_s}))
+    except Exception:
+        pass  # Schreibfehler (z.B. read-only Volume) still ignorieren
+
+
 try:
     AUDIO_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
 except PermissionError:
@@ -196,6 +225,7 @@ def _cors_kwargs() -> dict:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db_pool
+    _load_override()  # Runtime-Override aus JSON laden bevor erste Requests kommen
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
     await _ensure_schema()
     yield
@@ -780,6 +810,49 @@ async def heartmula_transcribe(req: HeartMuLaTranscribeRequest):
         engine = "unavailable"
 
     return {"track_id": req.track_id, "lyrics": lyrics, "engine": engine}
+
+
+@app.get("/api/music-health-config")
+async def music_health_config():
+    """Gibt Konfiguration des Health-Refresh-Intervalls zurück.
+
+    Priorität: Runtime-Override (PUT) > ENV > Default (30s).
+    Wird vom APK-Frontend genutzt um den Badge-Refresh-Takt zu steuern.
+    """
+    if _music_health_refresh_override is not None:
+        return {
+            "refresh_s": _music_health_refresh_override,
+            "source": "runtime_override",
+            "env_var": "KIROBI_MUSIC_HEALTH_REFRESH_S",
+        }
+    source = "env" if os.getenv("KIROBI_MUSIC_HEALTH_REFRESH_S") else "default"
+    return {
+        "refresh_s": MUSIC_HEALTH_REFRESH_S,
+        "source": source,
+        "env_var": "KIROBI_MUSIC_HEALTH_REFRESH_S",
+    }
+
+
+class MusicHealthConfigUpdate(BaseModel):
+    refresh_s: int = Field(..., ge=1, le=3600, description="Refresh-Intervall in Sekunden (1–3600)")
+
+
+@app.put("/api/music-health-config")
+async def update_music_health_config(body: MusicHealthConfigUpdate):
+    """Setzt Runtime-Override für den Health-Refresh-Takt und persistiert ihn in JSON-Datei.
+
+    Der Wert überlebt Backend-Neustarts. Zum Zurücksetzen auf ENV/Default
+    die Override-Datei löschen oder DELETE implementieren.
+    """
+    global _music_health_refresh_override
+    _music_health_refresh_override = body.refresh_s
+    _save_override(body.refresh_s)
+    return {
+        "refresh_s": _music_health_refresh_override,
+        "source": "runtime_override",
+        "persisted": True,
+        "override_file": str(_OVERRIDE_FILE),
+    }
 
 
 if __name__ == "__main__":
