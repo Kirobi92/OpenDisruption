@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tests/test_story_nav_e2e.py'
-      - 'tests/conftest.py'
+      - 'tests/e2e/test_story_nav_e2e.py'
+      - 'tests/e2e/conftest.py'
       - 'frontend/src/stories/**'
       - 'frontend/src/StoryIndex.tsx'
       - 'frontend/src/App.tsx'
@@ -14,8 +14,8 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened, labeled]
     paths:
-      - 'tests/test_story_nav_e2e.py'
-      - 'tests/conftest.py'
+      - 'tests/e2e/test_story_nav_e2e.py'
+      - 'tests/e2e/conftest.py'
       - 'frontend/src/stories/**'
       - 'frontend/src/StoryIndex.tsx'
       - 'frontend/src/App.tsx'
@@ -41,11 +41,11 @@ jobs:
         id: check
         run: |
           if [[ "${{ github.event_name }}" != "pull_request" ]]; then
-            echo "run-e2e=true" >> $GITHUB_OUTPUT
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           elif echo '${{ toJson(github.event.pull_request.labels.*.name) }}' | grep -qE '"e2e"|"frontend"'; then
-            echo "run-e2e=true" >> $GITHUB_OUTPUT
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
           else
-            echo "run-e2e=false" >> $GITHUB_OUTPUT
+            echo "run-e2e=false" >> "$GITHUB_OUTPUT"
           fi
 
   story-nav-e2e:
@@ -83,30 +83,32 @@ jobs:
       - name: Run Story Navigation E2E Tests
         id: story-e2e
         run: |
-          pytest tests/test_story_nav_e2e.py \
+          pytest tests/e2e/test_story_nav_e2e.py \
             -v --tb=short --timeout=60
 
       - name: Write Job Summary
         if: always()
         run: |
-          echo "## 🎭 Story Navigation E2E Results" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.story-e2e.outcome }}" == "success" ]; then
-            echo "![PASS](https://img.shields.io/badge/Story%20Nav%20E2E-PASS-brightgreen)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "![FAIL](https://img.shields.io/badge/Story%20Nav%20E2E-FAIL-red)" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Test-Szenario | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Story-Index erreichbar (/#/story) | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Story-Link vorhanden (music-health-config) | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Klick navigiert zu Story-Route | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Story-Komponente sichtbar nach Navigation | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Zurück zum Story-Index | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deep-Link direkt auf Story-Route | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Story-Pfad im Link angezeigt | ${{ steps.story-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🎭 Story Navigation E2E Results"
+            if [ "${{ steps.story-e2e.outcome }}" == "success" ]; then
+              echo "![PASS](https://img.shields.io/badge/Story%20Nav%20E2E-PASS-brightgreen)"
+            else
+              echo "![FAIL](https://img.shields.io/badge/Story%20Nav%20E2E-FAIL-red)"
+            fi
+            echo ""
+            echo "| Test-Szenario | Status |"
+            echo "|---------------|--------|"
+            echo "| Story-Index erreichbar (/#/story) | ${{ steps.story-e2e.outcome }} |"
+            echo "| Story-Link vorhanden (music-health-config) | ${{ steps.story-e2e.outcome }} |"
+            echo "| Klick navigiert zu Story-Route | ${{ steps.story-e2e.outcome }} |"
+            echo "| Story-Komponente sichtbar nach Navigation | ${{ steps.story-e2e.outcome }} |"
+            echo "| Zurück zum Story-Index | ${{ steps.story-e2e.outcome }} |"
+            echo "| Deep-Link direkt auf Story-Route | ${{ steps.story-e2e.outcome }} |"
+            echo "| Story-Pfad im Link angezeigt | ${{ steps.story-e2e.outcome }} |"
+            echo ""
+            echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload failure artifacts
         if: failure()
@@ -147,4 +149,3 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           KIROBI_STORY_E2E_NOTIFY_SUCCESS: ${{ vars.KIROBI_STORY_E2E_NOTIFY_SUCCESS }}
-# KIROBI_STORY_E2E_NOTIFY_SUCCESS: false (default, ruhiger Betrieb) — gesetzt 2026-05-21 via gh variable
