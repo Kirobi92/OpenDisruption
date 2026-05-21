@@ -44,6 +44,13 @@ jobs:
           {
             echo "## 🔍 actionlint Lint Results"
             echo ""
+            # shields.io HTML-Badges: grün bei Pass, rot bei Fail
+            if [ $LINT_EXIT -eq 0 ]; then
+              echo "![LINT PASS](https://img.shields.io/badge/LINT-PASS-brightgreen?style=flat-square&logo=githubactions&logoColor=white) ![Workflows](https://img.shields.io/badge/Workflows-${WORKFLOW_COUNT}-blue?style=flat-square) ![Errors](https://img.shields.io/badge/Errors-0-brightgreen?style=flat-square)"
+            else
+              echo "![LINT FAIL](https://img.shields.io/badge/LINT-FAIL-red?style=flat-square&logo=githubactions&logoColor=white) ![Workflows](https://img.shields.io/badge/Workflows-${WORKFLOW_COUNT}-blue?style=flat-square) ![Errors](https://img.shields.io/badge/Errors-${ERROR_COUNT}-red?style=flat-square)"
+            fi
+            echo ""
             echo "**Commit:** \`${{ github.sha }}\`"
             echo "**Branch:** \`${{ github.ref_name }}\`"
             echo ""
