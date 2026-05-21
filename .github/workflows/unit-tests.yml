@@ -1,0 +1,120 @@
+name: Frontend Unit Tests (Vitest)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/src/**'
+      - 'frontend/package.json'
+      - 'frontend/vite.config.ts'
+      - 'frontend/tsconfig*.json'
+      - '.github/workflows/unit-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/src/**'
+      - 'frontend/package.json'
+      - 'frontend/vite.config.ts'
+      - 'frontend/tsconfig*.json'
+      - '.github/workflows/unit-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vitest:
+    name: Vitest — Frontend Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Vitest (JSON report)
+        id: vitest
+        run: npm run test -- --reporter=json --outputFile=vitest-results.json
+        continue-on-error: true
+        # JSON-Report für dynamische Job-Summary; Exit-Code wird in next step geprüft
+
+      - name: Write Job Summary (dynamisch via vitest --reporter=json)
+        if: always()
+        run: |
+          echo "## 🧪 Vitest Unit Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.vitest.outcome }}" == "success" ]; then
+            echo "![PASS](https://img.shields.io/badge/Unit%20Tests-PASS-brightgreen)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "![FAIL](https://img.shields.io/badge/Unit%20Tests-FAIL-red)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test-File | Tests | Passed | Failed | Skipped | Duration |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|------:|-------:|-------:|--------:|---------:|" >> $GITHUB_STEP_SUMMARY
+          if [ -f vitest-results.json ]; then
+            CWD=$(pwd)/
+            jq -r --arg cwd "$CWD" '
+              .testResults[] |
+              (if .numFailingTests == 0 then "✅" else "❌" end) as $icon |
+              (.name | ltrimstr($cwd)) as $file |
+              (.numPassingTests + .numFailingTests + .numPendingTests) as $total |
+              (.perfStats.runtime // 0 | . / 1000 * 100 | round / 100 | tostring + "s") as $dur |
+              "| \($icon) `\($file)` | \($total) | \(.numPassingTests) | \(.numFailingTests) | \(.numPendingTests) | \($dur) |"
+            ' vitest-results.json >> $GITHUB_STEP_SUMMARY
+            jq -r '"| **TOTAL** | **\(.numTotalTests)** | **\(.numPassedTests)** | **\(.numFailedTests)** | **\(.numPendingTests)** | — |"' \
+              vitest-results.json >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| _(vitest-results.json nicht gefunden)_ | — | — | — | — | — |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail build if tests failed
+        if: steps.vitest.outcome == 'failure'
+        run: exit 1
+
+      - name: Telegram — Failure Notification
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"❌ *Kirobi CI — Unit Tests FAILED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\\nCommit: \`${{ github.sha }}\`\\n\\n🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Telegram — Success Notification
+        if: success() && env.KIROBI_UNIT_NOTIFY_SUCCESS == 'true'
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"✅ *Kirobi CI — Unit Tests PASSED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIROBI_UNIT_NOTIFY_SUCCESS: ${{ vars.KIROBI_UNIT_NOTIFY_SUCCESS }}
