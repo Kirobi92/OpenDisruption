@@ -46,13 +46,16 @@ jobs:
           SC_EXIT=0
 
           if [ -n "$SHELL_FILES" ]; then
+            # shellcheck disable=SC2086
             SC_OUTPUT=$(shellcheck -S warning $SHELL_FILES 2>&1)
             SC_EXIT=$?
           else
             SC_OUTPUT="Keine Shell-Skripte (.sh/.bash) gefunden."
           fi
 
-          SC_COUNT=$(echo "$SC_OUTPUT" | grep -c "^In " || true)
+          SC_ISSUE_COUNT=$(echo "$SC_OUTPUT" | grep -c "^In " || true)
+          # SC_ISSUE_COUNT geloggt für zukünftige Dashboard-Integration
+          echo "sc_issue_count=$SC_ISSUE_COUNT"
 
           {
             echo "## 🐚 shellcheck Ergebnisse"
@@ -70,16 +73,16 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-          # shellcheck Fehler als Annotations ausgeben
+          # SC-Findings als Annotations ausgeben
           if [ $SC_EXIT -ne 0 ]; then
             echo "$SC_OUTPUT" | grep -E "^In .+ line [0-9]+:" | while IFS= read -r line; do
-              FILE=$(echo "$line" | sed 's/^In \(.*\) line [0-9]*:$/\1/')
-              LINE=$(echo "$line" | sed 's/^In .* line \([0-9]*\):$/\1/')
-              echo "::warning file=${FILE},line=${LINE}::shellcheck Warnung — bitte prüfen"
+              FILE="${line#In }"; FILE="${FILE% line*}"
+              LINENO="${line##* line }"; LINENO="${LINENO%%:*}"
+              echo "::warning file=${FILE},line=${LINENO}::shellcheck Warnung — bitte prüfen"
             done
           fi
 
-          # shellcheck-Warnungen blockieren den Lint-Job nicht (nur actionlint ist blocking)
+          # SC-Warnungen blockieren den Lint-Job nicht (nur actionlint ist blocking)
           exit 0
 
       - name: Alle Workflows linten
