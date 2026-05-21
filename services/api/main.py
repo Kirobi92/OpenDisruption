@@ -5,16 +5,16 @@ Kirobi Main API Service
 Zone: WORKSPACE
 Purpose: Main API for family interactions with Kirobi
 """
-
 import os
 import json
+import math
 import uuid
 import asyncio
 from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
+from fastapi import FastAPI, Depends, HTTPException, Query, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.security import OAuth2PasswordBearer
@@ -2222,6 +2222,153 @@ async def delete_family_note(name: str, current_user: User = Depends(get_current
         raise HTTPException(status_code=404, detail="note not found")
     path.unlink()
     return None
+
+
+# ── APK Download-History Endpoint ─────────────────────────────────────────────
+# Liest apk-download-history.json aus dem scripts/-Verzeichnis und liefert paginierte Daten.
+# Keine Auth required — öffentliche Statistik (kein personenbezogener Inhalt).
+
+_APK_HISTORY_PATH = Path(__file__).parent.parent / "scripts" / "apk-download-history.json"
+_APK_PAGE_SIZE = int(os.getenv("KIROBI_DOWNLOAD_HISTORY_PAGE_SIZE", "5"))
+
+
+class DownloadHistorySnapshot(BaseModel):
+    week: str
+    date: str
+    debug_downloads: int
+    release_downloads: int
+    total: int
+
+
+class DownloadHistoryTagEntry(BaseModel):
+    tag: str
+    snapshots: List[DownloadHistorySnapshot]
+    total_downloads: int
+    latest_week: Optional[str] = None
+
+
+class DownloadHistoryResponse(BaseModel):
+    tags: List[DownloadHistoryTagEntry]
+    page: int
+    page_size: int
+    total_pages: int
+    total_tags: int
+    schema_version: str
+
+
+@app.get("/download-history", response_model=DownloadHistoryResponse, tags=["apk"])
+async def get_download_history(
+    page: int = Query(1, ge=1, description="Seite (1-basiert)"),
+    page_size: int = Query(_APK_PAGE_SIZE, ge=1, le=50, description="Einträge pro Seite"),
+):
+    """
+    Liefert paginierte APK-Download-History aus scripts/apk-download-history.json.
+    totalPages > 1 → Keyboard-Hint '← →' im Frontend anzeigen.
+    Kein Auth-Schutz — nur aggregierte öffentliche GitHub-Statistik.
+    """
+    if not _APK_HISTORY_PATH.is_file():
+        return DownloadHistoryResponse(
+            tags=[], page=1, page_size=page_size, total_pages=1, total_tags=0, schema_version="2.0"
+        )
+
+    try:
+        raw = json.loads(_APK_HISTORY_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        raise HTTPException(status_code=500, detail="download-history JSON konnte nicht gelesen werden")
+
+    schema_version = raw.get("schema_version", "2.0")
+    tags_raw: dict = raw.get("tags", {})
+
+    entries: List[DownloadHistoryTagEntry] = []
+    for tag, tag_data in tags_raw.items():
+        snapshots = [DownloadHistorySnapshot(**s) for s in tag_data.get("snapshots", [])]
+        total = sum(s.total for s in snapshots)
+        latest = snapshots[-1].week if snapshots else None
+        entries.append(DownloadHistoryTagEntry(
+            tag=tag, snapshots=snapshots, total_downloads=total, latest_week=latest
+        ))
+
+    # Neueste Tags zuerst
+    entries.sort(key=lambda e: e.latest_week or "", reverse=True)
+
+    total_tags = len(entries)
+    total_pages = max(1, math.ceil(total_tags / page_size))
+    page = min(page, total_pages)
+    offset = (page - 1) * page_size
+    page_entries = entries[offset: offset + page_size]
+
+    return DownloadHistoryResponse(
+        tags=page_entries,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
+        total_tags=total_tags,
+        schema_version=schema_version,
+    )
+
+
+# ---------------------------------------------------------------------------
+# SC Alert History Endpoint
+# Liest scripts/sc-alert-history.json und liefert die letzten N Alert-Events.
+# ---------------------------------------------------------------------------
+_SC_ALERT_HISTORY_PATH = Path(__file__).parent.parent / "scripts" / "sc-alert-history.json"
+
+
+class ScAlertEvent(BaseModel):
+    """Ein einzelnes SC-Alert-Event aus sc-alert-history.json."""
+    timestamp: str
+    run_id: int
+    run_started_at: str
+    sc_issue_count: int
+    threshold: int
+    delta: int
+
+
+class ScAlertsResponse(BaseModel):
+    """Response für /api/sc-alerts."""
+    alerts: List[ScAlertEvent]
+    total: int
+    limit: int
+    history_file: str
+
+
+@app.get("/sc-alerts", response_model=ScAlertsResponse, tags=["ci"])
+async def get_sc_alerts(
+    limit: int = Query(10, ge=1, le=100, description="Maximale Anzahl Alerts (neueste zuerst)"),
+):
+    """
+    Liefert die letzten SC-Alert-Events aus scripts/sc-alert-history.json.
+    Sortierung: neueste zuerst (desc by timestamp).
+    Kein Auth-Schutz — enthält nur CI-Metriken (keine persönlichen Daten).
+    """
+    if not _SC_ALERT_HISTORY_PATH.is_file():
+        return ScAlertsResponse(
+            alerts=[],
+            total=0,
+            limit=limit,
+            history_file=str(_SC_ALERT_HISTORY_PATH),
+        )
+
+    try:
+        raw: list = json.loads(_SC_ALERT_HISTORY_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        raise HTTPException(status_code=500, detail="sc-alert-history.json konnte nicht gelesen werden")
+
+    if not isinstance(raw, list):
+        raise HTTPException(status_code=500, detail="sc-alert-history.json hat unerwartetes Format (erwartet: Array)")
+
+    # Neueste zuerst
+    raw_sorted = sorted(raw, key=lambda e: e.get("timestamp", ""), reverse=True)
+    total = len(raw_sorted)
+    page_data = raw_sorted[:limit]
+
+    alerts = [ScAlertEvent(**item) for item in page_data]
+    return ScAlertsResponse(
+        alerts=alerts,
+        total=total,
+        limit=limit,
+        history_file=str(_SC_ALERT_HISTORY_PATH),
+    )
 
 
 if __name__ == "__main__":
