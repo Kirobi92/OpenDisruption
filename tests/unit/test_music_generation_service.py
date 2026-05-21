@@ -255,3 +255,37 @@ def test_get_track_found(client):
     assert data["id"] == "track-42"
     assert data["zone"] == "WORKSPACE"
     assert isinstance(data["metadata"], dict)
+
+
+# ---------------------------------------------------------------------------
+# Health — heartmula-missing Szenario (OPE-210)
+# ---------------------------------------------------------------------------
+
+def test_health_heartmula_missing(client):
+    """GET /health → heartmula.available=False wenn heartlib/Modell fehlt.
+
+    Szenario: DB ok, Ollama ok, aber heartmula-Modell-Pfad existiert nicht
+    und heartlib ist nicht installiert.
+    Erwartet: status='healthy' (heartmula ist optional) und
+    heartmula.available=False + model_exists=False.
+    """
+    import services.music_generation.main as svc
+
+    c, mock_conn = client
+    mock_conn.fetchval = AsyncMock(return_value=1)
+
+    mock_http = _make_mock_async_client(get_resp=_make_ollama_tags_response())
+
+    with patch("services.music_generation.main.httpx.AsyncClient", return_value=mock_http), \
+         patch.object(svc, "_HEARTMULA_AVAILABLE", False), \
+         patch("services.music_generation.main._HEARTMULA_MODEL_PATH") as mock_path:
+        mock_path.exists.return_value = False
+        mock_path.__str__ = lambda self: "/data/models/heartmula"
+        resp = c.get("/health")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    # heartmula fehlt → Service läuft trotzdem healthy (audiocraft/heartmula optional)
+    assert data["status"] == "healthy"
+    assert data["heartmula"]["available"] is False
+    assert data["heartmula"]["model_exists"] is False

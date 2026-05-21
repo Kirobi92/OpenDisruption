@@ -199,6 +199,22 @@ export function useServiceHealth(service: string) {
   });
 }
 
+/**
+ * Separater Health-Hook für den Music-Generation-Service mit eigenem Refresh-Interval.
+ * ENV: NEXT_PUBLIC_KIROBI_MUSIC_HEALTH_REFRESH_S (default 30s) — unabhängig vom
+ * generischen 10s-Intervall und vom 15s/60s Download-History-Interval.
+ */
+export function useMusicServiceHealth() {
+  const refreshS = parseInt(
+    process.env.NEXT_PUBLIC_KIROBI_MUSIC_HEALTH_REFRESH_S ?? '30',
+    10,
+  );
+  const refreshMs = (isNaN(refreshS) || refreshS < 5 ? 30 : refreshS) * 1000;
+  return useSWR<HealthResponse>('/api/proxy/music-generation/health', fetcher, {
+    refreshInterval: refreshMs,
+  });
+}
+
 export async function uploadFile(file: File, zone: string): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append('file', file);

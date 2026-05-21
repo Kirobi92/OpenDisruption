@@ -306,6 +306,7 @@ services:
       - OLLAMA_HOST=http://ollama:11434
       - MUSIC_STORAGE_PATH=/data/music
       - HEARTMULA_MODEL_PATH=/data/heartmula
+      - KIROBI_MUSIC_HEALTH_REFRESH_S=${KIROBI_MUSIC_HEALTH_REFRESH_S:-30}
     volumes:
       - music_data:/data/music
       - ${KI_MODEL_PATH:-/Datenspeicher/OpenDisruption_KI_Modelle}/huggingface:/data/hf-cache

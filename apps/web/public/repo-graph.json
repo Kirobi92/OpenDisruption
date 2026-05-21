@@ -265,6 +265,18 @@
       "size": 1
     },
     {
+      "id": ".github/dependabot.yml",
+      "label": "dependabot",
+      "dir": ".github",
+      "ext": "yml",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "red",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": ".github/workflows/README",
       "label": "README",
       "dir": ".github",
@@ -299,6 +311,42 @@
       "agent": "",
       "tags": [],
       "size": 1
+    },
+    {
+      "id": ".github/workflows/lint-workflows.yml",
+      "label": "lint-workflows",
+      "dir": ".github",
+      "ext": "yml",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": ".github/workflows/nightly-audit.yml",
+      "label": "nightly-audit",
+      "dir": ".github",
+      "ext": "yml",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": ".github/workflows/weekly-download-report.yml",
+      "label": "weekly-download-report",
+      "dir": ".github",
+      "ext": "yml",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
     },
     {
       "id": ".opencode/README",
@@ -1261,6 +1309,18 @@
       "size": 1
     },
     {
+      "id": "ARCHITECTURE_REVIEW",
+      "label": "ARCHITECTURE_REVIEW",
+      "dir": "ARCHITECTURE_REVIEW.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "AUDIT-REPORT",
       "label": "AUDIT-REPORT",
       "dir": "AUDIT-REPORT.md",
@@ -1307,6 +1367,18 @@
       "agent": "",
       "tags": [],
       "size": 2
+    },
+    {
+      "id": "CODEBASE_AUDIT",
+      "label": "CODEBASE_AUDIT",
+      "dir": "CODEBASE_AUDIT.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "COMPLETION-REPORT",
@@ -1364,6 +1436,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LR",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "IMPLEMENTATION_ROADMAP",
+      "label": "IMPLEMENTATION_ROADMAP",
+      "dir": "IMPLEMENTATION_ROADMAP.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -1453,6 +1537,18 @@
       "size": 8
     },
     {
+      "id": "RESTRUCTURING_PLAN",
+      "label": "RESTRUCTURING_PLAN",
+      "dir": "RESTRUCTURING_PLAN.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "ROADMAP",
       "label": "ROADMAP",
       "dir": "ROADMAP.md",
@@ -1472,6 +1568,54 @@
       "zone": "WORKSPACE",
       "quadrant": "LR",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "SECURITY_REVIEW",
+      "label": "SECURITY_REVIEW",
+      "dir": "SECURITY_REVIEW.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "red",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "TARGET_STRUCTURE",
+      "label": "TARGET_STRUCTURE",
+      "dir": "TARGET_STRUCTURE.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "TECH_DEBT_REGISTER",
+      "label": "TECH_DEBT_REGISTER",
+      "dir": "TECH_DEBT_REGISTER.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "TESTING_STRATEGY",
+      "label": "TESTING_STRATEGY",
+      "dir": "TESTING_STRATEGY.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -1679,6 +1823,18 @@
       "agent": "",
       "tags": [],
       "size": 1
+    },
+    {
+      "id": "agents/hermes/orchestrator.yaml",
+      "label": "orchestrator",
+      "dir": "agents",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 2
     },
     {
       "id": "agents/obsidian/AGENTS",
@@ -2101,6 +2257,318 @@
       "size": 1
     },
     {
+      "id": "apps/admin/.eslintrc.json",
+      "label": ".eslintrc",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "apps",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/next-env.d.ts",
+      "label": "next-env.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/next.config.js",
+      "label": "next.config",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/package-lock.json",
+      "label": "package-lock",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/postcss.config.js",
+      "label": "postcss.config",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/agents/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/analytics/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/api/proxy/[service]/[...path]/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/control-center/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/knowledge/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/layout.tsx",
+      "label": "layout",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/services/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/settings/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/app/users/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/components/agents/AgentCard.tsx",
+      "label": "AgentCard",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/components/layout/Sidebar.tsx",
+      "label": "Sidebar",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/components/layout/TopBar.tsx",
+      "label": "TopBar",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/components/ui/ServiceBadge.tsx",
+      "label": "ServiceBadge",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/components/ui/StatCard.tsx",
+      "label": "StatCard",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/lib/api.ts",
+      "label": "api",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/src/lib/service-proxy.ts",
+      "label": "service-proxy",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/tailwind.config.ts",
+      "label": "tailwind.config",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/admin/tsconfig.json",
+      "label": "tsconfig",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/copilot-instructions",
       "label": "copilot-instructions",
       "dir": "apps",
@@ -2509,6 +2977,42 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/.next-build/server/app/demo/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/demo/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/server/app/demo/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/.next-build/server/app/page.js",
       "label": "page",
       "dir": "apps",
@@ -2623,7 +3127,7 @@
       "ext": "js",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "orange",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -3205,6 +3709,42 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/demo/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/demo/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/demo/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/.next-build/standalone/.next-build/server/app/page.js",
       "label": "page",
       "dir": "apps",
@@ -3319,7 +3859,7 @@
       "ext": "js",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "orange",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -3589,6 +4129,30 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/.next-build/static/NjOG9aO7cs01XNGmsNuIB/_buildManifest.js",
+      "label": "_buildManifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/NjOG9aO7cs01XNGmsNuIB/_ssgManifest.js",
+      "label": "_ssgManifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/.next-build/static/chunks/23-78f7badd628b4d96.js",
       "label": "23-78f7badd628b4d96",
       "dir": "apps",
@@ -3601,8 +4165,8 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/255-483932fd5153cebd.js",
-      "label": "255-483932fd5153cebd",
+      "id": "apps/dashboard/.next-build/static/chunks/255-8be5e2f9e83cffd0.js",
+      "label": "255-8be5e2f9e83cffd0",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
@@ -3637,6 +4201,18 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/.next-build/static/chunks/619-f09bc47e24909021.js",
+      "label": "619-f09bc47e24909021",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/.next-build/static/chunks/app/_not-found/page-a1c64d58230b8155.js",
       "label": "page-a1c64d58230b8155",
       "dir": "apps",
@@ -3649,13 +4225,13 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/app/agents/page-3cb28573d2013b03.js",
-      "label": "page-3cb28573d2013b03",
+      "id": "apps/dashboard/.next-build/static/chunks/app/agents/page-965db946e21074e4.js",
+      "label": "page-965db946e21074e4",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "orange",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -3709,8 +4285,8 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/app/layout-a12d2f9c696bc836.js",
-      "label": "layout-a12d2f9c696bc836",
+      "id": "apps/dashboard/.next-build/static/chunks/app/demo/page-fc69bd3a7b51b5cf.js",
+      "label": "page-fc69bd3a7b51b5cf",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
@@ -3721,8 +4297,8 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/app/page-9fd9ea32bcbb5f12.js",
-      "label": "page-9fd9ea32bcbb5f12",
+      "id": "apps/dashboard/.next-build/static/chunks/app/layout-0f57da67efabc538.js",
+      "label": "layout-0f57da67efabc538",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
@@ -3733,13 +4309,25 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/app/services/page-e776a9fc2fd768a1.js",
-      "label": "page-e776a9fc2fd768a1",
+      "id": "apps/dashboard/.next-build/static/chunks/app/page-778fc5778c8a02d1.js",
+      "label": "page-778fc5778c8a02d1",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "orange",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/static/chunks/app/services/page-dbb58261c22a1878.js",
+      "label": "page-dbb58261c22a1878",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -3769,8 +4357,8 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/main-0611082dae099e92.js",
-      "label": "main-0611082dae099e92",
+      "id": "apps/dashboard/.next-build/static/chunks/main-7aaf74a992142f9d.js",
+      "label": "main-7aaf74a992142f9d",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
@@ -3829,32 +4417,8 @@
       "size": 1
     },
     {
-      "id": "apps/dashboard/.next-build/static/chunks/webpack-724bb23752810918.js",
-      "label": "webpack-724bb23752810918",
-      "dir": "apps",
-      "ext": "js",
-      "zone": "WORKSPACE",
-      "quadrant": "UR",
-      "spiral": "orange",
-      "agent": "",
-      "tags": [],
-      "size": 1
-    },
-    {
-      "id": "apps/dashboard/.next-build/static/db_sMG4gyCuDzpE6suSJ-/_buildManifest.js",
-      "label": "_buildManifest",
-      "dir": "apps",
-      "ext": "js",
-      "zone": "WORKSPACE",
-      "quadrant": "UR",
-      "spiral": "orange",
-      "agent": "",
-      "tags": [],
-      "size": 1
-    },
-    {
-      "id": "apps/dashboard/.next-build/static/db_sMG4gyCuDzpE6suSJ-/_ssgManifest.js",
-      "label": "_ssgManifest",
+      "id": "apps/dashboard/.next-build/static/chunks/webpack-7d5f4f5c02f00b13.js",
+      "label": "webpack-7d5f4f5c02f00b13",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
@@ -3914,6 +4478,18 @@
     },
     {
       "id": "apps/dashboard/.next-build/types/app/config/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/dashboard/.next-build/types/app/demo/page.ts",
       "label": "page",
       "dir": "apps",
       "ext": "ts",
@@ -4225,6 +4801,18 @@
       "size": 1
     },
     {
+      "id": "apps/dashboard/src/app/demo/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/dashboard/src/app/layout.tsx",
       "label": "layout",
       "dir": "apps",
@@ -4388,6 +4976,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/desktop/package-lock.json",
+      "label": "package-lock",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -4598,6 +5198,1710 @@
     },
     {
       "id": "apps/mobile/tsconfig.json",
+      "label": "tsconfig",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.eslintrc.json",
+      "label": ".eslintrc",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/diagnostics/build-diagnostics.json",
+      "label": "build-diagnostics",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/diagnostics/framework.json",
+      "label": "framework",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app-paths-manifest.json",
+      "label": "app-paths-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/_not-found/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/_not-found/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/_not-found/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "label": "route",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js.nft.json",
+      "label": "route.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route_client-reference-manifest.js",
+      "label": "route_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/brain/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/brain/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/brain/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/chat/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/chat/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/chat/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/goals/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/goals/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/goals/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/login/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/login/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/login/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/media/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/media/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/media/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/onboarding/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/onboarding/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/onboarding/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/os/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/os/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/os/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/profile/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/profile/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/profile/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/voice/page.js",
+      "label": "page",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/voice/page.js.nft.json",
+      "label": "page.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/app/voice/page_client-reference-manifest.js",
+      "label": "page_client-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/388.js",
+      "label": "388",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/499.js",
+      "label": "499",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/518.js",
+      "label": "518",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/611.js",
+      "label": "611",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/620.js",
+      "label": "620",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/809.js",
+      "label": "809",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/chunks/873.js",
+      "label": "873",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/functions-config-manifest.json",
+      "label": "functions-config-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/interception-route-rewrite-manifest.js",
+      "label": "interception-route-rewrite-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/middleware-build-manifest.js",
+      "label": "middleware-build-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/middleware-manifest.json",
+      "label": "middleware-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/middleware-react-loadable-manifest.js",
+      "label": "middleware-react-loadable-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/next-font-manifest.js",
+      "label": "next-font-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/next-font-manifest.json",
+      "label": "next-font-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages-manifest.json",
+      "label": "pages-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages/_app.js",
+      "label": "_app",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages/_app.js.nft.json",
+      "label": "_app.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages/_document.js",
+      "label": "_document",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages/_document.js.nft.json",
+      "label": "_document.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages/_error.js",
+      "label": "_error",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/pages/_error.js.nft.json",
+      "label": "_error.js.nft",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/server-reference-manifest.js",
+      "label": "server-reference-manifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/server-reference-manifest.json",
+      "label": "server-reference-manifest",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/server/webpack-runtime.js",
+      "label": "webpack-runtime",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/standalone/apps/portal/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/standalone/apps/portal/server.js",
+      "label": "server",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/ZKkho0yYsdd5YYuuB19Dn/_buildManifest.js",
+      "label": "_buildManifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/ZKkho0yYsdd5YYuuB19Dn/_ssgManifest.js",
+      "label": "_ssgManifest",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/125-a659fe44c187ecd2.js",
+      "label": "125-a659fe44c187ecd2",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/131-3f010df23d8e63dc.js",
+      "label": "131-3f010df23d8e63dc",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/138-798ffa3f62dc051b.js",
+      "label": "138-798ffa3f62dc051b",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/162-945791051f229af5.js",
+      "label": "162-945791051f229af5",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/355-3125b2127156f3bc.js",
+      "label": "355-3125b2127156f3bc",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/389-ee1144e1ade21093.js",
+      "label": "389-ee1144e1ade21093",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/417-5abc32588fc31899.js",
+      "label": "417-5abc32588fc31899",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/493-0bb4d8a5ee46f227.js",
+      "label": "493-0bb4d8a5ee46f227",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "red",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "label": "4bd1b696-c023c6e3521b1417",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/754-464728566baafcab.js",
+      "label": "754-464728566baafcab",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/79-7ecee00841995160.js",
+      "label": "79-7ecee00841995160",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/_not-found/page-e86d3cb064cb3948.js",
+      "label": "page-e86d3cb064cb3948",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/api/proxy/[service]/[...path]/route-a3eecc5f82bdc6a2.js",
+      "label": "route-a3eecc5f82bdc6a2",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/brain/page-53482344881dc6ee.js",
+      "label": "page-53482344881dc6ee",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/chat/page-8759abb9fa1717cc.js",
+      "label": "page-8759abb9fa1717cc",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/goals/page-d38be26bbb24250a.js",
+      "label": "page-d38be26bbb24250a",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/layout-f33d1dc13546597f.js",
+      "label": "layout-f33d1dc13546597f",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/login/page-de87cadd3e285795.js",
+      "label": "page-de87cadd3e285795",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/media/page-9a5a655c553c0a74.js",
+      "label": "page-9a5a655c553c0a74",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/onboarding/page-24f389bbf77bb646.js",
+      "label": "page-24f389bbf77bb646",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/os/page-de74fe403ae848b4.js",
+      "label": "page-de74fe403ae848b4",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/page-5dd0dd23b09a7415.js",
+      "label": "page-5dd0dd23b09a7415",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/profile/page-1e37188e33acb235.js",
+      "label": "page-1e37188e33acb235",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/app/voice/page-bf84a5aefc2418fa.js",
+      "label": "page-bf84a5aefc2418fa",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/framework-a6e0b7e30f98059a.js",
+      "label": "framework-a6e0b7e30f98059a",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/main-a91a79f2dfe03f44.js",
+      "label": "main-a91a79f2dfe03f44",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/main-app-bb9bed2611e6814e.js",
+      "label": "main-app-bb9bed2611e6814e",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/pages/_app-6c493b83aa965ae0.js",
+      "label": "_app-6c493b83aa965ae0",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/pages/_error-72a33df56bf599c8.js",
+      "label": "_error-72a33df56bf599c8",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/polyfills-42372ed130431b0a.js",
+      "label": "polyfills-42372ed130431b0a",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/static/chunks/webpack-609b45dedf52f2ba.js",
+      "label": "webpack-609b45dedf52f2ba",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/api/proxy/[service]/[...path]/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/brain/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/chat/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/goals/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/layout.ts",
+      "label": "layout",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/login/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/media/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/onboarding/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/os/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/profile/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/app/voice/page.ts",
+      "label": "page",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/cache-life.d.ts",
+      "label": "cache-life.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/routes.d.ts",
+      "label": "routes.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/.next.root-owned-20260515/types/validator.ts",
+      "label": "validator",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "apps",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/next-env.d.ts",
+      "label": "next-env.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/next.config.js",
+      "label": "next.config",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/package.json",
+      "label": "package",
+      "dir": "apps",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/postcss.config.js",
+      "label": "postcss.config",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "label": "route",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/brain/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/chat/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/goals/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/layout.tsx",
+      "label": "layout",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/login/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/media/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/onboarding/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/os/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/profile/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/app/voice/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/components/chat/AgentAvatar.tsx",
+      "label": "AgentAvatar",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/components/chat/ChatBubble.tsx",
+      "label": "ChatBubble",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/components/layout/BottomNav.tsx",
+      "label": "BottomNav",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/components/layout/Header.tsx",
+      "label": "Header",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/components/voice/VoiceButton.tsx",
+      "label": "VoiceButton",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/lib/api.ts",
+      "label": "api",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/lib/auth.tsx",
+      "label": "auth",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/lib/companions.ts",
+      "label": "companions",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/tailwind.config.ts",
+      "label": "tailwind.config",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/tsconfig.json",
       "label": "tsconfig",
       "dir": "apps",
       "ext": "json",
@@ -7117,6 +9421,18 @@
       "size": 1
     },
     {
+      "id": "apps/web/public/fallback-ce627215c0e4a9af.js",
+      "label": "fallback-ce627215c0e4a9af",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web/public/graph.json",
       "label": "graph",
       "dir": "apps",
@@ -7155,6 +9471,18 @@
     {
       "id": "apps/web/public/workbox-0710f85d.js",
       "label": "workbox-0710f85d",
+      "dir": "apps",
+      "ext": "js",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/public/workbox-74dd722d.js",
+      "label": "workbox-74dd722d",
       "dir": "apps",
       "ext": "js",
       "zone": "WORKSPACE",
@@ -7328,6 +9656,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/app/opendisruption-v01/page.tsx",
+      "label": "page",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
       "agent": "",
       "tags": [],
       "size": 1
@@ -7544,6 +9884,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "yellow",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web/src/components/ObsidianVaultGraph.tsx",
+      "label": "ObsidianVaultGraph",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -8335,6 +10687,18 @@
       "size": 1
     },
     {
+      "id": "docs/GLOBAL-DATA-STRUCTURE",
+      "label": "GLOBAL-DATA-STRUCTURE",
+      "dir": "docs",
+      "ext": "md",
+      "zone": "PUBLIC",
+      "quadrant": "LL",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "docs/MVP-E2E-PROOF",
       "label": "MVP-E2E-PROOF",
       "dir": "docs",
@@ -8402,6 +10766,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "docs/USER-FOLDER-TEMPLATE",
+      "label": "USER-FOLDER-TEMPLATE",
+      "dir": "docs",
+      "ext": "md",
+      "zone": "PUBLIC",
+      "quadrant": "LL",
+      "spiral": "blue",
       "agent": "",
       "tags": [],
       "size": 1
@@ -8927,6 +11303,18 @@
       "size": 1
     },
     {
+      "id": "experiences/learnings/ai-research-2026-05-12",
+      "label": "ai-research-2026-05-12",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "purple",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "experiences/learnings/best-practices",
       "label": "best-practices",
       "dir": "experiences",
@@ -8958,6 +11346,42 @@
       "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/learnings/nightly-2026-05-11",
+      "label": "nightly-2026-05-11",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "purple",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/learnings/nightly-2026-05-18",
+      "label": "nightly-2026-05-18",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/learnings/nightly-2026-05-19",
+      "label": "nightly-2026-05-19",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -9167,7 +11591,7 @@
       "label": "README",
       "dir": "experiences",
       "ext": "md",
-      "zone": "FAMILY_PRIVATE",
+      "zone": "WORKSPACE",
       "quadrant": "LL",
       "spiral": "green",
       "agent": "",
@@ -9591,6 +12015,42 @@
       "size": 1
     },
     {
+      "id": "infra/scripts/bootstrap-global-data-structure.sh",
+      "label": "bootstrap-global-data-structure",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/bootstrap-user-folder-structure.sh",
+      "label": "bootstrap-user-folder-structure",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/bootstrap-v01-demo.sh",
+      "label": "bootstrap-v01-demo",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "infra/scripts/bootstrap.sh",
       "label": "bootstrap",
       "dir": "infra",
@@ -9651,6 +12111,30 @@
       "size": 1
     },
     {
+      "id": "infra/scripts/daily-ai-research",
+      "label": "daily-ai-research",
+      "dir": "infra",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "purple",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "infra/scripts/daily-ai-research.sh",
+      "label": "daily-ai-research",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "infra/scripts/detect-gpu.sh",
       "label": "detect-gpu",
       "dir": "infra",
@@ -9693,7 +12177,7 @@
       "ext": "sh",
       "zone": "WORKSPACE",
       "quadrant": "LR",
-      "spiral": "blue",
+      "spiral": "beige",
       "agent": "",
       "tags": [],
       "size": 1
@@ -9759,6 +12243,42 @@
       "size": 1
     },
     {
+      "id": "infra/scripts/install-hermes-profiles",
+      "label": "install-hermes-profiles",
+      "dir": "infra",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "turquoise",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/install-hermes-profiles.sh",
+      "label": "install-hermes-profiles",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/install-nightly-timer.sh",
+      "label": "install-nightly-timer",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "infra/scripts/keycodi-opencode.sh",
       "label": "keycodi-opencode",
       "dir": "infra",
@@ -9771,6 +12291,30 @@
       "size": 1
     },
     {
+      "id": "infra/scripts/nightly-consolidation",
+      "label": "nightly-consolidation",
+      "dir": "infra",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "purple",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "infra/scripts/nightly-consolidation.sh",
+      "label": "nightly-consolidation",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "infra/scripts/obsidian-daily-note.sh",
       "label": "obsidian-daily-note",
       "dir": "infra",
@@ -9778,6 +12322,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LR",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/obsidian-graph-export.sh",
+      "label": "obsidian-graph-export",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -9838,6 +12394,18 @@
       "zone": "WORKSPACE",
       "quadrant": "LR",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "infra/scripts/restore.sh",
+      "label": "restore",
+      "dir": "infra",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "purple",
       "agent": "",
       "tags": [],
       "size": 1
@@ -10773,6 +13341,18 @@
       "size": 2
     },
     {
+      "id": "kirobi-avatar/CHANGELOG",
+      "label": "CHANGELOG",
+      "dir": "kirobi-avatar",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "kirobi-core/README",
       "label": "README",
       "dir": "kirobi-core",
@@ -10993,6 +13573,42 @@
       "label": "core-routing",
       "dir": "kirobi-core",
       "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "kirobi-core/profiles/samira.yaml",
+      "label": "samira",
+      "dir": "kirobi-core",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "UL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "kirobi-core/profiles/sineo.yaml",
+      "label": "sineo",
+      "dir": "kirobi-core",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "UL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "kirobi-core/profiles/sven.yaml",
+      "label": "sven",
+      "dir": "kirobi-core",
+      "ext": "yaml",
       "zone": "WORKSPACE",
       "quadrant": "UL",
       "spiral": "green",
@@ -12460,6 +15076,66 @@
       "size": 1
     },
     {
+      "id": "scripts/apk-download-history",
+      "label": "apk-download-history",
+      "dir": "scripts",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "scripts/apk-download-history.json",
+      "label": "apk-download-history",
+      "dir": "scripts",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "scripts/apk-milestone-config.json",
+      "label": "apk-milestone-config",
+      "dir": "scripts",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "scripts/apk-milestone-fired.json",
+      "label": "apk-milestone-fired",
+      "dir": "scripts",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "scripts/verify-apk.sh",
+      "label": "verify-apk",
+      "dir": "scripts",
+      "ext": "sh",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/AGENTS",
       "label": "AGENTS",
       "dir": "services",
@@ -12553,7 +15229,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 11
+      "size": 17
     },
     {
       "id": "services/api/Dockerfile",
@@ -12637,7 +15313,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 19
+      "size": 25
     },
     {
       "id": "services/auth/Dockerfile",
@@ -12733,7 +15409,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 6
+      "size": 11
     },
     {
       "id": "services/embeddings/Dockerfile",
@@ -12793,7 +15469,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 4
+      "size": 5
     },
     {
       "id": "services/hermes-runtime/README",
@@ -12826,10 +15502,10 @@
       "ext": "yaml",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "blue",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 2
+      "size": 1
     },
     {
       "id": "services/hermes-runtime/config/skills/nutzi/SKILL",
@@ -12844,13 +15520,25 @@
       "size": 1
     },
     {
+      "id": "services/hermes-runtime/config/skills/opendisruption-orchestrator/SKILL",
+      "label": "SKILL",
+      "dir": "services",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "turquoise",
+      "agent": "hermes-orchestrator",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/hermes-runtime/config/skills/opendisruption/SKILL",
       "label": "SKILL",
       "dir": "services",
       "ext": "md",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "beige",
+      "spiral": "green",
       "agent": "",
       "tags": [
         "OpenDisruption",
@@ -12859,9 +15547,46 @@
         "DevOps",
         "Self-Hosting",
         "Administration",
-        "Orchestration"
+        "Orchestration",
+        "Agents"
       ],
       "size": 1
+    },
+    {
+      "id": "services/hermes-runtime/config/skills/personal-agents/SKILL",
+      "label": "SKILL",
+      "dir": "services",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/hermes-runtime/jobs/daily_briefing",
+      "label": "daily_briefing",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": "services/hermes-runtime/jobs/self_improve",
+      "label": "self_improve",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
     },
     {
       "id": "services/image-generation/AGENTS",
@@ -12873,7 +15598,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 2
+      "size": 6
     },
     {
       "id": "services/image-generation/Dockerfile",
@@ -12933,7 +15658,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 3
+      "size": 6
     },
     {
       "id": "services/ingest/Dockerfile",
@@ -12993,7 +15718,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 2
+      "size": 3
     },
     {
       "id": "services/media-processing/Dockerfile",
@@ -13053,7 +15778,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 3
+      "size": 4
     },
     {
       "id": "services/model-routing/Dockerfile",
@@ -13113,7 +15838,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 2
+      "size": 5
     },
     {
       "id": "services/music-generation/Dockerfile",
@@ -13173,7 +15898,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 3
     },
     {
       "id": "services/nutzi/app/main",
@@ -13196,6 +15921,18 @@
       "quadrant": "UR",
       "spiral": "orange",
       "agent": "Nutzi",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/nutzi/config/hermes-skill.yaml",
+      "label": "hermes-skill",
+      "dir": "services",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
       "tags": [],
       "size": 1
     },
@@ -13296,6 +16033,66 @@
       "size": 2
     },
     {
+      "id": "services/personal-agents/Dockerfile",
+      "label": "Dockerfile",
+      "dir": "services",
+      "ext": "",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 3
+    },
+    {
+      "id": "services/personal-agents/app/main",
+      "label": "main",
+      "dir": "services",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/personal-agents/profiles/samira.yaml",
+      "label": "samira",
+      "dir": "services",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/personal-agents/profiles/sineo.yaml",
+      "label": "sineo",
+      "dir": "services",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "services/personal-agents/profiles/sven.yaml",
+      "label": "sven",
+      "dir": "services",
+      "ext": "yaml",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/retrieval/AGENTS",
       "label": "AGENTS",
       "dir": "services",
@@ -13305,7 +16102,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 4
+      "size": 8
     },
     {
       "id": "services/retrieval/Dockerfile",
@@ -13605,7 +16402,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 2
+      "size": 5
     },
     {
       "id": "services/video-generation/Dockerfile",
@@ -13665,7 +16462,7 @@
       "spiral": "blue",
       "agent": "",
       "tags": [],
-      "size": 5
+      "size": 8
     },
     {
       "id": "services/voice-processing/Dockerfile",
@@ -15281,6 +18078,21 @@
   ],
   "links": [
     {
+      "source": "services/telegram/AGENTS",
+      "target": ".github/workflows/lint-workflows.yml",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": ".github/workflows/nightly-audit.yml",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": ".github/workflows/weekly-download-report.yml",
+      "type": "telegram-bind"
+    },
+    {
       "source": "AGENT-DECISION-MATRIX",
       "target": ".opencode/agents/kirobi-architect",
       "type": "agent-call"
@@ -15321,9 +18133,119 @@
       "type": "import"
     },
     {
+      "source": "services/telegram/AGENTS",
+      "target": "agents/hermes/orchestrator.yaml",
+      "type": "telegram-bind"
+    },
+    {
       "source": "apps/desktop/src/main.tsx",
       "target": "apps/desktop/src/App.tsx",
       "type": "import"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/retrieval/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/ingest/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/voice-processing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/image-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/music-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/video-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/personal-agents/Dockerfile",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/.next.root-owned-20260515/server/app/api/proxy/[service]/[...path]/route.js",
+      "target": "services/hermes-runtime/Dockerfile",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/retrieval/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/ingest/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/voice-processing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/image-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/music-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/video-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "apps/portal/src/app/api/proxy/[service]/[...path]/route.ts",
+      "target": "services/personal-agents/Dockerfile",
+      "type": "http-call"
     },
     {
       "source": "apps/web-svelte/.svelte-kit/adapter-node/chunks/client.js",
@@ -15972,6 +18894,26 @@
     },
     {
       "source": "docker-compose.yml",
+      "target": "services/api/AGENTS",
+      "type": "service-dep"
+    },
+    {
+      "source": "docker-compose.yml",
+      "target": "services/auth/AGENTS",
+      "type": "service-dep"
+    },
+    {
+      "source": "docker-compose.yml",
+      "target": "services/api/AGENTS",
+      "type": "service-dep"
+    },
+    {
+      "source": "docker-compose.yml",
+      "target": "services/auth/AGENTS",
+      "type": "service-dep"
+    },
+    {
+      "source": "docker-compose.yml",
       "target": "services/auth/AGENTS",
       "type": "service-dep"
     },
@@ -15987,16 +18929,6 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/hermes-runtime/Dockerfile",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/model-routing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
       "target": "services/embeddings/AGENTS",
       "type": "route"
     },
@@ -16007,32 +18939,17 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/retrieval/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/media-processing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
       "target": "services/ingest/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/openclaw-gateway/README",
+      "target": "services/retrieval/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/telegram/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "apps/dashboard/.next-build/app-build-manifest.json",
+      "target": "services/hermes-runtime/Dockerfile",
       "type": "route"
     },
     {
@@ -16042,22 +18959,7 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/auth/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/voice-processing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
       "target": "services/image-generation/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/music-generation/AGENTS",
       "type": "route"
     },
     {
@@ -16067,7 +18969,52 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
+      "target": "services/telegram/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/music-generation/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/dashboard/.next-build/app-build-manifest.json",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/model-routing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/nutzi/Dockerfile",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/voice-processing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/media-processing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/auth/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
       "target": "apps/web/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/openclaw-gateway/README",
       "type": "route"
     },
     {
@@ -16081,9 +19028,19 @@
       "type": "http-call"
     },
     {
+      "source": "services/telegram/AGENTS",
+      "target": "infra/scripts/daily-ai-research",
+      "type": "telegram-bind"
+    },
+    {
       "source": "infra/scripts/init-qdrant",
       "target": "kirobi_core/qdrant_collections",
       "type": "import"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": "infra/scripts/nightly-consolidation",
+      "type": "telegram-bind"
     },
     {
       "source": "kidi/serve",
@@ -16411,6 +19368,11 @@
       "type": "wikilink"
     },
     {
+      "source": "services/telegram/AGENTS",
+      "target": "scripts/apk-download-history",
+      "type": "telegram-bind"
+    },
+    {
       "source": "services/analytics-service/main",
       "target": "kirobi_core/asyncpg_compat",
       "type": "import"
@@ -16461,8 +19423,73 @@
       "type": "import"
     },
     {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/ingest/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/retrieval/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/model-routing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/voice-processing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/image-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/music-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/video-generation/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/media-processing/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/hermes-runtime/agent_dispatcher",
+      "target": "services/nutzi/Dockerfile",
+      "type": "http-call"
+    },
+    {
       "source": "services/telegram/AGENTS",
-      "target": "services/hermes-runtime/config/cli-config.yaml",
+      "target": "services/hermes-runtime/jobs/daily_briefing",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": "services/hermes-runtime/jobs/self_improve",
       "type": "telegram-bind"
     },
     {
@@ -16504,6 +19531,11 @@
       "source": "services/music-generation/main",
       "target": "kirobi_core/analytics_client",
       "type": "import"
+    },
+    {
+      "source": "services/nutzi/scripts/index_qdrant",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
     },
     {
       "source": "services/orchestrator/supervisor",
@@ -16586,6 +19618,26 @@
       "type": "http-call"
     },
     {
+      "source": "services/telegram/keycodi/cron",
+      "target": "services/api/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/keycodi/cron",
+      "target": "services/auth/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/keycodi/cron",
+      "target": "services/embeddings/AGENTS",
+      "type": "http-call"
+    },
+    {
+      "source": "services/telegram/keycodi/cron",
+      "target": "services/retrieval/AGENTS",
+      "type": "http-call"
+    },
+    {
       "source": "services/telegram/keycodi/db",
       "target": "kirobi_core/asyncpg_compat",
       "type": "import"
@@ -16609,6 +19661,11 @@
       "source": "services/video-generation/main",
       "target": "kirobi_core/asyncpg_compat",
       "type": "import"
+    },
+    {
+      "source": "services/video-generation/main",
+      "target": "services/image-generation/AGENTS",
+      "type": "http-call"
     },
     {
       "source": "services/voice-processing/api",
@@ -17222,9 +20279,9 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-05-12T18:21:32.723432+00:00",
-    "node_count": 1263,
-    "link_count": 388,
+    "generated_at": "2026-05-21T00:00:38.544499+00:00",
+    "node_count": 1496,
+    "link_count": 440,
     "edge_types": [
       "wikilink",
       "import",

@@ -1,0 +1,15 @@
+[Unit]
+Description=Kirobi Obsidian Graph Export Timer (täglich 02:00 Uhr)
+Documentation=https://github.com/Kirobi92/OpenDisruption
+Requires=obsidian-graph-export.service
+
+[Timer]
+# Täglich um 02:00 Uhr lokal
+OnCalendar=*-*-* 02:00:00
+# Wenn der Rechner um 02:00 aus war, beim nächsten Start nachholen (innerhalb 10min)
+Persistent=true
+RandomizedDelaySec=120
+Unit=obsidian-graph-export.service
+
+[Install]
+WantedBy=timers.target
