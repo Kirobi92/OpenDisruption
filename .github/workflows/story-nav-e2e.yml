@@ -56,6 +56,8 @@ jobs:
     timeout-minutes: 15
 
     env:
+      # Node.js 24 erzwingen (Node.js 20 deprecated ab 02.06.2026)
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       # Standard Desktop-Viewport für Story-Navigation
       PLAYWRIGHT_VIEWPORT_WIDTH: "1280"
       PLAYWRIGHT_VIEWPORT_HEIGHT: "800"
