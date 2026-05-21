@@ -1,33 +1,5 @@
 [
   {
-    "run_id": 26184145282,
-    "started_at": "2026-05-20T19:10:40Z",
-    "conclusion": "failure",
-    "sc_issue_count": -1,
-    "synced_at": "2026-05-21T18:59:52.633953+00:00"
-  },
-  {
-    "run_id": 26185864660,
-    "started_at": "2026-05-20T19:44:51Z",
-    "conclusion": "failure",
-    "sc_issue_count": -1,
-    "synced_at": "2026-05-21T18:59:50.443515+00:00"
-  },
-  {
-    "run_id": 26187656182,
-    "started_at": "2026-05-20T20:20:28Z",
-    "conclusion": "failure",
-    "sc_issue_count": -1,
-    "synced_at": "2026-05-21T18:59:48.563133+00:00"
-  },
-  {
-    "run_id": 26187695089,
-    "started_at": "2026-05-20T20:21:15Z",
-    "conclusion": "failure",
-    "sc_issue_count": -1,
-    "synced_at": "2026-05-21T18:59:46.549892+00:00"
-  },
-  {
     "run_id": 26188917869,
     "started_at": "2026-05-20T20:45:08Z",
     "conclusion": "failure",
@@ -131,5 +103,40 @@
     "conclusion": "success",
     "sc_issue_count": 1,
     "synced_at": "2026-05-21T18:59:09.421772+00:00"
+  },
+  {
+    "run_id": 26246966406,
+    "started_at": "2026-05-21T19:01:21Z",
+    "conclusion": "success",
+    "sc_issue_count": -1,
+    "synced_at": "2026-05-21T20:43:59.117832+00:00"
+  },
+  {
+    "run_id": 26247453385,
+    "started_at": "2026-05-21T19:11:16Z",
+    "conclusion": "success",
+    "sc_issue_count": -1,
+    "synced_at": "2026-05-21T20:43:55.404535+00:00"
+  },
+  {
+    "run_id": 26248585858,
+    "started_at": "2026-05-21T19:34:27Z",
+    "conclusion": "success",
+    "sc_issue_count": -1,
+    "synced_at": "2026-05-21T20:43:52.018364+00:00"
+  },
+  {
+    "run_id": 26249901647,
+    "started_at": "2026-05-21T20:00:41Z",
+    "conclusion": "failure",
+    "sc_issue_count": 1,
+    "synced_at": "2026-05-21T20:43:48.148521+00:00"
+  },
+  {
+    "run_id": 26250297372,
+    "started_at": "2026-05-21T20:08:47Z",
+    "conclusion": "failure",
+    "sc_issue_count": 1,
+    "synced_at": "2026-05-21T20:43:46.337105+00:00"
   }
 ]

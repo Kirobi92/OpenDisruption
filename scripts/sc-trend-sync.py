@@ -31,7 +31,9 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
 SC_TREND_FILE = SCRIPT_DIR / "sc-trend.json"
+SC_ALERT_HISTORY_FILE = SCRIPT_DIR / "sc-alert-history.json"
 MAX_ENTRIES = 20
+MAX_ALERT_ENTRIES = 100
 WORKFLOW_NAME = "Lint GitHub Actions Workflows"
 
 
@@ -212,6 +214,43 @@ def save_trend(data: list) -> None:
     )
 
 
+def load_alert_history() -> list:
+    if SC_ALERT_HISTORY_FILE.exists():
+        try:
+            return json.loads(SC_ALERT_HISTORY_FILE.read_text())
+        except Exception:
+            pass
+    return []
+
+
+def save_alert_history(data: list) -> None:
+    SC_ALERT_HISTORY_FILE.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+    )
+
+
+def record_alert_event(run_id: int, sc_count: int, threshold: int, started_at: str) -> dict:
+    """Trägt ein SC-Alert-Event in sc-alert-history.json ein (Audit-Trail)."""
+    alert_history = load_alert_history()
+    existing_ids = {e.get("run_id") for e in alert_history}
+    if run_id in existing_ids:
+        return {}  # Bereits gespeichert
+    event = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "run_id": run_id,
+        "run_started_at": started_at,
+        "sc_issue_count": sc_count,
+        "threshold": threshold,
+        "delta": sc_count - threshold,
+    }
+    alert_history.append(event)
+    if len(alert_history) > MAX_ALERT_ENTRIES:
+        alert_history = alert_history[-MAX_ALERT_ENTRIES:]
+    save_alert_history(alert_history)
+    print(f"[ALERT] SC-Alert eingetragen: run_id={run_id}, sc_issue_count={sc_count} > threshold={threshold}")
+    return event
+
+
 def sync() -> dict:
     """Hauptfunktion: Sync SC-Trend aus GitHub API."""
     repo = get_github_repo()
@@ -220,6 +259,12 @@ def sync() -> dict:
     if not token:
         print("[ERROR] Kein GitHub-Token gefunden. Bitte GITHUB_TOKEN setzen oder `gh auth login`.")
         sys.exit(1)
+
+    # SC-Alert-Schwelle aus ENV lesen (Standard 0 = jede Finding löst Alert aus)
+    try:
+        sc_threshold = int(os.environ.get("KIROBI_SC_ALERT_THRESHOLD", "0"))
+    except ValueError:
+        sc_threshold = 0
 
     print(f"[INFO] Sync SC-Trend für Repo: {repo}")
     runs = fetch_runs(repo, token, limit=20)
@@ -231,6 +276,7 @@ def sync() -> dict:
     existing_ids = {e["run_id"] for e in trend}
 
     new_entries = 0
+    new_alerts = 0
     for run in runs:
         run_id = run["id"]
         if run_id in existing_ids:
@@ -251,6 +297,17 @@ def sync() -> dict:
         new_entries += 1
         print(f"[OK]  Run {run_id}: sc_issue_count={sc_count}, conclusion={run.get('conclusion')}")
 
+        # Alert-Event eintragen wenn sc_count > threshold
+        if sc_count is not None and sc_count > sc_threshold:
+            alert_event = record_alert_event(
+                run_id=run_id,
+                sc_count=sc_count,
+                threshold=sc_threshold,
+                started_at=run.get("created_at", ""),
+            )
+            if alert_event:
+                new_alerts += 1
+
     # Sortieren nach Zeit (älteste zuerst), max. MAX_ENTRIES behalten
     trend.sort(key=lambda x: x.get("started_at", ""))
     if len(trend) > MAX_ENTRIES:
@@ -260,9 +317,13 @@ def sync() -> dict:
 
     # Zusammenfassung
     valid = [e for e in trend if e["sc_issue_count"] >= 0]
+    alert_history = load_alert_history()
     summary = {
         "entries": len(trend),
         "new_this_sync": new_entries,
+        "new_alerts_this_sync": new_alerts,
+        "total_alerts": len(alert_history),
+        "latest_alert": alert_history[-1] if alert_history else None,
         "latest_count": valid[-1]["sc_issue_count"] if valid else None,
         "trend_direction": None,
         "avg_last_5": None,
