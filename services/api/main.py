@@ -2329,16 +2329,20 @@ class ScAlertsResponse(BaseModel):
     alerts: List[ScAlertEvent]
     total: int
     limit: int
+    offset: int
+    has_more: bool
     history_file: str
 
 
 @app.get("/sc-alerts", response_model=ScAlertsResponse, tags=["ci"])
 async def get_sc_alerts(
     limit: int = Query(10, ge=1, le=100, description="Maximale Anzahl Alerts (neueste zuerst)"),
+    offset: int = Query(0, ge=0, description="Anzahl der zu überspringenden Alerts (für Pagination)"),
 ):
     """
-    Liefert die letzten SC-Alert-Events aus scripts/sc-alert-history.json.
+    Liefert SC-Alert-Events aus scripts/sc-alert-history.json.
     Sortierung: neueste zuerst (desc by timestamp).
+    Pagination via limit + offset (z.B. ?limit=10&offset=0 für Seite 1, ?limit=10&offset=10 für Seite 2).
     Kein Auth-Schutz — enthält nur CI-Metriken (keine persönlichen Daten).
     """
     if not _SC_ALERT_HISTORY_PATH.is_file():
@@ -2346,6 +2350,8 @@ async def get_sc_alerts(
             alerts=[],
             total=0,
             limit=limit,
+            offset=offset,
+            has_more=False,
             history_file=str(_SC_ALERT_HISTORY_PATH),
         )
 
@@ -2360,13 +2366,16 @@ async def get_sc_alerts(
     # Neueste zuerst
     raw_sorted = sorted(raw, key=lambda e: e.get("timestamp", ""), reverse=True)
     total = len(raw_sorted)
-    page_data = raw_sorted[:limit]
+    page_data = raw_sorted[offset: offset + limit]
+    has_more = (offset + limit) < total
 
     alerts = [ScAlertEvent(**item) for item in page_data]
     return ScAlertsResponse(
         alerts=alerts,
         total=total,
         limit=limit,
+        offset=offset,
+        has_more=has_more,
         history_file=str(_SC_ALERT_HISTORY_PATH),
     )
 

@@ -953,3 +953,61 @@ def test_sc_alerts_limit_1(client, tmp_path):
     assert data["limit"] == 1
     # Neueste zuerst (run_id 222)
     assert data["alerts"][0]["run_id"] == 222
+
+
+def test_sc_alerts_offset_pagination(client, tmp_path):
+    """GET /sc-alerts?limit=1&offset=1 muss zweites Event zurückgeben + has_more=False."""
+    import services.api.main as api
+
+    history = [
+        {
+            "timestamp": "2026-05-21T18:00:00+00:00",
+            "run_id": 111,
+            "run_started_at": "2026-05-21T17:55:00Z",
+            "sc_issue_count": 3,
+            "threshold": 0,
+            "delta": 3,
+        },
+        {
+            "timestamp": "2026-05-21T20:00:00+00:00",
+            "run_id": 222,
+            "run_started_at": "2026-05-21T19:55:00Z",
+            "sc_issue_count": 1,
+            "threshold": 0,
+            "delta": -2,
+        },
+    ]
+    history_file = tmp_path / "sc-alert-history.json"
+    history_file.write_text(json.dumps(history), encoding="utf-8")
+
+    c, _ = client
+    with patch.object(api, "_SC_ALERT_HISTORY_PATH", history_file):
+        # Seite 1: limit=1, offset=0 → run_id 222 (neueste), has_more=True
+        resp1 = c.get("/sc-alerts?limit=1&offset=0")
+        assert resp1.status_code == 200
+        data1 = resp1.json()
+        assert data1["alerts"][0]["run_id"] == 222
+        assert data1["offset"] == 0
+        assert data1["has_more"] is True
+
+        # Seite 2: limit=1, offset=1 → run_id 111 (ältere), has_more=False
+        resp2 = c.get("/sc-alerts?limit=1&offset=1")
+        assert resp2.status_code == 200
+        data2 = resp2.json()
+        assert data2["alerts"][0]["run_id"] == 111
+        assert data2["offset"] == 1
+        assert data2["has_more"] is False
+        assert data2["total"] == 2
+
+
+def test_sc_alerts_offset_leer_response(client, tmp_path):
+    """GET /sc-alerts hat offset + has_more auch im leeren State (fehlende Datei)."""
+    import services.api.main as api
+
+    c, _ = client
+    with patch.object(api, "_SC_ALERT_HISTORY_PATH", tmp_path / "nonexistent.json"):
+        resp = c.get("/sc-alerts?limit=5&offset=0")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["offset"] == 0
+    assert data["has_more"] is False
