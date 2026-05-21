@@ -184,6 +184,31 @@ jobs:
             -d "text=${MESSAGE}" \
             -d "disable_web_page_preview=true" > /dev/null
 
+      - name: Telegram-Alert bei SC_ISSUE_COUNT > Schwelle
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIROBI_LINT_NOTIFY_SUCCESS: ${{ vars.KIROBI_LINT_NOTIFY_SUCCESS || 'false' }}
+          KIROBI_SC_ALERT_THRESHOLD: ${{ vars.KIROBI_SC_ALERT_THRESHOLD || '0' }}
+          SC_COUNT: ${{ steps.shellcheck.outputs.sc_issue_count || '0' }}
+        run: |
+          # Nur senden wenn KIROBI_LINT_NOTIFY_SUCCESS=true UND SC_COUNT > KIROBI_SC_ALERT_THRESHOLD
+          if [ "${KIROBI_LINT_NOTIFY_SUCCESS}" != "true" ]; then
+            echo "SC-Alert deaktiviert (KIROBI_LINT_NOTIFY_SUCCESS=false)"
+            exit 0
+          fi
+          if [ "${SC_COUNT}" -le "${KIROBI_SC_ALERT_THRESHOLD}" ]; then
+            echo "SC-Alert: ${SC_COUNT} Findings ≤ Schwelle ${KIROBI_SC_ALERT_THRESHOLD} — kein Alert."
+            exit 0
+          fi
+          MESSAGE="⚠️ *shellcheck Alert — lint-workflows.yml*%0A%0A*SC Findings:* ${SC_COUNT} (Schwelle: ${KIROBI_SC_ALERT_THRESHOLD})%0A*Repo:* \`${{ github.repository }}\`%0A*Branch:* \`${{ github.ref_name }}\`%0A*Commit:* \`${{ github.sha }}\`%0A%0AshellCheck hat ${SC_COUNT} Finding(s) gefunden — bitte prüfen.%0A👉 https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "parse_mode=Markdown" \
+            -d "text=${MESSAGE}" \
+            -d "disable_web_page_preview=true" > /dev/null
+
       - name: Telegram-Notification bei Lint-Erfolg
         if: success()
         env:
