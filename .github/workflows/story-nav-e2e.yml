@@ -80,6 +80,9 @@ jobs:
           playwright install chromium
           playwright install-deps chromium
 
+      - name: Pre-create screenshots directory
+        run: mkdir -p tests/e2e/screenshots
+
       - name: Run Story Navigation E2E Tests
         id: story-e2e
         run: |
