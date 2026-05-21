@@ -861,3 +861,95 @@ def test_json_field_returns_fallback_on_none():
 
     result = api._json_field(None, {})
     assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# /api/sc-alerts — Unit-Tests
+# ---------------------------------------------------------------------------
+
+def test_sc_alerts_empty_wenn_datei_fehlt(client, tmp_path):
+    """GET /sc-alerts muss leeres Array zurückgeben wenn sc-alert-history.json fehlt."""
+    import services.api.main as api
+
+    c, _ = client
+    with patch.object(api, "_SC_ALERT_HISTORY_PATH", tmp_path / "nonexistent.json"):
+        resp = c.get("/sc-alerts")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["alerts"] == []
+    assert data["total"] == 0
+    assert data["limit"] == 10
+
+
+def test_sc_alerts_zwei_events(client, tmp_path):
+    """GET /sc-alerts muss 2 Events korrekt zurückgeben (neueste zuerst, desc by timestamp)."""
+    import services.api.main as api
+
+    history = [
+        {
+            "timestamp": "2026-05-21T18:00:00+00:00",
+            "run_id": 111,
+            "run_started_at": "2026-05-21T17:55:00Z",
+            "sc_issue_count": 2,
+            "threshold": 0,
+            "delta": 2,
+        },
+        {
+            "timestamp": "2026-05-21T20:00:00+00:00",
+            "run_id": 222,
+            "run_started_at": "2026-05-21T19:55:00Z",
+            "sc_issue_count": 1,
+            "threshold": 0,
+            "delta": -1,
+        },
+    ]
+    history_file = tmp_path / "sc-alert-history.json"
+    history_file.write_text(json.dumps(history), encoding="utf-8")
+
+    c, _ = client
+    with patch.object(api, "_SC_ALERT_HISTORY_PATH", history_file):
+        resp = c.get("/sc-alerts")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] == 2
+    assert data["limit"] == 10
+    # Neueste zuerst: run_id 222 hat späteres timestamp
+    assert data["alerts"][0]["run_id"] == 222
+    assert data["alerts"][1]["run_id"] == 111
+
+
+def test_sc_alerts_limit_1(client, tmp_path):
+    """GET /sc-alerts?limit=1 muss genau 1 Event zurückgeben, total=2 bleibt."""
+    import services.api.main as api
+
+    history = [
+        {
+            "timestamp": "2026-05-21T18:00:00+00:00",
+            "run_id": 111,
+            "run_started_at": "2026-05-21T17:55:00Z",
+            "sc_issue_count": 3,
+            "threshold": 0,
+            "delta": 3,
+        },
+        {
+            "timestamp": "2026-05-21T20:00:00+00:00",
+            "run_id": 222,
+            "run_started_at": "2026-05-21T19:55:00Z",
+            "sc_issue_count": 1,
+            "threshold": 0,
+            "delta": -2,
+        },
+    ]
+    history_file = tmp_path / "sc-alert-history.json"
+    history_file.write_text(json.dumps(history), encoding="utf-8")
+
+    c, _ = client
+    with patch.object(api, "_SC_ALERT_HISTORY_PATH", history_file):
+        resp = c.get("/sc-alerts?limit=1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["alerts"]) == 1
+    assert data["total"] == 2
+    assert data["limit"] == 1
+    # Neueste zuerst (run_id 222)
+    assert data["alerts"][0]["run_id"] == 222

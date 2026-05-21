@@ -27,7 +27,43 @@ jobs:
           pip install pytest pytest-asyncio httpx fastapi pydantic "python-jose[cryptography]" "passlib[bcrypt]" python-multipart aiofiles requests
 
       - name: Unit-Tests ausführen
+        id: unit_tests
         run: python -m pytest tests/unit -q
+
+      - name: Job-Summary schreiben
+        if: always()
+        run: |
+          OUTCOME="${{ steps.unit_tests.outcome }}"
+          if [ "$OUTCOME" == "success" ]; then
+            BADGE="![PASS](https://img.shields.io/badge/Unit%20Tests-PASS-brightgreen)"
+          else
+            BADGE="![FAIL](https://img.shields.io/badge/Unit%20Tests-FAIL-red)"
+          fi
+          {
+            echo "## 🧪 CI — Python Unit-Tests"
+            echo "$BADGE"
+            echo ""
+            echo "| Test-Suite | Ergebnis |"
+            echo "|------------|---------|"
+            echo "| tests/unit (alle Services) | $OUTCOME |"
+            echo "| /api/sc-alerts Tests (3 Szenarien) | $OUTCOME |"
+            echo ""
+            echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Telegram — Failure Notification
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"❌ *Kirobi CI — Python Unit Tests FAILED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\\nCommit: \`${{ github.sha }}\`\\n\\n🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   smoke-tests:
     name: Smoke-Tests (Services müssen laufen)
