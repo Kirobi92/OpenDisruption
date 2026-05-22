@@ -2,7 +2,7 @@ name: Frontend Unit Tests (Vitest)
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
     paths:
       - 'frontend/src/**'
       - 'frontend/package.json'
@@ -10,7 +10,7 @@ on:
       - 'frontend/tsconfig*.json'
       - '.github/workflows/unit-tests.yml'
   pull_request:
-    branches: [main]
+    branches: [main, master]
     paths:
       - 'frontend/src/**'
       - 'frontend/package.json'
