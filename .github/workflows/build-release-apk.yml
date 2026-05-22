@@ -86,7 +86,7 @@ jobs:
           KEYSTORE_ALIAS_PASS: ${{ secrets.KEYSTORE_ALIAS_PASS }}
         run: |
           cat > keystore.properties <<EOF
-          storeFile=kirobi-release.keystore
+          storeFile=../kirobi-release.keystore
           storePassword=${KEYSTORE_PASS}
           keyAlias=${KEYSTORE_ALIAS:-kirobi}
           keyPassword=${KEYSTORE_ALIAS_PASS:-$KEYSTORE_PASS}
