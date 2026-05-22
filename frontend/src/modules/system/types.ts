@@ -60,6 +60,7 @@ export type DashboardData = {
   max_marked_rate: number
   latest_assessment: string
   trend: string | null
+  sc_trend?: ScTrendData
 }
 
 export type DashboardConfig = {
@@ -143,6 +144,33 @@ export type ScAlertsData = {
   offset: number
   has_more: boolean
   history_file: string
+}
+
+export type ScTrendEntry = {
+  run_id: number
+  sc_issue_count: number
+  timestamp?: string
+  commit?: string
+}
+
+export type ScTrendSummary = {
+  total_runs: number
+  valid_runs: number
+  latest_count: number | null
+  min_count: number | null
+  max_count: number | null
+  avg_last_5: number | null
+  trend_direction: string | null
+  trend_delta: number | null
+  interpretation: string
+}
+
+export type ScTrendData = {
+  available: boolean
+  entries: ScTrendEntry[]
+  summary: ScTrendSummary | null
+  sc_trend_file?: string
+  error?: string
 }
 
 export type MusicHealthData = {

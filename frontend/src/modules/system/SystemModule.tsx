@@ -10,6 +10,10 @@ import { DownloadHistoryPanel } from './DownloadHistoryPanel'
 import { DownloadComparePanel } from './DownloadComparePanel'
 import { MusicHealthBadgePanel } from './MusicHealthBadgePanel'
 import { ScAlertsPanel } from './ScAlertsPanel'
+import { ScTrendPanel } from './ScTrendPanel'
+import { GpuPanel } from './GpuPanel'
+import { ServicesGridPanel } from './ServicesGridPanel'
+import { LiveLogsPanel } from './LiveLogsPanel'
 import { BUILD_TIME_GREEN, BUILD_TIME_YELLOW } from './Sparkline'
 import type {
   SystemStatus,
@@ -60,9 +64,6 @@ export default function SystemModule() {
   const isDesktopUA = useMemo(() => !/Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent), [])
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
-  const [logService, setLogService] = useState('kirobi-backend')
-  const [logLines, setLogLines] = useState<string[]>([])
-  const [logActive, setLogActive] = useState(false)
   const [swipeState, setSwipeState] = useState<Record<number, number>>({})
   const [dismissing, setDismissing] = useState<Set<number>>(new Set())
   // KIROBI_DL_HISTORY_REFRESH_S — dynamisch vom Backend (Standard: 15s)
@@ -313,22 +314,6 @@ export default function SystemModule() {
     setDlSwipeStart((prev) => ({ ...prev, [tag]: null }))
   }, [dlSwipeStart, downloadHistory])
 
-  useEffect(() => {
-    if (!logActive) return
-    setLogLines([])
-    const source = new EventSource(`${base}/api/system/logs/${logService}`)
-    source.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        setLogLines((lines) => [...lines.slice(-80), data.line])
-      } catch {
-        setLogLines((lines) => [...lines.slice(-80), event.data])
-      }
-    }
-    source.onerror = () => setLogLines((lines) => [...lines.slice(-80), '[SSE getrennt oder Service nicht erlaubt]'])
-    return () => source.close()
-  }, [base, logActive, logService])
-
   const gpu = data?.gpu
 
   return (
@@ -358,6 +343,8 @@ export default function SystemModule() {
       )}
 
       {dashboard && <DashboardPanel dashboard={dashboard} dashConfig={dashConfig} />}
+
+      {dashboard?.sc_trend && <ScTrendPanel scTrend={dashboard.sc_trend} />}
 
       {(milestoneFired || milestoneConfig) && (
         <MilestoneFiredPanel milestoneFired={milestoneFired} milestoneConfig={milestoneConfig} />
@@ -424,48 +411,11 @@ export default function SystemModule() {
       {/* Music-Health Config Panel — /api/music-health-config Refresh-Interval anzeigen + live editieren */}
       <MusicHealthConfigPanel base={base} musicHealthRefreshMs={musicHealthRefreshMs} onRefreshMsChange={(_ms) => {}} />
 
-      {gpu && (
-        <div className="gpuPanel">
-          <strong>RTX 3090 / GPU</strong>
-          {gpu.available ? (
-            <>
-              <div className="gpuLine"><span>VRAM</span><span>{gpu.memory_used_mb} / {gpu.memory_total_mb} MB</span></div>
-              <div className="gpuLine"><span>Temperatur</span><span>{gpu.temperature_c} °C</span></div>
-              <div className="gpuLine"><span>Last</span><span>{gpu.utilization_pct} %</span></div>
-            </>
-          ) : <div className="systemMeta">GPU-Daten nicht verfügbar: {gpu.error}</div>}
-        </div>
-      )}
+      {gpu && <GpuPanel gpu={gpu} />}
 
-      <div className="systemGrid">
-        {(data?.services ?? []).map((svc) => (
-          <article key={svc.name} className={`systemCard ${svc.status}`}>
-            <div className="systemCardTop">
-              <div className="systemName">{svc.name}</div>
-              <div className="systemPort">{svc.port ? `:${svc.port}` : 'systemd'}</div>
-            </div>
-            <span className={`systemPill ${svc.status}`}>{svc.status === 'ok' ? 'ONLINE' : 'DOWN'}</span>
-            <div className="systemMeta">{svc.detail || svc.url || 'bereit'}</div>
-            {typeof svc.latency_ms === 'number' && <div className="systemMeta">{svc.latency_ms} ms</div>}
-          </article>
-        ))}
-      </div>
+      <ServicesGridPanel services={data?.services ?? []} />
 
-      <div className="gpuPanel" style={{ marginTop: 14 }}>
-        <strong>Live Logs</strong>
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          <select value={logService} onChange={(e) => setLogService(e.target.value)}>
-            <option value="kirobi-backend">kirobi-backend</option>
-            <option value="kirobi-frontend">kirobi-frontend</option>
-            <option value="comfyui">comfyui</option>
-            <option value="hermes">hermes</option>
-          </select>
-          <button type="button" onClick={() => setLogActive((v) => !v)}>{logActive ? 'Stop' : 'Stream starten'}</button>
-        </div>
-        <pre style={{ maxHeight: 260, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11 }}>
-          {logLines.join('\n') || 'Noch kein Logstream aktiv.'}
-        </pre>
-      </div>
+      <LiveLogsPanel base={base} />
     </section>
   )
 }
