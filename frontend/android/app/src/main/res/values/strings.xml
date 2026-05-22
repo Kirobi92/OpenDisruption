@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kirobi</string>
+    <string name="title_activity_main">Kirobi</string>
+    <string name="package_name">de.opendisruption.kirobi</string>
+    <string name="custom_url_scheme">de.opendisruption.kirobi</string>
+</resources>

@@ -1,0 +1,48 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Node / frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build artifacts
+dist/
+build/
+coverage/
+.cache/
+
+# Android / Gradle artifacts
+.gradle/
+**/.gradle/
+**/build/
+*.apk
+*.aab
+*.apks
+*.aar
+output-metadata.json
+
+# Android secrets and local config (never commit)
+keystore.properties
+local.properties
+*.keystore
+*.jks
+frontend/android/gradle/wrapper/gradle-wrapper.jar
+
+# Runtime/local data
+logs/
+*.log
+.DS_Store
