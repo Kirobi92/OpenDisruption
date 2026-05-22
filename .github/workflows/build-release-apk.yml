@@ -188,7 +188,8 @@ jobs:
           MSG="${MSG}Version: ${{ steps.apk_info.outputs.version }} | ${{ steps.apk_info.outputs.build_type }}%0A"
           MSG="${MSG}SHA256: \`${{ steps.apk_info.outputs.sha256 }}\`%0A"
           MSG="${MSG}Branch: \`${{ github.ref_name }}\` | Commit: \`${GITHUB_SHA::7}\`%0A"
-          MSG="${MSG}[Actions Run](https://github.com/Kirobi92/OpenDisruption/actions/runs/${{ github.run_id }})"
+          MSG="${MSG}[Actions Run](https://github.com/Kirobi92/OpenDisruption/actions/runs/${{ github.run_id }})%0A"
+          MSG="${MSG}[📥 Download APK](https://github.com/Kirobi92/OpenDisruption/actions/runs/${{ github.run_id }}/artifacts)"
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
             -d "text=${MSG}" \
