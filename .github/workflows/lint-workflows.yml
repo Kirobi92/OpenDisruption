@@ -1,0 +1,103 @@
+name: Lint & Count Workflows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Vermeide parallele Runs auf demselben Branch
+concurrency:
+  group: lint-workflows-${{ github.ref }}
+  cancel-in-progress: true
+
+# ── Referenz-Baseline ────────────────────────────────────────────────────────
+# WORKFLOW_COUNT_REF wird manuell gepflegt und spiegelt den zuletzt bestätigten
+# sauberen Stand wider. Abweichungen ≥2 lösen einen Telegram-Alert aus.
+# Letzte Änderung: 2026-05-22 (Dry-Run: 6→7, lint-workflows.yml hinzugefügt)
+env:
+  WORKFLOW_COUNT_REF: "7"
+  TELEGRAM_CHAT_ID: "1066082496"
+
+jobs:
+  count-and-lint:
+    name: Workflow-Count & Delta-Alert
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 1. Aktuelle Workflow-Anzahl ermitteln ────────────────────────────
+      - name: Count workflow files
+        id: count
+        run: |
+          COUNT=$(find .github/workflows -maxdepth 1 -name "*.yml" -o -name "*.yaml" | wc -l)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Workflow Count::Aktuelle Anzahl: $COUNT | Referenz: ${{ env.WORKFLOW_COUNT_REF }}"
+
+      # ── 2. Delta berechnen und Alert auslösen ────────────────────────────
+      - name: Delta-Check & Telegram-Alert
+        env:
+          CURRENT: ${{ steps.count.outputs.count }}
+          REF: ${{ env.WORKFLOW_COUNT_REF }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.KIROBI_TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ env.TELEGRAM_CHAT_ID }}
+        run: |
+          DELTA=$(( CURRENT - REF ))
+          ABS_DELTA=${DELTA#-}
+          echo "Delta: $DELTA (abs: $ABS_DELTA)"
+
+          if [ "$ABS_DELTA" -ge 2 ]; then
+            echo "::warning title=WORKFLOW_COUNT Delta ≥2::Delta=$DELTA — Telegram-Alert wird gesendet"
+
+            if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+              MESSAGE="⚠️ *Kirobi APK — Workflow-Anzahl-Alert*%0A%0A"
+              MESSAGE+="Aktuelle Anzahl: \`$CURRENT\`%0A"
+              MESSAGE+="Referenz-Baseline: \`$REF\`%0A"
+              MESSAGE+="Delta: \`$DELTA\` (Schwelle: ≥2)%0A%0A"
+              MESSAGE+="Mögliche Ursache: Workflows wurden versehentlich gelöscht oder viele neue hinzugefügt.%0A"
+              MESSAGE+="🔗 Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+              curl -s -X POST \
+                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                -d "chat_id=${CHAT_ID}" \
+                -d "text=${MESSAGE}" \
+                -d "parse_mode=Markdown" \
+                --fail-with-body
+            else
+              echo "::warning::KIROBI_TELEGRAM_BOT_TOKEN nicht gesetzt — Alert nur lokal geloggt."
+            fi
+
+            # Job schlägt fehl, damit der PR blockiert wird
+            exit 1
+          else
+            echo "✅ Workflow-Count im Rahmen (Delta=$DELTA, Schwelle=2). Kein Alert."
+          fi
+
+      # ── 3. YAML-Lint aller Workflow-Dateien ──────────────────────────────
+      - name: Install yamllint
+        run: pip install yamllint --quiet
+
+      - name: Lint all workflow YAMLs
+        run: |
+          yamllint -d '{extends: relaxed, rules: {line-length: {max: 160}}}' \
+            .github/workflows/*.yml
+
+      # ── 4. Referenz-Dokumentation in Job-Summary verlinken ───────────────
+      - name: Link README.ci.md in Job-Summary
+        if: always()
+        run: |
+          echo "## 📚 CI-Dokumentation" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Vollständige Beschreibung aller Workflows und CI-Prozesse:" >> "$GITHUB_STEP_SUMMARY"
+          echo "👉 [README.ci.md](https://github.com/${{ github.repository }}/blob/main/README.ci.md)" >> "$GITHUB_STEP_SUMMARY"
