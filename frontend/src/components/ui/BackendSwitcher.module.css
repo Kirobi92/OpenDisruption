@@ -1,0 +1,103 @@
+.wrapper {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
+.trigger {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+}
+.trigger:hover { background: rgba(255,255,255,0.15); }
+
+.dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #000;
+}
+.dot[data-mode='lan']       { background: #22c55e; }
+.dot[data-mode='tailscale'] { background: #3b82f6; }
+.dot[data-mode='custom']    { background: #f59e0b; }
+
+.panel {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  background: rgba(15,15,25,0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 220px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.title {
+  color: rgba(255,255,255,0.4);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 8px 8px;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  gap: 2px;
+}
+.option:hover    { background: rgba(255,255,255,0.07); }
+.option.active   { background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); }
+
+.optLabel { color: #fff; font-size: 14px; font-weight: 500; }
+.optDesc  { color: rgba(255,255,255,0.4); font-size: 11px; }
+
+.customRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  width: 100%;
+}
+.customInput {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  outline: none;
+}
+.customInput:focus { border-color: rgba(99,102,241,0.6); }
+.saveBtn {
+  background: rgba(99,102,241,0.6);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 14px;
+}

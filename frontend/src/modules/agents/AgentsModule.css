@@ -1,0 +1,194 @@
+.agentsModule {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.agentsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.agentsHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.refreshBtn {
+  background: #1a1a2e;
+  border: 1px solid #333;
+  color: #4a9eff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.statsBar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.stat {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+}
+
+.statNum {
+  display: block;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.statLabel {
+  font-size: 10px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.viewSwitcher {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: #111;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.viewSwitcher button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #666;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.viewSwitcher button.active {
+  background: #1a1a2e;
+  color: #4a9eff;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 8px 0 4px;
+}
+
+.issuesList {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.issueCard {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+
+.issueHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.issueId {
+  font-size: 11px;
+  color: #555;
+  font-family: monospace;
+}
+
+.issueStatus {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.issueTitle {
+  font-size: 13px;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+.issueAssignee {
+  font-size: 11px;
+  color: #555;
+  margin-top: 4px;
+}
+
+.agentsList {
+  overflow-y: auto;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-content: start;
+}
+
+.agentCard {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.agentName {
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.agentMeta {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.agentTaskCount {
+  font-size: 10px;
+  color: #555;
+}
+
+.logView {
+  flex: 1;
+  overflow-y: auto;
+  background: #050505;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.logText {
+  font-family: monospace;
+  font-size: 11px;
+  color: #4caf50;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.emptyState, .loadingText {
+  text-align: center;
+  color: #555;
+  padding: 40px;
+  font-size: 13px;
+}

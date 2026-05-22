@@ -1,0 +1,51 @@
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: rgba(10, 10, 20, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 11px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  z-index: 100;
+  min-height: 36px;
+  flex-shrink: 0;
+}
+.left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.right {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.connection {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.agentState {
+  color: rgba(255,255,255,0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.divider {
+  color: rgba(255,255,255,0.12);
+  flex-shrink: 0;
+}
+.provider {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* Mobile: Provider-Info ausblenden auf sehr kleinen Screens */
+@media (max-width: 380px) {
+  .right { display: none; }
+}

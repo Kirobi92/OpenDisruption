@@ -1,0 +1,235 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StoryMusicHealthConfig — DOM-Snapshot-Regression > Snapshot: Default (source=default, refresh_s=30) 1`] = `
+<div
+  class="gpuPanel"
+  data-testid="music-health-config-panel"
+  style="margin-bottom: 14px;"
+>
+  <strong>
+    ⏱️ Music-Health Refresh-Config
+  </strong>
+  <div
+    style="font-size: 11px; color: rgb(170, 170, 170); margin-top: 6px;"
+  >
+    <span
+      style="margin-right: 12px;"
+    >
+      Interval: 
+      <strong
+        data-testid="refresh-s"
+        style="color: rgb(224, 224, 224);"
+      >
+        30
+        s
+      </strong>
+    </span>
+    <span
+      style="margin-right: 12px;"
+    >
+      Quelle: 
+      <strong
+        data-testid="source-label"
+        style="color: rgb(121, 134, 203);"
+      >
+        ⚙️ Default
+      </strong>
+    </span>
+    <span>
+      ENV: 
+      <code
+        style="font-size: 10px; color: rgb(136, 136, 136);"
+      >
+        KIROBI_MUSIC_HEALTH_REFRESH_S
+      </code>
+    </span>
+  </div>
+  <button
+    data-testid="edit-button"
+    style="margin-top: 8px; padding: 3px 10px; font-size: 11px; background: rgb(42, 42, 58); color: rgb(144, 202, 249); border: 1px solid rgb(68, 68, 68); border-radius: 4px; cursor: pointer;"
+  >
+    ✏️ Interval ändern
+  </button>
+</div>
+`;
+
+exports[`StoryMusicHealthConfig — DOM-Snapshot-Regression > Snapshot: ENV (source=env, refresh_s=60) 1`] = `
+<div
+  class="gpuPanel"
+  data-testid="music-health-config-panel"
+  style="margin-bottom: 14px;"
+>
+  <strong>
+    ⏱️ Music-Health Refresh-Config
+  </strong>
+  <div
+    style="font-size: 11px; color: rgb(170, 170, 170); margin-top: 6px;"
+  >
+    <span
+      style="margin-right: 12px;"
+    >
+      Interval: 
+      <strong
+        data-testid="refresh-s"
+        style="color: rgb(224, 224, 224);"
+      >
+        60
+        s
+      </strong>
+    </span>
+    <span
+      style="margin-right: 12px;"
+    >
+      Quelle: 
+      <strong
+        data-testid="source-label"
+        style="color: rgb(121, 134, 203);"
+      >
+        📌 ENV
+      </strong>
+    </span>
+    <span>
+      ENV: 
+      <code
+        style="font-size: 10px; color: rgb(136, 136, 136);"
+      >
+        KIROBI_MUSIC_HEALTH_REFRESH_S
+      </code>
+    </span>
+  </div>
+  <button
+    data-testid="edit-button"
+    style="margin-top: 8px; padding: 3px 10px; font-size: 11px; background: rgb(42, 42, 58); color: rgb(144, 202, 249); border: 1px solid rgb(68, 68, 68); border-radius: 4px; cursor: pointer;"
+  >
+    ✏️ Interval ändern
+  </button>
+</div>
+`;
+
+exports[`StoryMusicHealthConfig — DOM-Snapshot-Regression > Snapshot: Runtime (source=runtime, refresh_s=15) 1`] = `
+<div
+  class="gpuPanel"
+  data-testid="music-health-config-panel"
+  style="margin-bottom: 14px;"
+>
+  <strong>
+    ⏱️ Music-Health Refresh-Config
+  </strong>
+  <div
+    style="font-size: 11px; color: rgb(170, 170, 170); margin-top: 6px;"
+  >
+    <span
+      style="margin-right: 12px;"
+    >
+      Interval: 
+      <strong
+        data-testid="refresh-s"
+        style="color: rgb(224, 224, 224);"
+      >
+        15
+        s
+      </strong>
+    </span>
+    <span
+      style="margin-right: 12px;"
+    >
+      Quelle: 
+      <strong
+        data-testid="source-label"
+        style="color: rgb(121, 134, 203);"
+      >
+        ⚡ Runtime
+      </strong>
+    </span>
+    <span>
+      ENV: 
+      <code
+        style="font-size: 10px; color: rgb(136, 136, 136);"
+      >
+        KIROBI_MUSIC_HEALTH_REFRESH_S
+      </code>
+    </span>
+  </div>
+  <button
+    data-testid="edit-button"
+    style="margin-top: 8px; padding: 3px 10px; font-size: 11px; background: rgb(42, 42, 58); color: rgb(144, 202, 249); border: 1px solid rgb(68, 68, 68); border-radius: 4px; cursor: pointer;"
+  >
+    ✏️ Interval ändern
+  </button>
+</div>
+`;
+
+exports[`StoryMusicHealthConfig — Edit-Mode Snapshot > Snapshot: Edit-Mode offen (Default-Szenario) 1`] = `
+<div
+  class="gpuPanel"
+  data-testid="music-health-config-panel"
+  style="margin-bottom: 14px;"
+>
+  <strong>
+    ⏱️ Music-Health Refresh-Config
+  </strong>
+  <div
+    style="font-size: 11px; color: rgb(170, 170, 170); margin-top: 6px;"
+  >
+    <span
+      style="margin-right: 12px;"
+    >
+      Interval: 
+      <strong
+        data-testid="refresh-s"
+        style="color: rgb(224, 224, 224);"
+      >
+        30
+        s
+      </strong>
+    </span>
+    <span
+      style="margin-right: 12px;"
+    >
+      Quelle: 
+      <strong
+        data-testid="source-label"
+        style="color: rgb(121, 134, 203);"
+      >
+        ⚙️ Default
+      </strong>
+    </span>
+    <span>
+      ENV: 
+      <code
+        style="font-size: 10px; color: rgb(136, 136, 136);"
+      >
+        KIROBI_MUSIC_HEALTH_REFRESH_S
+      </code>
+    </span>
+  </div>
+  <div
+    style="margin-top: 8px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;"
+  >
+    <input
+      data-testid="interval-input"
+      min="10"
+      style="width: 70px; padding: 2px 6px; font-size: 12px; background: rgb(26, 26, 42); color: rgb(224, 224, 224); border: 1px solid rgb(85, 85, 85); border-radius: 4px;"
+      type="number"
+      value="30"
+    />
+    <span
+      style="font-size: 11px; color: rgb(170, 170, 170);"
+    >
+      Sekunden (min. 10)
+    </span>
+    <button
+      data-testid="save-button"
+      style="padding: 3px 10px; font-size: 11px; background: rgb(27, 58, 31); color: rgb(76, 175, 80); border: 1px solid rgb(76, 175, 80); border-radius: 4px; cursor: pointer;"
+    >
+      💾 Speichern
+    </button>
+    <button
+      data-testid="cancel-button"
+      style="padding: 3px 8px; font-size: 11px; background: rgb(42, 42, 58); color: rgb(170, 170, 170); border: 1px solid rgb(68, 68, 68); border-radius: 4px; cursor: pointer;"
+    >
+      ✕
+    </button>
+  </div>
+</div>
+`;
