@@ -9,7 +9,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   const publicPaths = [`${base}/login`, `${base}/login/`];
   const isPublic = publicPaths.some((p) => path === p || path.startsWith(p));
 
-  if (path.includes('/_app/') || path.startsWith('/v2/_app/') || path === `${base}/favicon.png`) {
+  if (path.includes('/_app/') || path === `${base}/favicon.png`) {
     return resolve(event);
   }
 
