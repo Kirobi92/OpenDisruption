@@ -71,7 +71,11 @@ export function ScAlertsPanel({ scAlerts, total, offset, hasMore, onPrev, onNext
                   </td>
                   <td style={{ ...tdStyle, color: '#aaa' }}>{alert.threshold}</td>
                   <td style={{ ...tdStyle, color: alert.delta > 0 ? '#ff5252' : alert.delta < 0 ? '#4caf50' : '#aaa' }}>
-                    {alert.delta > 0 ? `+${alert.delta}` : alert.delta}
+                    {alert.delta > 0
+                      ? `▲ +${alert.delta}`
+                      : alert.delta < 0
+                        ? `▼ ${alert.delta}`
+                        : `— 0`}
                   </td>
                 </tr>
               )

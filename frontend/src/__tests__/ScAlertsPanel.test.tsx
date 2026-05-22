@@ -110,6 +110,31 @@ describe('ScAlertsPanel — Pagination', () => {
     expect(screen.queryByRole('button')).toBeNull()
   })
 
+  it('Delta-Spalte zeigt Trending-Pfeil ▲ bei positivem, ▼ bei negativem Delta, — bei 0', () => {
+    const alerts = [
+      makeAlert({ run_id: 2001, delta: 3 }),
+      makeAlert({ run_id: 2002, delta: -2 }),
+      makeAlert({ run_id: 2003, delta: 0 }),
+    ]
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={3}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    const cells = document.querySelectorAll('td')
+    const allTexts = Array.from(cells).map((td) => td.textContent)
+    expect(allTexts.some((t) => t?.includes('▲'))).toBe(true)
+    expect(allTexts.some((t) => t?.includes('▼'))).toBe(true)
+    expect(allTexts.some((t) => t?.includes('—'))).toBe(true)
+  })
+
   it('sc_issue_count > 0 zeigt rote Farbe; =0 zeigt grüne Farbe', () => {
     const alerts = [
       makeAlert({ run_id: 1001, sc_issue_count: 2, delta: 2 }),
