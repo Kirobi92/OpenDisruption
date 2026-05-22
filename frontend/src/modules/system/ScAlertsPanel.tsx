@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import type { ScAlertEvent } from './types'
 
 const PAGE_LIMIT = 5
@@ -15,6 +16,20 @@ export function ScAlertsPanel({ scAlerts, total, offset, hasMore, onPrev, onNext
   const currentPage = Math.floor(offset / PAGE_LIMIT) + 1
   const totalPages = Math.ceil(total / PAGE_LIMIT) || 1
 
+  // Keyboard-Navigation: ArrowLeft/ArrowRight für Seitennavigation (analog DownloadHistoryPanel)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'ArrowLeft' && offset > 0) {
+        e.preventDefault()
+        onPrev()
+      } else if (e.key === 'ArrowRight' && hasMore) {
+        e.preventDefault()
+        onNext()
+      }
+    },
+    [offset, hasMore, onPrev, onNext]
+  )
+
   if (scAlerts.length === 0 && offset === 0) {
     return (
       <div className="gpuPanel" style={{ marginBottom: 14 }}>
@@ -27,7 +42,14 @@ export function ScAlertsPanel({ scAlerts, total, offset, hasMore, onPrev, onNext
   }
 
   return (
-    <div className="gpuPanel" style={{ marginBottom: 14 }}>
+    <div
+      className="gpuPanel"
+      style={{ marginBottom: 14, outline: 'none' }}
+      tabIndex={0}
+      role="region"
+      aria-label="SC-Alert-History Navigation"
+      onKeyDown={handleKeyDown}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <strong>🛡️ SC-Alert-History ({total} gesamt)</strong>
         {totalPages > 1 && (

@@ -226,5 +226,69 @@ describe('ScAlertsPanel — Pagination', () => {
 
     expect(screen.queryByText(/seite/i)).toBeNull()
   })
+
+  it('Keyboard ArrowRight → onNext aufgerufen wenn hasMore=true', () => {
+    const onNext = vi.fn()
+    const onPrev = vi.fn()
+    const alerts = makeAlerts(5)
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={10}
+        offset={0}
+        hasMore={true}
+        onPrev={onPrev}
+        onNext={onNext}
+      />
+    )
+
+    const region = screen.getByRole('region', { name: /sc-alert-history/i })
+    fireEvent.keyDown(region, { key: 'ArrowRight' })
+    expect(onNext).toHaveBeenCalledTimes(1)
+    expect(onPrev).not.toHaveBeenCalled()
+  })
+
+  it('Keyboard ArrowLeft → onPrev aufgerufen wenn offset>0', () => {
+    const onNext = vi.fn()
+    const onPrev = vi.fn()
+    const alerts = makeAlerts(5)
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={10}
+        offset={5}
+        hasMore={false}
+        onPrev={onPrev}
+        onNext={onNext}
+      />
+    )
+
+    const region = screen.getByRole('region', { name: /sc-alert-history/i })
+    fireEvent.keyDown(region, { key: 'ArrowLeft' })
+    expect(onPrev).toHaveBeenCalledTimes(1)
+    expect(onNext).not.toHaveBeenCalled()
+  })
+
+  it('Keyboard ArrowRight → onNext NICHT aufgerufen wenn hasMore=false', () => {
+    const onNext = vi.fn()
+    const alerts = makeAlerts(3)
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={3}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={onNext}
+      />
+    )
+
+    const region = screen.getByRole('region', { name: /sc-alert-history/i })
+    fireEvent.keyDown(region, { key: 'ArrowRight' })
+    expect(onNext).not.toHaveBeenCalled()
+  })
 })
 // unit-test trigger Fr 22. Mai 05:38:23 CEST 2026
