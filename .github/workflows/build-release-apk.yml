@@ -119,8 +119,13 @@ jobs:
             BUILD_TYPE="debug"
           fi
           
-          # Get versionName from build.gradle
-          VERSION=$(grep 'versionName' app/build.gradle | sed 's/.*"\(.*\)".*/\1/' | tr -d ' ')
+          # Derive VERSION from Git tag (v1.2.3 → 1.2.3) or fall back to build.gradle versionName
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/v}"
+            VERSION="$TAG_NAME"
+          else
+            VERSION=$(grep 'versionName' app/build.gradle | sed 's/.*"\\(.*\\)".*/\\1/' | tr -d ' ')
+          fi
           SUFFIX="${{ github.event.inputs.version_suffix }}"
           SHORT_SHA="${GITHUB_SHA::7}"
           
