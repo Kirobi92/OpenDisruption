@@ -202,3 +202,4 @@ describe('ScAlertsPanel — Pagination', () => {
     expect(screen.queryByText(/seite/i)).toBeNull()
   })
 })
+// unit-test trigger Fr 22. Mai 05:38:23 CEST 2026
