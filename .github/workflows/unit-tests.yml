@@ -111,7 +111,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{
               \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
-              \"text\": \"✅ *Kirobi CI — Unit Tests PASSED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\",
+              \"text\": \"✅ *Kirobi CI — Unit Tests PASSED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\\nCommit: \`${{ github.sha }}\`\\n\\n🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
               \"parse_mode\": \"Markdown\"
             }"
         env:
