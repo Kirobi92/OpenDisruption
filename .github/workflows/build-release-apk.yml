@@ -3,6 +3,8 @@ name: Build Release APK
 on:
   push:
     branches: [master]
+    tags:
+      - 'v*.*.*'
     paths:
       - 'frontend/src/**'
       - 'frontend/public/**'
@@ -149,6 +151,25 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Upload APK to GitHub Release (Tag-Push only)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          APK_PATH="${{ steps.apk_info.outputs.apk_path }}"
+          APK_NAME="${{ steps.apk_info.outputs.apk_name }}"
+          echo "Uploading ${APK_NAME} to release ${TAG}..."
+          # Create release if it doesn't exist yet (e.g. triggered by tag-push before manual release)
+          gh release view "${TAG}" --repo Kirobi92/OpenDisruption > /dev/null 2>&1 || \
+            gh release create "${TAG}" --repo Kirobi92/OpenDisruption \
+              --title "Kirobi ${TAG}" \
+              --notes "Automated release via CI — APK built from commit \`${GITHUB_SHA::7}\`"
+          # Upload APK (overwrite if asset already exists)
+          gh release upload "${TAG}" "${APK_PATH}#${APK_NAME}" \
+            --repo Kirobi92/OpenDisruption --clobber
+          echo "✅ APK hochgeladen: https://github.com/Kirobi92/OpenDisruption/releases/tag/${TAG}"
+
       - name: Write Job Summary
         if: always()
         run: |
@@ -190,6 +211,10 @@ jobs:
           MSG="${MSG}Branch: \`${{ github.ref_name }}\` | Commit: \`${GITHUB_SHA::7}\`%0A"
           MSG="${MSG}[Actions Run](https://github.com/Kirobi92/OpenDisruption/actions/runs/${{ github.run_id }})%0A"
           MSG="${MSG}[📥 Download APK](https://github.com/Kirobi92/OpenDisruption/actions/runs/${{ github.run_id }}/artifacts)"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            MSG="${MSG}%0A[🏷️ GitHub Release ${TAG}](https://github.com/Kirobi92/OpenDisruption/releases/tag/${TAG})"
+          fi
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TELEGRAM_CHAT_ID}" \
             -d "text=${MSG}" \
