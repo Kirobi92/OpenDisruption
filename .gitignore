@@ -40,7 +40,6 @@ keystore.properties
 local.properties
 *.keystore
 *.jks
-frontend/android/gradle/wrapper/gradle-wrapper.jar
 
 # Runtime/local data
 logs/
