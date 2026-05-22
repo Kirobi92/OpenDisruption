@@ -1,0 +1,14 @@
+# actionlint Konfiguration — Kirobi APK
+# Shellcheck-Info/Style/Warning-Findings führen NICHT zu exit-1.
+# Nur shellcheck error-Level → actionlint-Failure.
+# SC_ALERT-Reporting (non-blocking) erfolgt im lint-workflows.yml Job-Summary.
+# Docs: https://github.com/rhysd/actionlint/blob/main/docs/config.md
+
+self-hosted-runner:
+  labels: []
+
+shellcheck:
+  # -S error: nur shellcheck-Fehler der Severity "error" lösen exit-1 aus.
+  # info/style/warning-Findings (SC2086, SC2102, SC2129, SC2193) werden
+  # gezeigt aber nicht für den Exit-Code gezählt.
+  options: "-S error"

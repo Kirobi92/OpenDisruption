@@ -94,7 +94,44 @@ jobs:
           yamllint -d '{extends: relaxed, rules: {line-length: {max: 160}}}' \
             .github/workflows/*.yml
 
-      # ── 4. Referenz-Dokumentation in Job-Summary verlinken ───────────────
+      # ── 4. actionlint — GitHub Actions Syntax-Check ──────────────────────
+      # Shellcheck-Findings unterhalb "error"-Level (info/style/warning wie
+      # SC2086, SC2102, SC2129, SC2193) → SC_ALERT in Summary, kein exit-1.
+      # Nur echte shellcheck-Errors führen zu LINT FAIL.
+      # Konfiguration: .actionlint.yaml + scripts/shellcheck-error-only.sh
+      - name: Install actionlint
+        run: |
+          ACTIONLINT_VERSION="1.7.12"
+          curl -sSL \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            | tar -xz actionlint
+          sudo mv actionlint /usr/local/bin/actionlint
+
+      - name: actionlint — Workflow-Syntax prüfen (SC_ALERT non-blocking)
+        id: actionlint
+        run: |
+          chmod +x scripts/shellcheck-error-only.sh
+          SC_FINDINGS=$(actionlint -shellcheck scripts/shellcheck-error-only.sh \
+            .github/workflows/*.yml 2>&1 || true)
+          echo "$SC_FINDINGS"
+
+          # SC_ALERT: Info/Warning-Findings für Job-Summary sammeln
+          SC_ALERT_COUNT=$(echo "$SC_FINDINGS" | grep -c '\[shellcheck\]' || true)
+          echo "sc_alert_count=$SC_ALERT_COUNT" >> "$GITHUB_OUTPUT"
+
+          if [ -n "$SC_FINDINGS" ]; then
+            echo "## ⚠️ SC_ALERT — actionlint Shellcheck-Findings (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "$SC_FINDINGS" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "ℹ️ Findings auf info/style/warning-Level blockieren den CI-Run nicht." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## ✅ actionlint — keine Findings" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # ── 5. Referenz-Dokumentation in Job-Summary verlinken ───────────────
       - name: Link README.ci.md in Job-Summary
         if: always()
         run: |
