@@ -298,7 +298,7 @@
       "spiral": "orange",
       "agent": "",
       "tags": [],
-      "size": 1
+      "size": 2
     },
     {
       "id": ".github/workflows/install-test.yml",
@@ -327,6 +327,30 @@
     {
       "id": ".github/workflows/nightly-audit.yml",
       "label": "nightly-audit",
+      "dir": ".github",
+      "ext": "yml",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": ".github/workflows/story-nav-e2e.yml",
+      "label": "story-nav-e2e",
+      "dir": ".github",
+      "ext": "yml",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 2
+    },
+    {
+      "id": ".github/workflows/unit-tests.yml",
+      "label": "unit-tests",
       "dir": ".github",
       "ext": "yml",
       "zone": "WORKSPACE",
@@ -1351,7 +1375,7 @@
       "ext": "md",
       "zone": "WORKSPACE",
       "quadrant": "LR",
-      "spiral": "yellow",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -1535,6 +1559,30 @@
       "agent": "",
       "tags": [],
       "size": 8
+    },
+    {
+      "id": "README.ci",
+      "label": "README.ci",
+      "dir": "README.ci.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "README.secrets",
+      "label": "README.secrets",
+      "dir": "README.secrets.md",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "RESTRUCTURING_PLAN",
@@ -6788,6 +6836,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/portal/src/components/apk/DownloadHistoryPanel.tsx",
+      "label": "DownloadHistoryPanel",
+      "dir": "apps",
+      "ext": "tsx",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
       "agent": "",
       "tags": [],
       "size": 1
@@ -15124,6 +15184,42 @@
       "size": 1
     },
     {
+      "id": "scripts/sc-alert-history.json",
+      "label": "sc-alert-history",
+      "dir": "scripts",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "scripts/sc-trend-sync",
+      "label": "sc-trend-sync",
+      "dir": "scripts",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "beige",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "scripts/sc-trend.json",
+      "label": "sc-trend",
+      "dir": "scripts",
+      "ext": "json",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "scripts/verify-apk.sh",
       "label": "verify-apk",
       "dir": "scripts",
@@ -15301,7 +15397,7 @@
       "spiral": "green",
       "agent": "",
       "tags": [],
-      "size": 7
+      "size": 12
     },
     {
       "id": "services/auth/AGENTS",
@@ -15841,6 +15937,18 @@
       "size": 5
     },
     {
+      "id": "services/music-generation/AUDIOCRAFT-UPGRADE-STRATEGIE",
+      "label": "AUDIOCRAFT-UPGRADE-STRATEGIE",
+      "dir": "services",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "services/music-generation/Dockerfile",
       "label": "Dockerfile",
       "dir": "services",
@@ -15883,7 +15991,7 @@
       "ext": "py",
       "zone": "WORKSPACE",
       "quadrant": "UR",
-      "spiral": "green",
+      "spiral": "blue",
       "agent": "",
       "tags": [],
       "size": 1
@@ -17092,6 +17200,42 @@
       "size": 1
     },
     {
+      "id": "tests/e2e/__init__",
+      "label": "__init__",
+      "dir": "tests",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "tests/e2e/conftest",
+      "label": "conftest",
+      "dir": "tests",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "tests/e2e/test_story_nav_e2e",
+      "label": "test_story_nav_e2e",
+      "dir": "tests",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "tests/integration/AGENTS",
       "label": "AGENTS",
       "dir": "tests",
@@ -17267,6 +17411,18 @@
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "tests/test_story_nav_e2e",
+      "label": "test_story_nav_e2e",
+      "dir": "tests",
+      "ext": "py",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
       "agent": "",
       "tags": [],
       "size": 1
@@ -18079,12 +18235,27 @@
   "links": [
     {
       "source": "services/telegram/AGENTS",
+      "target": ".github/workflows/ci.yml",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "services/telegram/AGENTS",
       "target": ".github/workflows/lint-workflows.yml",
       "type": "telegram-bind"
     },
     {
       "source": "services/telegram/AGENTS",
       "target": ".github/workflows/nightly-audit.yml",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": ".github/workflows/story-nav-e2e.yml",
+      "type": "telegram-bind"
+    },
+    {
+      "source": "services/telegram/AGENTS",
+      "target": ".github/workflows/unit-tests.yml",
       "type": "telegram-bind"
     },
     {
@@ -18929,32 +19100,17 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/embeddings/AGENTS",
+      "target": "services/model-routing/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/video-generation/AGENTS",
+      "target": "services/nutzi/Dockerfile",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/ingest/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/retrieval/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/hermes-runtime/Dockerfile",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "apps/web-svelte/.svelte-kit/adapter-node/.vite/manifest.json",
+      "target": "services/telegram/AGENTS",
       "type": "route"
     },
     {
@@ -18969,12 +19125,12 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/telegram/AGENTS",
+      "target": "apps/web/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/music-generation/AGENTS",
+      "target": "services/auth/AGENTS",
       "type": "route"
     },
     {
@@ -18984,12 +19140,7 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/model-routing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/nutzi/Dockerfile",
+      "target": "services/hermes-runtime/Dockerfile",
       "type": "route"
     },
     {
@@ -19004,17 +19155,37 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/auth/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "apps/web/AGENTS",
+      "target": "services/retrieval/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
       "target": "services/openclaw-gateway/README",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/embeddings/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/ingest/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/.vite/manifest.json",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/music-generation/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/video-generation/AGENTS",
       "type": "route"
     },
     {
@@ -19793,6 +19964,31 @@
       "type": "import"
     },
     {
+      "source": "tests/unit/test_api_service",
+      "target": "services/api/main",
+      "type": "import"
+    },
+    {
+      "source": "tests/unit/test_api_service",
+      "target": "services/api/main",
+      "type": "import"
+    },
+    {
+      "source": "tests/unit/test_api_service",
+      "target": "services/api/main",
+      "type": "import"
+    },
+    {
+      "source": "tests/unit/test_api_service",
+      "target": "services/api/main",
+      "type": "import"
+    },
+    {
+      "source": "tests/unit/test_api_service",
+      "target": "services/api/main",
+      "type": "import"
+    },
+    {
       "source": "tests/unit/test_audit",
       "target": "kirobi_core/audit",
       "type": "import"
@@ -20279,9 +20475,9 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-05-21T00:00:38.544499+00:00",
-    "node_count": 1496,
-    "link_count": 440,
+    "generated_at": "2026-05-22T00:01:59.661272+00:00",
+    "node_count": 1509,
+    "link_count": 448,
     "edge_types": [
       "wikilink",
       "import",
