@@ -116,13 +116,13 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload failure artifacts
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: story-nav-e2e-failure-${{ github.run_id }}
           path: |
-            tests/screenshots/
-            tests/*.log
+            tests/e2e/screenshots/
+            tests/e2e/*.log
           retention-days: 7
           if-no-files-found: ignore
 
