@@ -1,0 +1,138 @@
+name: E2E Keyboard & Swipe Navigation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/test_keyboard_nav_e2e.py'
+      - 'frontend/src/modules/system/SystemModule.tsx'
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'tests/test_keyboard_nav_e2e.py'
+      - 'frontend/src/modules/system/SystemModule.tsx'
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Guard: Bei pull_request nur wenn Label 'e2e' oder 'frontend' gesetzt ist
+  check-labels:
+    name: "Check PR Labels"
+    runs-on: ubuntu-latest
+    outputs:
+      run-e2e: ${{ steps.check.outputs.run-e2e }}
+    steps:
+      - name: Check for e2e or frontend label
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+            echo "run-e2e=true" >> $GITHUB_OUTPUT
+          elif echo '${{ toJson(github.event.pull_request.labels.*.name) }}' | grep -qE '"e2e"|"frontend"'; then
+            echo "run-e2e=true" >> $GITHUB_OUTPUT
+          else
+            echo "run-e2e=false" >> $GITHUB_OUTPUT
+          fi
+
+  e2e:
+    name: "E2E — ${{ matrix.suite }}"
+    needs: check-labels
+    if: needs.check-labels.outputs.run-e2e == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: Keyboard
+            pytest_filter: "TestKeyboardNavE2E"
+            mobile: "false"
+            viewport_width: "1280"
+            viewport_height: "800"
+
+          - suite: Swipe-Touch
+            pytest_filter: "TestSwipeTouchE2E"
+            mobile: "true"
+            viewport_width: "390"
+            viewport_height: "844"
+
+          - suite: EnvOverride
+            pytest_filter: "-m envoverride"
+            mobile: "false"
+            viewport_width: "800"
+            viewport_height: "600"
+
+    env:
+      # ── Playwright Viewport-Konfiguration ──────────────────────────────────────
+      # Gesetzt via Matrix-Variable (suite-spezifisch):
+      #   Keyboard  Suite → PLAYWRIGHT_VIEWPORT_WIDTH=1280, PLAYWRIGHT_VIEWPORT_HEIGHT=800
+      #   Swipe-Touch Suite → PLAYWRIGHT_VIEWPORT_WIDTH=390,  PLAYWRIGHT_VIEWPORT_HEIGHT=844
+      #
+      # conftest.py liest diese Variablen in zwei Fixtures:
+      #   page()        → os.environ.get("PLAYWRIGHT_VIEWPORT_WIDTH",  "1280")
+      #                   os.environ.get("PLAYWRIGHT_VIEWPORT_HEIGHT", "800")
+      #                   → Desktop Chromium (kein Touch)
+      #   mobile_page() → os.environ.get("PLAYWRIGHT_VIEWPORT_WIDTH",  "390")
+      #                   os.environ.get("PLAYWRIGHT_VIEWPORT_HEIGHT", "844")
+      #                   → Mobile Chromium (hasTouch=true, iPhone 12 Pro UA)
+      #
+      # Wenn diese ENVs hier NICHT gesetzt wären, würden die conftest.py-Fixtures
+      # ihre hardkodierten Defaults nutzen (1280×800 bzw. 390×844).
+      # Hier explizit gesetzt, um Matrix-Suite-Werte zu übermitteln und
+      # CI-Verhalten von lokalen Defaults unabhängig zu machen.
+      PLAYWRIGHT_VIEWPORT_WIDTH: ${{ matrix.viewport_width }}
+      PLAYWRIGHT_VIEWPORT_HEIGHT: ${{ matrix.viewport_height }}
+
+      # ── Touch-Kontext ───────────────────────────────────────────────────────────
+      # conftest.py mobile_page() liest PLAYWRIGHT_DEVICE_HAS_TOUCH (default: "true")
+      # → os.environ.get("PLAYWRIGHT_DEVICE_HAS_TOUCH", "true").lower() != "false"
+      # Keyboard-Suite: mobile=false → kein Touch-Context
+      # Swipe-Touch-Suite: mobile=true → has_touch=True
+      PLAYWRIGHT_DEVICE_HAS_TOUCH: ${{ matrix.mobile }}
+
+      # ── Kirobi-interne E2E-Flags ────────────────────────────────────────────────
+      KIROBI_E2E_MOBILE: ${{ matrix.mobile == 'true' && '1' || '0' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements-e2e.txt
+
+      - name: Install Playwright Chromium
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Run E2E — ${{ matrix.suite }}
+        run: |
+          if [[ "${{ matrix.pytest_filter }}" == -m* ]]; then
+            pytest tests/test_keyboard_nav_e2e.py ${{ matrix.pytest_filter }} \
+              -v --tb=short --timeout=60
+          else
+            pytest tests/test_keyboard_nav_e2e.py::${{ matrix.pytest_filter }} \
+              -v --tb=short --timeout=60
+          fi
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-${{ matrix.suite }}-${{ github.run_id }}
+          path: |
+            tests/screenshots/
+            tests/*.log
+          retention-days: 7
+          if-no-files-found: ignore

@@ -1,0 +1,58 @@
+# CI-Workflow: Kirobi Backend Integrations-Tests
+# Triggered: push/PR auf main + manuell
+
+name: kirobi-backend-integration-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'tests/**'
+      - 'pytest.ini'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  integration-tests:
+    name: WS-Connect Integration Tests
+    runs-on: ubuntu-latest
+
+    env:
+      STT_PROVIDER: whisper
+      LLM_PROVIDER: ollama
+      TTS_PROVIDER: edge
+      KIROBI_TEST_MODE: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        # pipecat-ai aus backend/requirements.txt wird NICHT installiert:
+        # - zu schwer für GitHub Actions (PyTorch, Silero, Audio-ML)
+        # - KIROBI_TEST_MODE=1 unterdrückt pipecat-Import in server.py
+        # Stattdessen: requirements-ci.txt (leichtgewichtig, CI-kompatibel)
+        run: |
+          pip install --upgrade pip
+          pip install -r backend/requirements-ci.txt
+          pip install pytest pytest-asyncio httpx httpx-ws websockets uvicorn pytest-timeout anyio
+
+      - name: Run Integration Tests
+        run: |
+          pytest tests/ -v --timeout=30 -m "not slow"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: |
+            .pytest_cache/

@@ -1,0 +1,72 @@
+name: Kirobi Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'frontend/**'
+      - '*.apk'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'frontend/**'
+      - '*.apk'
+
+permissions:
+  contents: read
+
+# Vermeide parallele Runs auf demselben Branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest-Suite (Python 3.11)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install \
+            fastapi \
+            uvicorn[standard] \
+            httpx \
+            httpx-ws \
+            pytest \
+            pytest-asyncio \
+            pytest-timeout \
+            loguru \
+            python-dotenv \
+            websockets \
+            aiohttp
+
+      - name: Run pytest
+        run: |
+          python -m pytest tests/ -v --tb=short --timeout=30
+        env:
+          # Test-Modus: keine echten Provider, kein Ollama/ElevenLabs/Whisper nötig
+          KIROBI_TEST_MODE: "1"
+          STT_PROVIDER: "whisper"
+          LLM_PROVIDER: "ollama"
+          TTS_PROVIDER: "edge"
+          OPENAI_API_KEY: ""
+          ELEVENLABS_API_KEY: ""
