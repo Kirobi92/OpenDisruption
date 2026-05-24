@@ -23,7 +23,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Lint scripts
@@ -35,7 +35,7 @@ jobs:
     name: Help & version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - run: bash install.sh --version
       - run: bash install.sh --help
 
@@ -47,7 +47,7 @@ jobs:
       matrix:
         profile: [auto, minimal, cpu, nvidia, amd]
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - name: Run installer in dry-run mode
         run: |
           bash install.sh \
@@ -59,7 +59,7 @@ jobs:
     name: detect-system + validate-env
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - name: detect-system human + json + shell
         run: |
           bash infra/scripts/detect-system.sh
@@ -116,6 +116,6 @@ jobs:
     name: backup.sh + update.sh dry-runs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6
       - run: bash infra/scripts/backup.sh --dry-run --quiet
       - run: bash infra/scripts/update.sh --dry-run --no-backup --skip-validate
