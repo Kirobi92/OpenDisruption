@@ -65,6 +65,21 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
+      - name: Telegram — Success Notification
+        if: success() && env.KIROBI_UNIT_CI_NOTIFY_SUCCESS == 'true'
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"✅ *Kirobi CI — Python Unit Tests PASSED*\\n\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIROBI_UNIT_CI_NOTIFY_SUCCESS: ${{ vars.KIROBI_UNIT_CI_NOTIFY_SUCCESS }}
+
   smoke-tests:
     name: Smoke-Tests (Services müssen laufen)
     runs-on: ubuntu-latest
