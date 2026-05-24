@@ -1,0 +1,21 @@
+# Kirobi APK Checksums DB — auto-generiert via CI Release-Workflow
+# Format: name|sha256|tag
+# Letzte Aktualisierung: 2026-05-24 14:50 UTC
+Kirobi-v4-debug.apk|27682aaac9425556cd7153bf072613e6c5769a5e193687a9765074bf6507f709|v4.0.0
+Kirobi-v5-debug.apk|66473e90b23df4ec43359db0dcef69da151b7aa3f251fd7a7253eb9bacdf68f0|v5.0.0
+Kirobi-v6-debug.apk|a85232975ec9c3c3f217ac10da4882672b859c6984a78fad66acaab683e6f932|v6.0.0
+Kirobi-v7-debug.apk|d7ffb6c5d6c67c0caf1e30a48f4e06e7a88411000d0392ba11c2b34d8766a3cd|v7.0.0
+Kirobi-v8-debug.apk|07e091083331d7723084cb013eb7dc51dd6fb5b0a77767aa822e71de553de8ba|v8.0.0
+Kirobi-v9-debug.apk|3393f3e4bdf80ace0652d79d4becd080153b93ea299a95fa8cd86cb4137d7fdb|v9.0.0
+Kirobi-v10-debug.apk|04541c00f7f2ba2d1a375bb664fa715aaaa2779c1302b2f5f03197b58fce88a4|v10.0.0
+Kirobi-v10-release.apk|30191632eacad466d1f66078447a1ced216f1e9d9f6a21c5feb350ab988a7730|v10.0.0
+Kirobi-v10-release-signed.apk|18a1bcb3ea524ecc53700c3dd3052e54272371e1be1d5c4cbd79eb04682f7eb2|v10.0.0
+Kirobi-v10.2-milestone-fired-debug.apk|65befc5b6e6aedbb3a0cb1ed826d926e3e83efcfe93a8abab4d4dead9386d347|v10.2.0
+Kirobi-v10.3-download-history-debug.apk|12b2500731bc654bde2cabe19628eaa74f91868c4c5f7be3f4b7b55af85ddc18|v10.3.0
+Kirobi-v10.4-week-nav-debug.apk|0afc27a3fe5ed7f1f4dee64d2e84a33d9ad1d4c27d2c14dd2a59c3101a4f3266|v10.4.0
+Kirobi-v10.5-chat-agent-connect-debug.apk|a26ca36a29721548a064def6389e771e0d63b5a87654797565e37d0b64cad060|v10.5.0
+Kirobi-v10.5-keyboard-nav-debug.apk|170ba5dd00f263f090210bfc6c0ba07d4879de27034757409c34277b0631caa7|v10.5.0
+Kirobi-v10.6-tab-focus-debug.apk|cc462790316e7eab9fae698bfda8925819219014695f0cff33550fd93e3dc145|v10.6.0
+Kirobi-v10.7-accessibility-debug.apk|cc462790316e7eab9fae698bfda8925819219014695f0cff33550fd93e3dc145|v10.7.0
+Kirobi-v10.8-swipe-touch-debug.apk|cc462790316e7eab9fae698bfda8925819219014695f0cff33550fd93e3dc145|v10.8.0
+Kirobi-v11-debug.apk|5ddcf57f42c3fc0af03f04dc4bf7cafd31b0ed00c8ece4ccf9f4368154f02848|v11.0.0-beta

@@ -1,0 +1,109 @@
+name: Release Checksums Update
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release-Tag (z.B. v13.0.0) — leer lassen für latest'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  update-checksums:
+    name: APK-Checksum in apk-checksums.db committen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release-Tag ermitteln
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "TAG=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: APK-Asset herunterladen
+        id: download
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.TAG }}"
+          echo "Release-Tag: $TAG"
+          mkdir -p /tmp/apk-dl
+          cd /tmp/apk-dl
+
+          gh release download "$TAG" --pattern "*.apk" --repo "${{ github.repository }}" || true
+
+          APK_FILE=$(ls *.apk 2>/dev/null | head -1)
+          if [ -z "$APK_FILE" ]; then
+            echo "Keine .apk Assets im Release $TAG gefunden."
+            echo "APK_NAME=" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "APK_NAME=$APK_FILE" >> "$GITHUB_ENV"
+          echo "APK_FILE=/tmp/apk-dl/$APK_FILE" >> "$GITHUB_ENV"
+          echo "Download: $APK_FILE"
+
+      - name: SHA256 berechnen und DB aktualisieren
+        if: env.APK_NAME != ''
+        run: |
+          set -euo pipefail
+          APK_FILE="${{ env.APK_FILE }}"
+          APK_NAME="${{ env.APK_NAME }}"
+          TAG="${{ steps.tag.outputs.TAG }}"
+
+          HASH=$(sha256sum "$APK_FILE" | awk '{print $1}')
+          echo "SHA256($APK_NAME) = $HASH"
+
+          CLEAN_TAG="${TAG#v}"
+          DB_FILE="scripts/apk-checksums.db"
+
+          if grep -qF "${APK_NAME}|" "$DB_FILE" 2>/dev/null; then
+            echo "Update existing entry: $APK_NAME"
+            sed -i "s|^${APK_NAME}|.*|${APK_NAME}|${HASH}|${CLEAN_TAG}|" "$DB_FILE"
+          else
+            echo "Append new entry: $APK_NAME"
+            echo "${APK_NAME}|${HASH}|${CLEAN_TAG}" >> "$DB_FILE"
+          fi
+
+          echo "HASH=$HASH" >> "$GITHUB_ENV"
+
+      - name: Änderungen committen und pushen
+        if: env.HASH != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add scripts/apk-checksums.db
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen"
+            exit 0
+          fi
+
+          git commit -m "chore: apk-checksums.db update after release ${{ steps.tag.outputs.TAG }}"
+          git push origin main
+
+      - name: Job-Summary
+        if: always()
+        run: |
+          {
+            echo "## 🔐 APK Checksum DB Update"
+            echo ""
+            echo "| Feld | Wert |"
+            echo "|------|------|"
+            echo "| Release | ${{ steps.tag.outputs.TAG }} |"
+            echo "| APK | ${{ env.APK_NAME }} |"
+            echo "| SHA256 | ${{ env.HASH }} |"
+            echo ""
+            echo "📁 scripts/apk-checksums.db automatisch aktualisiert."
+          } >> "$GITHUB_STEP_SUMMARY"
