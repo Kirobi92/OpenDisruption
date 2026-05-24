@@ -59,6 +59,13 @@ jobs:
         run: npm run test -- --reporter=verbose
         # Schlägt fehl wenn Tests fehlschlagen → Telegram-Notification below
 
+      - name: Run Vitest with Coverage
+        id: vitest-coverage
+        if: always() && steps.vitest.outcome != 'skipped'
+        continue-on-error: true
+        run: npm run test:coverage -- --reporter=verbose
+        # Optionaler Coverage-Run — darf fehlschlagen ohne den Workflow zu blocken
+
       - name: Write Job Summary
         if: always()
         run: |
@@ -75,7 +82,64 @@ jobs:
           echo "| StoryIndex Tests | ${{ steps.vitest.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DownloadHistoryPanel Tests | ${{ steps.vitest.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+
+          # --- Coverage Section ---
+          COVERAGE_JSON="coverage/coverage-summary.json"
+          if [ -f "$COVERAGE_JSON" ]; then
+            echo "## 📊 Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Gesamt-Coverage
+            TOTAL_STMTS=$(jq -r '.total.statements.pct // "N/A"' "$COVERAGE_JSON")
+            TOTAL_BRANCH=$(jq -r '.total.branches.pct // "N/A"' "$COVERAGE_JSON")
+            TOTAL_FN=$(jq -r '.total.functions.pct // "N/A"' "$COVERAGE_JSON")
+            TOTAL_LINES=$(jq -r '.total.lines.pct // "N/A"' "$COVERAGE_JSON")
+
+            echo "| Metrik | Gesamt (%) |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-----------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Statements | ${TOTAL_STMTS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branches | ${TOTAL_BRANCH}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Functions | ${TOTAL_FN}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines | ${TOTAL_LINES}% |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # ScAlertsPanel.tsx Coverage (falls vorhanden)
+            SC_ALERTS_KEY=$(jq -r 'keys[]' "$COVERAGE_JSON" | grep -i "ScAlertsPanel" | head -1)
+            if [ -n "$SC_ALERTS_KEY" ]; then
+              SC_STMTS=$(jq -r ".[\"$SC_ALERTS_KEY\"].statements.pct // \"N/A\"" "$COVERAGE_JSON")
+              SC_BRANCH=$(jq -r ".[\"$SC_ALERTS_KEY\"].branches.pct // \"N/A\"" "$COVERAGE_JSON")
+              SC_FN=$(jq -r ".[\"$SC_ALERTS_KEY\"].functions.pct // \"N/A\"" "$COVERAGE_JSON")
+              SC_LINES=$(jq -r ".[\"$SC_ALERTS_KEY\"].lines.pct // \"N/A\"" "$COVERAGE_JSON")
+
+              echo "### 🔍 ScAlertsPanel.tsx" >> $GITHUB_STEP_SUMMARY
+              echo "| Metrik | Wert |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Statements | ${SC_STMTS}% |" >> $GITHUB_STEP_SUMMARY
+              echo "| Branches | ${SC_BRANCH}% |" >> $GITHUB_STEP_SUMMARY
+              echo "| Functions | ${SC_FN}% |" >> $GITHUB_STEP_SUMMARY
+              echo "| Lines | ${SC_LINES}% |" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "> ℹ️ *ScAlertsPanel.tsx* noch nicht im Coverage-Report — Komponente wird in OPE-275–278 aufgebaut." >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            echo "📁 Coverage-Details: [coverage/index.html](./coverage/index.html)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "> ⚠️ Kein Coverage-Report gefunden (\`coverage/coverage-summary.json\` fehlt)." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Coverage HTML Report
+        if: always() && steps.vitest-coverage.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/coverage/
+          retention-days: 7
 
       - name: Telegram — Failure Notification
         if: failure()
