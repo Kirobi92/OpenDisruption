@@ -56,6 +56,12 @@ jobs:
         continue-on-error: true
         # JSON-Report für dynamische Job-Summary; Exit-Code wird in next step geprüft
 
+      - name: Run Vitest Coverage (optional, non-blocking)
+        id: coverage
+        run: npx vitest run --coverage --reporter=json --outputFile=vitest-coverage-results.json 2>&1 | tee coverage-output.txt
+        continue-on-error: true
+        # Optionaler Coverage-Lauf; blockiert nicht den Build bei Fehlern
+
       - name: Write Job Summary (dynamisch via vitest --reporter=json)
         if: always()
         run: |
@@ -82,6 +88,33 @@ jobs:
               vitest-results.json >> $GITHUB_STEP_SUMMARY
           else
             echo "| _(vitest-results.json nicht gefunden)_ | — | — | — | — | — |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Coverage — ScAlertsPanel.tsx" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            SC_COVERAGE=$(jq -r 'to_entries[] | select(.key | endswith("ScAlertsPanel.tsx")) | 
+              "| Branch | \(.value.branches.pct)% |",
+              "| Statements | \(.value.statements.pct)% |"' coverage/coverage-summary.json 2>/dev/null)
+            if [ -n "$SC_COVERAGE" ]; then
+              echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|---------:|" >> $GITHUB_STEP_SUMMARY
+              echo "$SC_COVERAGE" >> $GITHUB_STEP_SUMMARY
+              # Farb-Badge basierend auf Branch-Coverage
+              BRANCH_PCT=$(jq -r '[to_entries[] | select(.key | endswith("ScAlertsPanel.tsx")) | .value.branches.pct][0]' coverage/coverage-summary.json)
+              if [ -n "$BRANCH_PCT" ]; then
+                if [ "$(echo "$BRANCH_PCT >= 80" | bc)" -eq 1 ]; then
+                  echo "![Coverage](https://img.shields.io/badge/Coverage-${BRANCH_PCT}%25-brightgreen)" >> $GITHUB_STEP_SUMMARY
+                elif [ "$(echo "$BRANCH_PCT >= 50" | bc)" -eq 1 ]; then
+                  echo "![Coverage](https://img.shields.io/badge/Coverage-${BRANCH_PCT}%25-yellow)" >> $GITHUB_STEP_SUMMARY
+                else
+                  echo "![Coverage](https://img.shields.io/badge/Coverage-${BRANCH_PCT}%25-red)" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            else
+              echo "_(ScAlertsPanel.tsx nicht in Coverage-Daten gefunden)_" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "_(coverage-summary.json nicht generiert — Coverage-Step ggf. fehlgeschlagen)_" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
