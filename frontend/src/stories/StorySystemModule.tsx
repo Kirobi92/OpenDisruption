@@ -1,4 +1,4 @@
-import type { DashboardData, DashboardConfig, MilestoneFiredData, MilestoneConfig } from '../modules/system/types'
+import { type DashboardData, type DashboardConfig, type MilestoneFiredData, type MilestoneConfig } from '../modules/system/types'
 import { DashboardPanel } from '../modules/system/DashboardPanel'
 import { MilestoneFiredPanel } from '../modules/system/MilestoneFiredPanel'
 

@@ -1,5 +1,5 @@
 import { lazy, type LazyExoticComponent } from 'react'
-import type { TabId } from './BottomNav'
+import { type TabId } from './BottomNav'
 
 type ModuleComponent = LazyExoticComponent<() => JSX.Element>
 

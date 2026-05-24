@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { DownloadHistoryData } from './types'
+import { type DownloadHistoryData } from './types'
 import { DownloadSparkline } from './DownloadSparkline'
 
 type Props = {

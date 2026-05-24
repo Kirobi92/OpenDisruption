@@ -1,4 +1,4 @@
-import type { AudioStatus } from './types'
+import { type AudioStatus } from './types'
 
 type Props = {
   audioStatus: AudioStatus

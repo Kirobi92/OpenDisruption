@@ -1,4 +1,4 @@
-import type { DashboardData, DashboardConfig } from './types'
+import { type DashboardData, type DashboardConfig } from './types'
 import { Sparkline, markedRateColor } from './Sparkline'
 
 type Props = {

@@ -1,4 +1,4 @@
-import type { ScTrendData, ScTrendEntry } from './types'
+import { type ScTrendData, type ScTrendEntry } from './types'
 
 // SVG Sparkline für SC_ISSUE_COUNT (weniger = besser → Trend-Farbe invertiert)
 function ScSparkline({ entries }: { entries: ScTrendEntry[] }) {

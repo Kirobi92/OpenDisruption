@@ -13,7 +13,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ScAlertsPanel } from '../modules/system/ScAlertsPanel'
-import type { ScAlertEvent } from '../modules/system/types'
+import { type ScAlertEvent } from '../modules/system/types'
 
 // ─── Test-Fixtures ─────────────────────────────────────────────────────────────
 
@@ -289,6 +289,156 @@ describe('ScAlertsPanel — Pagination', () => {
     const region = screen.getByRole('region', { name: /sc-alert-history/i })
     fireEvent.keyDown(region, { key: 'ArrowRight' })
     expect(onNext).not.toHaveBeenCalled()
+  })
+
+  // ── Explizite Zeilen-Tests (0/2/5 Events) per Task OPE-290 ──
+
+  it('Render mit 0 Events → Leer-Meldung, keine Tabellenzeilen (tbody)', () => {
+    render(
+      <ScAlertsPanel
+        scAlerts={[]}
+        total={0}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText(/shellcheck sauber/i)).toBeTruthy()
+    // Es gibt keine Tabelle — also auch keine tr im tbody
+    const tbody = document.querySelector('tbody')
+    expect(tbody).toBeNull()
+  })
+
+  it('Render mit 2 Events → genau 2 Tabellenzeilen (tr) im tbody', () => {
+    const alerts = makeAlerts(2)
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={2}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    const tbody = document.querySelector('tbody')!
+    expect(tbody).not.toBeNull()
+    const rows = tbody.querySelectorAll('tr')
+    expect(rows).toHaveLength(2)
+
+    // Farb-Check: erste Zeile sc_count > 0 → rot
+    const firstRowCountCell = rows[0].querySelectorAll('td')[2]
+    expect(firstRowCountCell?.textContent).toBe('1')
+    expect((firstRowCountCell as HTMLElement).style.color).toBe('rgb(255, 82, 82)')
+  })
+
+  it('Render mit 5 Events → genau 5 Tabellenzeilen (tr) im tbody', () => {
+    const alerts = makeAlerts(5)
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={5}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    const tbody = document.querySelector('tbody')!
+    expect(tbody).not.toBeNull()
+    const rows = tbody.querySelectorAll('tr')
+    expect(rows).toHaveLength(5)
+  })
+
+  it('Render mit 5 Events, sc_count=0 → grüne Farbklasse', () => {
+    const alerts = [
+      makeAlert({ run_id: 9001, sc_issue_count: 0, delta: 0 }),
+      makeAlert({ run_id: 9002, sc_issue_count: 0, delta: 0 }),
+      makeAlert({ run_id: 9003, sc_issue_count: 0, delta: 0 }),
+      makeAlert({ run_id: 9004, sc_issue_count: 0, delta: 0 }),
+      makeAlert({ run_id: 9005, sc_issue_count: 0, delta: 0 }),
+    ]
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={5}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    const tbody = document.querySelector('tbody')!
+    const rows = tbody.querySelectorAll('tr')
+    expect(rows).toHaveLength(5)
+
+    // Alle 5 SC-Count-Zellen (Spalte Index 2) müssen grün sein
+    rows.forEach((row) => {
+      const countCell = row.querySelectorAll('td')[2] as HTMLElement
+      expect(countCell.style.color).toBe('rgb(76, 175, 80)')
+      expect(countCell.textContent).toBe('0')
+    })
+  })
+
+  it('Render mit 5 Events, sc_count > 0 → rote Farbklasse', () => {
+    const alerts = [
+      makeAlert({ run_id: 8001, sc_issue_count: 3, delta: 3 }),
+      makeAlert({ run_id: 8002, sc_issue_count: 5, delta: 2 }),
+      makeAlert({ run_id: 8003, sc_issue_count: 1, delta: -4 }),
+      makeAlert({ run_id: 8004, sc_issue_count: 7, delta: 6 }),
+      makeAlert({ run_id: 8005, sc_issue_count: 2, delta: -5 }),
+    ]
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={5}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    const tbody = document.querySelector('tbody')!
+    const rows = tbody.querySelectorAll('tr')
+    expect(rows).toHaveLength(5)
+
+    // Alle 5 SC-Count-Zellen müssen rot sein (sc_count > 0)
+    rows.forEach((row) => {
+      const countCell = row.querySelectorAll('td')[2] as HTMLElement
+      expect(countCell.style.color).toBe('rgb(255, 82, 82)')
+    })
+  })
+
+  it('GitHub-Link href: alle 5 Zeilen haben korrekten Actions-Runs-Link', () => {
+    const alerts = makeAlerts(5)
+
+    render(
+      <ScAlertsPanel
+        scAlerts={alerts}
+        total={5}
+        offset={0}
+        hasMore={false}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+      />
+    )
+
+    const links = document.querySelectorAll('a[href*="github.com/Kirobi92/OpenDisruption/actions/runs/"]')
+    expect(links).toHaveLength(5)
+
+    links.forEach((link, i) => {
+      expect((link as HTMLAnchorElement).href).toContain(String(1000 + i))
+    })
   })
 })
 // unit-test trigger Fr 22. Mai 05:38:23 CEST 2026

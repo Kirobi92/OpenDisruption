@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { ScAlertEvent } from './types'
+import { type ScAlertEvent } from './types'
 
 const PAGE_LIMIT = 5
 

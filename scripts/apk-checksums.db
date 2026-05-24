@@ -1,4 +1,4 @@
-# Kirobi APK Checksums DB — automatisch generiert 2026-05-22 11:00
+# Kirobi APK Checksums DB — automatisch generiert 2026-05-24 18:00
 # Format: name|sha256|tag
 app-debug.apk|ebbf91c943611b923072080b0a4442ecb4dc1eec7c7d29e3a6d4d5fac9eca625|unknown
 app-release.apk|18a1bcb3ea524ecc53700c3dd3052e54272371e1be1d5c4cbd79eb04682f7eb2|unknown
@@ -35,5 +35,3 @@ Kirobi-v6-debug.apk|a85232975ec9c3c3f217ac10da4882672b859c6984a78fad66acaab683e6
 Kirobi-v7-debug.apk|d7ffb6c5d6c67c0caf1e30a48f4e06e7a88411000d0392ba11c2b34d8766a3cd|v7-debug
 Kirobi-v8-debug.apk|07e091083331d7723084cb013eb7dc51dd6fb5b0a77767aa822e71de553de8ba|v8-debug
 Kirobi-v9-debug.apk|3393f3e4bdf80ace0652d79d4becd080153b93ea299a95fa8cd86cb4137d7fdb|v9-debug
-Kirobi-v13.0.0-5880c06-release.apk|01ce9471721ffb7368f2bbdc7e8401bdfe2da3dd9c5961797d0fcc250bcf16b8|v13.0.0
-Kirobi-v10.0-1953f35-release.apk|73c26ad37583481a38732580cc5bb0a75da454dfd68d7a1f2896891971438130|v11.0.0

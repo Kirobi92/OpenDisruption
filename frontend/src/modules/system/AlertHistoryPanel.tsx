@@ -1,4 +1,4 @@
-import type { AlertEntry } from './types'
+import { type AlertEntry } from './types'
 
 type Props = {
   alerts: AlertEntry[]
