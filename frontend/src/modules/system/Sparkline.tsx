@@ -1,4 +1,4 @@
-import { type DashboardSnapshot } from './types'
+import { DashboardSnapshot } from './types'
 
 // MARKED-Rate Farbschwellen — werden zur Laufzeit via /api/dashboard-config aus dem Backend geladen
 // Build-time ENV (VITE_MARKED_RATE_GREEN/YELLOW) dienen nur als Fallback falls der Endpoint nicht erreichbar ist

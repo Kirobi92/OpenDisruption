@@ -1,4 +1,4 @@
-import { type MusicHealthData } from './types'
+import { MusicHealthData } from './types'
 
 type Props = {
   musicHealth: MusicHealthData

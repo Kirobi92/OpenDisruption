@@ -1,4 +1,4 @@
-import { type DownloadCompareData } from './types'
+import { DownloadCompareData } from './types'
 
 type Props = {
   downloadCompare: DownloadCompareData

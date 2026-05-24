@@ -1,5 +1,5 @@
 import { Suspense, lazy, useState } from 'react'
-import { BottomNav, type TabId } from './navigation/BottomNav'
+import { BottomNav, TabId } from './navigation/BottomNav'
 import { ROUTES } from './navigation/routes'
 import { StoryIndex } from './stories/StoryIndex'
 import './App.css'

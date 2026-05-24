@@ -124,6 +124,38 @@
 - Bei Fund → PR wird mit Exit 1 geblockt, Job-Summary zeigt betroffene Dateien + `npm run lint:fix` Hinweis
 - Bei Clean → PR passiert das Gate ✅
 
+**ESLint-Konfiguration (`frontend/eslint.config.js`):**
+
+Die Konfigurationsdatei definiert das oxc-Schutz-Gate und projektweite Lint-Regeln:
+
+```js
+// Zentrale oxc-Gate-Regel
+'@typescript-eslint/consistent-type-imports': ['error', {
+  prefer: 'no-type-imports',
+  fixStyle: 'inline-type-imports',
+  disallowTypeAnnotations: false,
+}]
+```
+
+**Regel-Begründung (oxc-Kompatibilität):**
+
+| Komponente | Problem |
+|---|---|
+| `@vitest/coverage-v8` | Nutzt intern oxc/rolldown als JavaScript/TypeScript-Parser |
+| oxc/rolldown | Unterstützt **kein** `import type { X }` (Type-Modifier auf Statement-Ebene) |
+| Folge | Coverage-Report wirft `rolldown Parse Error` bei Dateien mit `import type`-Syntax |
+
+**Lösung:** Die ESLint-Regel erzwingt die alternative Syntax `import { type X }` (inline-type-imports, `fixStyle`). Dies ist semantisch identisch, aber oxc-kompatibel. `prefer: 'no-type-imports'` verbietet den `import type`-Modifier vollständig, `disallowTypeAnnotations: false` erlaubt weiterhin explizite Type-Annotationen im Code.
+
+**Weitere Regeln in eslint.config.js:**
+
+| Regel | Level | Begründung |
+|---|---|---|
+| `@typescript-eslint/no-unused-vars` | `warn` | Lockere Warnung — kein Build-Blocker |
+| `@typescript-eslint/no-explicit-any` | `off` | Pragmatisch: `any` in Prototypen/Ionic erlaubt |
+
+**Ignorierte Pfade:** `dist/**`, `android/**`, `node_modules/**`, `coverage/**`
+
 **Besonderheiten:**
 - Nur `consistent-type-imports`-Fehler blockieren den Build (oxc-Gate)
 - Pre-existing Issues (no-empty, react-hooks/exhaustive-deps) werden in Summary gelistet, blockieren aber nicht

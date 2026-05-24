@@ -74,5 +74,10 @@
   padding: 14px;
 }
 
+.gpuPanel:focus-visible {
+  outline: 2px solid #64b5f6;
+  outline-offset: 2px;
+}
+
 .gpuLine { display:flex; justify-content:space-between; gap:12px; margin-top:8px; color:var(--text-secondary); }
 .systemError { color: var(--accent-red); margin: 16px 0; }

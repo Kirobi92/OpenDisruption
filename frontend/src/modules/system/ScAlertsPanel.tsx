@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { type ScAlertEvent } from './types'
+import { ScAlertEvent } from './types'
 
 const PAGE_LIMIT = 5
 
@@ -44,7 +44,7 @@ export function ScAlertsPanel({ scAlerts, total, offset, hasMore, onPrev, onNext
   return (
     <div
       className="gpuPanel"
-      style={{ marginBottom: 14, outline: 'none' }}
+      style={{ marginBottom: 14 }}
       tabIndex={0}
       role="region"
       aria-label="SC-Alert-History Navigation"

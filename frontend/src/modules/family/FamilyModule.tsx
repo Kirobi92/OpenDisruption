@@ -153,7 +153,7 @@ export default function FamilyModule() {
     if (expensesRes.ok) setExpenses((await expensesRes.json()).expenses || [])
   }
 
-  useEffect(() => { if (loggedIn) void refresh() }, [loggedIn])  // eslint-disable-line
+  useEffect(() => { if (loggedIn) void refresh() }, [loggedIn])   
 
   function handleLogin(p: Person) {
     setLoggedIn(p)

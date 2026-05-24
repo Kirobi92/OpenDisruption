@@ -1,4 +1,4 @@
-import { type DownloadSnapshot } from './types'
+import { DownloadSnapshot } from './types'
 
 // SVG Download-Sparkline (totals über Zeit)
 export function DownloadSparkline({ snapshots }: { snapshots: DownloadSnapshot[] }) {

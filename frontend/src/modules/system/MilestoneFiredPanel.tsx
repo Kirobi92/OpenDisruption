@@ -1,4 +1,4 @@
-import { type MilestoneFiredData, type MilestoneConfig } from './types'
+import { MilestoneFiredData, MilestoneConfig } from './types'
 
 type Props = {
   milestoneFired: MilestoneFiredData | null

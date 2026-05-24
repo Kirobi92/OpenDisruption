@@ -13,7 +13,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ScAlertsPanel } from '../modules/system/ScAlertsPanel'
-import { type ScAlertEvent } from '../modules/system/types'
+import { ScAlertEvent } from '../modules/system/types'
 
 // ─── Test-Fixtures ─────────────────────────────────────────────────────────────
 

@@ -16,18 +16,18 @@ import { ServicesGridPanel } from './ServicesGridPanel'
 import { LiveLogsPanel } from './LiveLogsPanel'
 import { BUILD_TIME_GREEN, BUILD_TIME_YELLOW } from './Sparkline'
 import {
-  type SystemStatus,
-  type AudioStatus,
-  type AlertEntry,
-  type DashboardData,
-  type DashboardConfig,
-  type MilestoneFiredData,
-  type MilestoneConfig,
-  type DownloadHistoryData,
-  type DownloadCompareData,
-  type MusicHealthData,
-  type ScAlertsData,
-  type GpuStatus,
+  SystemStatus,
+  AudioStatus,
+  AlertEntry,
+  DashboardData,
+  DashboardConfig,
+  MilestoneFiredData,
+  MilestoneConfig,
+  DownloadHistoryData,
+  DownloadCompareData,
+  MusicHealthData,
+  ScAlertsData,
+  GpuStatus,
 } from './types'
 import './SystemModule.css'
 
