@@ -22,10 +22,9 @@ concurrency:
 # ── Referenz-Baseline ────────────────────────────────────────────────────────
 # WORKFLOW_COUNT_REF wird manuell gepflegt und spiegelt den zuletzt bestätigten
 # sauberen Stand wider. Abweichungen ≥2 lösen einen Telegram-Alert aus.
-# Letzte Änderung: 2026-05-22 (OPE-248: 8 Workflows — ci, e2e-keyboard-nav,
-#   integration-tests, weekly-download-report committet + Baseline aktualisiert)
+# Letzte Änderung: 2026-05-24 (OPE-301: lint-frontend.yml hinzugefügt — 9 Workflows)
 env:
-  WORKFLOW_COUNT_REF: "8"
+  WORKFLOW_COUNT_REF: "9"
   TELEGRAM_CHAT_ID: "1066082496"
 
 jobs:

@@ -1,0 +1,159 @@
+name: Frontend ESLint (oxc-Gate)
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'frontend/src/**'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - 'frontend/eslint.config.js'
+      - 'frontend/tsconfig*.json'
+      - '.github/workflows/lint-frontend.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'frontend/src/**'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - 'frontend/eslint.config.js'
+      - 'frontend/tsconfig*.json'
+      - '.github/workflows/lint-frontend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eslint:
+    name: ESLint — oxc Import-Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        id: eslint
+        run: npm run lint
+        continue-on-error: true
+        # Exit-Code wird in next step ausgewertet, damit wir
+        # zwischen oxc-Gate-Fehlern und Pre-existing Issues unterscheiden können
+
+      - name: Parse ESLint Output & Job Summary
+        id: parse
+        if: always()
+        run: |
+          # Re-run lint with formatter=json for structured output
+          npx eslint src/ --ext .ts,.tsx --format json > eslint-results.json 2>/dev/null || true
+
+          echo "## 🔍 ESLint Results — oxc Import-Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -f eslint-results.json ] && [ -s eslint-results.json ]; then
+            # Count total errors/warnings
+            TOTAL_ERRORS=$(jq '[.[].errorCount] | add // 0' eslint-results.json)
+            TOTAL_WARNINGS=$(jq '[.[].warningCount] | add // 0' eslint-results.json)
+
+            # Count oxc-gate specific errors (consistent-type-imports)
+            OXC_GATE_ERRORS=$(jq -r '.[].messages[] | select(.ruleId == "@typescript-eslint/consistent-type-imports") | .ruleId' eslint-results.json | wc -l)
+
+            echo "| Metrik | Anzahl |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|--------|-------:|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Total Errors | $TOTAL_ERRORS |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Total Warnings | $TOTAL_WARNINGS |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| 🚫 **oxc-Gate** (`consistent-type-imports`) | **$OXC_GATE_ERRORS** |" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+
+            if [ "$OXC_GATE_ERRORS" -gt 0 ]; then
+              echo "![FAIL](https://img.shields.io/badge/oxc--Gate-FAIL-red)" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "❌ **BLOCKED:** \`import type { X }\` gefunden! Diese Import-Syntax ist mit oxc/rolldown (Coverage-Provider v8) nicht kompatibel." >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "**Fix:** \`npm run lint:fix\` lokal ausführen oder manuell \`import type { X }\` → \`import { type X }\` umstellen." >> "$GITHUB_STEP_SUMMARY"
+              echo "oxc_gate_failed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "![PASS](https://img.shields.io/badge/oxc--Gate-PASS-brightgreen)" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "✅ Keine \`import type\`-Statements gefunden — oxc/rolldown-kompatibel." >> "$GITHUB_STEP_SUMMARY"
+              echo "oxc_gate_failed=false" >> "$GITHUB_OUTPUT"
+            fi
+
+            # List affected files
+            if [ "$TOTAL_ERRORS" -gt 0 ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "### Betroffene Dateien" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "| Datei | Errors | Warnungen | oxc-Gate? |" >> "$GITHUB_STEP_SUMMARY"
+              echo "|-------|-------:|----------:|----------:|" >> "$GITHUB_STEP_SUMMARY"
+              jq -r '.[] |
+                (.errorCount) as $errs |
+                (.warningCount) as $warns |
+                ([.messages[] | select(.ruleId == "@typescript-eslint/consistent-type-imports")] | length) as $oxc |
+                (.filePath | sub(".*?/frontend/"; "")) as $file |
+                "| `\($file)` | \($errs) | \($warns) | \(if $oxc > 0 then "🚫 \($oxc)" else "—" end) |"
+              ' eslint-results.json >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "✅ Keine ESLint-Findings — Code ist sauber." >> "$GITHUB_STEP_SUMMARY"
+            echo "oxc_gate_failed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "🔗 [README.ci.md](https://github.com/${{ github.repository }}/blob/main/README.ci.md)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Block if oxc-gate failed
+        if: steps.parse.outputs.oxc_gate_failed == 'true'
+        run: |
+          echo "::error title=oxc-Gate BLOCKED::import type { X } statements detected — see Job Summary for details"
+          exit 1
+
+      - name: Telegram — Failure Notification
+        if: failure()
+        run: |
+          OXC_GATE=$(echo "${{ steps.parse.outputs.oxc_gate_failed }}" || echo "unknown")
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"❌ *Kirobi ESLint — FAILED*\\n\\noxc-Gate: ${OXC_GATE}\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\\nCommit: \`${{ github.sha }}\`\\n\\n🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Telegram — Success Notification
+        if: success() && env.KIROBI_LINT_FRONTEND_NOTIFY_SUCCESS == 'true'
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"✅ *Kirobi ESLint — PASSED*\\n\\noxc-Gate: clean ✨\\nWorkflow: \`${{ github.workflow }}\`\\nBranch: \`${{ github.ref_name }}\`\\nCommit: \`${{ github.sha }}\`\\n\\n🔗 ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+              \"parse_mode\": \"Markdown\"
+            }"
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          KIROBI_LINT_FRONTEND_NOTIFY_SUCCESS: ${{ vars.KIROBI_LINT_FRONTEND_NOTIFY_SUCCESS }}
