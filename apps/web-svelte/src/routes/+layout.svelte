@@ -13,7 +13,7 @@
 
 <div class="min-h-screen flex flex-col" style="background: var(--bg-void); color: var(--text-primary);">
   <AppNav />
-  <main class="flex-1 {!isLoginPage && !isGraphPage ? 'pb-16 md:pb-0' : ''}">
+  <main class="flex-1 {!isLoginPage && !isGraphPage ? 'pb-[calc(env(safe-area-inset-bottom,0px)+4rem)] md:pb-0' : ''}">
     {@render children()}
   </main>
 </div>

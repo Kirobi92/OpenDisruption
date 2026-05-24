@@ -65,28 +65,28 @@
 
 <svelte:head><title>Control Center · Kirobi</title></svelte:head>
 
-<div class="px-4 py-6 sm:px-6 max-w-7xl mx-auto space-y-6">
+<div class="px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-20 md:pb-0">
   <!-- Hero -->
-  <section class="rounded-3xl border border-aurora-cyan/20 bg-gradient-to-br from-aurora-cyan/10 via-gray-900 to-gray-950 p-6">
-    <div class="flex items-start justify-between">
-      <div>
+  <section class="rounded-3xl border border-aurora-cyan/20 bg-gradient-to-br from-aurora-cyan/10 via-gray-900 to-gray-950 p-4 sm:p-6">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
         <span class="inline-flex items-center gap-2 rounded-full border border-aurora-cyan/30 bg-aurora-cyan/10 px-3 py-1 text-xs uppercase tracking-widest text-aurora-cyan">
-          <Zap class="h-4 w-4" /> Agentic Control Center
+          <Zap class="h-4 w-4 flex-shrink-0" /> Agentic Control Center
         </span>
-        <h1 class="mt-4 text-3xl font-bold text-white">OpenDisruption</h1>
-        <p class="mt-2 text-sm text-gray-400">Lokale Intelligenz, sichere Räume. Alles in deiner Hand.</p>
+        <h1 class="mt-3 text-2xl md:text-3xl font-bold text-white">OpenDisruption</h1>
+        <p class="mt-1 text-sm text-gray-400">Lokale Intelligenz, sichere Räume. Alles in deiner Hand.</p>
       </div>
-      <button onclick={refresh} disabled={refreshing} class="p-2 rounded-xl border border-white/10 hover:bg-white/5 transition-colors disabled:opacity-50">
+      <button onclick={refresh} disabled={refreshing} class="flex-shrink-0 p-2 rounded-xl border border-white/10 hover:bg-white/5 transition-colors disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center">
         <RefreshCw class="h-4 w-4 {refreshing ? 'animate-spin' : ''}" />
       </button>
     </div>
 
     {#if control}
-      <div class="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
         {#each [['Active', control.activeTasks, 'text-emerald-300'], ['Pending', control.pendingTasks, 'text-amber-300'], ['Blocked', control.blockedTasks, 'text-red-300'], ['Dead Letter', control.deadLetterTasks, 'text-red-400']] as [label, value, color]}
-          <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4">
             <p class="text-xs uppercase tracking-widest text-gray-500">{label}</p>
-            <p class="mt-2 text-2xl font-semibold {color}">{value ?? 0}</p>
+            <p class="mt-1 text-3xl md:text-4xl font-semibold {color}">{value ?? 0}</p>
           </div>
         {/each}
       </div>
@@ -94,24 +94,24 @@
   </section>
 
   <!-- Quick Links -->
-  <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
     {#each QUICK_LINKS as link}
-      <a href={link.href} class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 hover:border-aurora-cyan/30 transition-colors">
-        <link.icon class="h-5 w-5 text-aurora-cyan" />
+      <a href={link.href} class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 hover:border-aurora-cyan/30 transition-colors min-h-[56px]">
+        <link.icon class="h-5 w-5 text-aurora-cyan flex-shrink-0" />
         <span class="text-sm font-medium text-white">{link.label}</span>
-        <ArrowUpRight class="h-4 w-4 text-gray-500 ml-auto" />
+        <ArrowUpRight class="h-4 w-4 text-gray-500 ml-auto flex-shrink-0" />
       </a>
     {/each}
   </section>
 
-  <div class="grid gap-6 xl:grid-cols-2">
+  <div class="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2">
     <!-- Runtime Probes -->
-    <section class="rounded-3xl border border-white/10 bg-gray-950/70 p-5">
+    <section class="rounded-3xl border border-white/10 bg-gray-950/70 p-4 sm:p-5">
       <h2 class="text-sm font-semibold text-white mb-4">Service Health</h2>
       <div class="space-y-2">
         {#each RUNTIME_PROBES as probe}
           {@const result = probes[probe.id] ?? { status: 'unknown', detail: 'prüfe...' }}
-          <div class="flex items-center gap-3 rounded-2xl border px-3 py-2.5 {statusColor(result.status)}">
+          <div class="flex items-center gap-3 rounded-2xl border px-3 py-3 {statusColor(result.status)}">
             {#if result.status === 'online'}<CheckCircle class="h-4 w-4 text-emerald-400 flex-shrink-0" />
             {:else if result.status === 'offline'}<XCircle class="h-4 w-4 text-red-400 flex-shrink-0" />
             {:else}<AlertTriangle class="h-4 w-4 text-amber-400 flex-shrink-0" />{/if}
@@ -123,7 +123,7 @@
     </section>
 
     <!-- Recent Activity -->
-    <section class="rounded-3xl border border-white/10 bg-gray-950/70 p-5">
+    <section class="rounded-3xl border border-white/10 bg-gray-950/70 p-4 sm:p-5">
       <h2 class="text-sm font-semibold text-white mb-4">Letzte Aktivität</h2>
       {#if activity.length === 0}
         <p class="text-gray-500 text-sm text-center py-4">Noch keine Aktivität.</p>
@@ -132,7 +132,7 @@
           {#each activity as item}
             <div class="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2.5">
               <div class="flex items-center justify-between gap-2">
-                <span class="text-xs text-gray-300">{item.summary}</span>
+                <span class="text-xs text-gray-300 truncate">{item.summary}</span>
                 <span class="text-[10px] text-gray-500 flex-shrink-0">{new Date(item.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
               <p class="text-[10px] text-gray-500 mt-0.5">{item.surface} · {item.actor}</p>

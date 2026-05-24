@@ -8401,7 +8401,67 @@
       "size": 1
     },
     {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/agents/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web-svelte/.svelte-kit/types/src/routes/api/logout/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/chat/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/control-center/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/creative/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/developer-studio/$types.d.ts",
       "label": "$types.d",
       "dir": "apps",
       "ext": "ts",
@@ -8427,6 +8487,18 @@
     {
       "id": "apps/web-svelte/.svelte-kit/types/src/routes/graph/proxy+page.server.ts",
       "label": "proxy+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/knowledge-base/$types.d.ts",
+      "label": "$types.d",
       "dir": "apps",
       "ext": "ts",
       "zone": "WORKSPACE",
@@ -8475,6 +8547,114 @@
     {
       "id": "apps/web-svelte/.svelte-kit/types/src/routes/proxy+page.server.ts",
       "label": "proxy+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/search/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/service-gateway/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/settings/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/status/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/studio/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/upload/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/voice-chat/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/voice-studio/$types.d.ts",
+      "label": "$types.d",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/.svelte-kit/types/src/routes/workbench/$types.d.ts",
+      "label": "$types.d",
       "dir": "apps",
       "ext": "ts",
       "zone": "WORKSPACE",
@@ -9133,6 +9313,18 @@
       "size": 1
     },
     {
+      "id": "apps/web-svelte/src/lib/components/AppNav.svelte",
+      "label": "AppNav",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web-svelte/src/lib/components/FilterPanel.svelte",
       "label": "FilterPanel",
       "dir": "apps",
@@ -9265,10 +9457,130 @@
       "size": 1
     },
     {
+      "id": "apps/web-svelte/src/routes/agents/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/agents/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web-svelte/src/routes/api/logout/+server.ts",
       "label": "+server",
       "dir": "apps",
       "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/chat/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/chat/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/control-center/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/control-center/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/creative/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/creative/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/developer-studio/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/developer-studio/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
       "zone": "WORKSPACE",
       "quadrant": "UR",
       "spiral": "blue",
@@ -9301,6 +9613,30 @@
       "size": 3
     },
     {
+      "id": "apps/web-svelte/src/routes/knowledge-base/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/knowledge-base/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "apps/web-svelte/src/routes/login/+page.server.ts",
       "label": "+page.server",
       "dir": "apps",
@@ -9323,6 +9659,198 @@
       "agent": "",
       "tags": [],
       "size": 3
+    },
+    {
+      "id": "apps/web-svelte/src/routes/search/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/search/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/service-gateway/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/service-gateway/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/settings/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/settings/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/status/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/status/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/upload/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/upload/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/voice-chat/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/voice-chat/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/voice-studio/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/voice-studio/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/workbench/+page.server.ts",
+      "label": "+page.server",
+      "dir": "apps",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "apps/web-svelte/src/routes/workbench/+page.svelte",
+      "label": "+page",
+      "dir": "apps",
+      "ext": "svelte",
+      "zone": "WORKSPACE",
+      "quadrant": "UR",
+      "spiral": "blue",
+      "agent": "",
+      "tags": [],
+      "size": 1
     },
     {
       "id": "apps/web-svelte/svelte.config.js",
@@ -11147,6 +11675,18 @@
       "size": 1
     },
     {
+      "id": "experiences/family/family-chat.json",
+      "label": "family-chat",
+      "dir": "experiences",
+      "ext": "json",
+      "zone": "FAMILY_PRIVATE",
+      "quadrant": "LL",
+      "spiral": "green",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
       "id": "experiences/family/family-mediation-log",
       "label": "family-mediation-log",
       "dir": "experiences",
@@ -11437,6 +11977,18 @@
     {
       "id": "experiences/learnings/nightly-2026-05-19",
       "label": "nightly-2026-05-19",
+      "dir": "experiences",
+      "ext": "md",
+      "zone": "WORKSPACE",
+      "quadrant": "LL",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
+      "size": 1
+    },
+    {
+      "id": "experiences/learnings/nightly-2026-05-21",
+      "label": "nightly-2026-05-21",
       "dir": "experiences",
       "ext": "md",
       "zone": "WORKSPACE",
@@ -11832,6 +12384,18 @@
         "personal-memory",
         "workspace"
       ],
+      "size": 1
+    },
+    {
+      "id": "frontend/capacitor.config.ts",
+      "label": "capacitor.config",
+      "dir": "frontend",
+      "ext": "ts",
+      "zone": "WORKSPACE",
+      "quadrant": "LR",
+      "spiral": "orange",
+      "agent": "",
+      "tags": [],
       "size": 1
     },
     {
@@ -17416,18 +17980,6 @@
       "size": 1
     },
     {
-      "id": "tests/test_story_nav_e2e",
-      "label": "test_story_nav_e2e",
-      "dir": "tests",
-      "ext": "py",
-      "zone": "WORKSPACE",
-      "quadrant": "UR",
-      "spiral": "green",
-      "agent": "",
-      "tags": [],
-      "size": 1
-    },
-    {
       "id": "tests/unit/AGENTS",
       "label": "AGENTS",
       "dir": "tests",
@@ -19100,72 +19652,7 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/model-routing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/nutzi/Dockerfile",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
       "target": "services/telegram/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/image-generation/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/api/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "apps/web/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/auth/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "apps/dashboard/.next-build/app-build-manifest.json",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/hermes-runtime/Dockerfile",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/voice-processing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/media-processing/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/retrieval/AGENTS",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/openclaw-gateway/README",
-      "type": "route"
-    },
-    {
-      "source": "infra/caddy/Caddyfile",
-      "target": "services/embeddings/AGENTS",
       "type": "route"
     },
     {
@@ -19175,17 +19662,82 @@
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "apps/web-svelte/.svelte-kit/adapter-node/.vite/manifest.json",
+      "target": "services/image-generation/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
-      "target": "services/music-generation/AGENTS",
+      "target": "apps/dashboard/.next-build/app-build-manifest.json",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/nutzi/Dockerfile",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/media-processing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/voice-processing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/embeddings/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/hermes-runtime/Dockerfile",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/openclaw-gateway/README",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/retrieval/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/web/AGENTS",
       "type": "route"
     },
     {
       "source": "infra/caddy/Caddyfile",
       "target": "services/video-generation/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/model-routing/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "apps/web-svelte/.svelte-kit/adapter-node/.vite/manifest.json",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/api/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/auth/AGENTS",
+      "type": "route"
+    },
+    {
+      "source": "infra/caddy/Caddyfile",
+      "target": "services/music-generation/AGENTS",
       "type": "route"
     },
     {
@@ -20475,8 +21027,8 @@
     }
   ],
   "meta": {
-    "generated_at": "2026-05-22T00:01:59.661272+00:00",
-    "node_count": 1509,
+    "generated_at": "2026-05-24T00:02:34.958660+00:00",
+    "node_count": 1555,
     "link_count": 448,
     "edge_types": [
       "wikilink",

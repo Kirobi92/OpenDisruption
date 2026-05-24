@@ -51,23 +51,23 @@
 
 <svelte:head><title>Workbench · Kirobi</title></svelte:head>
 
-<div class="px-4 py-6 sm:px-6 max-w-7xl mx-auto space-y-6">
+<div class="px-4 py-4 sm:px-6 sm:py-6 max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-20 md:pb-0">
   {#if !activeSurface}
     <!-- Overview -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3">
       <h1 class="text-2xl font-bold text-white">Workbench</h1>
-      <button onclick={runProbes} class="p-2 rounded-xl border border-white/10 hover:bg-white/5 transition-colors">
+      <button onclick={runProbes} class="p-2 rounded-xl border border-white/10 hover:bg-white/5 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
         <RefreshCw class="h-4 w-4 {!probingDone ? 'animate-spin' : ''}" />
       </button>
     </div>
 
     <!-- Probes -->
-    <section class="rounded-3xl border border-white/10 bg-gray-950/70 p-5">
+    <section class="rounded-3xl border border-white/10 bg-gray-950/70 p-4 sm:p-5">
       <h2 class="text-sm font-semibold text-white mb-4">Runtime Health</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 gap-2">
         {#each PROBES as probe}
           {@const r = probes[probe.id]}
-          <div class="flex items-center gap-2 rounded-2xl border px-3 py-2.5
+          <div class="flex items-center gap-2 rounded-2xl border px-3 py-3
             {!r ? 'border-white/10 bg-white/[0.02]' : r.status === 'online' ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-red-500/30 bg-red-500/10'}">
             {#if !r}
               <div class="h-3 w-3 rounded-full bg-gray-600 animate-pulse flex-shrink-0"></div>
@@ -83,11 +83,11 @@
     </section>
 
     <!-- Surfaces Grid -->
-    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section class="grid gap-4 grid-cols-1 sm:grid-cols-2">
       {#each SURFACES as surface}
         <div class="rounded-2xl border border-white/10 bg-gray-950/70 p-4 space-y-3">
-          <div class="flex items-start justify-between">
-            <div>
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
               <span class="inline-flex text-[10px] border rounded-full px-2 py-0.5 {BADGE_COLOR[surface.badge] ?? BADGE_COLOR.Native}">{surface.badge}</span>
               <p class="mt-2 font-semibold text-white">{surface.label}</p>
               <p class="mt-1 text-xs text-gray-500">{surface.summary}</p>
@@ -95,11 +95,11 @@
           </div>
           <div class="flex gap-2">
             {#if surface.embeddable}
-              <a href={surface.path} class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.05] border border-white/10 py-2 text-xs text-white hover:bg-white/10 transition-colors">
+              <a href={surface.path} class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.05] border border-white/10 py-2.5 text-xs text-white hover:bg-white/10 transition-colors min-h-[44px]">
                 Einbetten <ArrowUpRight class="h-3 w-3" />
               </a>
             {/if}
-            <a href={surface.directPath} target="_blank" class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.05] border border-white/10 py-2 text-xs text-white hover:bg-white/10 transition-colors">
+            <a href={surface.directPath} target="_blank" class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.05] border border-white/10 py-2.5 text-xs text-white hover:bg-white/10 transition-colors min-h-[44px]">
               Öffnen <ExternalLink class="h-3 w-3" />
             </a>
           </div>
@@ -109,22 +109,22 @@
 
   {:else if surfaceConfig?.embeddable}
     <!-- Embedded View -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2 flex-wrap">
       <h1 class="text-xl font-bold text-white">{surfaceConfig.label}</h1>
       <div class="flex gap-2">
-        <a href={surfaceConfig.directPath} target="_blank" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+        <a href={surfaceConfig.directPath} target="_blank" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white min-h-[44px] px-2">
           <ExternalLink class="h-4 w-4" /> Neues Tab
         </a>
-        <a href="/workbench" class="text-sm text-gray-500 hover:text-white">← Zurück</a>
+        <a href="/workbench" class="text-sm text-gray-500 hover:text-white min-h-[44px] flex items-center px-2">← Zurück</a>
       </div>
     </div>
-    <iframe src={surfaceConfig.directPath} class="w-full h-[calc(100vh-160px)] rounded-2xl border border-white/10" title={surfaceConfig.label}></iframe>
+    <iframe src={surfaceConfig.directPath} class="w-full rounded-2xl border border-white/10" style="height: calc(100dvh - 160px);" title={surfaceConfig.label}></iframe>
   {:else if activeSurface}
     <div class="rounded-3xl border border-amber-500/20 bg-amber-500/10 p-6 text-center space-y-4">
       <AlertTriangle class="h-8 w-8 text-amber-400 mx-auto" />
       <p class="text-sm text-amber-200">Dieser Service kann nicht eingebettet werden.</p>
       {#if surfaceConfig}
-        <a href={surfaceConfig.directPath} target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm text-white hover:bg-amber-500">
+        <a href={surfaceConfig.directPath} target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-3 text-sm text-white hover:bg-amber-500 min-h-[44px]">
           <ExternalLink class="h-4 w-4" /> In neuem Tab öffnen
         </a>
       {/if}

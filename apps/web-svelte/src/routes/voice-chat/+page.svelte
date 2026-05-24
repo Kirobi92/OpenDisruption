@@ -73,28 +73,29 @@
 
 <svelte:head><title>Voice Chat · Kirobi</title></svelte:head>
 
-<div class="px-4 py-6 sm:px-6 max-w-3xl mx-auto space-y-6">
-  <section class="rounded-3xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 via-gray-900 to-gray-950 p-6">
+<div class="flex flex-col px-4 py-4 sm:px-6 sm:py-6 max-w-3xl mx-auto pb-24 md:pb-8" style="min-height: calc(100dvh - 3.5rem);">
+  <!-- Header -->
+  <section class="rounded-3xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 via-gray-900 to-gray-950 p-4 sm:p-6 flex-shrink-0 mb-4 sm:mb-6">
     <span class="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs uppercase tracking-widest text-sky-200">
       <Mic class="h-4 w-4" /> Voice Chat
     </span>
-    <h1 class="mt-4 text-3xl font-bold text-white">Sprach-Assistent</h1>
-    <p class="mt-2 text-sm text-gray-400">Sprich mit deinem Agenten. Lokal, privat, schnell.</p>
+    <h1 class="mt-3 text-2xl md:text-3xl font-bold text-white">Sprach-Assistent</h1>
+    <p class="mt-1 text-sm text-gray-400">Sprich mit deinem Agenten. Lokal, privat, schnell.</p>
   </section>
 
   <!-- Agent Select -->
   {#if agents.length > 0}
-    <select bind:value={selectedAgent} class="w-full rounded-2xl border border-white/10 bg-gray-950/70 px-4 py-2.5 text-sm text-white">
+    <select bind:value={selectedAgent} class="w-full rounded-2xl border border-white/10 bg-gray-950/70 px-4 py-3 text-base text-white flex-shrink-0 mb-4 sm:mb-6" style="font-size: 16px;">
       {#each agents as agent}<option value={agent.id}>{agent.label}</option>{/each}
     </select>
   {/if}
 
-  <!-- Conversation -->
-  <div class="min-h-48 space-y-3">
+  <!-- Conversation (flex-1, scrollable) -->
+  <div class="flex-1 overflow-y-auto space-y-3 mb-4">
     {#each messages as msg}
       <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-        <div class="max-w-[80%] rounded-2xl px-4 py-3 {msg.role === 'user' ? 'bg-sky-600/30 border border-sky-500/30' : 'bg-white/[0.04] border border-white/10'}">
-          <p class="text-sm text-white">{msg.text}</p>
+        <div class="max-w-[85%] rounded-2xl px-4 py-3 {msg.role === 'user' ? 'bg-sky-600/30 border border-sky-500/30' : 'bg-white/[0.04] border border-white/10'}">
+          <p class="text-sm text-white break-words">{msg.text}</p>
           {#if msg.audioUrl}
             <audio src={msg.audioUrl} controls class="mt-2 h-8 w-full"></audio>
           {/if}
@@ -114,21 +115,22 @@
     {/if}
   </div>
 
+  <!-- Error -->
   {#if error}
-    <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-red-300 text-sm">{error}</div>
+    <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-red-300 text-sm flex-shrink-0 mb-4">{error}</div>
   {/if}
 
-  <!-- Controls -->
-  <div class="flex items-center justify-center gap-4">
+  <!-- Controls (always visible) -->
+  <div class="flex-shrink-0 flex items-center justify-center gap-4 py-2">
     {#if messages.length > 0}
-      <button onclick={() => messages = []} class="p-3 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors text-gray-400">
+      <button onclick={() => messages = []} class="p-3 rounded-2xl border border-white/10 hover:bg-white/5 transition-colors text-gray-400 min-h-[44px] min-w-[44px] flex items-center justify-center">
         <Trash2 class="h-5 w-5" />
       </button>
     {/if}
     <button
       onclick={recording ? stopRecording : startRecording}
       disabled={processing}
-      class="p-6 rounded-full transition-all {recording ? 'bg-red-600 hover:bg-red-500 scale-110 shadow-lg shadow-red-500/25' : 'bg-sky-600 hover:bg-sky-500'} disabled:opacity-50">
+      class="p-8 rounded-full transition-all {recording ? 'bg-red-600 hover:bg-red-500 scale-110 shadow-lg shadow-red-500/25' : 'bg-sky-600 hover:bg-sky-500'} disabled:opacity-50">
       {#if processing}
         <RefreshCw class="h-7 w-7 text-white animate-spin" />
       {:else if recording}
@@ -138,7 +140,7 @@
       {/if}
     </button>
   </div>
-  <p class="text-center text-xs text-gray-500">
+  <p class="text-center text-xs text-gray-500 flex-shrink-0 mt-1">
     {#if recording}Aufnehmen... (nochmal klicken zum Stoppen)
     {:else if processing}Verarbeite...
     {:else}Mikrofon-Button drücken zum Sprechen{/if}

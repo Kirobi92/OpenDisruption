@@ -109,50 +109,52 @@
   });
 </script>
 
-<div class="min-h-screen bg-gray-950 text-white px-4 py-8 max-w-4xl mx-auto">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold">Upload</h1>
-    <p class="text-gray-400 mt-1">Dateien und Texte in den lokalen Wissenspfad</p>
+<div class="bg-gray-950 text-white px-4 py-4 sm:px-6 sm:py-8 max-w-4xl mx-auto pb-20 md:pb-0">
+  <div class="mb-6">
+    <h1 class="text-2xl md:text-3xl font-bold">Upload</h1>
+    <p class="text-gray-400 mt-1 text-sm">Dateien und Texte in den lokalen Wissenspfad</p>
   </div>
 
-  <!-- Zone selector -->
-  <div class="flex gap-2 mb-6">
+  <!-- Zone selector: horizontal scroll on mobile -->
+  <div class="flex gap-2 mb-4 overflow-x-auto pb-1" style="scrollbar-width: thin;">
     {#each Object.entries(ZONE_LABELS) as [z, label]}
       <button
         onclick={() => selectedZone = z as Zone}
-        class="px-3 py-1.5 text-sm rounded-lg border transition {selectedZone === z ? ZONE_COLORS[z as Zone] : 'border-gray-700 bg-gray-900 text-gray-400 hover:border-gray-600'}"
+        class="px-3 py-2 text-sm rounded-lg border transition whitespace-nowrap min-h-[44px] flex-shrink-0 {selectedZone === z ? ZONE_COLORS[z as Zone] : 'border-gray-700 bg-gray-900 text-gray-400 hover:border-gray-600'}"
       >{label}</button>
     {/each}
   </div>
 
   <!-- Mode toggle -->
-  <div class="flex gap-2 mb-6">
-    <button onclick={() => textMode = false} class="px-4 py-2 rounded-xl text-sm {!textMode ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'} transition">Datei</button>
-    <button onclick={() => textMode = true} class="px-4 py-2 rounded-xl text-sm {textMode ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'} transition">Schnellnotiz</button>
+  <div class="flex gap-2 mb-4">
+    <button onclick={() => textMode = false} class="flex-1 px-4 py-3 rounded-xl text-sm min-h-[44px] {!textMode ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'} transition">Datei</button>
+    <button onclick={() => textMode = true} class="flex-1 px-4 py-3 rounded-xl text-sm min-h-[44px] {textMode ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'} transition">Schnellnotiz</button>
   </div>
 
   {#if textMode}
-    <div class="rounded-2xl border border-gray-800 bg-gray-900/80 p-5 mb-6">
+    <div class="rounded-2xl border border-gray-800 bg-gray-900/80 p-4 sm:p-5 mb-4">
       <input
         bind:value={textTitle}
         type="text"
         placeholder="Titel (optional)"
-        class="w-full mb-3 px-4 py-2 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm"
+        class="w-full mb-3 px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-base"
+        style="font-size: 16px;"
       />
       <textarea
         bind:value={textContent}
         placeholder="Inhalt hier eingeben…"
         rows="6"
-        class="w-full px-4 py-2 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm resize-none"
+        class="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-base resize-none"
+        style="font-size: 16px;"
       ></textarea>
       <button
         onclick={uploadText}
         disabled={uploading || !textContent.trim()}
-        class="mt-3 px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-medium transition disabled:opacity-50"
+        class="mt-3 w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-medium transition disabled:opacity-50 min-h-[44px]"
       >{uploading ? 'Speichert…' : 'Speichern'}</button>
     </div>
   {:else}
-    <!-- Drop zone -->
+    <!-- Drop zone: p-8 on mobile, tap-friendly -->
     <div
       role="button"
       tabindex="0"
@@ -161,10 +163,11 @@
       ondrop={handleDrop}
       onclick={() => document.getElementById('file-input')?.click()}
       onkeydown={(e) => e.key === 'Enter' && document.getElementById('file-input')?.click()}
-      class="rounded-2xl border-2 border-dashed {dragOver ? 'border-blue-400 bg-blue-500/10' : 'border-gray-700 bg-gray-900/40 hover:border-gray-600'} p-12 text-center cursor-pointer transition mb-6"
+      class="rounded-2xl border-2 border-dashed {dragOver ? 'border-blue-400 bg-blue-500/10' : 'border-gray-700 bg-gray-900/40 hover:border-gray-600'} p-8 text-center cursor-pointer transition mb-4"
     >
       <CloudUpload class="w-10 h-10 text-gray-500 mx-auto mb-3" />
-      <p class="text-gray-300 font-medium">Datei hier ablegen oder klicken</p>
+      <p class="text-gray-300 font-medium">Tippen zum Auswählen</p>
+      <p class="text-sm text-gray-500 mt-1 hidden md:block">oder Datei hier ablegen</p>
       <p class="text-sm text-gray-500 mt-1">PDF, Bild, Text, Dokument</p>
       {#if uploading}<p class="text-blue-400 text-sm mt-2">Wird hochgeladen…</p>{/if}
     </div>
@@ -178,7 +181,7 @@
 
   <!-- Files list -->
   {#if files.length > 0}
-    <h2 class="text-lg font-semibold mb-3">Vorhandene Uploads ({files.length})</h2>
+    <h2 class="text-base font-semibold mb-3">Vorhandene Uploads ({files.length})</h2>
     <div class="space-y-2">
       {#each files as f}
         <div class="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900/80 p-3">
