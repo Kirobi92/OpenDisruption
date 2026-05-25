@@ -56,8 +56,36 @@ jobs:
 
       - name: Run Vitest
         id: vitest
-        run: npm run test -- --reporter=verbose
-        # Schlägt fehl wenn Tests fehlschlagen → Telegram-Notification below
+        run: |
+          # Capture stderr separately for diagnostics on failure.
+          # Module-Import-Fehler landen oft nur auf stderr (Exit 1 ohne Stdout-Info).
+          npm run test -- --reporter=verbose 2> vitest-stderr.log
+          VITEST_EXIT=$?
+          # Ensure stderr is visible in the step log even on success (informational warnings)
+          if [ -s vitest-stderr.log ]; then
+            echo "── STDERR OUTPUT ──"
+            cat vitest-stderr.log
+          fi
+          exit $VITEST_EXIT
+
+      - name: 🔍 Vitest Failure Diagnostic
+        if: failure() && steps.vitest.outcome == 'failure'
+        run: |
+          echo "## 🔍 Vitest Failure Diagnostic" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f vitest-stderr.log ] && [ -s vitest-stderr.log ]; then
+            echo "### 📋 Stderr-Log (Modul-Import-Fehler & Runtime-Errors)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 80 vitest-stderr.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "> ⚠️ Kein Stderr-Log vorhanden. Fehlerursache nicht über Stderr diagnostizierbar." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "💡 **Nächste Schritte:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Prüfe ob alle importierten Module existieren" >> $GITHUB_STEP_SUMMARY
+          echo "- `npx vitest run --reporter=verbose` lokal ausführen" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript-Compile-Fehler via \`npx tsc --noEmit\` prüfen" >> $GITHUB_STEP_SUMMARY
 
       - name: Run Vitest with Coverage
         id: vitest-coverage
