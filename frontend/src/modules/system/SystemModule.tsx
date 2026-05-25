@@ -11,6 +11,7 @@ import { DownloadComparePanel } from './DownloadComparePanel'
 import { MusicHealthBadgePanel } from './MusicHealthBadgePanel'
 import { ScAlertsPanel } from './ScAlertsPanel'
 import { ScTrendPanel } from './ScTrendPanel'
+import { CoverageTrendPanel } from './CoverageTrendPanel'
 import { GpuPanel } from './GpuPanel'
 import { ServicesGridPanel } from './ServicesGridPanel'
 import { LiveLogsPanel } from './LiveLogsPanel'
@@ -27,6 +28,7 @@ import {
   DownloadCompareData,
   MusicHealthData,
   ScAlertsData,
+  CoverageTrendData,
   GpuStatus,
 } from './types'
 import './SystemModule.css'
@@ -64,6 +66,8 @@ export default function SystemModule() {
   const isDesktopUA = useMemo(() => !/Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent), [])
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const [covSyncing, setCovSyncing] = useState(false)
+  const [covSyncResult, setCovSyncResult] = useState<{ status: string; message: string; newEntries: number } | null>(null)
   const [swipeState, setSwipeState] = useState<Record<number, number>>({})
   const [dismissing, setDismissing] = useState<Set<number>>(new Set())
   // KIROBI_DL_HISTORY_REFRESH_S — dynamisch vom Backend (Standard: 15s)
@@ -212,6 +216,39 @@ export default function SystemModule() {
     }
   }, [])
 
+  // Manueller Coverage-Trend-Sync via Backend-API
+  const syncCoverage = useCallback(async () => {
+    setCovSyncing(true)
+    setCovSyncResult(null)
+    try {
+      const res = await fetch(`${base}/api/system/coverage-trend-sync`, {
+        method: 'POST',
+        cache: 'no-store',
+      })
+      const data = await res.json()
+      setCovSyncResult({
+        status: data.status ?? 'unknown',
+        message: data.message ?? 'Sync abgeschlossen.',
+        newEntries: data.new_entries ?? 0,
+      })
+      // Dashboard neu laden, damit das Panel die aktualisierten Daten zeigt
+      if (data.status === 'ok' || data.status === 'no_data') {
+        try {
+          const dashRes = await fetch(`${base}/api/dashboard`, { cache: 'no-store' })
+          if (dashRes.ok) setDashboard(await dashRes.json())
+        } catch { /* Dashboard-Refresh fehlgeschlagen — kein Abbruch */ }
+      }
+    } catch (err) {
+      setCovSyncResult({
+        status: 'error',
+        message: `Netzwerkfehler: ${err instanceof Error ? err.message : String(err)}`,
+        newEntries: 0,
+      })
+    } finally {
+      setCovSyncing(false)
+    }
+  }, [base])
+
   // Music-Health Polling-Interval: separater, langsamerer Intervall (Standard: 30s).
   useEffect(() => {
     void refreshMusicHealth()
@@ -345,6 +382,15 @@ export default function SystemModule() {
       {dashboard && <DashboardPanel dashboard={dashboard} dashConfig={dashConfig} />}
 
       {dashboard?.sc_trend && <ScTrendPanel scTrend={dashboard.sc_trend} />}
+
+      {dashboard?.coverage_trend && (
+        <CoverageTrendPanel
+          coverageTrend={dashboard.coverage_trend}
+          syncing={covSyncing}
+          syncResult={covSyncResult}
+          onSync={() => void syncCoverage()}
+        />
+      )}
 
       {(milestoneFired || milestoneConfig) && (
         <MilestoneFiredPanel milestoneFired={milestoneFired} milestoneConfig={milestoneConfig} />

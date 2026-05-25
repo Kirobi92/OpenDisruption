@@ -50,6 +50,50 @@ export type DashboardSnapshot = {
   assessment: string
 }
 
+export type CoverageTrendEntry = {
+  run_id: number
+  started_at: string
+  conclusion: string
+  head_sha: string
+  statements_pct: number
+  branches_pct: number
+  functions_pct: number
+  lines_pct: number
+  statements_covered?: number
+  statements_total?: number
+  branches_covered?: number
+  branches_total?: number
+  functions_covered?: number
+  functions_total?: number
+  lines_covered?: number
+  lines_total?: number
+  synced_at: string
+}
+
+export type CoverageTrendMetric = {
+  direction: string
+  delta: number
+  interpretation: string
+  latest: number | null
+  min: number | null
+  max: number | null
+  avg_last_5: number | null
+}
+
+export type CoverageTrendData = {
+  available: boolean
+  entries: CoverageTrendEntry[]
+  summary: {
+    total_runs: number
+    latest: CoverageTrendEntry | null
+    statements_trend: CoverageTrendMetric
+    branches_trend: CoverageTrendMetric
+    functions_trend: CoverageTrendMetric
+    lines_trend: CoverageTrendMetric
+  } | null
+  error?: string
+}
+
 export type DashboardData = {
   status: string
   schema_version: string
@@ -61,6 +105,7 @@ export type DashboardData = {
   latest_assessment: string
   trend: string | null
   sc_trend?: ScTrendData
+  coverage_trend?: CoverageTrendData
 }
 
 export type DashboardConfig = {
