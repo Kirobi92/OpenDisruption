@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write  # write für git auto-commit der README.ci.md
 
 concurrency:
   group: unit-tests-${{ github.ref }}
@@ -55,6 +55,17 @@ jobs:
         run: npm run test -- --reporter=json --outputFile=vitest-results.json
         continue-on-error: true
         # JSON-Report für dynamische Job-Summary; Exit-Code wird in next step geprüft
+
+      - name: Upload Vitest JSON as artifact
+        if: always() && (steps.vitest.outcome == 'success' || steps.vitest.outcome == 'failure')
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-results-${{ github.run_id }}
+          path: frontend/vitest-results.json
+          retention-days: 7
+          if-no-files-found: warn
+        # Speichert vitest-results.json als Build-Artefakt für Audit/Debugging
+        # Verhindert Regression durch veraltete lokale JSON-Dateien
 
       - name: Run Vitest Coverage (optional, non-blocking)
         id: coverage
@@ -118,6 +129,30 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update README.ci.md (vitest-table-gen.sh)
+        id: table-update
+        if: steps.vitest.outcome == 'success' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        run: |
+          bash scripts/vitest-table-gen.sh --update --input-file frontend/vitest-results.json
+        working-directory: .
+        # Nur auf Push zu master/main — nicht bei PRs (kein Schreibzugriff)
+
+      - name: Commit updated README.ci.md
+        id: commit-table
+        if: steps.table-update.outcome == 'success'
+        run: |
+          if git diff --quiet README.ci.md; then
+            echo "📋 Keine Änderungen an README.ci.md — kein Commit nötig"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add README.ci.md
+            git commit -m "docs: auto-update Test-Datei-Tabelle via vitest-table-gen.sh [skip ci]"
+            git push
+            echo "✅ README.ci.md via vitest-table-gen.sh aktualisiert und committet"
+          fi
+        # Auto-Commit der aktualisierten Test-Tabelle (nur wenn Diff existiert)
 
       - name: Fail build if tests failed
         if: steps.vitest.outcome == 'failure'

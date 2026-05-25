@@ -45,3 +45,7 @@ local.properties
 logs/
 *.log
 .DS_Store
+
+# Vitest output files (generated at runtime, never commit)
+frontend/vitest-results.json
+frontend/vitest-coverage-results.json
