@@ -156,6 +156,57 @@ Die Konfigurationsdatei definiert das oxc-Schutz-Gate und projektweite Lint-Rege
 
 **Ignorierte Pfade:** `dist/**`, `android/**`, `node_modules/**`, `coverage/**`
 
+---
+
+### oxc-Kompatibilitäts-Matrix (OPE-315)
+
+> **Zweck:** Proaktiver Lint-Schutz vor oxc/rolldown-Parse-Fehlern in `@vitest/coverage-v8`.
+> Alle bekannten inkompatiblen TypeScript-Syntax-Patterns — dokumentiert mit Status, Risiko und Gegenmaßnahme.
+
+| # | Pattern | Status | Risiko | ESLint-Regel | Empfehlung |
+|---|---|---|---|---|---|
+| 1 | `import type { X }` (Statement-Modifier) | ❌ Inkompatibel | 🔴 Critical | `@typescript-eslint/consistent-type-imports: error` (aktiv) | `import { type X }` (inline) verwenden |
+| 2 | `export type { X }` (Statement-Modifier) | ⚠️ Teilweise | 🟡 Medium | `@typescript-eslint/consistent-type-exports` | Prüfen: oxc parsed `export type { X }` in manchen Kontexten korrekt, in anderen nicht. Im Zweifel `export { type X }` (inline). |
+| 3 | `namespace X { }` (Internal Module) | ❌ Inkompatibel | 🔴 Critical | `@typescript-eslint/no-namespace: error` (empfohlen) | ES Module Syntax (`export`/`import`) oder `declare module` nutzen |
+| 4 | `const enum` | ⚠️ Inkompatibel | 🟡 Medium | `no-restricted-syntax` mit `TSEnumDeclaration[const=true]` (empfohlen) | `readonly` object + `as const` verwenden. `const enum` wird von oxc nicht vollständig inlined/transpiliert. |
+| 5 | TypeScript-Generics in JSX `<Comp<T>>` | ✅ Kompatibel (≥4.1.7) | 🟢 OK | Version-Pinning (aktiv) | `vitest@4.1.7` + `@vitest/coverage-v8@4.1.7` exakt (ohne `^`). Ältere Versionen → `rolldown Parse Error`. |
+| 6 | `declare global { }` (Module Augmentation) | ⚠️ Edge Cases | 🟡 Low | Manuelles Review | Nur in `.d.ts`-Dateien oder isolierten Story-Files verwenden. Im Projekt: `StoryMusicHealthConfig.tsx` (Story-only → unkritisch). |
+| 7 | `using` Declarations (TS 5.2+ Explicit Resource Management) | ⚠️ Nicht getestet | 🟡 Medium | `no-restricted-syntax` mit `VariableDeclaration[kind='using']` (empfohlen) | Vermeiden, bis oxc/rolldown Support bestätigt. Aktuell nicht im Projekt verwendet. |
+| 8 | `accessor` Keyword (Stage 3 Auto-Accessors) | ⚠️ Nicht getestet | 🟡 Low | `no-restricted-syntax` mit `AccessorProperty` (empfohlen) | Vermeiden, bis oxc Stage-3-Decorator-Support bestätigt. Aktuell nicht im Projekt verwendet. |
+| 9 | Triple-Slash Directives `/// <reference ... />` | ✅ Unterstützt | 🟢 OK | Keine (Standard) | Nur in `.d.ts` Typ-Deklarationsdateien. Im Projekt: `vite-env.d.ts` — unkritisch. |
+
+**Legende:**
+- 🔴 **Critical**: Blockiert Coverage-Report → muss aktiv per ESLint/Lint-Workflow verhindert werden
+- 🟡 **Medium**: Kann in bestimmten Kontexten zu Parse-Fehlern führen → empfohlene ESLint-Regel, aber kein CI-Blocker
+- 🟢 **OK**: Kompatibel oder durch Version-Pinning abgesichert
+
+**Gate-Priorität (in `lint-frontend.yml`):**
+1. 🔴 Patterns (1, 3): **LINT FAIL** → blockiert PR
+2. 🟡 Patterns (2, 4, 6, 7, 8): **LINT WARN** → Job-Summary, kein Blocker
+3. 🟢 Patterns (5, 9): **OK** → keine Aktion nötig
+
+**Empfohlene ESLint-Erweiterungen für vollständigen oxc-Schutz:**
+
+```js
+// In eslint.config.js zusätzlich zu bestehenden Regeln:
+rules: {
+  // 🔴 CRITICAL — bereits aktiv
+  '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'no-type-imports', fixStyle: 'inline-type-imports' }],
+
+  // 🟡 MEDIUM — empfohlen
+  '@typescript-eslint/no-namespace': 'error',
+  'no-restricted-syntax': [
+    'warn',
+    { selector: 'TSEnumDeclaration[const=true]', message: 'const enum ist oxc-inkompatibel. Verwende readonly object + as const.' },
+    { selector: 'VariableDeclaration[kind="using"]', message: 'using-Declaration ist oxc-inkompatibel (TS 5.2+). Nicht verwenden.' },
+  ],
+}
+```
+
+**Letzte Aktualisierung:** 2026-05-25 | **Gültig für:** oxc/rolldown ≥ v0.x (Stand Mai 2026)
+
+---
+
 **Besonderheiten:**
 - Nur `consistent-type-imports`-Fehler blockieren den Build (oxc-Gate)
 - Pre-existing Issues (no-empty, react-hooks/exhaustive-deps) werden in Summary gelistet, blockieren aber nicht
@@ -243,10 +294,72 @@ WORKFLOW_COUNT_REF: "8"
 
 **Besonderheiten:**
 - `concurrency: group: unit-tests-${{ github.ref }}`, `cancel-in-progress: true`
-- Tested: `SystemModule`, `ScAlertsPanel`, `StoryMusicHealthConfig`, alle Story-Snapshots
 - Permissions: `contents: read`
 
+**Test-Dateien (Gesamt: 85 Tests, Stand: 2026-05-25):**
+
+| # | Datei | Tests | Komponenten |
+|---|---|---|---|
+| 1 | `CoverageTrendPanel.test.tsx` | 23 | CoverageTrendPanel |
+| 2 | `DownloadHistoryPanel.test.tsx` | 5 | Download-History Panel |
+| 3 | `MusicHealthConfigPanel.test.tsx` | 6 | MusicHealthConfigPanel |
+| 4 | `ScAlertsPanel.test.tsx` | 17 | ScAlertsPanel (Pagination) |
+| 5 | `StoryIndex.test.tsx` | 5 | StoryIndex |
+| 6 | `StoryMusicHealthConfig.snapshot.test.tsx` | 4 | StoryMusicHealthConfig (DOM-Snapshot-Regression, Edit-Mode Snapshot) |
+| 7 | `SystemSubComponents.test.tsx` | 25 | GpuPanel, LiveLogsPanel, ServicesGridPanel |
+| **Gesamt** | | **85** | |
+
 **Typische Laufzeit:** ~2 Minuten
+
+> **Coverage-Setup:** Siehe separaten Abschnitt [Coverage-Setup & Version-Pinning](#coverage-setup--version-pinning) unten.
+
+---
+
+### 8b. Coverage-Setup & Version-Pinning
+
+> **Mindestversionen | Stand: 2026-05-25 (OPE-316)**
+
+**Kritische Versionen (exakt gepinnt in `package.json`):**
+
+| Paket | Mindestversion | Gepinnt | Begründung |
+|---|---|---|---|
+| `vitest` | `4.1.7` | ✅ `"vitest": "4.1.7"` (ohne `^`) | TypeScript-Generics in JSX werden korrekt geparst |
+| `@vitest/coverage-v8` | `4.1.7` | ✅ `"@vitest/coverage-v8": "4.1.7"` (ohne `^`) | Nutzt intern oxc/rolldown; ältere Versionen werfen Parse-Error bei TSX-Generics |
+
+**Warum Version-Pinning (kein Caret `^`)?**
+
+- `^4.1.7` erlaubt automatische Minor/Patch-Upgrades (z.B. `4.2.0`), die ungetestete oxc/rolldown-Versionen einführen können
+- `4.1.7` (exakt) verhindert Überraschungs-Regressionen durch abweichende Parser-Versionen bei `npm ci`/`npm install`
+- TypeScript-Generics in JSX (z.B. `<Component<T>`) sind ein bekannter Edge-Case für oxc — nur ab vitest 4.1.7 stabil
+
+**Regression-Schutz-Mechanismus:**
+
+```
+package.json:  "vitest": "4.1.7"            ← kein ^, kein ~
+               "@vitest/coverage-v8": "4.1.7"  ← kein ^, kein ~
+
+unit-tests.yml: npx vitest run --coverage    ← schlägt fehl wenn Version < 4.1.7
+                                            (Parse Error bei TSX-Generics)
+```
+
+**Coverage ausführen (lokal):**
+```bash
+cd frontend
+npx vitest run --coverage          # Coverage-Report in coverage/ Verzeichnis
+npx vitest run --coverage --reporter=verbose  # Mit ausführlicher Ausgabe
+```
+
+**Coverage-Schwellwerte (geplant, OPE-317):**
+- In CI als Warnung: `lines ≥ 50%`, `branches ≥ 40%` für `src/modules/system/`
+- Bei Unterschreitung: Job-Summary-Warnung (kein Build-Blocker)
+
+**Version-Historie:**
+
+| Version | Datum | Änderung | OPE |
+|---|---|---|---|
+| `^3.2.x` | vor 2026-05 | Initial Setup, oxc-Parse-Error bei TSX-Generics | — |
+| `^4.1.7` | 2026-05-24 | Upgrade auf 4.1.7 (Caret), Parse-Error behoben | OPE-317 |
+| `4.1.7` | 2026-05-25 | **Exaktes Pinning** (Caret entfernt) für Regression-Schutz | OPE-316 |
 
 ---
 
