@@ -135,7 +135,7 @@ jobs:
 
       - name: Upload Coverage HTML Report
         if: always() && steps.vitest-coverage.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: frontend/coverage/
@@ -143,7 +143,7 @@ jobs:
 
       - name: Upload Vitest Coverage Results JSON
         if: always() && steps.vitest-coverage.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vitest-coverage-results
           path: frontend/coverage/coverage-summary.json
