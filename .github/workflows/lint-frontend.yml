@@ -81,7 +81,7 @@ jobs:
             echo "|--------|-------:|" >> "$GITHUB_STEP_SUMMARY"
             echo "| Total Errors | $TOTAL_ERRORS |" >> "$GITHUB_STEP_SUMMARY"
             echo "| Total Warnings | $TOTAL_WARNINGS |" >> "$GITHUB_STEP_SUMMARY"
-            echo "| 🚫 **oxc-Gate** (`consistent-type-imports`) | **$OXC_GATE_ERRORS** |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| 🚫 **oxc-Gate** (\`consistent-type-imports\`) | **$OXC_GATE_ERRORS** |" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
 
             if [ "$OXC_GATE_ERRORS" -gt 0 ]; then
