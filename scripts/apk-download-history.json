@@ -9,6 +9,35 @@
           "debug_downloads": 2,
           "release_downloads": 3,
           "total": 5
+        },
+        {
+          "week": "2026-W22",
+          "date": "2026-05-25",
+          "debug_downloads": 3,
+          "release_downloads": 3,
+          "total": 6
+        }
+      ]
+    },
+    "v13.0.0": {
+      "snapshots": [
+        {
+          "week": "2026-W22",
+          "date": "2026-05-25",
+          "debug_downloads": 0,
+          "release_downloads": 2,
+          "total": 2
+        }
+      ]
+    },
+    "v11.0.0": {
+      "snapshots": [
+        {
+          "week": "2026-W22",
+          "date": "2026-05-25",
+          "debug_downloads": 0,
+          "release_downloads": 1,
+          "total": 1
         }
       ]
     }
