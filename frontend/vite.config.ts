@@ -51,6 +51,10 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: ['src/**/*.{ts,tsx}'],
       reportOnFailure: true,
+      thresholds: {
+        lines: 50,
+        branches: 40,
+      },
     },
   },
 })

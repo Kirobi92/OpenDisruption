@@ -100,32 +100,43 @@ jobs:
           else
             echo "| _(vitest-results.json nicht gefunden)_ | — | — | — | — | — |" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📊 Coverage — ScAlertsPanel.tsx" >> $GITHUB_STEP_SUMMARY
+          echo ""
+          echo "## ⚙️ Coverage — System-Modul (src/modules/system/)" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Coverage | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------:|----------:|:------:|" >> $GITHUB_STEP_SUMMARY
           if [ -f coverage/coverage-summary.json ]; then
-            SC_COVERAGE=$(jq -r 'to_entries[] | select(.key | endswith("ScAlertsPanel.tsx")) | 
-              "| Branch | \(.value.branches.pct)% |",
-              "| Statements | \(.value.statements.pct)% |"' coverage/coverage-summary.json 2>/dev/null)
-            if [ -n "$SC_COVERAGE" ]; then
-              echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
-              echo "|--------|---------:|" >> $GITHUB_STEP_SUMMARY
-              echo "$SC_COVERAGE" >> $GITHUB_STEP_SUMMARY
-              # Farb-Badge basierend auf Branch-Coverage
-              BRANCH_PCT=$(jq -r '[to_entries[] | select(.key | endswith("ScAlertsPanel.tsx")) | .value.branches.pct][0]' coverage/coverage-summary.json)
-              if [ -n "$BRANCH_PCT" ]; then
-                if [ "$(echo "$BRANCH_PCT >= 80" | bc)" -eq 1 ]; then
-                  echo "![Coverage](https://img.shields.io/badge/Coverage-${BRANCH_PCT}%25-brightgreen)" >> $GITHUB_STEP_SUMMARY
-                elif [ "$(echo "$BRANCH_PCT >= 50" | bc)" -eq 1 ]; then
-                  echo "![Coverage](https://img.shields.io/badge/Coverage-${BRANCH_PCT}%25-yellow)" >> $GITHUB_STEP_SUMMARY
-                else
-                  echo "![Coverage](https://img.shields.io/badge/Coverage-${BRANCH_PCT}%25-red)" >> $GITHUB_STEP_SUMMARY
-                fi
-              fi
+            SYS_LINES_PCT=$(jq -r '
+              [to_entries[] | select(.key | test("src/modules/system/"))] as $sys |
+              if ($sys | length) > 0 then
+                ($sys | map(.value.lines.total) | add) as $tl |
+                ($sys | map(.value.lines.covered) | add) as $cl |
+                (if $tl > 0 then ($cl / $tl * 100 * 10 | floor) / 10 else 0 end)
+              else -1 end' coverage/coverage-summary.json)
+            SYS_BRANCHES_PCT=$(jq -r '
+              [to_entries[] | select(.key | test("src/modules/system/"))] as $sys |
+              if ($sys | length) > 0 then
+                ($sys | map(.value.branches.total) | add) as $tb |
+                ($sys | map(.value.branches.covered) | add) as $cb |
+                (if $tb > 0 then ($cb / $tb * 100 * 10 | floor) / 10 else 0 end)
+              else -1 end' coverage/coverage-summary.json)
+            if [ "$SYS_LINES_PCT" = "-1" ] || [ "$SYS_BRANCHES_PCT" = "-1" ]; then
+              echo "| — | — | — | _(keine System-Modul-Dateien)_ |" >> $GITHUB_STEP_SUMMARY
             else
-              echo "_(ScAlertsPanel.tsx nicht in Coverage-Daten gefunden)_" >> $GITHUB_STEP_SUMMARY
+              LINES_OK=$(echo "$SYS_LINES_PCT >= 50" | bc -l)
+              BRANCHES_OK=$(echo "$SYS_BRANCHES_PCT >= 40" | bc -l)
+              if [ "$LINES_OK" = "1" ]; then LINES_ICON="✅"; else LINES_ICON="⚠️"; fi
+              if [ "$BRANCHES_OK" = "1" ]; then BRANCHES_ICON="✅"; else BRANCHES_ICON="⚠️"; fi
+              echo "| Lines | ${SYS_LINES_PCT}% | ≥50% | ${LINES_ICON} |" >> $GITHUB_STEP_SUMMARY
+              echo "| Branches | ${SYS_BRANCHES_PCT}% | ≥40% | ${BRANCHES_ICON} |" >> $GITHUB_STEP_SUMMARY
+              # Farb-Badge basierend auf Threshold-Status
+              if [ "$LINES_OK" = "1" ] && [ "$BRANCHES_OK" = "1" ]; then
+                echo "![System Coverage](https://img.shields.io/badge/System%20Module-OK-brightgreen)" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "![System Coverage](https://img.shields.io/badge/System%20Module-WARNING-yellow)" >> $GITHUB_STEP_SUMMARY
+              fi
             fi
           else
-            echo "_(coverage-summary.json nicht generiert — Coverage-Step ggf. fehlgeschlagen)_" >> $GITHUB_STEP_SUMMARY
+            echo "| — | — | — | _(coverage-summary.json fehlt)_ |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Workflow: \`${{ github.workflow }}\` | Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
