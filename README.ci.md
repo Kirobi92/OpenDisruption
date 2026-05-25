@@ -259,3 +259,22 @@ cd tests/e2e && pytest test_story_nav_e2e.py -v
 - Bei shellcheck-Findings: `actionlint .github/workflows/DATEI.yml` lokal ausführen
 - SC_ISSUE_COUNT Dashboard-Integration: `KIROBI_SC_ALERT_THRESHOLD` in `.env` konfigurieren
 - Bei Dependabot-Alerts: Workflow `ci.yml` + `nightly-audit.yml` pip-audit-Output prüfen
+
+---
+
+<!-- VITEST-TABLE-START -->
+> **Automatisch generiert** via `scripts/vitest-table-gen.sh --update` — Stand: 2026-05-25 06:52 UTC
+
+| Gesamt-Tests | Bestanden | Fehlgeschlagen | Test-Dateien |
+|---|---:|---:|---:|
+| 86 | 86 | 0 | 4 |
+
+### Test-Datei-Übersicht
+
+| # | Test-Datei | Tests | Status |
+|---|---|---|---|
+| 1|src/modules/system/SystemModule.test.tsx|24|✅ |
+| 2|src/modules/system/ScAlertsPanel.test.tsx|12|✅ |
+| 3|src/modules/system/SystemSubComponents.test.tsx|25|✅ |
+| 4|src/stories/StoryMusicHealthConfig.test.tsx|12|✅ |
+<!-- VITEST-TABLE-END -->
