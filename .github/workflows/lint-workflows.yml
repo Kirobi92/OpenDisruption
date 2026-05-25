@@ -2,11 +2,11 @@ name: Lint & Count Workflows
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - '.github/workflows/**'
   pull_request:
-    branches: [main]
+    branches: [master]
     paths:
       - '.github/workflows/**'
   workflow_dispatch:
@@ -137,4 +137,4 @@ jobs:
           echo "## 📚 CI-Dokumentation" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Vollständige Beschreibung aller Workflows und CI-Prozesse:" >> "$GITHUB_STEP_SUMMARY"
-          echo "👉 [README.ci.md](https://github.com/${{ github.repository }}/blob/main/README.ci.md)" >> "$GITHUB_STEP_SUMMARY"
+          echo "👉 [README.ci.md](https://github.com/${{ github.repository }}/blob/master/README.ci.md)" >> "$GITHUB_STEP_SUMMARY"
