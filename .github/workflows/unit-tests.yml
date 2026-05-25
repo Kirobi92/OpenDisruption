@@ -73,6 +73,35 @@ jobs:
         continue-on-error: true
         # Optionaler Coverage-Lauf; blockiert nicht den Build bei Fehlern
 
+      - name: Validate Coverage Artifact (JSON)
+        id: coverage-validate
+        if: always() && steps.coverage.outcome != 'skipped'
+        run: |
+          if [ -f vitest-coverage-results.json ]; then
+            if jq empty vitest-coverage-results.json 2>/dev/null; then
+              echo "valid=true" >> $GITHUB_OUTPUT
+              echo "✅ vitest-coverage-results.json ist valides JSON"
+            else
+              echo "valid=false" >> $GITHUB_OUTPUT
+              echo "❌ vitest-coverage-results.json ist kein valides JSON (jq parse error)"
+            fi
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "⚠️ vitest-coverage-results.json nicht gefunden"
+          fi
+        # Validiert, dass die Coverage-JSON-Datei syntaktisch korrekt ist
+        # Schützt vor korrupten Artefakten durch vitest-Abstürze
+
+      - name: Upload Coverage JSON as artifact
+        if: always() && steps.coverage-validate.outputs.valid == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-coverage-${{ github.run_id }}
+          path: frontend/vitest-coverage-results.json
+          retention-days: 7
+          if-no-files-found: warn
+        # Coverage-Artefakt für spätere Coverage-Delta-Analysen
+
       - name: Write Job Summary (dynamisch via vitest --reporter=json)
         if: always()
         run: |
@@ -102,6 +131,11 @@ jobs:
           fi
           echo ""
           echo "## ⚙️ Coverage — System-Modul (src/modules/system/)" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.coverage-validate.outputs.valid }}" == "true" ]; then
+            echo "![Coverage Artifact](https://img.shields.io/badge/Coverage%20Artifact-OK-brightgreen)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "![Coverage Artifact](https://img.shields.io/badge/Coverage%20Artifact-FAIL-red)" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "| Metric | Coverage | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|---------:|----------:|:------:|" >> $GITHUB_STEP_SUMMARY
           if [ -f coverage/coverage-summary.json ]; then
