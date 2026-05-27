@@ -1,0 +1,100 @@
+# OpenDisruption — Master .gitignore
+# Quelle: docs/architecture-planning/06_roadmap_and_migration_plan.md (R-004)
+
+# ============ Secrets ============
+**/.env
+**/.env.*
+!**/.env.template
+!**/.env.example
+**/*.secret
+**/*secrets*.yml
+**/*secrets*.yaml
+**/credentials.json
+**/.backup.env
+**/.envrc
+
+# ============ Python ============
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.venv/
+**/venv/
+**/env/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/*.egg-info/
+**/dist/
+**/build/
+**/.tox/
+
+# ============ Node / JS ============
+**/node_modules/
+**/.pnpm-store/
+**/.npm/
+**/.yarn/
+**/.next/
+**/.nuxt/
+**/.svelte-kit/
+**/.cache/
+
+# ============ Runtime / Databases ============
+**/*.sqlite
+**/*.sqlite3
+**/*.sqlite-journal
+**/*.db
+**/*.db-journal
+**/*.rdb
+**/data/
+!**/source-docs/
+**/logs/
+**/*.log
+
+# ============ Service-Runtime / Caches ============
+**/image_cache/
+**/audio_cache/
+**/memories/
+services/qdrant/
+services/open-webui/data/
+services/flowise/data/
+services/flowise/logs/
+services/hindsight/data/
+
+# ============ Tool-Caches ============
+.opencode/
+.omo/
+.hermes/
+.claude/cache/
+.vscode/
+
+# ============ OS ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ IDE ============
+*.swp
+*.swo
+*~
+.idea/
+
+# ============ Build-Artefakte ============
+*.tar.gz
+*.zip
+*.tar.zst
+**/coverage/
+**/htmlcov/
+
+# ============ LUKI source docs (binär außerhalb Repo) ============
+products/luki/source-docs/*.pdf
+products/luki/source-docs/*.docx
+products/luki/source-docs/*.xlsx
+products/luki/source-docs/*.pptx
+!products/luki/source-docs/manifest.json
+!products/luki/source-docs/README.md
+
+# ============ Modelle ============
+**/models/*.gguf
+**/models/*.bin
+**/models/*.safetensors
+**/models/*.pt

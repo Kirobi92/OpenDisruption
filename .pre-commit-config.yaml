@@ -1,0 +1,37 @@
+# `.pre-commit-config.yaml` für OpenDisruption Monorepo
+
+repos:
+  # Secret-Scanner: gitleaks (schnell, zuverlässig)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  # Secret-Scanner: trufflehog (zweite Schicht, höhere Recall)
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.83.7
+    hooks:
+      - id: trufflehog
+        args: ['filesystem', '--no-update', '--fail', '--no-verification']
+
+  # Python
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # YAML/JSON/MD
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=512']
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
