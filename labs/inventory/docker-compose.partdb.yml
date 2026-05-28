@@ -1,0 +1,61 @@
+---
+# Part-DB — Elektronik-Bauteil-Inventar
+# URL: http://100.127.16.62/partdb
+# Port: 8200
+# Secrets: /Datenspeicher/OpenDisruption-Data/secrets/partdb.env (chmod 600)
+# 2026-05-27: env_file conversion (R-002/R-003) — Plaintext-PWs purged.
+
+services:
+  partdb:
+    image: jbtronics/part-db1:latest
+    container_name: partdb
+    restart: unless-stopped
+    ports:
+      - "8200:80"
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/partdb.env
+    environment:
+      - APP_ENV=production
+      - DEFAULT_LANG=de
+      - DEFAULT_TIMEZONE=Europe/Berlin
+      - PARTDB_TITLE=Sven's Bauteil-Inventar
+      - ALLOW_ATTACHMENT_DOWNLOADS=1
+      - USE_GRAVATAR=0
+      - MAX_ATTACHMENT_FILE_SIZE=100
+      - DEMO_MODE=0
+      - TRUSTED_PROXIES=172.21.0.1
+      - BASE_URL=http://100.127.16.62/partdb/
+    volumes:
+      - partdb_uploads:/var/www/html/uploads
+      - partdb_public:/var/www/html/public/media
+    depends_on:
+      partdb-db:
+        condition: service_healthy
+    networks:
+      - inventory-net
+
+  partdb-db:
+    image: mysql:8.0
+    container_name: partdb-db
+    restart: unless-stopped
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/partdb.env
+    command: --log_bin_trust_function_creators=1
+    volumes:
+      - partdb_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - inventory-net
+
+volumes:
+  partdb_uploads:
+  partdb_public:
+  partdb_db:
+
+networks:
+  inventory-net:
+    driver: bridge

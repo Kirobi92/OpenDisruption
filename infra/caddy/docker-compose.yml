@@ -1,0 +1,26 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: opendisruption-caddy
+    restart: unless-stopped
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/caddy.env
+    ports:
+      - "127.0.0.1:80:80"
+      - "100.127.16.62:80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - caddy_net
+
+networks:
+  caddy_net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,20 @@
+version: '3.8'
+# InvenTree Server — 3D-Druck Inventar
+# Secrets: /Datenspeicher/OpenDisruption-Data/secrets/inventree-server.env (chmod 600)
+# 2026-05-28: Phase C env_file conversion.
+services:
+  inventree-server:
+    image: inventree/inventree:stable
+    container_name: inventree-3ddruck
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:4999:8000"
+    volumes:
+      - ./inventree-data:/home/inventree/data
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/inventree-server.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

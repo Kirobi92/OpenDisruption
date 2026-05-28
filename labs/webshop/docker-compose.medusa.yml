@@ -1,0 +1,35 @@
+version: "3.8"
+
+# Webshop Postgres + Redis (Medusa stack)
+# Secrets: /Datenspeicher/OpenDisruption-Data/secrets/webshop-postgres.env (chmod 600)
+# 2026-05-28: Phase C env_file conversion.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: webshop-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/webshop-postgres.env
+    volumes:
+      - webshop-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: webshop-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - webshop-redis-data:/data
+
+volumes:
+  webshop-postgres-data:
+  webshop-redis-data:

@@ -1,0 +1,152 @@
+{
+    admin off
+    auto_https off
+}
+
+# OpenDisruption — Alle Services via Tailscale/LAN
+# Hardening 2026-05-27 (R-005):
+#   - admin/business/labs Routen hinter basicauth
+#   - User: sven, samira, sineo, od-admin (Hashes via env_file)
+#   - Family-Routen (/kirobi, /avatar) ebenfalls auth (kein offenes LAN)
+# Erreichbar über:
+#   Tailscale:  http://100.127.16.62
+#   Loopback:   http://127.0.0.1
+
+(admin_auth) {
+    basicauth {
+        {$CADDY_USER_SVEN} {$CADDY_HASH_SVEN}
+        {$CADDY_USER_SAMIRA} {$CADDY_HASH_SAMIRA}
+        {$CADDY_USER_SINEO} {$CADDY_HASH_SINEO}
+        {$CADDY_USER_OD_ADMIN} {$CADDY_HASH_OD_ADMIN}
+    }
+}
+
+:80 {
+
+    # ── ROOT ──
+    redir / /kirobi 301
+
+    # ── CONTROL CENTER (admin) ──
+    handle /cc* {
+        import admin_auth
+        uri strip_prefix /cc
+        reverse_proxy 172.21.0.1:4200
+    }
+
+    # ── KIROBI PWA (Family) ──
+    handle /kirobi* {
+        import admin_auth
+        reverse_proxy 172.21.0.1:4300
+    }
+
+    # ── LUKI PWA (Business) ──
+    handle /luki* {
+        import admin_auth
+        uri strip_prefix /luki
+        reverse_proxy 172.17.0.1:8002
+    }
+
+    # ── KI & AGENTEN (admin) ──
+    handle /webui* {
+        import admin_auth
+        uri strip_prefix /webui
+        reverse_proxy 172.21.0.1:3000
+    }
+
+    handle /flowise* {
+        import admin_auth
+        uri strip_prefix /flowise
+        reverse_proxy 172.21.0.1:3001
+    }
+
+    handle /mission* {
+        import admin_auth
+        uri strip_prefix /mission
+        reverse_proxy 172.21.0.1:4100
+    }
+
+    handle /paperclip* {
+        import admin_auth
+        uri strip_prefix /paperclip
+        reverse_proxy 172.21.0.1:3100
+    }
+
+    handle /hindsight* {
+        import admin_auth
+        uri strip_prefix /hindsight
+        reverse_proxy 172.21.0.1:5301
+    }
+
+    handle /ollama* {
+        import admin_auth
+        uri strip_prefix /ollama
+        reverse_proxy 172.21.0.1:11434
+    }
+
+    handle /qdrant* {
+        import admin_auth
+        uri strip_prefix /qdrant
+        reverse_proxy 172.21.0.1:6333
+    }
+
+    # ── INVENTAR & ERP (admin) ──
+    handle /inventree* {
+        import admin_auth
+        uri strip_prefix /inventree
+        reverse_proxy 172.21.0.1:4999
+    }
+
+    handle /partdb* {
+        import admin_auth
+        redir * http://{host}:8200/ 302
+    }
+
+    handle /homebox* {
+        import admin_auth
+        redir * http://{host}:8201{uri} 302
+    }
+
+    # ── KREATIV (admin) ──
+    handle /comfyui* {
+        import admin_auth
+        uri strip_prefix /comfyui
+        reverse_proxy 172.21.0.1:8188
+    }
+
+    # ── KIROBI AVATAR (family) ──
+    handle /avatar* {
+        import admin_auth
+        uri strip_prefix /avatar
+        reverse_proxy 172.21.0.1:5173
+    }
+
+    # ── SHOP & E-COMMERCE (admin) ──
+    handle /shop-admin* {
+        import admin_auth
+        uri strip_prefix /shop-admin
+        reverse_proxy 172.21.0.1:9000
+    }
+
+    handle /shop-storefront* {
+        import admin_auth
+        uri strip_prefix /shop-storefront
+        reverse_proxy 172.21.0.1:8000
+    }
+
+    handle /wordpress* {
+        import admin_auth
+        uri strip_prefix /wordpress
+        reverse_proxy 172.21.0.1:9001
+    }
+
+    handle /3dbar* {
+        import admin_auth
+        uri strip_prefix /3dbar
+        reverse_proxy 172.21.0.1:8081
+    }
+
+    # ── FALLBACK ──
+    handle {
+        respond "OpenDisruption — Service nicht verfügbar" 404
+    }
+}

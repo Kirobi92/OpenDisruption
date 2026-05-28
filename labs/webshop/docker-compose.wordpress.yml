@@ -1,0 +1,38 @@
+version: "3.8"
+
+# Webshop Stack — WordPress + MySQL
+# Secrets: /Datenspeicher/OpenDisruption-Data/secrets/webshop.env (chmod 600)
+# 2026-05-27: env_file conversion (R-002/R-003) — Plaintext-PWs purged.
+
+services:
+  webshop-mysql:
+    image: mysql:8.0
+    container_name: webshop-mysql
+    restart: unless-stopped
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/webshop.env
+    volumes:
+      - /Datenspeicher/OpenDisruption_v0.1/data/webshop-mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - webshop-net
+
+  wordpress:
+    image: wordpress:latest
+    container_name: webshop-wordpress
+    restart: unless-stopped
+    depends_on:
+      - webshop-mysql
+    env_file:
+      - /Datenspeicher/OpenDisruption-Data/secrets/webshop.env
+    volumes:
+      - /Datenspeicher/OpenDisruption_v0.1/data/webshop-wordpress:/var/www/html
+    ports:
+      - "9001:80"
+    networks:
+      - webshop-net
+
+networks:
+  webshop-net:
+    name: webshop-net

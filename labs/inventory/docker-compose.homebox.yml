@@ -1,0 +1,22 @@
+---
+# Homebox — Allgemeines Haushalts-Inventar
+# URL: http://100.127.16.62/homebox
+# Port: 8201
+
+services:
+  homebox:
+    image: ghcr.io/sysadminsmedia/homebox:latest
+    container_name: homebox
+    restart: unless-stopped
+    ports:
+      - "8201:7745"
+    environment:
+      - HBOX_LOG_LEVEL=info
+      - HBOX_LOG_FORMAT=text
+      - HBOX_WEB_MAX_UPLOAD_SIZE=10
+      - HBOX_OPTIONS_ALLOW_REGISTRATION=false
+    volumes:
+      - homebox_data:/data
+
+volumes:
+  homebox_data:

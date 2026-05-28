@@ -1,6 +1,25 @@
 # 06 — Roadmap & Migration Plan (7 / 30 / 60 / 90 Tage)
 
-**Datum:** 2026-05-26 · Format: ausführbare Aufgaben mit Akzeptanz und Rollback.
+**Datum:** 2026-05-26 · **Letztes Update:** 2026-05-28 (Phase A+C abgeschlossen) · Format: ausführbare Aufgaben mit Akzeptanz und Rollback.
+
+## Status-Übersicht (2026-05-28)
+
+| Phase | Status | Bericht |
+|---|---|---|
+| A — Safety Baseline | ✅ COMPLETE | `reports/A-03-phase-a-complete-2026-05-27.md` |
+| B — Repository Skeleton | ✅ COMPLETE (mit Phase A) | inkl. Git-Init + `.gitignore` + CI |
+| C — Shared Infra | ✅ AUTONOM-SCOPE COMPLETE | `reports/C-03-phase-c-complete-2026-05-28.md` |
+| D — KIROBI Cleanup | ⏳ NEXT | Hermes-Runtime-Migration, PWA-Service, Telegram-Gateways |
+| E — LUKI Extraction | PENDING | – |
+| F — LUKI Knowledge MVP | PENDING | – |
+| G — Doku/Runbooks | PENDING | – |
+| H — Business Readiness | PENDING | – |
+
+**Verbleibende User-Aktionen (blockierend für 100% Phase A/C):**
+1. UFW-Skript ausführen (siehe `C-01-network-hardening-plan-2026-05-28.md`)
+2. Telegram-Bot-Tokens via @BotFather rotieren
+3. WooCommerce-Keys via WP-Admin neu generieren
+4. Caddy-Plaintext-PW-File löschen (`shred -u …secrets/caddy-plaintext-2026-05-27.txt`)
 
 ## A) Aufgabenmatrix
 
@@ -41,6 +60,14 @@
 | R-033 | 61–90 d | Preismodell-Entwurf LUKI | LUKI | P2 | M | LOW | R-030 | 2–3 Preisstaffeln (Eval/Pilot/Prod), Lizenz-/Wartungsmodell | Dokument `products/luki/business/pricing-v1.md` | – | – |
 | R-034 | 61–90 d | Go/No-Go WhatsApp/Teams/eNVenta-Middleware | LUKI | P1 | S | MED | R-030 | Entscheidungsdokument anhand Pilot-Erfahrung | klare Entscheidung dokumentiert | – | – |
 | R-035 | 61–90 d | KIROBI-Avatar Entscheidung (KIROBI vs. LAB) | KIROBI | P2 | S | LOW | R-012 | Entscheidung E5 finalisieren | dokumentiert + entsprechende Migration | – | D-Spalte 03 |
+| R-036 | 0–7 d | **DONE** kirobi-*-Stack archivieren | ARCHIVE | P0 | S | LOW | – | 13 orphan-Container von Compose-Projekt `opendisruption` removed | ✅ Phase A abgeschlossen | – | A-01 |
+| R-037 | 8–30 d | Hindsight-Compose rekonstruieren | LABS | P2 | S | LOW | R-009 | `docker inspect hindsight` → `infra/hindsight/docker-compose.yml`; Bind 127.0.0.1 | Compose committed, Restart-fähig | bestehender Container | C-02 |
+| R-038 | 8–30 d | 3d-druck-bar-preview-Compose rekonstruieren | LABS | P2 | XS | LOW | R-009 | wie R-037 für 8081-Service | Compose committed | wie oben | C-02 |
+| R-039 | 8–30 d | Mission-Control-Service-Quelle klären | SHARED_INFRA | P1 | S | LOW | – | systemd? container? port 4100 → identifizieren | Komponente dokumentiert oder als gestoppt markiert | – | C-02 |
+| R-040 | 8–30 d | Open-WebUI Compose erstellen | LABS | P2 | S | LOW | R-009 | Service unter `services/open-webui/` finalisieren, Bind 127.0.0.1 | Compose + Service-Start grün | – | C-02 |
+| R-041 | 8–30 d | Hermes-Runtime → Data-Tree-Migration | SHARED_INFRA | P0 | M | MED | R-010 | `~/.hermes` → `…OpenDisruption-Data/shared/hermes/` + Symlink + Service-Restart | Telegram-Echo läuft, Daten in Restic-Backup | Symlink rückgängig, ~/.hermes.bak | C-03 |
+| R-042 | 8–30 d | UFW-Backend-Lockdown | SHARED_INFRA | P0 | S | LOW | – | 18 Backend-Ports nur Tailscale/Docker/Loopback | LAN-Scan (von anderem Host) → ports closed | `sudo ufw disable` | C-01 |
+| R-043 | 8–30 d | DB-PW-Rotation Webshop+Partdb | LABS | P1 | M | HIGH | R-016 | `ALTER USER` im Container + wp-config.php update + env_file aktualisieren | Stack startet mit neuen PWs, kein Datenverlust | DB-Dumps als Restore-Punkt | – |
 
 ## B) Critical Path
 
@@ -65,6 +92,12 @@ R-001 → R-002 → R-003 → R-007 → R-016 → R-015 → R-022 → R-023 → 
 | 2026-05-26 | Externer Snapshot vor Phase A Pflicht | kein Git, kein Branch-Rollback |
 | 2026-05-26 | Monorepo empfohlen | Solo-Owner, atomische Cross-Changes |
 | 2026-05-26 | LUKI-MVP startet mit Knowledge | kleinster sinnvoller Schritt |
+| 2026-05-27 | Restic-Repo NICHT rotieren | Repo intakt, 10 Snapshots — kein Schadensgrund |
+| 2026-05-27 | kirobi-* Compose-Stack: ARCHIVE | Nutzer-Entscheidung — Experimentelles Setup |
+| 2026-05-27 | PWA-Wahrheit: Top-Level `kirobi-pwa/` | Nutzer-Entscheidung |
+| 2026-05-27 | Caddy-User: sven, samira, sineo, od-admin | Nutzer-Vorgabe |
+| 2026-05-28 | DB-PW-Rotation deferred bis Phase E (mit DB-Konsolidierung) | Risiko vs. Nutzen — saubere Lösung braucht ohnehin Stack-Refactor |
+| 2026-05-28 | Netz-Hardening Hybrid B+C: UFW jetzt, Network-Refactor später | sudo-Skript trivial, Compose-Refactor groß |
 
 ## E) Open Questions
 
