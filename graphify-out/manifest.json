@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "tools/README.md": {
-    "mtime": 1781066669.5328798,
-    "ast_hash": "8f2079d7a801abc23f9a9648b0d2e205",
+    "mtime": 1781067067.962789,
+    "ast_hash": "c0f532a658638d5524e9ff3c72aebc93",
     "semantic_hash": ""
   },
   "tests/test_opendisruption_ultimate.py": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "products/luki/config/luki.json": {
-    "mtime": 1781037092.6998653,
-    "ast_hash": "9f43269fd5e7b5f777245d8cb215deb1",
+    "mtime": 1781067067.962789,
+    "ast_hash": "a338a4700107376c338eb00d76264aad",
     "semantic_hash": ""
   },
   "products/luki/evals/v1/questions.json": {
@@ -227,6 +227,16 @@
   "docs/runbooks/graphify.md": {
     "mtime": 1781066703.0984254,
     "ast_hash": "de266bf4f93b7036752ab67b0fba7958",
+    "semantic_hash": ""
+  },
+  "tests/test_luki_qdrant_bootstrap.py": {
+    "mtime": 1781067067.962789,
+    "ast_hash": "384e3dc6807bbf7d6daccbb2742add91",
+    "semantic_hash": ""
+  },
+  "tools/luki_qdrant_bootstrap.py": {
+    "mtime": 1781067067.962789,
+    "ast_hash": "e20ad0991a0f9c0b31dc49bf87b5bf78",
     "semantic_hash": ""
   }
 }

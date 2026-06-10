@@ -90,10 +90,20 @@
       "norm_label": "embedding_model"
     },
     {
-      "label": "llm_model",
+      "label": "embedding_dimensions",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
       "source_location": "L4",
+      "_origin": "ast",
+      "id": "config_luki_embedding_dimensions",
+      "community": 2,
+      "norm_label": "embedding_dimensions"
+    },
+    {
+      "label": "llm_model",
+      "file_type": "code",
+      "source_file": "products/luki/config/luki.json",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "config_luki_llm_model",
       "community": 2,
@@ -103,7 +113,7 @@
       "label": "top_k",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L5",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "config_luki_top_k",
       "community": 2,
@@ -113,7 +123,7 @@
       "label": "score_threshold",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "config_luki_score_threshold",
       "community": 2,
@@ -123,7 +133,7 @@
       "label": "chunk_size",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L7",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "config_luki_chunk_size",
       "community": 2,
@@ -133,7 +143,7 @@
       "label": "chunk_overlap",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L8",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "config_luki_chunk_overlap",
       "community": 2,
@@ -143,7 +153,7 @@
       "label": "policy",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L9",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "config_luki_policy",
       "community": 2,
@@ -153,7 +163,7 @@
       "label": "zone",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "config_luki_policy_zone",
       "community": 2,
@@ -163,7 +173,7 @@
       "label": "allow_cloud",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L11",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "config_luki_policy_allow_cloud",
       "community": 2,
@@ -173,7 +183,7 @@
       "label": "allowed_collections",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L12",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "config_luki_policy_allowed_collections",
       "community": 2,
@@ -183,7 +193,7 @@
       "label": "audit",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L14",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "config_luki_audit",
       "community": 2,
@@ -193,7 +203,7 @@
       "label": "enabled",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "config_luki_audit_enabled",
       "community": 2,
@@ -203,7 +213,7 @@
       "label": "hash_user",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L16",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "config_luki_audit_hash_user",
       "community": 2,
@@ -213,7 +223,7 @@
       "label": "hash_question",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L17",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "config_luki_audit_hash_question",
       "community": 2,
@@ -223,7 +233,7 @@
       "label": "hash_answer",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L18",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "config_luki_audit_hash_answer",
       "community": 2,
@@ -233,7 +243,7 @@
       "label": "runtime",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L20",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "config_luki_runtime",
       "community": 2,
@@ -243,7 +253,7 @@
       "label": "data_root",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "config_luki_runtime_data_root",
       "community": 2,
@@ -253,7 +263,7 @@
       "label": "secrets_file",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "config_luki_runtime_secrets_file",
       "community": 2,
@@ -263,11 +273,21 @@
       "label": "source_docs_root",
       "file_type": "code",
       "source_file": "products/luki/config/luki.json",
-      "source_location": "L23",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "config_luki_runtime_source_docs_root",
       "community": 2,
       "norm_label": "source_docs_root"
+    },
+    {
+      "label": "qdrant_url",
+      "file_type": "code",
+      "source_file": "products/luki/config/luki.json",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "config_luki_runtime_qdrant_url",
+      "community": 2,
+      "norm_label": "qdrant_url"
     },
     {
       "label": "questions.json",
@@ -510,6 +530,36 @@
       "norm_label": "test_graphify_payload_is_first_class_status()"
     },
     {
+      "label": "test_luki_qdrant_bootstrap.py",
+      "file_type": "code",
+      "source_file": "tests/test_luki_qdrant_bootstrap.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tests_test_luki_qdrant_bootstrap",
+      "community": 38,
+      "norm_label": "test_luki_qdrant_bootstrap.py"
+    },
+    {
+      "label": "test_collection_payload_matches_nomic_embedding_size()",
+      "file_type": "code",
+      "source_file": "tests/test_luki_qdrant_bootstrap.py",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "tests_test_luki_qdrant_bootstrap_test_collection_payload_matches_nomic_embedding_size",
+      "community": 38,
+      "norm_label": "test_collection_payload_matches_nomic_embedding_size()"
+    },
+    {
+      "label": "test_qdrant_config_is_local_and_allowlisted()",
+      "file_type": "code",
+      "source_file": "tests/test_luki_qdrant_bootstrap.py",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "tests_test_luki_qdrant_bootstrap_test_qdrant_config_is_local_and_allowlisted",
+      "community": 38,
+      "norm_label": "test_qdrant_config_is_local_and_allowlisted()"
+    },
+    {
       "label": "test_opendisruption_ultimate.py",
       "file_type": "code",
       "source_file": "tests/test_opendisruption_ultimate.py",
@@ -656,7 +706,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "runtimeerror",
-      "community": 0,
+      "community": 37,
       "norm_label": "runtimeerror"
     },
     {
@@ -736,7 +786,7 @@
       "source_location": "L153",
       "_origin": "ast",
       "id": "datetime",
-      "community": 0,
+      "community": 35,
       "norm_label": "datetime"
     },
     {
@@ -857,6 +907,146 @@
       "_origin": "ast",
       "id": "tools_luki_mvp_server_main",
       "community": 0,
+      "norm_label": "main()"
+    },
+    {
+      "label": "luki_qdrant_bootstrap.py",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap",
+      "community": 37,
+      "norm_label": "luki_qdrant_bootstrap.py"
+    },
+    {
+      "label": "CollectionPayload",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_collectionpayload",
+      "community": 37,
+      "norm_label": "collectionpayload"
+    },
+    {
+      "label": "BootstrapResult",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_bootstrapresult",
+      "community": 37,
+      "norm_label": "bootstrapresult"
+    },
+    {
+      "label": "QdrantConfig",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_qdrantconfig",
+      "community": 37,
+      "norm_label": "qdrantconfig"
+    },
+    {
+      "label": "QdrantBootstrapError",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_qdrantbootstraperror",
+      "community": 37,
+      "norm_label": "qdrantbootstraperror"
+    },
+    {
+      "label": "_read_json()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_read_json",
+      "community": 37,
+      "norm_label": "_read_json()"
+    },
+    {
+      "label": "Path",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_py_path",
+      "community": 37,
+      "norm_label": "path"
+    },
+    {
+      "label": "load_qdrant_config()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L48",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "community": 37,
+      "norm_label": "load_qdrant_config()"
+    },
+    {
+      "label": "collection_payload()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L84",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_collection_payload",
+      "community": 37,
+      "norm_label": "collection_payload()"
+    },
+    {
+      "label": "_request_json()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L88",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_request_json",
+      "community": 37,
+      "norm_label": "_request_json()"
+    },
+    {
+      "label": "bootstrap_collection()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L110",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "community": 37,
+      "norm_label": "bootstrap_collection()"
+    },
+    {
+      "label": "build_parser()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L125",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_build_parser",
+      "community": 37,
+      "norm_label": "build_parser()"
+    },
+    {
+      "label": "ArgumentParser",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L125",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_py_argumentparser",
+      "community": 37,
+      "norm_label": "argumentparser"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L131",
+      "_origin": "ast",
+      "id": "tools_luki_qdrant_bootstrap_main",
+      "community": 37,
       "norm_label": "main()"
     },
     {
@@ -3607,6 +3797,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "products/luki/config/luki.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "config_luki",
+      "target": "config_luki_embedding_dimensions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "products/luki/config/luki.json",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -3747,6 +3947,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "products/luki/config/luki.json",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "config_luki_runtime",
+      "target": "config_luki_runtime_qdrant_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "products/luki/config/luki.json",
       "source_location": "L22",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -3869,9 +4079,9 @@
       "source_file": "products/luki/web/app.js",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "web_app",
-      "target": "web_app_setanswer",
-      "confidence_score": 1.0
+      "target": "web_app_setanswer"
     },
     {
       "relation": "contains",
@@ -3922,9 +4132,9 @@
       "source_file": "products/luki/web/app.js",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "web_app_ask",
-      "target": "web_app_setanswer",
-      "confidence_score": 1.0
+      "target": "web_app_setanswer"
     },
     {
       "relation": "calls",
@@ -3933,9 +4143,9 @@
       "source_file": "products/luki/web/app.js",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "web_app_refreshstatus",
-      "target": "web_app_setanswer",
-      "confidence_score": 1.0
+      "target": "web_app_setanswer"
     },
     {
       "relation": "calls",
@@ -3986,9 +4196,9 @@
       "source_file": "tests/test_luki_mvp_server.py",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_luki_mvp_server",
-      "target": "tests_test_luki_mvp_server_test_audit_rejects_repo_data_root",
-      "confidence_score": 1.0
+      "target": "tests_test_luki_mvp_server_test_audit_rejects_repo_data_root"
     },
     {
       "relation": "contains",
@@ -3996,9 +4206,9 @@
       "source_file": "tests/test_luki_mvp_server.py",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_luki_mvp_server",
-      "target": "tests_test_luki_mvp_server_test_config_rejects_collection_outside_allowlist",
-      "confidence_score": 1.0
+      "target": "tests_test_luki_mvp_server_test_config_rejects_collection_outside_allowlist"
     },
     {
       "relation": "contains",
@@ -4006,9 +4216,9 @@
       "source_file": "tests/test_luki_mvp_server.py",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_luki_mvp_server",
-      "target": "tests_test_luki_mvp_server_test_graphify_payload_is_first_class_status",
-      "confidence_score": 1.0
+      "target": "tests_test_luki_mvp_server_test_graphify_payload_is_first_class_status"
     },
     {
       "relation": "contains",
@@ -4026,9 +4236,9 @@
       "source_file": "tests/test_luki_mvp_server.py",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_luki_mvp_server",
-      "target": "tests_test_luki_mvp_server_test_status_does_not_expose_runtime_paths",
-      "confidence_score": 1.0
+      "target": "tests_test_luki_mvp_server_test_status_does_not_expose_runtime_paths"
     },
     {
       "relation": "calls",
@@ -4059,9 +4269,9 @@
       "source_file": "tests/test_luki_mvp_server.py",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_luki_mvp_server_test_config_rejects_collection_outside_allowlist",
-      "target": "tests_test_luki_mvp_server_py_path",
-      "confidence_score": 1.0
+      "target": "tests_test_luki_mvp_server_py_path"
     },
     {
       "relation": "calls",
@@ -4073,6 +4283,26 @@
       "weight": 1.0,
       "source": "tests_test_luki_mvp_server_test_audit_rejects_repo_data_root",
       "target": "datetime"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_luki_qdrant_bootstrap.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "tests_test_luki_qdrant_bootstrap",
+      "target": "tests_test_luki_qdrant_bootstrap_test_collection_payload_matches_nomic_embedding_size",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_luki_qdrant_bootstrap.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "tests_test_luki_qdrant_bootstrap",
+      "target": "tests_test_luki_qdrant_bootstrap_test_qdrant_config_is_local_and_allowlisted",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4090,9 +4320,9 @@
       "source_file": "tests/test_opendisruption_ultimate.py",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_test_opendisruption_ultimate",
-      "target": "tests_test_opendisruption_ultimate_test_graph_cli_is_machine_readable",
-      "confidence_score": 1.0
+      "target": "tests_test_opendisruption_ultimate_test_graph_cli_is_machine_readable"
     },
     {
       "relation": "contains",
@@ -4191,9 +4421,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server",
-      "target": "tools_luki_mvp_server_graphify_payload",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_graphify_payload"
     },
     {
       "relation": "contains",
@@ -4201,9 +4431,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server",
-      "target": "tools_luki_mvp_server_graphifyresponse",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_graphifyresponse"
     },
     {
       "relation": "contains",
@@ -4261,9 +4491,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server",
-      "target": "tools_luki_mvp_server_runtimeboundaryerror",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_runtimeboundaryerror"
     },
     {
       "relation": "contains",
@@ -4332,9 +4562,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_graphifyresponse",
-      "target": "typeddict",
-      "confidence_score": 1.0
+      "target": "typeddict"
     },
     {
       "relation": "inherits",
@@ -4349,12 +4579,32 @@
     {
       "relation": "inherits",
       "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_bootstrapresult",
+      "target": "typeddict",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_collectionpayload",
+      "target": "typeddict",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_graphifystatus",
-      "target": "typeddict",
-      "confidence_score": 1.0
+      "target": "typeddict"
     },
     {
       "relation": "inherits",
@@ -4405,9 +4655,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_graphify_payload",
-      "target": "tools_luki_mvp_server_graphifyresponse",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_graphifyresponse"
     },
     {
       "relation": "references",
@@ -4460,9 +4710,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L158",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_audit_path",
-      "target": "tools_luki_mvp_server_runtimeboundaryerror",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_runtimeboundaryerror"
     },
     {
       "relation": "calls",
@@ -4471,9 +4721,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L98",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_load_config",
-      "target": "tools_luki_mvp_server_runtimeboundaryerror",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_runtimeboundaryerror"
     },
     {
       "relation": "inherits",
@@ -4481,7 +4731,17 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_runtimeboundaryerror",
+      "target": "runtimeerror"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_qdrantbootstraperror",
       "target": "runtimeerror",
       "confidence_score": 1.0
     },
@@ -4492,9 +4752,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L132",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_graphify_payload",
-      "target": "tools_luki_mvp_server_read_json",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_read_json"
     },
     {
       "relation": "calls",
@@ -4536,9 +4796,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_graphify_payload",
-      "target": "tools_luki_mvp_server_py_path",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_py_path"
     },
     {
       "relation": "references",
@@ -4602,9 +4862,9 @@
       "source_file": "tools/luki_mvp_server.py",
       "source_location": "L225",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_luki_mvp_server_lukihandler_do_get",
-      "target": "tools_luki_mvp_server_graphify_payload",
-      "confidence_score": 1.0
+      "target": "tools_luki_mvp_server_graphify_payload"
     },
     {
       "relation": "calls",
@@ -4790,6 +5050,292 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_bootstrapresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_build_parser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_collection_payload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_collectionpayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_qdrantbootstraperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_qdrantconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_read_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap",
+      "target": "tools_luki_qdrant_bootstrap_request_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_collection_payload",
+      "target": "tools_luki_qdrant_bootstrap_collectionpayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "target": "tools_luki_qdrant_bootstrap_bootstrapresult",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "target": "tools_luki_qdrant_bootstrap_qdrantconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "target": "tools_luki_qdrant_bootstrap_qdrantconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "target": "tools_luki_qdrant_bootstrap_qdrantbootstraperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "target": "tools_luki_qdrant_bootstrap_qdrantbootstraperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_request_json",
+      "target": "tools_luki_qdrant_bootstrap_qdrantbootstraperror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "target": "tools_luki_qdrant_bootstrap_read_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_read_json",
+      "target": "tools_luki_qdrant_bootstrap_py_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "target": "tools_luki_qdrant_bootstrap_py_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_main",
+      "target": "tools_luki_qdrant_bootstrap_load_qdrant_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L118",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "target": "tools_luki_qdrant_bootstrap_collection_payload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "target": "tools_luki_qdrant_bootstrap_request_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_main",
+      "target": "tools_luki_qdrant_bootstrap_bootstrap_collection",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_build_parser",
+      "target": "tools_luki_qdrant_bootstrap_py_argumentparser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/luki_qdrant_bootstrap.py",
+      "source_location": "L132",
+      "weight": 1.0,
+      "source": "tools_luki_qdrant_bootstrap_main",
+      "target": "tools_luki_qdrant_bootstrap_build_parser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L157",
       "weight": 1.0,
@@ -4823,9 +5369,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L271",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate",
-      "target": "tools_opendisruption_ultimate_cmd_graph",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_cmd_graph"
     },
     {
       "relation": "contains",
@@ -4853,9 +5399,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate",
-      "target": "tools_opendisruption_ultimate_graphify_status",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_graphify_status"
     },
     {
       "relation": "contains",
@@ -4863,9 +5409,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate",
-      "target": "tools_opendisruption_ultimate_graphifystatus",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_graphifystatus"
     },
     {
       "relation": "contains",
@@ -4873,9 +5419,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate",
-      "target": "tools_opendisruption_ultimate_json_list_count",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_json_list_count"
     },
     {
       "relation": "contains",
@@ -4923,9 +5469,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate",
-      "target": "tools_opendisruption_ultimate_read_json",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_read_json"
     },
     {
       "relation": "contains",
@@ -4943,9 +5489,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L222",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate",
-      "target": "tools_opendisruption_ultimate_render_graphify",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_render_graphify"
     },
     {
       "relation": "contains",
@@ -4996,9 +5542,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_graphify_status",
-      "target": "tools_opendisruption_ultimate_graphifystatus",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_graphifystatus"
     },
     {
       "relation": "references",
@@ -5007,9 +5553,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L222",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_render_graphify",
-      "target": "tools_opendisruption_ultimate_graphifystatus",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_graphifystatus"
     },
     {
       "relation": "references",
@@ -5073,9 +5619,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_graphify_status",
-      "target": "tools_opendisruption_ultimate_py_path",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_py_path"
     },
     {
       "relation": "references",
@@ -5084,9 +5630,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_json_list_count",
-      "target": "tools_opendisruption_ultimate_py_path",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_py_path"
     },
     {
       "relation": "references",
@@ -5106,9 +5652,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_read_json",
-      "target": "tools_opendisruption_ultimate_py_path",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_py_path"
     },
     {
       "relation": "references",
@@ -5139,9 +5685,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_graphify_status",
-      "target": "tools_opendisruption_ultimate_read_json",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_read_json"
     },
     {
       "relation": "calls",
@@ -5150,9 +5696,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_json_list_count",
-      "target": "tools_opendisruption_ultimate_read_json",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_read_json"
     },
     {
       "relation": "calls",
@@ -5161,9 +5707,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_build_status",
-      "target": "tools_opendisruption_ultimate_graphify_status",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_graphify_status"
     },
     {
       "relation": "calls",
@@ -5172,9 +5718,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L272",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_cmd_graph",
-      "target": "tools_opendisruption_ultimate_graphify_status",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_graphify_status"
     },
     {
       "relation": "calls",
@@ -5183,9 +5729,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L157",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_build_status",
-      "target": "tools_opendisruption_ultimate_json_list_count",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_json_list_count"
     },
     {
       "relation": "calls",
@@ -5249,9 +5795,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L276",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_cmd_graph",
-      "target": "tools_opendisruption_ultimate_render_graphify",
-      "confidence_score": 1.0
+      "target": "tools_opendisruption_ultimate_render_graphify"
     },
     {
       "relation": "references",
@@ -5304,9 +5850,9 @@
       "source_file": "tools/opendisruption_ultimate.py",
       "source_location": "L271",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tools_opendisruption_ultimate_cmd_graph",
-      "target": "namespace",
-      "confidence_score": 1.0
+      "target": "namespace"
     },
     {
       "relation": "contains",
@@ -7284,9 +7830,9 @@
       "source_file": "docs/runbooks/graphify.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runbooks_graphify",
-      "target": "runbooks_graphify_graphify_runbook",
-      "confidence_score": 1.0
+      "target": "runbooks_graphify_graphify_runbook"
     },
     {
       "relation": "contains",
@@ -7294,9 +7840,9 @@
       "source_file": "docs/runbooks/graphify.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runbooks_graphify_graphify_runbook",
-      "target": "runbooks_graphify_commands",
-      "confidence_score": 1.0
+      "target": "runbooks_graphify_commands"
     },
     {
       "relation": "contains",
@@ -7304,9 +7850,9 @@
       "source_file": "docs/runbooks/graphify.md",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runbooks_graphify_graphify_runbook",
-      "target": "runbooks_graphify_rules",
-      "confidence_score": 1.0
+      "target": "runbooks_graphify_rules"
     },
     {
       "relation": "contains",
@@ -7314,9 +7860,9 @@
       "source_file": "docs/runbooks/graphify.md",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "runbooks_graphify_graphify_runbook",
-      "target": "runbooks_graphify_runtime_surfaces",
-      "confidence_score": 1.0
+      "target": "runbooks_graphify_runtime_surfaces"
     },
     {
       "relation": "contains",
@@ -7450,5 +7996,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b80324f157e9bc3e518dd3c79de18680193140cd"
+  "built_at_commit": "a6979b04b23efc342d956c1388ee0e874d22ff18"
 }

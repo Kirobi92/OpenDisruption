@@ -1,16 +1,16 @@
 # Graph Report - OpenDisruption  (2026-06-10)
 
 ## Corpus Check
-- 37 files · ~25,525 words
+- 39 files · ~26,092 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 349 nodes · 386 edges · 37 communities (29 shown, 8 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
+- 368 nodes · 420 edges · 39 communities (31 shown, 8 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b80324f1`
+- Built from commit: `a6979b04`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -51,6 +51,7 @@
 - [[_COMMUNITY_Community 34|Community 34]]
 - [[_COMMUNITY_Community 35|Community 35]]
 - [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `08 — Final Architecture Blueprint` - 24 edges
@@ -73,19 +74,19 @@
 ## Import Cycles
 - 1-file cycle: `tools/luki_mvp_server.py -> tools/luki_mvp_server.py`
 
-## Communities (37 total, 8 thin omitted)
+## Communities (39 total, 8 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.15
-Nodes (23): BaseHTTPRequestHandler, datetime, HTTPStatus, RuntimeError, answer_question(), AskRequest, AskResponse, _audit_path() (+15 more)
+Cohesion: 0.16
+Nodes (21): BaseHTTPRequestHandler, HTTPStatus, answer_question(), AskRequest, AskResponse, _audit_path(), build_parser(), graphify_payload() (+13 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.08
 Nodes (24): 08 — Final Architecture Blueprint, 10. Monitoring-Modell, 11. Logging-Modell, 12. Test-/CI-Modell, 13. KIROBI im Zielbild, 14. LUKI im Zielbild, 15. LABS im Zielbild, 16. ARCHIVE-Strategie (+16 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.10
-Nodes (20): audit, enabled, hash_answer, hash_question, hash_user, chunk_overlap, chunk_size, collection (+12 more)
+Cohesion: 0.09
+Nodes (22): audit, enabled, hash_answer, hash_question, hash_user, chunk_overlap, chunk_size, collection (+14 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.11
@@ -180,32 +181,36 @@ Cohesion: 0.50
 Nodes (3): questions, schema, target_count
 
 ### Community 35 - "Community 35"
-Cohesion: 0.29
-Nodes (4): Path, test_answer_refuses_without_retrieval_sources_and_writes_hash_audit(), test_audit_rejects_repo_data_root(), test_config_rejects_collection_outside_allowlist()
+Cohesion: 0.31
+Nodes (5): datetime, Path, test_answer_refuses_without_retrieval_sources_and_writes_hash_audit(), test_audit_rejects_repo_data_root(), test_config_rejects_collection_outside_allowlist()
 
 ### Community 36 - "Community 36"
 Cohesion: 0.40
 Nodes (4): Commands, Graphify Runbook, Rules, Runtime Surfaces
 
+### Community 37 - "Community 37"
+Cohesion: 0.27
+Nodes (14): RuntimeError, bootstrap_collection(), BootstrapResult, build_parser(), collection_payload(), CollectionPayload, load_qdrant_config(), main() (+6 more)
+
 ## Knowledge Gaps
-- **211 isolated node(s):** `collection`, `embedding_model`, `llm_model`, `top_k`, `score_threshold` (+206 more)
+- **214 isolated node(s):** `collection`, `embedding_model`, `embedding_dimensions`, `llm_model`, `top_k` (+209 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `datetime` connect `Community 0` to `Community 35`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `datetime` connect `Community 35` to `Community 0`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `UltimateStatus` connect `Community 5` to `Community 0`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **What connects `collection`, `embedding_model`, `llm_model` to the rest of the system?**
-  _211 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.1477832512315271 - nodes in this community are weakly interconnected._
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `GraphifyStatus` connect `Community 5` to `Community 0`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **What connects `collection`, `embedding_model`, `embedding_dimensions` to the rest of the system?**
+  _214 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
