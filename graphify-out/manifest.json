@@ -1,0 +1,232 @@
+{
+  "infra/backup/backup-datenspeicher.sh": {
+    "mtime": 1779945643.2545528,
+    "ast_hash": "2b971902dfbaf15905adb4c05b8a41f0",
+    "semantic_hash": ""
+  },
+  ".forgejo/workflows/ci.yml": {
+    "mtime": 1779901559.8762937,
+    "ast_hash": "b45ba7342cd69c99ca18c938ae16d60e",
+    "semantic_hash": ""
+  },
+  ".pre-commit-config.yaml": {
+    "mtime": 1779901559.8752937,
+    "ast_hash": "724c38169997e3a3f88fe65c51f143be",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1781066669.5338798,
+    "ast_hash": "4ef0c746bb0efd3687ec4791635665e5",
+    "semantic_hash": ""
+  },
+  "archive/README.md": {
+    "mtime": 1779901584.8374977,
+    "ast_hash": "665f9dd9a76ab6a1448f4ab87238605d",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/00_execution_protocol.md": {
+    "mtime": 1779901559.9214137,
+    "ast_hash": "2147bdb1e60144655a906eed0e26493b",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/01_current_state_inventory.md": {
+    "mtime": 1779901559.9215748,
+    "ast_hash": "437c5343ec128a68bdfa6544441c4dbd",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/02_security_and_operations_risks.md": {
+    "mtime": 1779901559.921731,
+    "ast_hash": "bd1da20e9c3a50bcc5aa24c94c004d28",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/03_domain_boundary_model.md": {
+    "mtime": 1779901559.9218848,
+    "ast_hash": "6130e17bbb1b88ca67dbbc03a9ef3e61",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/04_target_architecture.md": {
+    "mtime": 1779901559.9220552,
+    "ast_hash": "46607e8185b510879988b0979c0a4fe3",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/05_luki_mvp_definition.md": {
+    "mtime": 1779901559.9221487,
+    "ast_hash": "ff74623ee1afac5016b4b53d1e233da4",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/06_roadmap_and_migration_plan.md": {
+    "mtime": 1779945772.5280354,
+    "ast_hash": "fee649f4c76d10398287a3b02a5be61f",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/07_phased_implementation_plan.md": {
+    "mtime": 1781066820.8719854,
+    "ast_hash": "4507dd5bfb8df0a752785bed8b09e7fc",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/08_final_architecture_blueprint.md": {
+    "mtime": 1779901559.9225607,
+    "ast_hash": "2e1de19ac095ba254f594902ef4709f9",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/09_next_agent_prompts.md": {
+    "mtime": 1781066820.8719854,
+    "ast_hash": "58b095eada5ceda922b86bf479e1208f",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/reports/A-01-zombie-inventory-2026-05-27.md": {
+    "mtime": 1779915854.4174292,
+    "ast_hash": "9bb4bd7ff3f0e6e70e0221dab0b76368",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/reports/A-02-phase-a-status-2026-05-27.md": {
+    "mtime": 1779915854.4175205,
+    "ast_hash": "44b6b5ed370ea81d7783be97f051d380",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/reports/A-03-phase-a-complete-2026-05-27.md": {
+    "mtime": 1779915854.4175718,
+    "ast_hash": "ff88ea52adc190d2cb8e687b823c2606",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/reports/C-01-network-hardening-plan-2026-05-28.md": {
+    "mtime": 1779945731.2239792,
+    "ast_hash": "5e90e0c4a5a66bc68fe3ab6a4389c3a1",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/reports/C-02-compose-gap-analysis-2026-05-28.md": {
+    "mtime": 1779945731.225979,
+    "ast_hash": "abb9fe1db1a2a0595d14841455b1adb8",
+    "semantic_hash": ""
+  },
+  "docs/architecture-planning/reports/C-03-phase-c-complete-2026-05-28.md": {
+    "mtime": 1779945731.2269793,
+    "ast_hash": "c2ed6da731f475c7c06b117f4faf0eae",
+    "semantic_hash": ""
+  },
+  "infra/README.md": {
+    "mtime": 1779901584.8324978,
+    "ast_hash": "d735d9f593d2aa6a42b2dc8151a6c48f",
+    "semantic_hash": ""
+  },
+  "infra/caddy/docker-compose.yml": {
+    "mtime": 1779945643.247528,
+    "ast_hash": "780e526b3fa3ef4d23fd8de75ac0cf97",
+    "semantic_hash": ""
+  },
+  "labs/README.md": {
+    "mtime": 1779901584.8364978,
+    "ast_hash": "53dfc5d47ffc7cb7a7b84d8a42b14c9d",
+    "semantic_hash": ""
+  },
+  "labs/inventory/docker-compose.homebox.yml": {
+    "mtime": 1779945643.25161,
+    "ast_hash": "c1fc06334230d198263afedf7bf92cef",
+    "semantic_hash": ""
+  },
+  "labs/inventory/docker-compose.inventree.yml": {
+    "mtime": 1779945643.2526183,
+    "ast_hash": "259138379e441e99b526500fc45ca173",
+    "semantic_hash": ""
+  },
+  "labs/inventory/docker-compose.partdb.yml": {
+    "mtime": 1779945643.2505937,
+    "ast_hash": "a01cc7a3db67c052e35b5e16d9b1a619",
+    "semantic_hash": ""
+  },
+  "labs/webshop/docker-compose.medusa.yml": {
+    "mtime": 1779945643.249545,
+    "ast_hash": "27b3519d8c6b02517ad6d6813925d26f",
+    "semantic_hash": ""
+  },
+  "labs/webshop/docker-compose.wordpress.yml": {
+    "mtime": 1779945643.248541,
+    "ast_hash": "7b665adea59d7476417fa576f736873d",
+    "semantic_hash": ""
+  },
+  "packages/README.md": {
+    "mtime": 1779901584.8355691,
+    "ast_hash": "9772741b9c6b4bf5809cda7d1487f8a7",
+    "semantic_hash": ""
+  },
+  "products/kirobi/README.md": {
+    "mtime": 1779901584.8334978,
+    "ast_hash": "93533de58c37ffa6badf104a193803f7",
+    "semantic_hash": ""
+  },
+  "products/luki/README.md": {
+    "mtime": 1779901584.8347306,
+    "ast_hash": "dcebf33144907f659a0c52f26b2e7801",
+    "semantic_hash": ""
+  },
+  "tools/README.md": {
+    "mtime": 1781066669.5328798,
+    "ast_hash": "8f2079d7a801abc23f9a9648b0d2e205",
+    "semantic_hash": ""
+  },
+  "tests/test_opendisruption_ultimate.py": {
+    "mtime": 1781066652.732757,
+    "ast_hash": "8b0babfdf809f9432dbb24febabc159d",
+    "semantic_hash": ""
+  },
+  "tools/opendisruption_ultimate.py": {
+    "mtime": 1781066632.337608,
+    "ast_hash": "2110db52d3730cac5f5697caba3bfe13",
+    "semantic_hash": ""
+  },
+  "docs/ultimate-open-disruption.md": {
+    "mtime": 1780987052.7188206,
+    "ast_hash": "060aa47a5472517e3fb222ad7d22a7d8",
+    "semantic_hash": ""
+  },
+  "products/luki/config/luki.json": {
+    "mtime": 1781037092.6998653,
+    "ast_hash": "9f43269fd5e7b5f777245d8cb215deb1",
+    "semantic_hash": ""
+  },
+  "products/luki/evals/v1/questions.json": {
+    "mtime": 1781037092.699966,
+    "ast_hash": "72e2a041132e95c391a4e67dc5621d0a",
+    "semantic_hash": ""
+  },
+  "products/luki/source-docs/manifest.json": {
+    "mtime": 1781037092.7001522,
+    "ast_hash": "cbbefc10e5c7764cf36647622ef165df",
+    "semantic_hash": ""
+  },
+  "products/luki/web/app.js": {
+    "mtime": 1781066586.1042702,
+    "ast_hash": "6a116d012a5d4e98cf151d4b9e4b0f09",
+    "semantic_hash": ""
+  },
+  "tests/test_luki_mvp_server.py": {
+    "mtime": 1781066686.2130017,
+    "ast_hash": "520a3a8bb6a5d2d6918fa0013dc9f6f8",
+    "semantic_hash": ""
+  },
+  "tools/luki_mvp_server.py": {
+    "mtime": 1781066562.532098,
+    "ast_hash": "64808141dc65cd39fbdf3df24f9fadd4",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1781037092.699689,
+    "ast_hash": "a50fee548d3fb5d0b96b826b0a34e0c4",
+    "semantic_hash": ""
+  },
+  "products/luki/source-docs/README.md": {
+    "mtime": 1781037092.7000604,
+    "ast_hash": "eab7164bf24d278a36eca663872eb278",
+    "semantic_hash": ""
+  },
+  "products/luki/web/index.html": {
+    "mtime": 1781066586.1042702,
+    "ast_hash": "2d186b147d82d6250cb9cb1151746c96",
+    "semantic_hash": ""
+  },
+  "docs/runbooks/graphify.md": {
+    "mtime": 1781066703.0984254,
+    "ast_hash": "de266bf4f93b7036752ab67b0fba7958",
+    "semantic_hash": ""
+  }
+}

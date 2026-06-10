@@ -58,7 +58,7 @@
 **Tests:**
 - Port-Scan Tailscale-IP und LAN-IP: keine offenen Admin-Routen ohne 401.
 - `ss -ltnp | grep 4300` → nur `127.0.0.1`.
-- `curl -u user:wrong https://caddy.lan/mission` → 401.
+- `curl --user '<user>:<wrong-password>' https://caddy.lan/mission` → 401.
 - Altes Telegram-Token: API-Call schlägt fehl (`getMe` → 401).
 - Restic-Restore Stichproben-SHA stimmt.
 
@@ -396,7 +396,7 @@
 - Eval-Run: Top1≥0.50, Top3≥0.75, Halluzinationsrate≤0.10.
 - Audit-Log parseable (`jq -c . < luki-audit-*.jsonl`).
 - Whitelist-Test: Versuch auf `kirobi_*` schlägt fehl.
-- `curl -u user:wrong https://lan/luki/ask` → 401.
+- `curl --user '<user>:<wrong-password>' https://lan/luki/ask` → 401.
 
 **Verifikation:**
 - [ ] Eval-Bericht im Repo.

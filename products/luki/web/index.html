@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LUKI Knowledge</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero" aria-labelledby="title">
+        <div>
+          <p class="eyebrow">OpenDisruption · LUKI_BUSINESS</p>
+          <h1 id="title">LUKI Knowledge</h1>
+          <p class="lead">Lokaler Wissensassistent mit Quellenpflicht, Qdrant-Allowlist und Hash-Audit.</p>
+        </div>
+        <button id="refresh" class="icon-button" type="button" aria-label="Status aktualisieren" title="Status aktualisieren">
+          ↻
+        </button>
+      </section>
+
+      <section class="status-grid" aria-label="Systemstatus">
+        <article class="tile">
+          <span>API</span>
+          <strong id="api-state">...</strong>
+        </article>
+        <article class="tile">
+          <span>Collection</span>
+          <strong id="collection">...</strong>
+        </article>
+        <article class="tile">
+          <span>Cloud</span>
+          <strong id="cloud">...</strong>
+        </article>
+        <article class="tile">
+          <span>Audit</span>
+          <strong id="audit">...</strong>
+        </article>
+        <article class="tile">
+          <span>Graphify</span>
+          <strong id="graphify">...</strong>
+        </article>
+      </section>
+
+      <section class="workspace" aria-label="Frage stellen">
+        <form id="ask-form" class="ask-panel">
+          <label for="question">Frage</label>
+          <textarea id="question" name="question" rows="5" placeholder="Was steht in den freigegebenen LUKI-Quellen?"></textarea>
+          <button type="submit">Frage prüfen</button>
+        </form>
+        <article class="answer-panel" aria-live="polite">
+          <span>Antwort</span>
+          <p id="answer">Noch keine Frage gestellt.</p>
+          <ol id="sources"></ol>
+        </article>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

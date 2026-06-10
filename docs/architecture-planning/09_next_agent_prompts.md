@@ -288,7 +288,7 @@
 - Eval: Top1≥0.50, Top3≥0.75, Halluzination≤0.10.
 - Audit-JSONL parseable (`jq`).
 - Versuch `kirobi_*` → 403/fehlt.
-- `curl -u user:wrong …/luki/ask` → 401.
+- `curl --user '<user>:<wrong-password>' …/luki/ask` → 401.
 
 **Output:**
 - Eval-Report in Repo + Bericht `…/reports/F-luki-mvp-<datum>.md`.

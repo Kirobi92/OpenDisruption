@@ -35,6 +35,14 @@
 - **2026-05-27:** Skelett angelegt (PHASE B).
 - Detaillierte Planungsdokumente: siehe `docs/architecture-planning/` (kopiert aus `OpenDisruption_v0.1`).
 - Migration in Phasen A–H gemäß `docs/architecture-planning/07_phased_implementation_plan.md`.
+- Ultimate-Control-Plane: `python3 tools/opendisruption_ultimate.py status --json`
+  und `docs/ultimate-open-disruption.md`.
+- LUKI-Knowledge-MVP: `python3 tools/luki_mvp_server.py --host 127.0.0.1 --port 8411`
+  startet eine lokale Minimal-API mit sauberer Web-Oberflaeche, Qdrant-Collection-Allowlist
+  und Hash-Audit.
+- Graphify ist voll integriert als Knowledge-Plane:
+  `python3 tools/opendisruption_ultimate.py graph --json`, `GET /api/graphify`,
+  UI-Statuskarte und `docs/runbooks/graphify.md`.
 
 ## Wichtige Regeln
 

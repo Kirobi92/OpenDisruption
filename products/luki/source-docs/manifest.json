@@ -1,0 +1,9 @@
+{
+  "schema": "opendisruption.luki.source-docs.v1",
+  "collection": "luki_knowledge_v1",
+  "documents": [],
+  "notes": [
+    "Raw documents stay outside git.",
+    "Add sha256, relative_path, media_type, and approved_by before ingest."
+  ]
+}

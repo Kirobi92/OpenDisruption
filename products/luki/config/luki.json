@@ -1,0 +1,25 @@
+{
+  "collection": "luki_knowledge_v1",
+  "embedding_model": "nomic-embed-text",
+  "llm_model": "llama3.1:8b",
+  "top_k": 8,
+  "score_threshold": 0.72,
+  "chunk_size": 800,
+  "chunk_overlap": 150,
+  "policy": {
+    "zone": "LUKI_BUSINESS",
+    "allow_cloud": false,
+    "allowed_collections": ["luki_knowledge_v1"]
+  },
+  "audit": {
+    "enabled": true,
+    "hash_user": true,
+    "hash_question": true,
+    "hash_answer": true
+  },
+  "runtime": {
+    "data_root": "/Datenspeicher/OpenDisruption-Data",
+    "secrets_file": "/Datenspeicher/OpenDisruption-Data/secrets/luki.env",
+    "source_docs_root": "/Datenspeicher/OpenDisruption-Data/luki/source-docs"
+  }
+}
