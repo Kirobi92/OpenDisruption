@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7
         with:
           # Fetch full history so we can commit updated JSON
           fetch-depth: 1
