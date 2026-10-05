@@ -142,6 +142,13 @@
           "debug_downloads": 3,
           "release_downloads": 3,
           "total": 6
+        },
+        {
+          "week": "2026-W41",
+          "date": "2026-10-05",
+          "debug_downloads": 3,
+          "release_downloads": 3,
+          "total": 6
         }
       ]
     },
@@ -279,6 +286,13 @@
           "debug_downloads": 0,
           "release_downloads": 2,
           "total": 2
+        },
+        {
+          "week": "2026-W41",
+          "date": "2026-10-05",
+          "debug_downloads": 0,
+          "release_downloads": 2,
+          "total": 2
         }
       ]
     },
@@ -413,6 +427,13 @@
         {
           "week": "2026-W40",
           "date": "2026-09-28",
+          "debug_downloads": 0,
+          "release_downloads": 1,
+          "total": 1
+        },
+        {
+          "week": "2026-W41",
+          "date": "2026-10-05",
           "debug_downloads": 0,
           "release_downloads": 1,
           "total": 1
