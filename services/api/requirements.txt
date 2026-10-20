@@ -1,7 +1,7 @@
 # Kirobi API Service Requirements
 
 fastapi==0.115.14
-uvicorn[standard]==0.32.1
+uvicorn[standard]==0.48.0
 pydantic==2.11.4
 pydantic-settings==2.14.1
 asyncpg==0.31.0
