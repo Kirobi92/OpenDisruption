@@ -5,7 +5,7 @@ asyncpg>=0.29.0
 pydantic>=2.7.0
 python-dotenv>=1.0.0
 Pillow>=12.2.0
-aiofiles>=23.2.1
+aiofiles>=25.1.0
 numpy<2
 huggingface_hub>=1.15.0,<2.0
 diffusers==0.38.0
