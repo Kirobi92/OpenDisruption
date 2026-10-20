@@ -24,5 +24,5 @@ loguru>=0.7.0
 
 # Optional: LangGraph for advanced orchestration
 langgraph>=0.0.20
-langchain>=0.1.0
+langchain>=1.3.2
 langchain-community>=0.0.20
